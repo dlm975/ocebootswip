@@ -97,6 +97,21 @@
   </div>
 </results-list>
 
+{% style %}
+  /* 3 columns on mobile */
+  @media screen and (max-width: 749px) {
+    .product-grid--{{ section.id }}:not([product-grid-view='zoom-out']):not([product-grid-view='mobile-single']):not(.product-grid-mobile--large) {
+      grid-template-columns: repeat(3, 1fr) !important;
+    }
+  }
+  /* 6 columns on desktop */
+  @media screen and (min-width: 750px) {
+    .product-grid--{{ section.id }}:is(.product-grid--grid):not([product-grid-view='zoom-out']) {
+      --product-grid-columns-desktop: repeat(6, 1fr) !important;
+    }
+  }
+{% endstyle %}
+
 {% stylesheet %}
   .main-collection-grid {
     grid-column: var(--grid-column--mobile);
