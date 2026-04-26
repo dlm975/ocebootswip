@@ -53,6 +53,7 @@
   </div>
 
   {% capture list_items %}
+    {% assign mobile_max = section.settings.mobile_max | default: 0 %}
     {% for i in (1..max_items) %}
       {% if section_products.size > 0 %}
         {% assign index = forloop.index0 %}
@@ -61,10 +62,19 @@
         {% assign product = null %}
       {% endif %}
       <div
-        class="resource-list__item"
+        class="resource-list__item{% if mobile_max > 0 and forloop.index > mobile_max %} resource-list__item--mobile-hidden{% endif %}"
       >
         {% content_for 'block', type: '_product-card', id: 'static-product-card', closest.product: product %}
       </div>
+
+      {% if mobile_max > 0 and forloop.index == mobile_max %}
+        <div class="resource-list__item resource-list__item--view-all-card">
+          <a href="{{ section.settings.collection.url }}" class="plist-view-all-card">
+            <span class="plist-view-all-card__label">View All</span>
+            <span class="plist-view-all-card__arrow">→</span>
+          </a>
+        </div>
+      {% endif %}
 
       {% unless forloop.last %}
         <!--@list/split-->
@@ -142,6 +152,57 @@
   </div>
 </div>
 
+{% stylesheet %}
+  /* Mobile cap: hide products beyond the mobile_max threshold */
+  @media screen and (max-width: 749px) {
+    .resource-list__item--mobile-hidden {
+      display: none;
+    }
+  }
+
+  /* View-all card: mobile only */
+  .resource-list__item--view-all-card {
+    display: none;
+  }
+
+  @media screen and (max-width: 749px) {
+    .resource-list__item--view-all-card {
+      display: flex;
+    }
+  }
+
+  .plist-view-all-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #111;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .plist-view-all-card:hover {
+    background-color: #e2e2e2;
+    transform: scale(1.02);
+  }
+
+  .plist-view-all-card__label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .plist-view-all-card__arrow {
+    font-size: 1.2rem;
+    line-height: 1;
+  }
+{% endstylesheet %}
+
 {% schema %}
 {
   "name": "t:names.product_list",
@@ -201,6 +262,16 @@
       "max": 16,
       "step": 1,
       "default": 4
+    },
+    {
+      "type": "range",
+      "id": "mobile_max",
+      "label": "Mobile product limit (0 = disabled)",
+      "min": 0,
+      "max": 16,
+      "step": 1,
+      "default": 0,
+      "info": "Caps visible products on mobile and inserts a View All card in the next slot."
     },
     {
       "type": "range",
