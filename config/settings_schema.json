@@ -2313,5 +2313,33 @@
         "default": "equal-width-buttons"
       }
     ]
+  },
+  {
+    "name": "Instagram widget",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Instagram reels"
+      },
+      {
+        "type": "paragraph",
+        "content": "Paste the full URL of each Instagram reel, e.g. https://www.instagram.com/reel/ABC123DEF/"
+      },
+      {
+        "type": "text",
+        "id": "instagram_reel_1",
+        "label": "Reel 1 URL"
+      },
+      {
+        "type": "text",
+        "id": "instagram_reel_2",
+        "label": "Reel 2 URL"
+      },
+      {
+        "type": "text",
+        "id": "instagram_reel_3",
+        "label": "Reel 3 URL"
+      }
+    ]
   }
 ]
