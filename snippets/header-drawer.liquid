@@ -1096,44 +1096,58 @@
   }
 
   /* ============================================================
-     DROPDOWN OVERRIDE — extends below header, full-width, white
+     DROPDOWN OVERRIDE — jigsaw extension of the header pill
      ============================================================ */
 
+  /*
+   * position: absolute so the drawer anchors to the bottom of
+   * .header__row--top (its nearest positioned ancestor), inheriting
+   * its exact width and left/right edges automatically.
+   * No --header-height calculations needed.
+   */
   .header-drawer .menu-drawer {
-    top: var(--header-height, 60px);
+    position: absolute;
+    top: 100%;
     left: 0;
     right: 0;
     width: 100%;
-    max-width: 100%;
+    max-width: none;
     height: auto;
-    max-height: calc(85dvh - var(--header-height, 60px));
+    max-height: 75vh;
     overflow-y: auto;
-    transform: translateY(-110%);
+    /* Closed: fades up slightly */
+    transform: translateY(-10px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity   0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                visibility 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     background-color: #ffffff;
-    /* Sit behind the header so it never covers it */
-    z-index: 11;
     border-right: none;
     border-top: none;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 0 0 12px 12px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+    border-bottom: none;
+    /* Bottom corners match header pill radius; top is flush */
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.13);
 
     @media screen and (min-width: 750px) {
       width: 100%;
     }
   }
 
-  /* Open state: slide down into view */
+  /* Open: drop into place */
   .menu-drawer-container.menu-open > .menu-drawer {
     transform: translateY(0);
-    visibility: visible;
     opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
   }
 
-  /* Backdrop starts below header and sits behind it too */
+  /* Backdrop: covers page below the pill, never the header itself */
   .header-drawer .menu-drawer__backdrop {
     top: var(--header-height, 60px);
-    z-index: 10;
+    z-index: -1;
   }
 
   /* Auto-height inner containers */
@@ -1156,7 +1170,7 @@
   }
 
   .header-drawer .menu-drawer__menu-item--parent {
-    color: rgba(0, 0, 0, 0.65);
+    color: rgba(0, 0, 0, 0.6);
   }
 
   .header-drawer .menu-drawer__menu-item--parent:hover {
@@ -1164,23 +1178,23 @@
   }
 
   .header-drawer .menu-drawer__menu-item--child {
-    color: rgba(0, 0, 0, 0.5);
+    color: rgba(0, 0, 0, 0.45);
   }
 
   .header-drawer .menu-drawer__menu-item--child:hover {
-    color: rgba(0, 0, 0, 0.8);
+    color: rgba(0, 0, 0, 0.75);
   }
 
   /* Dividers */
   .header-drawer .menu-drawer__list-item--divider,
   .header-drawer .menu-drawer__menu-container--divider {
-    border-color: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.07);
   }
 
   /* Close / back buttons */
   .header-drawer .menu-drawer__close-button,
   .header-drawer .menu-drawer__back-button {
-    color: rgba(0, 0, 0, 0.5);
+    color: rgba(0, 0, 0, 0.45);
   }
 
   .header-drawer .menu-drawer__close-button:hover,
@@ -1193,7 +1207,7 @@
     background-color: #ffffff;
   }
 
-  /* Carets and SVG icons inherit text colour */
+  /* Icons inherit text colour */
   .header-drawer .menu-drawer svg {
     color: inherit;
   }
