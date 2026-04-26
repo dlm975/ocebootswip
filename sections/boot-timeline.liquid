@@ -1,0 +1,362 @@
+{%- liquid
+  assign stem_heights = '120,165,95,150,115,175,90,155,130,170,105,160,85,145,120,168,98,152,112,140' | split: ','
+-%}
+
+<style>
+  #btl-{{ section.id }} {
+    padding-block: {{ section.settings.padding_top }}px {{ section.settings.padding_bottom }}px;
+  }
+</style>
+
+<div id="btl-{{ section.id }}" class="btl-section color-{{ section.settings.color_scheme }}">
+  <div class="btl-inner page-width">
+
+    {%- if section.settings.heading != blank -%}
+      <h2 class="btl-heading">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+
+    <div class="btl-scene">
+      <div class="btl-pins">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign idx = forloop.index0
+            assign stem_h = stem_heights[idx] | default: '130'
+          -%}
+          <div
+            class="btl-pin"
+            style="--stem-h: {{ stem_h }}px"
+            {{ block.shopify_attributes }}
+            role="button"
+            tabindex="0"
+            aria-label="{{ block.settings.label | escape }}"
+          >
+            <div class="btl-pin__card">
+              {%- if block.settings.image != blank -%}
+                {{
+                  block.settings.image
+                  | image_url: width: 300
+                  | image_tag:
+                    class: 'btl-pin__img',
+                    loading: 'lazy',
+                    alt: block.settings.label,
+                    widths: '80, 120, 200, 300'
+                }}
+              {%- else -%}
+                <div class="btl-pin__img btl-pin__img--empty"></div>
+              {%- endif -%}
+              <a
+                class="btl-pin__btn"
+                href="{{ block.settings.link | default: '#' }}"
+                tabindex="-1"
+              >
+                Shop {{ block.settings.label | default: 'Now' }}
+              </a>
+            </div>
+            <div class="btl-pin__stem"></div>
+          </div>
+        {%- endfor -%}
+      </div>
+
+      <!-- Ground -->
+      <div class="btl-ground" aria-hidden="true">
+        <div class="btl-grass"></div>
+        <div class="btl-dirt"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  .btl-section {
+    overflow: hidden;
+  }
+
+  .btl-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .btl-heading {
+    font-size: {{ section.settings.heading_size }}px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+    color: {{ section.settings.heading_color }};
+  }
+
+  /* ── Scene ── */
+  .btl-scene {
+    width: 100%;
+  }
+
+  /* ── Pins row ── */
+  .btl-pins {
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+  }
+
+  /* ── Single pin ── */
+  .btl-pin {
+    flex: 1 0 5%; /* 20 per row on desktop */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    z-index: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btl-pin:hover,
+  .btl-pin.btl-active {
+    z-index: 10;
+  }
+
+  /* ── Stem ── */
+  .btl-pin__stem {
+    width: 4px;
+    height: var(--stem-h, 130px);
+    background: linear-gradient(to bottom, #3b3b8f 0%, #27277a 100%);
+    border-radius: 2px 2px 0 0;
+    flex-shrink: 0;
+  }
+
+  /* ── Card (image + button) ── */
+  .btl-pin__card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    transform-origin: bottom center;
+  }
+
+  /* ── Image ── */
+  .btl-pin__img {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+    display: block;
+    transition: width 0.25s cubic-bezier(0.34, 1.2, 0.64, 1),
+                height 0.25s cubic-bezier(0.34, 1.2, 0.64, 1),
+                box-shadow 0.25s ease;
+    background: #e8e8e8;
+  }
+
+  .btl-pin__img--empty {
+    border-radius: 8px;
+    border: 2px dashed rgba(0,0,0,0.15);
+  }
+
+  .btl-pin:hover .btl-pin__img,
+  .btl-pin.btl-active .btl-pin__img {
+    width: 88px;
+    height: 88px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.32);
+  }
+
+  /* ── Shop button ── */
+  .btl-pin__btn {
+    display: block;
+    padding: 4px 10px;
+    background: #111;
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 999px;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(-4px);
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .btl-pin:hover .btl-pin__btn,
+  .btl-pin.btl-active .btl-pin__btn {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  /* ── Ground ── */
+  .btl-ground {
+    width: 100%;
+  }
+
+  .btl-grass {
+    height: 14px;
+    background: linear-gradient(to bottom, #5ab82e 0%, #4aa020 60%, #3d8f18 100%);
+    position: relative;
+  }
+
+  /* Grass blade tips */
+  .btl-grass::before {
+    content: '';
+    position: absolute;
+    top: -7px;
+    left: 0;
+    right: 0;
+    height: 9px;
+    background: repeating-linear-gradient(
+      90deg,
+      #6dd63a 0px, #6dd63a 2px,
+      #5ab82e 2px, #5ab82e 4px,
+      #4aa020 4px, #4aa020 5px,
+      transparent 5px, transparent 8px
+    );
+  }
+
+  .btl-dirt {
+    height: 18px;
+    background: linear-gradient(to bottom, #8b6332 0%, #6b4a22 100%);
+  }
+
+  /* ── Mobile: 10 per row, wraps to 2 rows ── */
+  @media screen and (max-width: 749px) {
+    .btl-pins {
+      flex-wrap: wrap;
+      row-gap: 0;
+    }
+
+    .btl-pin {
+      flex: 0 0 10%;
+    }
+
+    .btl-pin:hover .btl-pin__img,
+    .btl-pin.btl-active .btl-pin__img {
+      width: 66px;
+      height: 66px;
+    }
+
+    .btl-pin__img {
+      width: 32px;
+      height: 32px;
+    }
+
+    .btl-pin__stem {
+      width: 3px;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    var isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+    if (!isTouchDevice) return;
+
+    document.querySelectorAll('#btl-{{ section.id }} .btl-pin').forEach(function (pin) {
+      pin.addEventListener('click', function (e) {
+        var isActive = pin.classList.contains('btl-active');
+        /* Close all others in this section */
+        document.querySelectorAll('#btl-{{ section.id }} .btl-pin').forEach(function (p) {
+          p.classList.remove('btl-active');
+          p.querySelector('.btl-pin__btn').setAttribute('tabindex', '-1');
+        });
+        if (!isActive) {
+          pin.classList.add('btl-active');
+          pin.querySelector('.btl-pin__btn').removeAttribute('tabindex');
+        }
+        /* Prevent link from firing on first tap */
+        if (!isActive) e.preventDefault();
+      });
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Boot Timeline",
+  "tag": "section",
+  "max_blocks": 20,
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Boot",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Boot image"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Boot name / year",
+          "default": "Boot"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link to product or collection"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Boot History"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size",
+      "min": 10, "max": 48, "step": 1, "default": 18,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#111111"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0, "max": 100, "step": 4, "default": 32,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0, "max": 100, "step": 4, "default": 0,
+      "unit": "px"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Boot Timeline",
+      "blocks": [
+        { "type": "item", "settings": { "label": "2000" } },
+        { "type": "item", "settings": { "label": "2002" } },
+        { "type": "item", "settings": { "label": "2004" } },
+        { "type": "item", "settings": { "label": "2006" } },
+        { "type": "item", "settings": { "label": "2008" } },
+        { "type": "item", "settings": { "label": "2010" } },
+        { "type": "item", "settings": { "label": "2012" } },
+        { "type": "item", "settings": { "label": "2014" } },
+        { "type": "item", "settings": { "label": "2016" } },
+        { "type": "item", "settings": { "label": "2018" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
