@@ -35,15 +35,20 @@
     </div>
 
     <div class="igw-reels" id="igw-reels">
-      {%- assign reel_urls = '' -%}
       {%- if settings.instagram_reel_1 != blank -%}
-        <iframe class="igw-reel" data-src="{{ settings.instagram_reel_1 | remove: ' ' }}" frameborder="0" scrolling="no" allowtransparency="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe>
+        <div class="igw-reel-wrapper">
+          <iframe class="igw-reel" data-src="{{ settings.instagram_reel_1 | remove: ' ' }}" frameborder="0" scrolling="no" allowtransparency="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
       {%- endif -%}
       {%- if settings.instagram_reel_2 != blank -%}
-        <iframe class="igw-reel" data-src="{{ settings.instagram_reel_2 | remove: ' ' }}" frameborder="0" scrolling="no" allowtransparency="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe>
+        <div class="igw-reel-wrapper">
+          <iframe class="igw-reel" data-src="{{ settings.instagram_reel_2 | remove: ' ' }}" frameborder="0" scrolling="no" allowtransparency="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
       {%- endif -%}
       {%- if settings.instagram_reel_3 != blank -%}
-        <iframe class="igw-reel" data-src="{{ settings.instagram_reel_3 | remove: ' ' }}" frameborder="0" scrolling="no" allowtransparency="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe>
+        <div class="igw-reel-wrapper">
+          <iframe class="igw-reel" data-src="{{ settings.instagram_reel_3 | remove: ' ' }}" frameborder="0" scrolling="no" allowtransparency="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
       {%- endif -%}
       {%- if settings.instagram_reel_1 == blank and settings.instagram_reel_2 == blank and settings.instagram_reel_3 == blank -%}
         <p class="igw-reels-empty">Add reel URLs in the theme editor to display them here.</p>
@@ -196,23 +201,37 @@
     display: none;
   }
 
-  .igw-reel {
+  /* Clipping shell — visible area only, no IG chrome */
+  .igw-reel-wrapper {
+    position: relative;
     flex: 0 0 220px;
     height: 390px;
     border-radius: 12px;
-    background: #1a1a1a;
+    background: #000;
     scroll-snap-align: start;
     overflow: hidden;
   }
 
-  /* On larger screens, fill the available width evenly */
+  /* Iframe is oversized and offset to push IG header/footer outside the clip */
+  .igw-reel {
+    position: absolute;
+    /* 58px crops the top bar (username / avatar) */
+    top: -58px;
+    left: -2px;
+    width: calc(100% + 4px);
+    /* 58 top + 78 bottom = 136px of UI to hide */
+    height: calc(100% + 136px);
+    border: none;
+    background: #000;
+  }
+
   @media screen and (min-width: 700px) {
     .igw-reels {
       overflow-x: visible;
       justify-content: center;
     }
 
-    .igw-reel {
+    .igw-reel-wrapper {
       flex: 1 1 0;
       max-width: 220px;
     }
