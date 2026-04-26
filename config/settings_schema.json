@@ -2319,26 +2319,26 @@
     "settings": [
       {
         "type": "header",
-        "content": "Instagram reels"
+        "content": "Reel videos"
       },
       {
         "type": "paragraph",
-        "content": "Paste the full URL of each Instagram reel, e.g. https://www.instagram.com/reel/ABC123DEF/"
+        "content": "Upload up to 3 portrait video files (MP4, 9:16 ratio recommended)."
       },
       {
-        "type": "text",
-        "id": "instagram_reel_1",
-        "label": "Reel 1 URL"
+        "type": "video",
+        "id": "instagram_video_1",
+        "label": "Reel 1"
       },
       {
-        "type": "text",
-        "id": "instagram_reel_2",
-        "label": "Reel 2 URL"
+        "type": "video",
+        "id": "instagram_video_2",
+        "label": "Reel 2"
       },
       {
-        "type": "text",
-        "id": "instagram_reel_3",
-        "label": "Reel 3 URL"
+        "type": "video",
+        "id": "instagram_video_3",
+        "label": "Reel 3"
       }
     ]
   }
