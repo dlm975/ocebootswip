@@ -10,7 +10,7 @@
 %}
 
 <div class="brand-tiles-section color-{{ section.settings.color_scheme }}">
-  <div class="brand-tiles-inner page-width">
+  <div class="brand-tiles-inner">
 
     {%- if section.settings.heading != blank -%}
       <h2 class="brand-tiles-heading">{{ section.settings.heading }}</h2>
@@ -55,6 +55,9 @@
   }
 
   .brand-tiles-inner {
+    max-width: 680px;
+    margin-inline: auto;
+    padding-inline: 40px;
     display: flex;
     flex-direction: column;
     gap: 20px;
