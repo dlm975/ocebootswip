@@ -1,0 +1,187 @@
+{% liquid
+  assign tile_count = 0
+  for i in (1..10)
+    assign img_key = 'brand_image_' | append: i
+    assign img = section.settings[img_key]
+    if img != blank
+      assign tile_count = tile_count | plus: 1
+    endif
+  endfor
+%}
+
+<div class="brand-tiles-section color-{{ section.settings.color_scheme }}">
+  <div class="brand-tiles-inner page-width">
+
+    {%- if section.settings.heading != blank -%}
+      <h2 class="brand-tiles-heading">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+
+    <div class="brand-tiles-grid">
+      {%- for i in (1..10) -%}
+        {%- liquid
+          assign img_key   = 'brand_image_'  | append: i
+          assign link_key  = 'brand_link_'   | append: i
+          assign label_key = 'brand_label_'  | append: i
+          assign img   = section.settings[img_key]
+          assign link  = section.settings[link_key]
+          assign label = section.settings[label_key]
+        -%}
+        {%- if img != blank -%}
+          <a
+            class="brand-tile"
+            href="{{ link | default: '#' }}"
+            aria-label="{{ label | default: 'Brand' | escape }}"
+          >
+            {{
+              img
+              | image_url: width: 400
+              | image_tag:
+                class: 'brand-tile__img',
+                alt: label,
+                loading: 'lazy',
+                widths: '200, 300, 400'
+            }}
+          </a>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+  </div>
+</div>
+
+<style>
+  .brand-tiles-section {
+    padding-block: {{ section.settings.padding_top }}px {{ section.settings.padding_bottom }}px;
+  }
+
+  .brand-tiles-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .brand-tiles-heading {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+
+  .brand-tiles-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+  }
+
+  .brand-tile {
+    display: block;
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    background: #f5f5f5;
+  }
+
+  .brand-tile:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
+  }
+
+  .brand-tile__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  @media screen and (max-width: 749px) {
+    .brand-tiles-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Brand Tiles",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop by Brand"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "options": [
+        { "value": "scheme-1", "label": "Scheme 1" },
+        { "value": "scheme-2", "label": "Scheme 2" },
+        { "value": "scheme-3", "label": "Scheme 3" }
+      ],
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0, "max": 100, "step": 4, "default": 40,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0, "max": 100, "step": 4, "default": 40,
+      "unit": "px"
+    },
+    { "type": "header", "content": "Brand 1" },
+    { "type": "image_picker", "id": "brand_image_1", "label": "Image" },
+    { "type": "url",          "id": "brand_link_1",  "label": "Link" },
+    { "type": "text",         "id": "brand_label_1", "label": "Label (accessibility)" },
+    { "type": "header", "content": "Brand 2" },
+    { "type": "image_picker", "id": "brand_image_2", "label": "Image" },
+    { "type": "url",          "id": "brand_link_2",  "label": "Link" },
+    { "type": "text",         "id": "brand_label_2", "label": "Label (accessibility)" },
+    { "type": "header", "content": "Brand 3" },
+    { "type": "image_picker", "id": "brand_image_3", "label": "Image" },
+    { "type": "url",          "id": "brand_link_3",  "label": "Link" },
+    { "type": "text",         "id": "brand_label_3", "label": "Label (accessibility)" },
+    { "type": "header", "content": "Brand 4" },
+    { "type": "image_picker", "id": "brand_image_4", "label": "Image" },
+    { "type": "url",          "id": "brand_link_4",  "label": "Link" },
+    { "type": "text",         "id": "brand_label_4", "label": "Label (accessibility)" },
+    { "type": "header", "content": "Brand 5" },
+    { "type": "image_picker", "id": "brand_image_5", "label": "Image" },
+    { "type": "url",          "id": "brand_link_5",  "label": "Link" },
+    { "type": "text",         "id": "brand_label_5", "label": "Label (accessibility)" },
+    { "type": "header", "content": "Brand 6" },
+    { "type": "image_picker", "id": "brand_image_6", "label": "Image" },
+    { "type": "url",          "id": "brand_link_6",  "label": "Link" },
+    { "type": "text",         "id": "brand_label_6", "label": "Label (accessibility)" },
+    { "type": "header", "content": "Brand 7" },
+    { "type": "image_picker", "id": "brand_image_7", "label": "Image" },
+    { "type": "url",          "id": "brand_link_7",  "label": "Link" },
+    { "type": "text",         "id": "brand_label_7", "label": "Label (accessibility)" },
+    { "type": "header", "content": "Brand 8" },
+    { "type": "image_picker", "id": "brand_image_8", "label": "Image" },
+    { "type": "url",          "id": "brand_link_8",  "label": "Link" },
+    { "type": "text",         "id": "brand_label_8", "label": "Label (accessibility)" },
+    { "type": "header", "content": "Brand 9" },
+    { "type": "image_picker", "id": "brand_image_9", "label": "Image" },
+    { "type": "url",          "id": "brand_link_9",  "label": "Link" },
+    { "type": "text",         "id": "brand_label_9", "label": "Label (accessibility)" },
+    { "type": "header", "content": "Brand 10" },
+    { "type": "image_picker", "id": "brand_image_10", "label": "Image" },
+    { "type": "url",          "id": "brand_link_10",  "label": "Link" },
+    { "type": "text",         "id": "brand_label_10", "label": "Label (accessibility)" }
+  ],
+  "presets": [
+    { "name": "Brand Tiles" }
+  ]
+}
+{% endschema %}
