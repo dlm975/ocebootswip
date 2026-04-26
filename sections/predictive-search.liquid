@@ -1206,6 +1206,98 @@
       box-shadow: 0 2px 5px rgb(0 0 0 / var(--opacity-8));
     }
   }
+
+  /* ── Search modal: centered pill with blurred backdrop ── */
+
+  /* True center positioning */
+  @media screen and (min-width: 750px) {
+    .search-modal__content {
+      width: min(600px, 90vw);
+      inset: 0;
+      margin: auto;
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    /* Relax to rounded rect when results appear */
+    .search-modal__content:has(.predictive-search-form__content-wrapper:not([hidden])) {
+      border-radius: var(--search-border-radius);
+    }
+  }
+
+  /* Pill-shaped inner search row */
+  .search-modal__content .predictive-search-form__header-inner {
+    border-radius: 9999px;
+  }
+
+  /* Relax pill top corners when results drop below */
+  .search-modal__content:has(.predictive-search-form__content-wrapper:not([hidden])) .predictive-search-form__header-inner {
+    border-radius: var(--style-border-radius-popover) var(--style-border-radius-popover) 0 0;
+  }
+
+  /* Blurred + dimmed backdrop */
+  @keyframes search-backdrop-in {
+    from {
+      backdrop-filter: blur(0px) brightness(1);
+      background-color: rgb(0 0 0 / 0);
+    }
+    to {
+      backdrop-filter: blur(14px) brightness(0.55);
+      background-color: rgb(0 0 0 / 0.2);
+    }
+  }
+
+  @keyframes search-backdrop-out {
+    from {
+      backdrop-filter: blur(14px) brightness(0.55);
+      background-color: rgb(0 0 0 / 0.2);
+    }
+    to {
+      backdrop-filter: blur(0px) brightness(1);
+      background-color: rgb(0 0 0 / 0);
+    }
+  }
+
+  .dialog-modal[open].search-modal__content::backdrop {
+    animation: search-backdrop-in 300ms var(--ease-out-quad) forwards;
+  }
+
+  .dialog-modal.search-modal__content.dialog-closing::backdrop {
+    animation: search-backdrop-out 200ms var(--ease-out-quad) forwards;
+  }
+
+  /* Centered fade+scale entry instead of slide-from-top */
+  @keyframes search-modal-appear {
+    from {
+      opacity: 0;
+      transform: scale(0.95) translateY(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes search-modal-disappear {
+    from {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.95) translateY(-6px);
+    }
+  }
+
+  .dialog-modal[open].search-modal__content {
+    transform-origin: center top;
+    animation: search-modal-appear 250ms var(--ease-out-quad) forwards;
+    box-shadow: 0 8px 40px rgb(0 0 0 / 0.18), 0 2px 8px rgb(0 0 0 / 0.1);
+  }
+
+  .dialog-modal.search-modal__content.dialog-closing {
+    animation: search-modal-disappear 180ms var(--ease-out-quad) forwards;
+  }
 {% endstylesheet %}
 
 {% schema %}
