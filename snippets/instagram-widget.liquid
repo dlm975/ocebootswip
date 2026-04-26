@@ -267,13 +267,14 @@
 
   /* --- See More pill --- */
   .igw-see-more {
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: 8px;
     margin: 20px auto 24px;
     padding: 13px 28px;
-    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
-    filter: brightness(0.7);
+    background: none;
+    isolation: isolate;
     color: #ffffff;
     font-size: 0.95rem;
     font-weight: 800;
@@ -285,9 +286,19 @@
     box-shadow: 0 4px 16px rgba(214, 36, 159, 0.35);
   }
 
-  .igw-see-more:hover {
-    filter: brightness(1.08);
-    transform: translateY(-1px);
+  .igw-see-more::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+    filter: brightness(0.7);
+    z-index: -1;
+    transition: filter 0.18s ease;
+  }
+
+  .igw-see-more:hover::before {
+    filter: brightness(0.85);
   }
 </style>
 
