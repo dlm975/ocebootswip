@@ -1203,7 +1203,8 @@ button.shopify-payment-button__button--unbranded {
   margin-block: 0;
   transition: color var(--animation-speed) var(--animation-easing),
     box-shadow var(--animation-speed) var(--animation-easing),
-    background-color var(--animation-speed) var(--animation-easing);
+    background-color var(--animation-speed) var(--animation-easing),
+    transform var(--animation-speed) var(--animation-easing);
   cursor: pointer;
   width: fit-content;
   box-shadow: inset 0 0 0 var(--button-border-width) var(--button-border-color);
@@ -1276,6 +1277,7 @@ button.shopify-payment-button__button--unbranded:hover:not([disabled]) {
   --button-color: var(--color-primary-button-hover-text);
   --button-background-color: var(--color-primary-button-hover-background);
   --button-border-color: var(--color-primary-button-hover-border);
+  transform: scale(1.02);
 }
 
 .button-secondary {
