@@ -1,0 +1,154 @@
+<div id="cs-overlay" aria-hidden="true" role="dialog" aria-label="Search" aria-modal="true">
+  <div class="cs-backdrop" id="cs-backdrop"></div>
+  <div class="cs-center">
+    <form class="cs-form" id="cs-form" action="{{ routes.search_url }}" method="get" autocomplete="off">
+      <input type="hidden" name="type" value="product">
+      <div class="cs-field">
+        <input
+          id="cs-input"
+          class="cs-input"
+          type="search"
+          name="q"
+          spellcheck="false"
+          placeholder="Search..."
+          aria-label="Search"
+        >
+      </div>
+      <p class="cs-hint">Press <kbd>Enter</kbd> to search &middot; <kbd>Esc</kbd> to close</p>
+    </form>
+  </div>
+</div>
+
+<style>
+  #cs-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  #cs-overlay.cs-open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .cs-backdrop {
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(0px) brightness(1);
+    transition: backdrop-filter 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  #cs-overlay.cs-open .cs-backdrop {
+    backdrop-filter: blur(16px) brightness(0.5);
+  }
+
+  .cs-center {
+    position: relative;
+    z-index: 1;
+    width: min(640px, 88vw);
+    text-align: center;
+    transform: translateY(-12px);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  #cs-overlay.cs-open .cs-center {
+    transform: translateY(0);
+  }
+
+  .cs-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border-bottom: 1.5px solid rgba(255, 255, 255, 0.7);
+    padding-bottom: 10px;
+  }
+
+  .cs-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ffffff;
+    font-size: clamp(1.6rem, 4vw, 2.8rem);
+    font-family: inherit;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    text-align: center;
+    padding: 0;
+    caret-color: #ffffff;
+    appearance: none;
+  }
+
+  .cs-input::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+  }
+
+  /* hide browser's native ✕ clear button */
+  .cs-input::-webkit-search-cancel-button,
+  .cs-input::-webkit-search-decoration {
+    display: none;
+  }
+
+  .cs-hint {
+    margin-top: 18px;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.45);
+    letter-spacing: 0.04em;
+    font-family: inherit;
+  }
+
+  .cs-hint kbd {
+    font-family: inherit;
+    font-size: inherit;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+</style>
+
+<script>
+  (function () {
+    const overlay = document.getElementById('cs-overlay');
+    const input   = document.getElementById('cs-input');
+    const backdrop = document.getElementById('cs-backdrop');
+    const form    = document.getElementById('cs-form');
+
+    function openSearch() {
+      overlay.classList.add('cs-open');
+      overlay.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      // small delay lets the transition start before focus triggers any layout shift
+      setTimeout(() => input.focus(), 40);
+    }
+
+    function closeSearch() {
+      overlay.classList.remove('cs-open');
+      overlay.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      input.value = '';
+    }
+
+    backdrop.addEventListener('click', closeSearch);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && overlay.classList.contains('cs-open')) {
+        closeSearch();
+      }
+    });
+
+    form.addEventListener('submit', function (e) {
+      const q = input.value.trim();
+      if (!q) { e.preventDefault(); return; }
+      // let the form submit naturally to /search?q=...&type=product
+    });
+
+    window.customSearchOpen  = openSearch;
+    window.customSearchClose = closeSearch;
+  })();
+</script>

@@ -11,7 +11,7 @@
 {% unless style == 'none' %}
   <search-button class="search-action{% if class != blank %} {{ class | strip }}{% endif %}">
     <button
-      on:click="#search-modal/showDialog"
+      onclick="window.customSearchOpen()"
       class="button button-unstyled search-modal__button header-actions__action"
       aria-label="{{ 'accessibility.open_search_modal' | t }}"
     >
