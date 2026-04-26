@@ -320,13 +320,98 @@
         "padding-block-end": 40
       }
     },
-    "brand_tiles_main": {
-      "type": "brand-tiles",
+    "collection_list_MPfnbb": {
+      "type": "collection-list",
+      "blocks": {
+        "static-collection-card": {
+          "type": "_collection-card",
+          "name": "t:names.collection_card",
+          "static": true,
+          "settings": {
+            "placement": "on_image",
+            "horizontal_alignment": "flex-start",
+            "vertical_alignment": "flex-end",
+            "collection_card_gap": 8,
+            "inherit_color_scheme": true,
+            "color_scheme": "",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_radius": 0
+          },
+          "blocks": {
+            "collection_title_FdX4Uk": {
+              "type": "collection-title",
+              "name": "t:names.collection_title",
+              "settings": {
+                "width": "fit-content",
+                "max_width": "normal",
+                "alignment": "left",
+                "type_preset": "custom",
+                "font": "var(--font-heading--family)",
+                "font_size": "1.5rem",
+                "line_height": "normal",
+                "letter_spacing": "normal",
+                "case": "none",
+                "wrap": "pretty",
+                "color": "var(--color-foreground)",
+                "background": false,
+                "background_color": "#ffffff",
+                "corner_radius": 0,
+                "padding-block-start": 4,
+                "padding-block-end": 4,
+                "padding-inline-start": 8,
+                "padding-inline-end": 8
+              },
+              "blocks": {}
+            },
+            "collection-card-image": {
+              "type": "_collection-card-image",
+              "name": "t:names.collection_card_image",
+              "static": true,
+              "settings": {
+                "image_ratio": "portrait",
+                "toggle_overlay": false,
+                "overlay_color": "#00000026",
+                "overlay_style": "solid",
+                "gradient_direction": "to top",
+                "border": "none",
+                "border_width": 1,
+                "border_opacity": 100,
+                "border_radius": 12
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": [
+            "collection_title_FdX4Uk"
+          ]
+        }
+      },
+      "name": "t:names.collections_bento",
       "settings": {
-        "heading": "Shop by Brand",
-        "color_scheme": "scheme-1",
-        "padding_top": 40,
-        "padding_bottom": 40
+        "collection_list": [
+          "adidas",
+          "nike",
+          "all-football-boots",
+          "accessories-services"
+        ],
+        "layout_type": "bento",
+        "carousel_on_mobile": false,
+        "columns": 4,
+        "mobile_columns": "2",
+        "mobile_card_size": "60cqw",
+        "columns_gap": 8,
+        "bento_gap": 10,
+        "rows_gap": 8,
+        "max_collections": 4,
+        "icons_style": "arrow",
+        "icons_shape": "none",
+        "section_width": "page-width",
+        "gap": 17,
+        "color_scheme": "scheme-217c9e10-e79c-41f0-bd29-fc7e4a9157ff",
+        "padding-block-start": 49,
+        "padding-block-end": 24
       }
     }
   },
@@ -334,6 +419,6 @@
     "1770583639efe53d54",
     "17706063529fca8395",
     "newly_listed_fc",
-    "brand_tiles_main"
+    "collection_list_MPfnbb"
   ]
 }
