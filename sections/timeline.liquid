@@ -1,0 +1,300 @@
+<div id="tl-section-{{ section.id }}" class="tl-section color-{{ section.settings.color_scheme }}">
+  <div class="tl-inner page-width">
+
+    {%- if section.settings.heading != blank -%}
+      <h2 class="tl-heading">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="tl-track">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign remainder = forloop.index | modulo: 2
+            if remainder == 1
+              assign card_dir = 'up'
+            else
+              assign card_dir = 'down'
+            endif
+          -%}
+          <div class="tl-item tl-item--{{ card_dir }}" {{ block.shopify_attributes }}>
+
+            <div class="tl-item__card">
+              <a
+                class="tl-card"
+                href="{{ block.settings.link | default: '#' }}"
+                {% if block.settings.link == blank %}tabindex="-1"{% endif %}
+              >
+                {%- if block.settings.image != blank -%}
+                  {{
+                    block.settings.image
+                    | image_url: width: 280
+                    | image_tag:
+                      class: 'tl-card__img',
+                      loading: 'lazy',
+                      alt: block.settings.label,
+                      widths: '140, 200, 280'
+                  }}
+                {%- endif -%}
+                {%- if block.settings.label != blank -%}
+                  <span class="tl-card__label">{{ block.settings.label }}</span>
+                {%- endif -%}
+              </a>
+            </div>
+
+            <div class="tl-item__dot"></div>
+
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+  </div>
+</div>
+
+<style>
+  #tl-section-{{ section.id }} {
+    padding-block: {{ section.settings.padding_top }}px {{ section.settings.padding_bottom }}px;
+  }
+</style>
+
+{% stylesheet %}
+  .tl-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .tl-heading {
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+  }
+
+  /* ── Track ── */
+  .tl-track {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    padding-block: 140px;
+  }
+
+  /* Horizontal line */
+  .tl-track::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(0, 0, 0, 0.12);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  /* ── Item ── */
+  .tl-item {
+    position: relative;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  /* ── Dot ── */
+  .tl-item__dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #111;
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.25s ease;
+  }
+
+  .tl-item:hover .tl-item__dot {
+    transform: scale(2.2);
+    box-shadow: 0 0 0 5px rgba(17, 17, 17, 0.1);
+  }
+
+  /* ── Card (hidden by default) ── */
+  .tl-item__card {
+    position: absolute;
+    left: 50%;
+    width: 140px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+    z-index: 2;
+  }
+
+  .tl-item--up .tl-item__card {
+    bottom: calc(50% + 16px);
+    transform: translateX(-50%) translateY(10px);
+  }
+
+  .tl-item--down .tl-item__card {
+    top: calc(50% + 16px);
+    transform: translateX(-50%) translateY(-10px);
+  }
+
+  .tl-item:hover .tl-item__card {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── Card inner ── */
+  .tl-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .tl-card__img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    display: block;
+  }
+
+  .tl-card__label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-align: center;
+    color: #111;
+    line-height: 1.3;
+  }
+
+  /* ── Connector line from dot to card edge ── */
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    width: 2px;
+    background: rgba(0, 0, 0, 0.15);
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.22s ease;
+    z-index: 0;
+  }
+
+  .tl-item--up::before {
+    bottom: calc(50% + 7px);
+    height: 130px;
+  }
+
+  .tl-item--down::before {
+    top: calc(50% + 7px);
+    height: 130px;
+  }
+
+  .tl-item:hover::before {
+    opacity: 1;
+  }
+
+  @media screen and (max-width: 749px) {
+    .tl-track {
+      padding-block: 100px;
+      justify-content: flex-start;
+      gap: 40px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .tl-track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tl-item__card {
+      width: 110px;
+    }
+
+    .tl-card__img {
+      height: 110px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Timeline",
+  "tag": "section",
+  "max_blocks": 12,
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Timeline item",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Milestone"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Our Story"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0, "max": 100, "step": 4, "default": 40,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0, "max": 100, "step": 4, "default": 40,
+      "unit": "px"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Timeline",
+      "blocks": [
+        { "type": "item" },
+        { "type": "item" },
+        { "type": "item" },
+        { "type": "item" },
+        { "type": "item" }
+      ]
+    }
+  ]
+}
+{% endschema %}
