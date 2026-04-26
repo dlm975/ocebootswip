@@ -1123,11 +1123,20 @@
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
                 opacity   0.25s cubic-bezier(0.4, 0, 0.2, 1),
                 visibility 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    background-color: #ffffff;
-    border-right: none;
-    border-top: none;
-    border-bottom: none;
-    /* Bottom corners match header pill radius; top is flush */
+    /*
+     * Two radial-gradient quarter-circle cutouts at the top corners.
+     * Each covers a 40×40 area; within the 20px radius the gradient is
+     * transparent (letting the black header background show through),
+     * outside it is white. This creates the concave jigsaw notch that
+     * cups the header pill's convex bottom corners.
+     */
+    background:
+      radial-gradient(circle at 0 0, transparent 20px, #ffffff 20px)
+        top left  / 40px 40px no-repeat,
+      radial-gradient(circle at 100% 0, transparent 20px, #ffffff 20px)
+        top right / 40px 40px no-repeat,
+      #ffffff;
+    border: none;
     border-radius: 0 0 20px 20px;
     box-shadow: 0 14px 36px rgba(0, 0, 0, 0.13);
 
