@@ -19,7 +19,13 @@
     aspect-ratio: 4 / 5;
     overflow: hidden;
     border-radius: {{ block.settings.border_radius }}px;
-    box-shadow: 0 8px 24px rgb(0 0 0 / 0.18), 0 32px 64px rgb(0 0 0 / 0.22);
+    box-shadow: 0 4px 8px rgb(0 0 0 / 0.18), 0 10px 20px rgb(0 0 0 / 0.14);
+  }
+
+  @media screen and (min-width: 750px) {
+    .ai-hero-container-{{ ai_gen_id }} {
+      aspect-ratio: 16 / 9;
+    }
   }
 
   .ai-hero-image-{{ ai_gen_id }} {
