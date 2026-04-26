@@ -1096,10 +1096,9 @@
   }
 
   /* ============================================================
-     DROPDOWN OVERRIDE — drops from header, full-width, inverted
+     DROPDOWN OVERRIDE — extends below header, full-width, white
      ============================================================ */
 
-  /* Reposition: sits directly below the header */
   .header-drawer .menu-drawer {
     top: var(--header-height, 60px);
     left: 0;
@@ -1109,33 +1108,35 @@
     height: auto;
     max-height: calc(85dvh - var(--header-height, 60px));
     overflow-y: auto;
-    /* Drop from top instead of sliding from left */
     transform: translateY(-110%);
-    /* Inverted colour scheme — dark panel under (likely light) header */
-    background-color: #0f0f0f;
+    background-color: #ffffff;
+    /* Sit behind the header so it never covers it */
+    z-index: 11;
     border-right: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 0 0 14px 14px;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55);
+    border-top: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
 
     @media screen and (min-width: 750px) {
       width: 100%;
     }
   }
 
-  /* Open state: translate down into view */
+  /* Open state: slide down into view */
   .menu-drawer-container.menu-open > .menu-drawer {
     transform: translateY(0);
     visibility: visible;
     opacity: 1;
   }
 
-  /* Backdrop must not cover the header */
+  /* Backdrop starts below header and sits behind it too */
   .header-drawer .menu-drawer__backdrop {
     top: var(--header-height, 60px);
+    z-index: 10;
   }
 
-  /* Inner containers: auto height so panel wraps content */
+  /* Auto-height inner containers */
   .header-drawer .menu-drawer__navigation-container {
     grid-template-rows: auto auto;
     height: auto;
@@ -1145,54 +1146,54 @@
     height: auto;
   }
 
-  /* ---- Text colours — white on dark ---- */
+  /* ---- Text: black on white ---- */
   .header-drawer .menu-drawer__menu-item--mainlist {
-    color: rgba(255, 255, 255, 0.9);
+    color: #111111;
   }
 
   .header-drawer .menu-drawer__menu-item--mainlist:hover {
-    color: #ffffff;
+    color: #000000;
   }
 
   .header-drawer .menu-drawer__menu-item--parent {
-    color: rgba(255, 255, 255, 0.65);
+    color: rgba(0, 0, 0, 0.65);
   }
 
   .header-drawer .menu-drawer__menu-item--parent:hover {
-    color: rgba(255, 255, 255, 0.9);
+    color: #111111;
   }
 
   .header-drawer .menu-drawer__menu-item--child {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(0, 0, 0, 0.5);
   }
 
   .header-drawer .menu-drawer__menu-item--child:hover {
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(0, 0, 0, 0.8);
   }
 
   /* Dividers */
   .header-drawer .menu-drawer__list-item--divider,
   .header-drawer .menu-drawer__menu-container--divider {
-    border-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(0, 0, 0, 0.08);
   }
 
   /* Close / back buttons */
   .header-drawer .menu-drawer__close-button,
   .header-drawer .menu-drawer__back-button {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(0, 0, 0, 0.5);
   }
 
   .header-drawer .menu-drawer__close-button:hover,
   .header-drawer .menu-drawer__back-button:hover {
-    color: #ffffff;
+    color: #000000;
   }
 
-  /* Submenu panels (3-level menus) also go dark */
+  /* Submenus (3-level deep) also white */
   .header-drawer .menu-drawer__submenu {
-    background-color: #0f0f0f;
+    background-color: #ffffff;
   }
 
-  /* Icon carets */
+  /* Carets and SVG icons inherit text colour */
   .header-drawer .menu-drawer svg {
     color: inherit;
   }
