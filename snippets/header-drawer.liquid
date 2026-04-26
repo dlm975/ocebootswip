@@ -1147,16 +1147,22 @@
     z-index: -1;
   }
 
-  /* Auto-height inner containers so overflow-y on the drawer scrolls content */
+  /* The theme removes overflow when a submenu is open — keep our scroll */
+  .header-drawer .menu-drawer:has(details[open]) {
+    overflow-y: auto;
+  }
+
+  /* Auto-height inner containers so content determines drawer height */
   .header-drawer .menu-drawer__inner-container,
   .header-drawer .menu-drawer__navigation-container,
   .header-drawer .menu-drawer__inner-submenu {
     height: auto;
-    overflow: visible;
+    min-height: 0;
   }
 
   .header-drawer .menu-drawer__navigation-container {
     grid-template-rows: auto auto;
+    overflow-y: visible;
   }
 
   /* ---- Text: black on white ---- */
