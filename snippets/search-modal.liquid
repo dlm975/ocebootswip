@@ -36,18 +36,70 @@
     justify-content: center;
   }
 
+  /* Centered pill layout */
   .search-modal__content {
-    /* Approx set the top so when the content is at max height, the modal is centered */
-    --modal-top-margin: calc(50dvh - var(--modal-max-height) / 2 - 2rem);
-    --modal-width: 66dvw;
+    --modal-width: min(600px, 90vw);
 
     padding: 0;
+    border-radius: 9999px;
 
     @media screen and (min-width: 750px) {
       width: var(--modal-width);
-      margin-block-start: var(--modal-top-margin);
+      /* True vertical + horizontal centering */
+      inset: 0;
+      margin: auto;
       overflow: hidden;
     }
+  }
+
+  /* When results are visible, relax pill to rounded rectangle */
+  .search-modal__content:has(.predictive-search-form__content-wrapper:not([hidden])) {
+    border-radius: var(--search-border-radius);
+    border-end-start-radius: var(--search-border-radius);
+    border-end-end-radius: var(--search-border-radius);
+  }
+
+  /* Pill-shaped search input row */
+  .search-modal__content .predictive-search-form__header {
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+
+  /* Relax header pill when results appear below it */
+  .search-modal__content:has(.predictive-search-form__content-wrapper:not([hidden])) .predictive-search-form__header {
+    border-radius: var(--search-border-radius) var(--search-border-radius) 0 0;
+  }
+
+  /* Blurred + dimmed backdrop */
+  @keyframes search-backdrop-in {
+    from {
+      backdrop-filter: blur(0px) brightness(1);
+      background-color: rgb(0 0 0 / 0);
+    }
+    to {
+      backdrop-filter: blur(14px) brightness(0.55);
+      background-color: rgb(0 0 0 / 0.2);
+    }
+  }
+
+  @keyframes search-backdrop-out {
+    from {
+      backdrop-filter: blur(14px) brightness(0.55);
+      background-color: rgb(0 0 0 / 0.2);
+    }
+    to {
+      backdrop-filter: blur(0px) brightness(1);
+      background-color: rgb(0 0 0 / 0);
+    }
+  }
+
+  /* Override the default backdrop animation for search only */
+  .dialog-modal[open].search-modal__content::backdrop {
+    animation: search-backdrop-in 300ms var(--ease-out-quad) forwards;
+  }
+
+  .dialog-modal.search-modal__content.dialog-closing::backdrop {
+    animation: search-backdrop-out 200ms var(--ease-out-quad) forwards;
   }
 
   /* Hide the default dialog backdrop on small screens */
@@ -57,11 +109,33 @@
     }
   }
 
+  /* Opening animation: fade + scale from center instead of bottom slide */
+  @keyframes search-modal-appear {
+    from {
+      opacity: 0;
+      transform: scale(0.95) translateY(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes search-modal-disappear {
+    from {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.95) translateY(-6px);
+    }
+  }
+
   .dialog-modal[open].search-modal__content {
-    transform-origin: bottom center;
-    animation: search-element-slide-in-bottom 300ms var(--ease-out-quad) forwards;
-    border-radius: var(--search-border-radius);
-    box-shadow: var(--shadow-popover);
+    transform-origin: center top;
+    animation: search-modal-appear 250ms var(--ease-out-quad) forwards;
+    box-shadow: 0 8px 40px rgb(0 0 0 / 0.18), 0 2px 8px rgb(0 0 0 / 0.1);
 
     @media screen and (max-width: 749px) {
       border-radius: 0;
@@ -69,7 +143,7 @@
   }
 
   .dialog-modal.search-modal__content.dialog-closing {
-    animation: search-element-slide-out-bottom 200ms var(--ease-out-quad) forwards;
+    animation: search-modal-disappear 180ms var(--ease-out-quad) forwards;
   }
 
   .search-modal__content[open] {
