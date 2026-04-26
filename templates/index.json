@@ -303,7 +303,7 @@
         "collection": "all-football-boots",
         "layout_type": "grid",
         "carousel_on_mobile": false,
-        "max_products": 9,
+        "max_products": 12,
         "mobile_max": 8,
         "columns": 6,
         "mobile_columns": "3",
