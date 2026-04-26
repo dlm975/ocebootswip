@@ -63,6 +63,7 @@
     {% render 'custom-search-overlay' %}
     {% if template.name == 'index' or template.name == 'collection' %}
       {% render 'instagram-widget' %}
+      {% render 'size-widget' %}
     {% endif %}
 
     {% if settings.quick_add or settings.mobile_quick_add %}

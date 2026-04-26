@@ -1,0 +1,399 @@
+{% comment %} Shop By Size floating widget {% endcomment %}
+
+<!-- Floating trigger -->
+<button id="sbz-trigger" aria-label="Shop by size">
+  <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" aria-hidden="true" style="flex-shrink:0">
+    <rect x="1" y="1" width="7.5" height="7.5" rx="1.5"/>
+    <rect x="11.5" y="1" width="7.5" height="7.5" rx="1.5"/>
+    <rect x="1" y="11.5" width="7.5" height="7.5" rx="1.5"/>
+    <rect x="11.5" y="11.5" width="7.5" height="7.5" rx="1.5"/>
+  </svg>
+  <span>Shop By Size</span>
+</button>
+
+<!-- Overlay -->
+<div id="sbz-overlay" aria-hidden="true" role="dialog" aria-label="Shop by size" aria-modal="true">
+  <div class="sbz-backdrop" id="sbz-backdrop"></div>
+  <div class="sbz-panel">
+
+    <button class="sbz-close" id="sbz-close" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="18" height="18">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+
+    <h2 class="sbz-title">Shop By Size</h2>
+
+    <!-- Segmented control -->
+    <div class="sbz-switcher" id="sbz-switcher" role="group" aria-label="Size system">
+      <button class="sbz-sys sbz-sys-active" data-sys="us">US</button>
+      <button class="sbz-sys" data-sys="uk">UK</button>
+      <button class="sbz-sys" data-sys="eu">EU</button>
+      <span class="sbz-switcher-pill" id="sbz-switcher-pill" aria-hidden="true"></span>
+    </div>
+
+    <!-- Size grids — built by JS -->
+    <div class="sbz-grid" id="sbz-grid-us" data-sys="us"></div>
+    <div class="sbz-grid sbz-grid-hidden" id="sbz-grid-uk" data-sys="uk"></div>
+    <div class="sbz-grid sbz-grid-hidden" id="sbz-grid-eu" data-sys="eu"></div>
+
+    <!-- Shop Now -->
+    <a class="sbz-shop-btn" id="sbz-shop-btn" href="#" aria-disabled="true">
+      Shop Now
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="15" height="15">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </a>
+
+  </div>
+</div>
+
+<style>
+  /* --- Floating trigger --- */
+  #sbz-trigger {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    z-index: 9000;
+    height: 52px;
+    padding: 0 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(10, 10, 10, 0.88);
+    backdrop-filter: blur(10px);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    white-space: nowrap;
+  }
+
+  #sbz-trigger:hover {
+    background: rgba(30, 30, 30, 0.95);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  }
+
+  /* --- Overlay --- */
+  #sbz-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  #sbz-overlay.sbz-open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .sbz-backdrop {
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(0px) brightness(1);
+    transition: backdrop-filter 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  #sbz-overlay.sbz-open .sbz-backdrop {
+    backdrop-filter: blur(18px) brightness(0.45);
+  }
+
+  /* --- Panel --- */
+  .sbz-panel {
+    position: relative;
+    z-index: 1;
+    background: #111111;
+    border-radius: 20px;
+    width: min(480px, 94vw);
+    max-height: 88vh;
+    overflow-y: auto;
+    padding: 28px 24px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    transform: translateY(16px);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+  }
+
+  #sbz-overlay.sbz-open .sbz-panel {
+    transform: translateY(0);
+  }
+
+  /* --- Close --- */
+  .sbz-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.6);
+    transition: background 0.15s, color 0.15s;
+    padding: 0;
+  }
+
+  .sbz-close:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+  }
+
+  /* --- Title --- */
+  .sbz-title {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin: 0;
+  }
+
+  /* --- Segmented control (Apple style) --- */
+  .sbz-switcher {
+    position: relative;
+    display: flex;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    padding: 3px;
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .sbz-sys {
+    flex: 1;
+    padding: 8px 0;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.55);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    transition: color 0.2s ease;
+    border-radius: 999px;
+  }
+
+  .sbz-sys.sbz-sys-active {
+    color: #111111;
+  }
+
+  /* Sliding white pill */
+  .sbz-switcher-pill {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: calc(33.333% - 2px);
+    height: calc(100% - 6px);
+    background: #ffffff;
+    border-radius: 999px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+
+  /* --- Size grid --- */
+  .sbz-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 7px;
+    width: 100%;
+  }
+
+  .sbz-grid-hidden {
+    display: none;
+  }
+
+  .sbz-size-btn {
+    padding: 10px 4px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 9px;
+    color: rgba(255, 255, 255, 0.8);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+
+  .sbz-size-btn:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+  }
+
+  .sbz-size-btn.sbz-size-selected {
+    background: #ffffff;
+    border-color: #ffffff;
+    color: #111111;
+    font-weight: 700;
+  }
+
+  /* --- Shop Now --- */
+  .sbz-shop-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 32px;
+    background: #ffffff;
+    color: #111111;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+    border-radius: 999px;
+    opacity: 0.25;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .sbz-shop-btn.sbz-shop-active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .sbz-shop-btn.sbz-shop-active:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
+</style>
+
+<script>
+  (function () {
+    const trigger  = document.getElementById('sbz-trigger');
+    const overlay  = document.getElementById('sbz-overlay');
+    const backdrop = document.getElementById('sbz-backdrop');
+    const closeBtn = document.getElementById('sbz-close');
+    const switcher = document.getElementById('sbz-switcher');
+    const pill     = document.getElementById('sbz-switcher-pill');
+    const shopBtn  = document.getElementById('sbz-shop-btn');
+
+    const SYSTEMS = {
+      us: [4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 13],
+      uk: [3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 12],
+      eu: [35, 36, 36.5, 37, 37.5, 38, 38.5, 39, 40, 40.5, 41, 41.5, 42, 43, 44, 44.5, 45, 46, 47]
+    };
+
+    function sizeHandle(sys, size) {
+      return 'size-' + sys + '-' + String(size).replace('.', '-');
+    }
+
+    function sizeLabel(size) {
+      return String(size);
+    }
+
+    let activeSys = 'us';
+    let selectedSize = null;
+
+    /* Build grids once */
+    Object.keys(SYSTEMS).forEach(function (sys) {
+      var grid = document.getElementById('sbz-grid-' + sys);
+      SYSTEMS[sys].forEach(function (size) {
+        var btn = document.createElement('button');
+        btn.className = 'sbz-size-btn';
+        btn.dataset.sys = sys;
+        btn.dataset.size = size;
+        btn.textContent = sizeLabel(size);
+        btn.addEventListener('click', function () { selectSize(sys, size, btn); });
+        grid.appendChild(btn);
+      });
+    });
+
+    function selectSize(sys, size, btn) {
+      /* Deselect all in current grid */
+      document.querySelectorAll('#sbz-grid-' + sys + ' .sbz-size-btn').forEach(function (b) {
+        b.classList.remove('sbz-size-selected');
+      });
+      btn.classList.add('sbz-size-selected');
+      selectedSize = size;
+
+      var handle = sizeHandle(sys, size);
+      shopBtn.href = '/collections/' + handle;
+      shopBtn.classList.add('sbz-shop-active');
+      shopBtn.removeAttribute('aria-disabled');
+    }
+
+    function setSys(sys) {
+      /* Update button states */
+      var sysBtns = switcher.querySelectorAll('.sbz-sys');
+      var idx = 0;
+      sysBtns.forEach(function (btn, i) {
+        btn.classList.remove('sbz-sys-active');
+        if (btn.dataset.sys === sys) {
+          btn.classList.add('sbz-sys-active');
+          idx = i;
+        }
+      });
+
+      /* Slide the pill */
+      pill.style.transform = 'translateX(calc(' + idx + ' * (100% + 2px)))';
+
+      /* Swap grids */
+      Object.keys(SYSTEMS).forEach(function (s) {
+        var grid = document.getElementById('sbz-grid-' + s);
+        grid.classList.toggle('sbz-grid-hidden', s !== sys);
+      });
+
+      /* Reset selection if switching system */
+      if (sys !== activeSys) {
+        selectedSize = null;
+        shopBtn.classList.remove('sbz-shop-active');
+        shopBtn.href = '#';
+        shopBtn.setAttribute('aria-disabled', 'true');
+      }
+
+      activeSys = sys;
+    }
+
+    switcher.querySelectorAll('.sbz-sys').forEach(function (btn) {
+      btn.addEventListener('click', function () { setSys(btn.dataset.sys); });
+    });
+
+    function openWidget() {
+      overlay.classList.add('sbz-open');
+      overlay.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeWidget() {
+      overlay.classList.remove('sbz-open');
+      overlay.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    trigger.addEventListener('click', openWidget);
+    closeBtn.addEventListener('click', closeWidget);
+    backdrop.addEventListener('click', closeWidget);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && overlay.classList.contains('sbz-open')) closeWidget();
+    });
+  })();
+</script>
