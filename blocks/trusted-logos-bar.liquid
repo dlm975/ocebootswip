@@ -1,0 +1,316 @@
+{% doc %}
+  @prompt
+    Trustpilot-style 5-star header above a thin infinite-scrolling logo bar.
+    Logos are uploaded via theme editor image pickers (up to 12).
+{% enddoc %}
+
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .tlb-{{ ai_gen_id }} {
+    width: 100%;
+    padding: {{ block.settings.section_padding }}px 0;
+    background: {{ block.settings.section_background }};
+  }
+
+  /* --- Header: stars + label --- */
+  .tlb-header-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .tlb-stars-{{ ai_gen_id }} {
+    display: flex;
+    gap: 3px;
+  }
+
+  .tlb-stars-{{ ai_gen_id }} svg {
+    width: {{ block.settings.star_size }}px;
+    height: {{ block.settings.star_size }}px;
+    fill: {{ block.settings.star_color }};
+  }
+
+  .tlb-label-{{ ai_gen_id }} {
+    font-size: {{ block.settings.label_size }}px;
+    color: {{ block.settings.label_color }};
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+
+  /* --- Scrolling bar --- */
+  .tlb-bar-{{ ai_gen_id }} {
+    overflow: hidden;
+    width: 100%;
+    background: {{ block.settings.bar_background }};
+    border-top: 1px solid {{ block.settings.bar_border_color }};
+    border-bottom: 1px solid {{ block.settings.bar_border_color }};
+    padding: {{ block.settings.bar_padding }}px 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .tlb-track-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    gap: {{ block.settings.logo_gap }}px;
+    width: max-content;
+    animation: tlb-scroll-{{ ai_gen_id }} {{ block.settings.scroll_speed }}s linear infinite;
+  }
+
+  .tlb-track-{{ ai_gen_id }}:hover {
+    animation-play-state: paused;
+  }
+
+  .tlb-track-{{ ai_gen_id }} img {
+    height: {{ block.settings.logo_height }}px;
+    width: auto;
+    object-fit: contain;
+    flex-shrink: 0;
+    filter: {{ block.settings.logo_filter }};
+    opacity: {{ block.settings.logo_opacity | divided_by: 100.0 }};
+    display: block;
+  }
+
+  @keyframes tlb-scroll-{{ ai_gen_id }} {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  .tlb-empty-{{ ai_gen_id }} {
+    width: 100%;
+    text-align: center;
+    font-size: 13px;
+    color: #999;
+    padding: 0 20px;
+  }
+{% endstyle %}
+
+<div class="tlb-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+
+  <div class="tlb-header-{{ ai_gen_id }}">
+    <div class="tlb-stars-{{ ai_gen_id }}">
+      {% for i in (1..5) %}
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+      {% endfor %}
+    </div>
+    <p class="tlb-label-{{ ai_gen_id }}">{{ block.settings.heading_text }}</p>
+  </div>
+
+  <div class="tlb-bar-{{ ai_gen_id }}">
+    {% liquid
+      assign has_logos = false
+      for i in (1..12)
+        assign logo_key = 'logo_' | append: i
+        if block.settings[logo_key] != blank
+          assign has_logos = true
+          break
+        endif
+      endfor
+    %}
+
+    {% if has_logos %}
+      <div class="tlb-track-{{ ai_gen_id }}">
+        {% comment %} First pass {% endcomment %}
+        {% for i in (1..12) %}
+          {% assign logo_key = 'logo_' | append: i %}
+          {% if block.settings[logo_key] != blank %}
+            <img
+              src="{{ block.settings[logo_key] | image_url: width: 400 }}"
+              alt=""
+              loading="lazy"
+            >
+          {% endif %}
+        {% endfor %}
+        {% comment %} Duplicate for seamless loop {% endcomment %}
+        {% for i in (1..12) %}
+          {% assign logo_key = 'logo_' | append: i %}
+          {% if block.settings[logo_key] != blank %}
+            <img
+              src="{{ block.settings[logo_key] | image_url: width: 400 }}"
+              alt=""
+              loading="lazy"
+              aria-hidden="true"
+            >
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="tlb-empty-{{ ai_gen_id }}">Add logo images in the theme editor to populate this bar.</p>
+    {% endif %}
+  </div>
+
+</div>
+
+{% schema %}
+{
+  "name": "Trusted logos bar",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header"
+    },
+    {
+      "type": "text",
+      "id": "heading_text",
+      "label": "Heading",
+      "default": "Trusted by the Best"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star color",
+      "default": "#00b67a"
+    },
+    {
+      "type": "range",
+      "id": "star_size",
+      "label": "Star size",
+      "min": 14,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 22
+    },
+    {
+      "type": "range",
+      "id": "label_size",
+      "label": "Label font size",
+      "min": 10,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Label color",
+      "default": "#111111"
+    },
+    {
+      "type": "header",
+      "content": "Section"
+    },
+    {
+      "type": "color",
+      "id": "section_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "label": "Top / bottom padding",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Scrolling bar"
+    },
+    {
+      "type": "color",
+      "id": "bar_background",
+      "label": "Bar background",
+      "default": "#f7f7f7"
+    },
+    {
+      "type": "color",
+      "id": "bar_border_color",
+      "label": "Border color",
+      "default": "#e2e2e2"
+    },
+    {
+      "type": "range",
+      "id": "bar_padding",
+      "label": "Bar vertical padding",
+      "min": 6,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "logo_height",
+      "label": "Logo height",
+      "min": 16,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "logo_gap",
+      "label": "Gap between logos",
+      "min": 20,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "scroll_speed",
+      "label": "Scroll speed (s per loop)",
+      "min": 5,
+      "max": 60,
+      "step": 5,
+      "default": 25
+    },
+    {
+      "type": "range",
+      "id": "logo_opacity",
+      "label": "Logo opacity",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 85
+    },
+    {
+      "type": "select",
+      "id": "logo_filter",
+      "label": "Logo colour style",
+      "options": [
+        { "value": "none", "label": "Full colour" },
+        { "value": "grayscale(100%)", "label": "Grayscale" },
+        { "value": "brightness(0)", "label": "Black" },
+        { "value": "brightness(0) invert(1)", "label": "White" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "header",
+      "content": "Logos (upload up to 12)"
+    },
+    { "type": "image_picker", "id": "logo_1",  "label": "Logo 1"  },
+    { "type": "image_picker", "id": "logo_2",  "label": "Logo 2"  },
+    { "type": "image_picker", "id": "logo_3",  "label": "Logo 3"  },
+    { "type": "image_picker", "id": "logo_4",  "label": "Logo 4"  },
+    { "type": "image_picker", "id": "logo_5",  "label": "Logo 5"  },
+    { "type": "image_picker", "id": "logo_6",  "label": "Logo 6"  },
+    { "type": "image_picker", "id": "logo_7",  "label": "Logo 7"  },
+    { "type": "image_picker", "id": "logo_8",  "label": "Logo 8"  },
+    { "type": "image_picker", "id": "logo_9",  "label": "Logo 9"  },
+    { "type": "image_picker", "id": "logo_10", "label": "Logo 10" },
+    { "type": "image_picker", "id": "logo_11", "label": "Logo 11" },
+    { "type": "image_picker", "id": "logo_12", "label": "Logo 12" }
+  ],
+  "presets": [
+    { "name": "Trusted logos bar" }
+  ]
+}
+{% endschema %}
