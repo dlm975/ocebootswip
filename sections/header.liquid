@@ -567,6 +567,23 @@
     }
   }
 
+  /* Floating pill header */
+  .header-section {
+    padding: 10px 16px;
+    background: transparent;
+  }
+
+  .header__row--top {
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgb(0 0 0 / 0.1);
+  }
+
+  /* Keep box-shadow on sticky state */
+  .header-section:has(> #header-component[sticky='always']) .header__row--top,
+  .header-section:has(> #header-component[sticky='scroll-up'][data-sticky-state='active']) .header__row--top {
+    box-shadow: 0 4px 24px rgb(0 0 0 / 0.14);
+  }
+
   /* When the header is transparent, add a margin to a potential header-section below it */
   .header-section:has(.header[transparent]) + .shopify-section {
     margin-top: var(--header-height);
