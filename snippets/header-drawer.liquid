@@ -1201,8 +1201,13 @@
     color: #000000;
   }
 
-  /* Submenus (3-level deep) also white */
+  /* Submenus: flow in-place inside the scrollable drawer */
   .header-drawer .menu-drawer__submenu {
+    position: relative;
+    height: auto;
+    top: auto;
+    left: auto;
+    overflow-y: visible;
     background-color: #ffffff;
   }
 
