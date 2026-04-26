@@ -1,0 +1,8 @@
+{% comment %}
+  Paste into layout/theme.liquid inside <head> (or before </head>):
+
+  {% render 'mobile-centric-styles' %}
+{% endcomment %}
+{% if template.name == 'product' and template.suffix == 'mobile-centric' %}
+  {{ 'product-mobile-centric.css' | asset_url | stylesheet_tag }}
+{% endif %}

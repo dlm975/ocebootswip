@@ -1,0 +1,2100 @@
+{% comment %}
+---------------------------------------------------------
+Copyright © 2023 Section Store. All rights reserved.
+Unauthorized copying, modification, distribution, or use
+of this code or any portion of it, is strictly prohibited.
+Violators will be prosecuted to the fullest extent of the law.
+For inquiries or permissions, contact daniel@section.store
+---------------------------------------------------------
+{% endcomment %}
+
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+/>
+
+{%- liquid 
+  assign padding_horizontal = section.settings.padding_horizontal
+  assign padding_horizontal_mobile = section.settings.padding_horizontal_mobile
+  assign padding_top = section.settings.padding_top
+  assign padding_bottom = section.settings.padding_bottom
+  assign border_color = section.settings.border_color
+  assign border_thickness = section.settings.border_thickness
+  assign margin_top = section.settings.margin_top
+  assign margin_bottom = section.settings.margin_bottom
+  assign background_color = section.settings.background_color
+  assign background_gradient = section.settings.background_gradient
+  assign lazy = section.settings.lazy
+
+  assign reviews_position = section.settings.reviews_position
+  assign use_metafield = section.settings.use_metafield
+
+  assign slider_gap = section.settings.slider_gap
+  assign slider_gap_mobile = section.settings.slider_gap_mobile
+  assign slider_view = section.settings.slider_view
+  assign slider_view_mobile = section.settings.slider_view_mobile
+
+  assign item_padding_horizontal = section.settings.item_padding_horizontal
+  assign item_padding_horizontal_mobile = section.settings.item_padding_horizontal_mobile
+  assign item_padding_vertical = section.settings.item_padding_vertical
+  assign item_padding_vertical_mobile = section.settings.item_padding_vertical_mobile
+  assign item_radius = section.settings.item_radius
+  assign item_border_thickness = section.settings.item_border_thickness
+  assign item_border_color = section.settings.item_border_color
+  assign item_bg_color = section.settings.item_bg_color
+  assign item_shadow = section.settings.item_shadow
+
+  assign stars_icon = section.settings.stars_icon
+  assign stars_size = section.settings.stars_size
+  assign stars_size_mobile = section.settings.stars_size_mobile
+  assign stars_bg_color = section.settings.stars_bg_color
+  assign stars_color = section.settings.stars_color
+
+  assign use_verified_tag = section.settings.use_verified_tag
+
+  assign verified_custom = section.settings.verified_custom
+  assign verified_font = section.settings.verified_font
+  assign verified_size = section.settings.verified_size
+  assign verified_size_mobile = section.settings.verified_size_mobile
+  assign verified_height = section.settings.verified_height
+  assign verified_icon_size = section.settings.verified_icon_size
+  assign verified_icon_size_mobile = section.settings.verified_icon_size_mobile
+  assign verified_text_color = section.settings.verified_text_color
+  assign verified_color = section.settings.verified_color
+
+  assign title_custom = section.settings.title_custom
+  assign title_font = section.settings.title_font
+  assign title_size = section.settings.title_size
+  assign title_size_mobile = section.settings.title_size_mobile
+  assign title_height = section.settings.title_height
+  assign title_color = section.settings.title_color
+  assign title_mt = section.settings.title_mt
+  assign title_mt_mobile = section.settings.title_mt_mobile
+
+  assign text_custom = section.settings.text_custom
+  assign text_font = section.settings.text_font
+  assign text_size = section.settings.text_size
+  assign text_size_mobile = section.settings.text_size_mobile
+  assign text_height = section.settings.text_height
+  assign text_color = section.settings.text_color
+  assign text_mt = section.settings.text_mt
+  assign text_mt_mobile = section.settings.text_mt_mobile
+
+  assign publication_mt = section.settings.publication_mt
+  assign publication_mt_mobile = section.settings.publication_mt_mobile
+
+  assign author_custom = section.settings.author_custom
+  assign author_font = section.settings.author_font
+  assign author_size = section.settings.author_size
+  assign author_size_mobile = section.settings.author_size_mobile
+  assign author_height = section.settings.author_height
+  assign author_color = section.settings.author_color
+
+  assign time_custom = section.settings.time_custom
+  assign time_font = section.settings.time_font
+  assign time_size = section.settings.time_size
+  assign time_size_mobile = section.settings.time_size_mobile
+  assign time_height = section.settings.time_height
+  assign time_color = section.settings.time_color
+
+  assign arrow_size = section.settings.arrow_size
+  assign arrow_size_mobile = section.settings.arrow_size_mobile
+  assign arrow_icon_size = section.settings.arrow_icon_size
+  assign arrow_icon_size_mobile = section.settings.arrow_icon_size_mobile
+  assign arrow_color = section.settings.arrow_color
+  assign arrow_hover_color = section.settings.arrow_hover_color
+  assign arrow_bg_color = section.settings.arrow_bg_color
+  assign arrow_bg_hover_color = section.settings.arrow_bg_hover_color
+  assign arrow_radius = section.settings.arrow_radius
+  assign arrow_border_thickness = section.settings.arrow_border_thickness
+  assign arrow_border_color = section.settings.arrow_border_color
+  assign arrow_border_hover_color = section.settings.arrow_border_hover_color
+  assign arrow_show_desktop = section.settings.arrow_show_desktop
+  assign arrow_show_mobile = section.settings.arrow_show_mobile
+  assign arrow_hover_effect = section.settings.arrow_hover_effect
+
+  assign bottom_text = section.settings.bottom_text  
+  assign bottom_text_custom = section.settings.bottom_text_custom
+  assign bottom_text_font = section.settings.bottom_text_font
+  assign bottom_text_size = section.settings.bottom_text_size
+  assign bottom_text_size_mobile = section.settings.bottom_text_size_mobile
+  assign bottom_text_height = section.settings.bottom_text_height
+  assign bottom_text_color = section.settings.bottom_text_color
+  assign bottom_text_mt = section.settings.bottom_text_mt
+  assign bottom_text_mt_mobile = section.settings.bottom_text_mt_mobile
+  assign bottom_text_align = section.settings.bottom_text_align
+  assign bottom_text_align_mobile = section.settings.bottom_text_align_mobile
+-%}
+
+{%- style -%}
+  {{  verified_font | font_face: font_display: 'swap' }}
+  {{  title_font | font_face: font_display: 'swap' }}
+  {{  text_font | font_face: font_display: 'swap' }}
+  {{  author_font | font_face: font_display: 'swap' }}
+  {{  time_font | font_face: font_display: 'swap' }}
+  {{  bottom_text_font | font_face: font_display: 'swap' }}
+  
+  .section-{{ section.id }} {
+    border-top: solid {{ border_color }} {{ border_thickness }}px;
+    border-bottom: solid {{ border_color }} {{ border_thickness }}px;
+    margin-top: {{ margin_top | times: 0.75 | round: 0 }}px;
+    margin-bottom: {{ margin_bottom | times: 0.75 | round: 0 }}px;
+    overflow: hidden;
+  }
+  
+  .section-{{ section.id }}-settings {
+    margin: 0 auto;
+    padding-top: {{ padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ padding_bottom | times: 0.75 | round: 0 }}px;
+    padding-left: {{ padding_horizontal_mobile }}px;
+    padding-right: {{ padding_horizontal_mobile }}px;
+    position: relative;
+  }
+
+  .product-reviews-slider-wrapper-{{ section.id }} {
+    position: relative;
+  }
+
+  .product-reviews-slider-{{ section.id }} .swiper-wrapper {
+    align-items: stretch !important;
+  }
+
+  .product-reviews-slider-{{ section.id }} {
+    padding: 3px;
+  }
+
+  .product-reviews-item-{{ section.id }} {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box !important;
+    height: auto !important;
+    padding: {{ item_padding_vertical_mobile }}px {{ item_padding_horizontal_mobile }}px;    
+    border: {{ item_border_thickness }}px solid {{ item_border_color }};
+    border-radius: {{ item_radius }}px;
+    background-color: {{ item_bg_color }};
+  }
+  
+  .product-reviews-review-{{ section.id }} {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .product-reviews-stars-{{ section.id }} {
+    display: flex;
+    align-items: end;
+    gap: 2px;
+  }
+
+  .product-reviews-stars-{{ section.id }} svg,
+  .product-reviews-stars-{{ section.id }} img {
+    display: block;
+    width: {{ stars_size_mobile }}px;
+    height: {{ stars_size_mobile }}px;
+    object-fit: cover;
+  }
+
+  .product-reviews-verified-{{ section.id }} {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .product-reviews-verified-icon-{{ section.id }} {
+    display: block;
+    width: {{ verified_icon_size_mobile }}px;
+    height: {{ verified_icon_size_mobile }}px;
+    object-fit: cover;
+  }
+
+  .product-reviews-verified-icon-{{ section.id }} svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    margin: 0;  
+  }
+
+  .product-reviews-verified-icon-{{ section.id }} svg path {
+    fill: {{ verified_color }};
+  }
+
+  .product-reviews-verified-text-{{ section.id }} {
+    margin: 0;
+    display: block;
+    text-transform: unset;
+    word-wrap: break-word;
+    font-size: {{ verified_size_mobile }}px;
+    line-height: {{ verified_height }}%;
+    color: {{ verified_text_color }};
+  }
+
+  .product-reviews-title-{{ section.id }} {
+    margin: 0;
+    margin-top: {{ title_mt_mobile }}px;
+    display: block;
+    text-transform: unset;
+    word-wrap: break-word;
+    font-weight: 700;
+    font-size: {{ title_size_mobile }}px;
+    line-height: {{ title_height }}%;
+    color: {{ title_color }};
+  }
+
+  .product-reviews-text-{{ section.id }} * {
+    margin: 0;
+    margin-top: {{ text_mt_mobile }}px;
+    display: block;
+    text-transform: unset;
+    word-wrap: break-word;
+    font-size: {{ text_size_mobile }}px;
+    line-height: {{ text_height }}%;
+    color: {{ text_color }};
+  }
+
+  .product-reviews-publication-{{ section.id }} {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: {{ publication_mt_mobile }}px;
+  }
+
+  .product-reviews-author-{{ section.id }} {
+    margin: 0;
+    display: block;
+    text-transform: unset;
+    word-wrap: break-word;
+    font-weight: 700;
+    font-size: {{ author_size_mobile }}px;
+    line-height: {{ author_height }}%;
+    color: {{ author_color }};
+  }
+
+  .product-reviews-time-{{ section.id }} {
+    margin: 0;
+    display: block;
+    text-transform: unset;
+    word-wrap: break-word;
+    font-size: {{ time_size_mobile }}px;
+    line-height: {{ time_height }}%;
+    color: {{ time_color }};
+  }
+
+  .product-reviews-btn-prev-{{ section.id }},
+  .product-reviews-btn-next-{{ section.id }} {
+    display: flex;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: {{ arrow_size_mobile }}px;
+    height: {{ arrow_size_mobile }}px;
+    border: 0px;
+    border: {{ arrow_border_thickness }}px solid {{ arrow_border_color }};
+    border-radius: {{ arrow_radius }}px;
+    background: transparent;
+    background: {{ arrow_bg_color }};
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease 0s;
+    cursor: pointer;
+    -webkit-appearance: none;
+    flex-shrink: 0;
+  }
+
+  .product-reviews-btn-prev-{{ section.id }} {
+    left: 8px;
+  }
+
+  .product-reviews-btn-next-{{ section.id }} {
+    right: 8px;
+  }
+
+  .product-reviews-btn-prev-{{ section.id }} .animate-icon,
+  .product-reviews-btn-next-{{ section.id }} .animate-icon {
+    pointer-events: none;
+    place-items: center;
+    display: grid;
+  }
+
+  .product-reviews-btn-prev-{{ section.id }} .animate-icon:before,
+  .product-reviews-btn-next-{{ section.id }} .animate-icon:before {
+    content: "";
+    grid-area: 1 / -1;
+    transition: all .2s ease;
+    width: {{ arrow_icon_size_mobile }}px;
+    height: {{ arrow_icon_size_mobile }}px;
+    transform: rotate(calc(1 * 45deg));
+    box-sizing: border-box;
+    border-style: solid;
+    border: 0px;
+    border-right: 2px solid currentColor;
+    border-top: 2px solid currentColor;
+    position: relative;
+    left: -1px;
+  }
+
+  .product-reviews-btn-prev-{{ section.id }} .animate-icon:before {
+    left: unset;
+    right: -1px;
+    border-right: 0px;
+    border-top: 0px;
+    border-bottom: 2px solid currentColor;
+    border-left: 2px solid currentColor;
+  }
+
+  .product-reviews-btn-prev-{{ section.id }} .animate-icon:after,
+  .product-reviews-btn-next-{{ section.id }} .animate-icon:after {
+    content: "";
+    grid-area: 1 / -1;
+    transition: all .2s ease;
+    width: {{ arrow_icon_size_mobile | minus: 0.3 }}px;
+    height: 1.6px;
+    transform-origin: center;
+    opacity: 0;
+    background: currentColor;
+    transform: scaleX(.5);
+  }
+
+  .product-reviews-btn-prev-{{ section.id }} span,
+  .product-reviews-btn-next-{{ section.id }} span {
+    color: {{ arrow_color }};
+  }
+
+  .product-reviews-btn-prev-{{ section.id }}.swiper-button-disabled,
+  .product-reviews-btn-next-{{ section.id }}.swiper-button-disabled {
+    opacity: 0;
+  }
+  
+  .product-reviews-bottom-text-{{ section.id }} {
+    margin: 0;
+    display: block;
+    text-transform: unset;
+    word-wrap: break-word;
+    font-weight: 400;
+    text-align: {{ bottom_text_align_mobile }};
+    margin-top: {{ bottom_text_mt_mobile }}px;
+    font-size: {{ bottom_text_size_mobile }}px;
+    line-height: {{ bottom_text_height }}%;
+    color: {{ bottom_text_color }};
+  }
+
+  .product-reviews-bottom-text-{{ section.id }} a {
+    text-decoration: underline;
+    color: {{ bottom_text_color }};
+  }
+
+  @media(min-width: 1024px) {
+
+    .section-{{ section.id }} {
+      margin-top: {{ margin_top }}px;
+      margin-bottom: {{ margin_bottom }}px;
+    }
+    
+    .section-{{ section.id }}-settings {
+      padding: 0 5rem;
+      padding-top: {{ padding_top }}px;
+      padding-bottom: {{ padding_bottom }}px;
+      padding-left: {{ padding_horizontal }}px;
+      padding-right: {{ padding_horizontal }}px;
+    }
+
+    .product-reviews-item-{{ section.id }} {
+      padding: {{ item_padding_vertical }}px {{ item_padding_horizontal }}px;    
+    }
+
+    .product-reviews-stars-{{ section.id }} svg,
+    .product-reviews-stars-{{ section.id }} img {
+      width: {{ stars_size }}px;
+      height: {{ stars_size }}px;
+    }
+
+    .product-reviews-verified-icon-{{ section.id }} {
+      width: {{ verified_icon_size }}px;
+      height: {{ verified_icon_size }}px;
+    }
+
+    .product-reviews-verified-text-{{ section.id }} {
+      font-size: {{ verified_size }}px;
+    }
+
+    .product-reviews-title-{{ section.id }} {
+      margin-top: {{ title_mt }}px;
+      font-size: {{ title_size }}px;
+    }
+
+    .product-reviews-text-{{ section.id }} * {
+      margin-top: {{ text_mt }}px;
+      font-size: {{ text_size }}px;
+    }   
+
+    .product-reviews-publication-{{ section.id }} {
+      margin-top: {{ publication_mt }}px;
+    }
+    
+    .product-reviews-author-{{ section.id }} {
+      font-size: {{ author_size }}px;
+    }
+
+    .product-reviews-time-{{ section.id }} {
+      font-size: {{ time_size }}px;
+    }
+
+    .product-reviews-btn-prev-{{ section.id }},
+    .product-reviews-btn-next-{{ section.id }} {
+      opacity: 0;
+      width: {{ arrow_size }}px;
+      height: {{ arrow_size }}px;
+      transition: all 0.25s ease 0s;
+    }
+
+    .product-reviews-slider-wrapper-{{ section.id }}:hover .product-reviews-btn-prev-{{ section.id }},
+    .product-reviews-slider-wrapper-{{ section.id }}:hover .product-reviews-btn-next-{{ section.id }} {
+      opacity: 1;
+      transition: all 0.25s ease 0s;
+    }
+
+    .product-reviews-slider-wrapper-{{ section.id }}:hover .product-reviews-btn-prev-{{ section.id }}.swiper-button-disabled,
+    .product-reviews-slider-wrapper-{{ section.id }}:hover .product-reviews-btn-next-{{ section.id }}.swiper-button-disabled {
+      opacity: 0;
+      transition: all 0.25s ease 0s;
+    }
+
+    .product-reviews-btn-prev-{{ section.id }} .animate-icon:before,
+    .product-reviews-btn-next-{{ section.id }} .animate-icon:before {
+      width: {{ arrow_icon_size }}px;
+      height: {{ arrow_icon_size }}px;
+    }
+
+    .product-reviews-btn-prev-{{ section.id }} .animate-icon:after,
+    .product-reviews-btn-next-{{ section.id }} .animate-icon:after {
+      width: {{ arrow_icon_size | minus: 0.3 }}px;
+    }
+
+    .product-reviews-bottom-text-{{ section.id }} {
+      text-align: {{ bottom_text_align }};
+      margin-top: {{ bottom_text_mt }}px;
+      font-size: {{ bottom_text_size }}px;
+    }
+  }
+  
+{%- endstyle -%}
+
+{% if verified_custom %}
+  <style>
+    .product-reviews-verified-text-{{ section.id }} {
+      font-family: {{ verified_font.family }}, {{ verified_font.fallback_families }};
+      font-weight: {{ verified_font.weight }};
+      font-style: {{ verified_font.style }};
+    }
+  </style>
+{% endif %}
+
+{% if title_custom %}
+  <style>
+    .product-reviews-title-{{ section.id }}  {
+      font-family: {{ title_font.family }}, {{ title_font.fallback_families }};
+      font-weight: {{ title_font.weight }};
+      font-style: {{ title_font.style }};
+    }
+  </style>
+{% endif %}
+
+{% if text_custom %}
+  <style>
+    .product-reviews-text-{{ section.id }} * {
+      font-family: {{ text_font.family }}, {{ text_font.fallback_families }};
+      font-weight: {{ text_font.weight }};
+      font-style: {{ text_font.style }};
+    }
+  </style>
+{% endif %}
+
+{% if author_custom %}
+  <style>
+    .product-reviews-author-{{ section.id }}  {
+      font-family: {{ author_font.family }}, {{ author_font.fallback_families }};
+      font-weight: {{ author_font.weight }};
+      font-style: {{ author_font.style }};
+    }
+  </style>
+{% endif %}
+
+{% if time_custom %}
+  <style>
+    .product-reviews-time-{{ section.id }}  {
+      font-family: {{ time_font.family }}, {{ time_font.fallback_families }};
+      font-weight: {{ time_font.weight }};
+      font-style: {{ time_font.style }};
+    }
+  </style>
+{% endif %}
+
+{% if bottom_text_custom %}
+  <style>
+    .product-reviews-bottom-text-{{ section.id }}  {
+      font-family: {{ bottom_text_font.family }}, {{ bottom_text_font.fallback_families }};
+      font-weight: {{ bottom_text_font.weight }};
+      font-style: {{ bottom_text_font.style }};
+    }
+  </style>
+{% endif %}
+
+{% if arrow_hover_effect == "color" %}
+  <style>
+    .product-reviews-btn-prev-{{ section.id }}:hover,
+    .product-reviews-btn-next-{{ section.id }}:hover {
+      transition: all 0.3s ease 0s;
+      border: {{ arrow_border_thickness }}px solid {{ arrow_border_hover_color }};
+      background: {{ arrow_bg_hover_color }};
+    }
+  
+    .product-reviews-btn-prev-{{ section.id }}:hover .animate-icon,
+    .product-reviews-btn-next-{{ section.id }}:hover .animate-icon {
+      color: {{ arrow_hover_color }};
+    }
+  </style>
+{% elsif arrow_hover_effect == "scale" %}
+  <style>
+    .product-reviews-btn-prev-{{ section.id }}:hover,
+    .product-reviews-btn-next-{{ section.id }}:hover {
+      transform: scale(0.9) translateY(-50%);
+    }
+
+    @media(min-width: 1024px) {
+      .product-reviews-btn-prev-{{ section.id }}:hover,
+      .product-reviews-btn-next-{{ section.id }}:hover {
+        transform: scale(0.9) translateY(-50%);
+      }
+    }
+  </style>
+{% elsif arrow_hover_effect == "arrow" %}
+  <style>
+    .product-reviews-btn-next-{{ section.id }}:hover .animate-icon:before {
+      transform: translate(calc(1 * 0.125rem)) rotate(calc(1 * 45deg));
+    }
+  
+    .product-reviews-btn-prev-{{ section.id }}:hover .animate-icon:before {
+      transform: translate(calc(-1 * 0.125rem)) rotate(calc(1 * 45deg));
+    }
+    
+    .product-reviews-btn-prev-{{ section.id }}:hover .animate-icon:after,
+    .product-reviews-btn-next-{{ section.id }}:hover .animate-icon:after {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+  </style>
+{% endif %}
+
+{% if arrow_show_mobile %}
+  <style>
+    .product-reviews-btn-next-{{ section.id }},
+    .product-reviews-btn-prev-{{ section.id }} {
+      display: block;
+    }
+  </style>
+{% else %}
+  <style>
+    .product-reviews-btn-next-{{ section.id }},
+    .product-reviews-btn-prev-{{ section.id }} {
+      display: none;
+    }
+  </style>
+{% endif %}
+
+{% if arrow_show_desktop %}
+  <style>
+    @media(min-width: 1024px) {
+      .product-reviews-btn-next-{{ section.id }},
+      .product-reviews-btn-prev-{{ section.id }} {
+        display: block;
+      }
+    }
+  </style>
+{% else %}
+  <style>
+    @media(min-width: 1024px) {
+      .product-reviews-btn-next-{{ section.id }},
+      .product-reviews-btn-prev-{{ section.id }} {
+        display: none;
+      }
+    }
+  </style>
+{% endif %}
+
+{% if item_shadow %}
+  <style>
+    .product-reviews-item-{{ section.id }} {
+      box-shadow: rgba(17, 17, 26, 0.1) 0px 1px 0px;
+    }
+  </style>
+{% endif %}
+
+<script>
+  (function () {
+    function moreLoadProductForm() {
+      var productForm = document.querySelector('#ss-product-reviews-2');
+      if (!productForm){
+        var productForm = document.querySelector('{% if reviews_position == "below_title" or reviews_position == "above_title" %}.product__title{% elsif reviews_position == "below_description" or reviews_position == "above_description" %}.product__description{% elsif reviews_position == "below_price" %}.price.price--large.price--show-badge{% else %}.button--add-to-cart, .product .product-form, .product-single__add-to-cart, .shopify-payment-button, .shopify-payment-button__button, .ProductForm__BuyButtons, .add-to-cart{% endif %}');
+        if (!productForm) return;
+        }
+        const templateContent = document.querySelector(
+          '#ss-product-reviews-2-{{ section.id }}'
+        ).content;
+
+        productForm.insertAdjacentElement(
+          '{% if reviews_position == "below_buy" or reviews_position == "below_title" or reviews_position == "below_description" or reviews_position == "below_price" %}afterend{% else %}beforebegin{% endif %}',
+          templateContent.firstElementChild
+        );
+      
+    }
+    window.addEventListener('DOMContentLoaded', moreLoadProductForm);
+  })();
+</script>
+
+{% comment %} PREVIEW {% endcomment %}
+<style>
+  .product-reviews-slider-{{ section.id }}.preview .swiper-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+
+  .product-reviews-slider-{{ section.id }}.preview .product-reviews-item-{{ section.id }} {
+    width: 100%;
+  }
+
+  .product-reviews-slider-{{ section.id }}.preview .product-reviews-item-{{ section.id }}:not(:first-child) {
+    margin-left: {{ slider_gap_mobile }}px;
+  } 
+
+  @media(min-width: 1024px) {
+    .product-reviews-slider-{{ section.id }}.preview .product-reviews-item-{{ section.id }}:not(:first-child) {
+      margin-left: {{ slider_gap }}px;
+    } 
+
+    .product-reviews-slider-{{ section.id }}.preview .product-reviews-item-{{ section.id }} {
+      width: calc(100% / {{ slider_view }} - ({{ slider_gap }}px));
+    }
+  }
+</style>
+
+{% if use_metafield %}
+  {%  if product.metafields.custom.product_reviews_2 != blank %}
+    <template id="ss-product-reviews-2-{{ section.id }}">
+      <div class="section-{{ section.id }} product-reviews-{{ section.id }}" style="background-color:{{ background_color }}; background-image: {{ background_gradient }};">
+        <div class="section-{{ section.id }}-settings">
+          <div class="product-reviews-slider-wrapper-{{ section.id }}">
+            <button class="product-reviews-btn-prev-{{ section.id }}">
+              <span class="animate-icon"></span>
+            </button>
+            <button class="product-reviews-btn-next-{{ section.id }}">
+              <span class="animate-icon"></span>
+            </button>         
+            <div class="product-reviews-slider-{{ section.id }} preview swiper">
+              <div class="swiper-wrapper">              
+                {% for review in product.metafields.custom.product_reviews_2.value %}
+                  <div class="product-reviews-item-{{ section.id }} swiper-slide">
+                    <div class="product-reviews-review-{{ section.id }}">
+                      {% if review.stars_count != 0 %}
+                        <div class="product-reviews-stars-{{ section.id }}">
+                            {% if stars_icon != blank %}
+                              {% assign stars_count_round = review.stars_count | round: 0 %}
+                              {% for item in (1..stars_count_round) %}
+                                <img src="{{ stars_icon | image_url }}" alt="{{ stars_icon.alt }}" {% if lazy %}loading="lazy"{% endif %}>
+                              {% endfor %}
+                            {% else %}
+                              {% if review.stars_count > 0 %}
+                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  {% if review.stars_count == 0.5 %}
+                                    <defs>
+                                      <linearGradient id="grad{{ section.id }}31">
+                                        <stop offset="0%" stop-color="{{ stars_bg_color }}" />
+                                        <stop offset="50%" stop-color="{{ stars_bg_color }}" />
+                                        <stop offset="50%" stop-color="#DDDDDD" />
+                                        <stop offset="100%" stop-color="#DDDDDD" />
+                                      </linearGradient>
+                                    </defs>
+                                  {% endif %}
+                                  <rect width="32" height="32" fill="{% if review.stars_count == 0.5 %}url(#grad{{ section.id }}31){% else %}{{ stars_bg_color }}{% endif %}"/>
+                                  <g clip-path="url(#clip0_25_4)">
+                                  <path d="M9.20283 27L16.001 21.807L22.7972 27L20.2018 18.596L27 13.403H18.5984L16.001 5L13.4037 13.403H5L11.7982 18.596L9.20283 27Z" fill="{{ stars_color }}"/>
+                                  </g>
+                                  <defs>
+                                  <clipPath id="clip0_25_4">
+                                  <rect width="22" height="22" fill="{{ stars_color }}" transform="translate(5 5)"/>
+                                  </clipPath>
+                                  </defs>
+                                </svg>
+                              {% endif %}
+                              {% if review.stars_count > 1 %}
+                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  {% if review.stars_count == 1.5 %}
+                                    <defs>
+                                      <linearGradient id="grad{{ section.id }}32">
+                                        <stop offset="0%" stop-color="{{ stars_bg_color }}" />
+                                        <stop offset="50%" stop-color="{{ stars_bg_color }}" />
+                                        <stop offset="50%" stop-color="#DDDDDD" />
+                                        <stop offset="100%" stop-color="#DDDDDD" />
+                                      </linearGradient>
+                                    </defs>
+                                  {% endif %}
+                                  <rect width="32" height="32" fill="{% if review.stars_count == 1.5 %}url(#grad{{ section.id }}32){% else %}{{ stars_bg_color }}{% endif %}"/>
+                                  <g clip-path="url(#clip0_25_4)">
+                                  <path d="M9.20283 27L16.001 21.807L22.7972 27L20.2018 18.596L27 13.403H18.5984L16.001 5L13.4037 13.403H5L11.7982 18.596L9.20283 27Z" fill="{{ stars_color }}"/>
+                                  </g>
+                                  <defs>
+                                  <clipPath id="clip0_25_4">
+                                  <rect width="22" height="22" fill="{{ stars_color }}" transform="translate(5 5)"/>
+                                  </clipPath>
+                                  </defs>
+                                </svg>
+                              {% endif %}
+                              {% if review.stars_count > 2 %}
+                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  {% if review.stars_count == 2.5 %}
+                                    <defs>
+                                      <linearGradient id="grad{{ section.id }}33">
+                                        <stop offset="0%" stop-color="{{ stars_bg_color }}" />
+                                        <stop offset="50%" stop-color="{{ stars_bg_color }}" />
+                                        <stop offset="50%" stop-color="#DDDDDD" />
+                                        <stop offset="100%" stop-color="#DDDDDD" />
+                                      </linearGradient>
+                                    </defs>
+                                  {% endif %}
+                                  <rect width="32" height="32" fill="{% if review.stars_count == 2.5 %}url(#grad{{ section.id }}33){% else %}{{ stars_bg_color }}{% endif %}"/>
+                                  <g clip-path="url(#clip0_25_4)">
+                                  <path d="M9.20283 27L16.001 21.807L22.7972 27L20.2018 18.596L27 13.403H18.5984L16.001 5L13.4037 13.403H5L11.7982 18.596L9.20283 27Z" fill="{{ stars_color }}"/>
+                                  </g>
+                                  <defs>
+                                  <clipPath id="clip0_25_4">
+                                  <rect width="22" height="22" fill="{{ stars_color }}" transform="translate(5 5)"/>
+                                  </clipPath>
+                                  </defs>
+                                </svg>
+                              {% endif %}
+                              {% if review.stars_count > 3 %}
+                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  {% if review.stars_count == 3.5 %}
+                                    <defs>
+                                      <linearGradient id="grad{{ section.id }}44">
+                                        <stop offset="0%" stop-color="{{ stars_bg_color }}" />
+                                        <stop offset="50%" stop-color="{{ stars_bg_color }}" />
+                                        <stop offset="50%" stop-color="#DDDDDD" />
+                                        <stop offset="100%" stop-color="#DDDDDD" />
+                                      </linearGradient>
+                                    </defs>
+                                  {% endif %}
+                                  <rect width="32" height="32" fill="{% if review.stars_count == 3.5 %}url(#grad{{ section.id }}44){% else %}{{ stars_bg_color }}{% endif %}"/>
+                                  <g clip-path="url(#clip0_25_4)">
+                                  <path d="M9.20283 27L16.001 21.807L22.7972 27L20.2018 18.596L27 13.403H18.5984L16.001 5L13.4037 13.403H5L11.7982 18.596L9.20283 27Z" fill="{{ stars_color }}"/>
+                                  </g>
+                                  <defs>
+                                  <clipPath id="clip0_25_4">
+                                  <rect width="22" height="22" fill="{{ stars_color }}" transform="translate(5 5)"/>
+                                  </clipPath>
+                                  </defs>
+                                </svg>
+                              {% endif %}
+                              {% if review.stars_count > 4 %}
+                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  {% if review.stars_count == 4.5 %}
+                                    <defs>
+                                      <linearGradient id="grad{{ section.id }}55">
+                                        <stop offset="0%" stop-color="{{ stars_bg_color }}" />
+                                        <stop offset="50%" stop-color="{{ stars_bg_color }}" />
+                                        <stop offset="50%" stop-color="#DDDDDD" />
+                                        <stop offset="100%" stop-color="#DDDDDD" />
+                                      </linearGradient>
+                                    </defs>
+                                  {% endif %}
+                                  <rect width="32" height="32" fill="{% if review.stars_count == 4.5 %}url(#grad{{ section.id }}55){% else %}{{ stars_bg_color }}{% endif %}"/>
+                                  <g clip-path="url(#clip0_25_4)">
+                                  <path d="M9.20283 27L16.001 21.807L22.7972 27L20.2018 18.596L27 13.403H18.5984L16.001 5L13.4037 13.403H5L11.7982 18.596L9.20283 27Z" fill="{{ stars_color }}"/>
+                                  </g>
+                                  <defs>
+                                  <clipPath id="clip0_25_4">
+                                  <rect width="22" height="22" fill="{{ stars_color }}" transform="translate(5 5)"/>
+                                  </clipPath>
+                                  </defs>
+                                </svg>
+                              {% endif %}                        
+                            {% endif %}
+                        </div>
+                      {% endif %}
+                      {% if use_verified_tag and review.verified_text != blank %}
+                        <div class="product-reviews-verified-{{ section.id }}">
+                          <div class="product-reviews-verified-icon-{{ section.id }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" id="verified">
+                              <path fill="#000" fill-rule="evenodd" d="M1 12C1 5.92487 5.92487 1 12 1C18.0751 1 23 5.92487 23 12C23 18.0751 18.0751 23 12 23C5.92487 23 1 18.0751 1 12ZM11.2071 16.2071L18.2071 9.20711L16.7929 7.79289L10.5 14.0858L7.20711 10.7929L5.79289 12.2071L9.79289 16.2071C9.98043 16.3946 10.2348 16.5 10.5 16.5C10.7652 16.5 11.0196 16.3946 11.2071 16.2071Z" clip-rule="evenodd"></path>
+                            </svg>
+                          </div>
+                          <p class="product-reviews-verified-text-{{ section.id }}">{{ review.verified_text }}</p>
+                        </div>
+                      {% endif %}  
+                    </div>
+                    {% if review.title != blank %}
+                      <h2 class="product-reviews-title-{{ section.id }}">
+                        {{ review.title }}
+                      </h2>
+                    {% endif %}
+                    {% if review.text != blank %}
+                      <div class="product-reviews-text-{{ section.id }}">
+                        {{ review.text | metafield_tag }}
+                      </div>
+                    {% endif %}
+                    <div class="product-reviews-publication-{{ section.id }}">
+                      {% if review.author != blank %}
+                        <p class="product-reviews-author-{{ section.id }}">{{ review.author }},</p>                  
+                      {% endif %}
+                      {% if review.time != blank %}
+                        <p class="product-reviews-time-{{ section.id }}">{{ review.time }}</p>                  
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          {% if bottom_text != blank %}
+            <div class="product-reviews-bottom-text-{{ section.id }}">
+              {{ bottom_text }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </template>
+  {% endif %}
+  
+{% else %}  
+
+  <template id="ss-product-reviews-2-{{ section.id }}">
+    <div class="section-{{ section.id }} product-reviews-{{ section.id }}" style="background-color:{{ background_color }}; background-image: {{ background_gradient }};">
+        <div class="section-{{ section.id }}-settings">
+          <div class="product-reviews-slider-wrapper-{{ section.id }}">
+            <button class="product-reviews-btn-prev-{{ section.id }}">
+              <span class="animate-icon"></span>
+            </button>
+            <button class="product-reviews-btn-next-{{ section.id }}">
+              <span class="animate-icon"></span>
+            </button> 
+            <div class="product-reviews-slider-{{ section.id }} preview swiper">
+              <div class="swiper-wrapper">
+                {% for block in section.blocks %}
+                  <div class="product-reviews-item-{{ section.id }} swiper-slide">
+                    <div class="product-reviews-review-{{ section.id }}">
+                      {% if block.settings.stars_count != 0 %}
+                        <div class="product-reviews-stars-{{ section.id }}">
+                            {% if stars_icon != blank %}
+                              {% assign stars_count_round = block.settings.stars_count | round: 0 %}
+                              {% for item in (1..stars_count_round) %}
+                                <img src="{{ stars_icon | image_url }}" alt="{{ stars_icon.alt }}" {% if lazy %}loading="lazy"{% endif %}>
+                              {% endfor %}
+                            {% else %}
+                              {% if block.settings.stars_count > 0 %}
+                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  {% if block.settings.stars_count == 0.5 %}
+                                    <defs>
+                                      <linearGradient id="grad{{ section.id }}31">
+                                        <stop offset="0%" stop-color="{{ stars_bg_color }}" />
+                                        <stop offset="50%" stop-color="{{ stars_bg_color }}" />
+                                        <stop offset="50%" stop-color="#DDDDDD" />
+                                        <stop offset="100%" stop-color="#DDDDDD" />
+                                      </linearGradient>
+                                    </defs>
+                                  {% endif %}
+                                  <rect width="32" height="32" fill="{% if block.settings.stars_count == 0.5 %}url(#grad{{ section.id }}31){% else %}{{ stars_bg_color }}{% endif %}"/>
+                                  <g clip-path="url(#clip0_25_4)">
+                                  <path d="M9.20283 27L16.001 21.807L22.7972 27L20.2018 18.596L27 13.403H18.5984L16.001 5L13.4037 13.403H5L11.7982 18.596L9.20283 27Z" fill="{{ stars_color }}"/>
+                                  </g>
+                                  <defs>
+                                  <clipPath id="clip0_25_4">
+                                  <rect width="22" height="22" fill="{{ stars_color }}" transform="translate(5 5)"/>
+                                  </clipPath>
+                                  </defs>
+                                </svg>
+                              {% endif %}
+                              {% if block.settings.stars_count > 1 %}
+                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  {% if block.settings.stars_count == 1.5 %}
+                                    <defs>
+                                      <linearGradient id="grad{{ section.id }}32">
+                                        <stop offset="0%" stop-color="{{ stars_bg_color }}" />
+                                        <stop offset="50%" stop-color="{{ stars_bg_color }}" />
+                                        <stop offset="50%" stop-color="#DDDDDD" />
+                                        <stop offset="100%" stop-color="#DDDDDD" />
+                                      </linearGradient>
+                                    </defs>
+                                  {% endif %}
+                                  <rect width="32" height="32" fill="{% if block.settings.stars_count == 1.5 %}url(#grad{{ section.id }}32){% else %}{{ stars_bg_color }}{% endif %}"/>
+                                  <g clip-path="url(#clip0_25_4)">
+                                  <path d="M9.20283 27L16.001 21.807L22.7972 27L20.2018 18.596L27 13.403H18.5984L16.001 5L13.4037 13.403H5L11.7982 18.596L9.20283 27Z" fill="{{ stars_color }}"/>
+                                  </g>
+                                  <defs>
+                                  <clipPath id="clip0_25_4">
+                                  <rect width="22" height="22" fill="{{ stars_color }}" transform="translate(5 5)"/>
+                                  </clipPath>
+                                  </defs>
+                                </svg>
+                              {% endif %}
+                              {% if block.settings.stars_count > 2 %}
+                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  {% if block.settings.stars_count == 2.5 %}
+                                    <defs>
+                                      <linearGradient id="grad{{ section.id }}33">
+                                        <stop offset="0%" stop-color="{{ stars_bg_color }}" />
+                                        <stop offset="50%" stop-color="{{ stars_bg_color }}" />
+                                        <stop offset="50%" stop-color="#DDDDDD" />
+                                        <stop offset="100%" stop-color="#DDDDDD" />
+                                      </linearGradient>
+                                    </defs>
+                                  {% endif %}
+                                  <rect width="32" height="32" fill="{% if block.settings.stars_count == 2.5 %}url(#grad{{ section.id }}33){% else %}{{ stars_bg_color }}{% endif %}"/>
+                                  <g clip-path="url(#clip0_25_4)">
+                                  <path d="M9.20283 27L16.001 21.807L22.7972 27L20.2018 18.596L27 13.403H18.5984L16.001 5L13.4037 13.403H5L11.7982 18.596L9.20283 27Z" fill="{{ stars_color }}"/>
+                                  </g>
+                                  <defs>
+                                  <clipPath id="clip0_25_4">
+                                  <rect width="22" height="22" fill="{{ stars_color }}" transform="translate(5 5)"/>
+                                  </clipPath>
+                                  </defs>
+                                </svg>
+                              {% endif %}
+                              {% if block.settings.stars_count > 3 %}
+                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  {% if block.settings.stars_count == 3.5 %}
+                                    <defs>
+                                      <linearGradient id="grad{{ section.id }}44">
+                                        <stop offset="0%" stop-color="{{ stars_bg_color }}" />
+                                        <stop offset="50%" stop-color="{{ stars_bg_color }}" />
+                                        <stop offset="50%" stop-color="#DDDDDD" />
+                                        <stop offset="100%" stop-color="#DDDDDD" />
+                                      </linearGradient>
+                                    </defs>
+                                  {% endif %}
+                                  <rect width="32" height="32" fill="{% if block.settings.stars_count == 3.5 %}url(#grad{{ section.id }}44){% else %}{{ stars_bg_color }}{% endif %}"/>
+                                  <g clip-path="url(#clip0_25_4)">
+                                  <path d="M9.20283 27L16.001 21.807L22.7972 27L20.2018 18.596L27 13.403H18.5984L16.001 5L13.4037 13.403H5L11.7982 18.596L9.20283 27Z" fill="{{ stars_color }}"/>
+                                  </g>
+                                  <defs>
+                                  <clipPath id="clip0_25_4">
+                                  <rect width="22" height="22" fill="{{ stars_color }}" transform="translate(5 5)"/>
+                                  </clipPath>
+                                  </defs>
+                                </svg>
+                              {% endif %}
+                              {% if block.settings.stars_count > 4 %}
+                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  {% if block.settings.stars_count == 4.5 %}
+                                    <defs>
+                                      <linearGradient id="grad{{ section.id }}55">
+                                        <stop offset="0%" stop-color="{{ stars_bg_color }}" />
+                                        <stop offset="50%" stop-color="{{ stars_bg_color }}" />
+                                        <stop offset="50%" stop-color="#DDDDDD" />
+                                        <stop offset="100%" stop-color="#DDDDDD" />
+                                      </linearGradient>
+                                    </defs>
+                                  {% endif %}
+                                  <rect width="32" height="32" fill="{% if block.settings.stars_count == 4.5 %}url(#grad{{ section.id }}55){% else %}{{ stars_bg_color }}{% endif %}"/>
+                                  <g clip-path="url(#clip0_25_4)">
+                                  <path d="M9.20283 27L16.001 21.807L22.7972 27L20.2018 18.596L27 13.403H18.5984L16.001 5L13.4037 13.403H5L11.7982 18.596L9.20283 27Z" fill="{{ stars_color }}"/>
+                                  </g>
+                                  <defs>
+                                  <clipPath id="clip0_25_4">
+                                  <rect width="22" height="22" fill="{{ stars_color }}" transform="translate(5 5)"/>
+                                  </clipPath>
+                                  </defs>
+                                </svg>
+                              {% endif %}                        
+                            {% endif %}
+                        </div>
+                      {% endif %}
+                      {% if use_verified_tag and  block.settings.verified_text != blank %}
+                        <div class="product-reviews-verified-{{ section.id }}">
+                          <div class="product-reviews-verified-icon-{{ section.id }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" id="verified">
+                              <path fill="#000" fill-rule="evenodd" d="M1 12C1 5.92487 5.92487 1 12 1C18.0751 1 23 5.92487 23 12C23 18.0751 18.0751 23 12 23C5.92487 23 1 18.0751 1 12ZM11.2071 16.2071L18.2071 9.20711L16.7929 7.79289L10.5 14.0858L7.20711 10.7929L5.79289 12.2071L9.79289 16.2071C9.98043 16.3946 10.2348 16.5 10.5 16.5C10.7652 16.5 11.0196 16.3946 11.2071 16.2071Z" clip-rule="evenodd"></path>
+                            </svg>
+                          </div>
+                          <p class="product-reviews-verified-text-{{ section.id }}">{{ block.settings.verified_text }}</p>
+                        </div>
+                      {% endif %}  
+                    </div>
+                    {% if block.settings.title != blank %}
+                      <h2 class="product-reviews-title-{{ section.id }}">
+                        {{ block.settings.title }}
+                      </h2>
+                    {% endif %}
+                    {% if block.settings.text != blank %}
+                      <div class="product-reviews-text-{{ section.id }}">
+                        {{ block.settings.text }}
+                      </div>
+                    {% endif %}
+                    <div class="product-reviews-publication-{{ section.id }}">
+                      {% if block.settings.author != blank %}
+                        <p class="product-reviews-author-{{ section.id }}">{{ block.settings.author }},</p>                  
+                      {% endif %}
+                      {% if block.settings.time != blank %}
+                        <p class="product-reviews-time-{{ section.id }}">{{ block.settings.time }}</p>                  
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div> 
+          </div>
+          {% if bottom_text != blank %}
+            <div class="product-reviews-bottom-text-{{ section.id }}">
+              {{ bottom_text }}
+            </div>
+          {% endif %}
+        </div>
+    </div>
+  </template>
+
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+<script>
+  function initProductReviews2() {
+    setTimeout(() => {
+      document.querySelector('.product-reviews-slider-{{ section.id }}').classList.remove('preview');
+      const slider = new Swiper(".product-reviews-slider-{{ section.id }}", {
+        speed: 300,
+        spaceBetween: 20,
+        navigation: {
+          nextEl: '.product-reviews-btn-next-{{ section.id }}',
+          prevEl: '.product-reviews-btn-prev-{{ section.id }}',
+        },
+        breakpoints: {
+          320: {
+            spaceBetween: {{ slider_gap_mobile }},
+            slidesPerView: {{ slider_view_mobile }},
+          },
+          768: {
+            spaceBetween: {{ slider_gap_mobile }},
+            slidesPerView: {{ slider_view | times: 0.5 | round: 0 }},
+          },
+          1024: {
+            spaceBetween: {{ slider_gap }},
+            slidesPerView: {{ slider_view }},
+          }
+        }
+      });
+    }, 400)
+  }
+
+  document.addEventListener('DOMContentLoaded', initProductReviews2);
+
+  if (Shopify.designMode) {
+    document.addEventListener('shopify:section:unload', initProductReviews2);
+    document.addEventListener('shopify:section:load', initProductReviews2);
+  }
+</script>
+
+{% schema %}
+  {
+    "name": "SS - Product reviews #2",
+    "settings": [
+      {
+        "type": "header",
+        "content": "⚠️ Save settings to view updates",
+        "info":"Learn how to add snippet sections with [this tutorial](https://section-store.helpscoutdocs.com/article/10-adding-product-page-snippets)"
+      },
+      {
+        "type": "header",
+        "content": "Custom placement",
+        "info": "Copy this code: <div id='ss-product-reviews-2'></div> - Click 'Add block' -> Custom Liquid/HTML -> Paste."
+      },
+      {
+        "type": "select",
+        "id": "reviews_position",
+        "label": "Position",
+        "default": "below_buy",
+        "options": [
+          {
+            "label": "Above buy buttons",
+            "value": "above_buy"
+          },
+          {
+            "label": "Below buy buttons",
+            "value": "below_buy"
+          },
+          {
+            "label": "Above product title",
+            "value": "above_title"
+          },
+          {
+            "label": "Below product title",
+            "value": "below_title"
+          },
+          {
+            "label": "Above product description",
+            "value": "above_description"
+          },
+          {
+            "label": "Below product description",
+            "value": "below_description"
+          },
+          {
+            "label": "Below price",
+            "value": "below_price"
+          }
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "use_metafield",
+        "label": "Use metafield",
+        "info": "Check the box to enable the metafield for showing product reviews."
+      },
+      {
+        "type": "header",
+        "content": "Slider settings"
+      },
+      {
+        "type": "range",
+        "id": "slider_view",
+        "min": 1,
+        "max": 2,
+        "step": 0.1,
+        "label": "Reviews per view",
+        "default": 2
+      },      
+      {
+        "type": "range",
+        "id": "slider_view_mobile",
+        "min": 1,
+        "max": 2,
+        "step": 0.1,
+        "label": "Reviews per view - mobile",
+        "default": 1.3
+      }, 
+      {
+        "type": "range",
+        "id": "slider_gap",
+        "min": 0,
+        "max": 50,
+        "step": 2,
+        "unit": "px",
+        "label": "Gap",
+        "default": 16
+      },
+      {
+        "type": "range",
+        "id": "slider_gap_mobile",
+        "min": 0,
+        "max": 50,
+        "step": 2,
+        "unit": "px",
+        "label": "Gap - mobile",
+        "default": 16
+      }, 
+      {
+        "type": "header",
+        "content": "Review settings"
+      },
+      {
+        "type": "range",
+        "id": "item_padding_horizontal",
+        "min": 0,
+        "max": 50,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding horizontal",
+        "default": 20
+      },
+      {
+        "type": "range",
+        "id": "item_padding_horizontal_mobile",
+        "min": 0,
+        "max": 50,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding horizontal - mobile",
+        "default": 20
+      },  
+      {
+        "type": "range",
+        "id": "item_padding_vertical",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding vertical",
+        "default": 20
+      },
+      {
+        "type": "range",
+        "id": "item_padding_vertical_mobile",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding vertical - mobile",
+        "default": 20
+      }, 
+      {
+        "type": "range",
+        "id": "item_radius",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Roundness",
+        "default": 4
+      },  
+      {
+        "type": "range",
+        "id": "item_border_thickness",
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "unit": "px",
+        "label": "Border thickness",
+        "default": 0
+      },
+      {
+        "type": "checkbox",
+        "id": "item_shadow",
+        "label": "Use shadow",
+        "default": true
+      },
+      {
+        "type": "header",
+        "content": "Stars settings"
+      },
+      {
+        "type": "image_picker",
+        "label": "Stars icon",
+        "id": "stars_icon",
+        "info": "Replaces the default stars icon"
+      },
+      {
+        "type": "range",
+        "id": "stars_size",
+        "min": 10,
+        "max": 40,
+        "step": 1,
+        "unit": "px",
+        "label": "Size",
+        "default": 14
+      },
+      {
+        "type": "range",
+        "id": "stars_size_mobile",
+        "min": 10,
+        "max": 40,
+        "step": 1,
+        "unit": "px",
+        "label": "Size - mobile",
+        "default": 14
+      },
+      {
+        "type": "header",
+        "content": "Verified settings"
+      },
+      {
+        "type": "checkbox",
+        "id": "use_verified_tag",
+        "label": "Use verified tag",
+        "default": true
+      },
+      {
+        "type": "header",
+        "content": "Verified icon settings"
+      },
+      {
+        "type": "range",
+        "id": "verified_icon_size",
+        "min": 10,
+        "max": 40,
+        "step": 1,
+        "unit": "px",
+        "label": "Size",
+        "default": 14
+      },
+      {
+        "type": "range",
+        "id": "verified_icon_size_mobile",
+        "min": 10,
+        "max": 40,
+        "step": 1,
+        "unit": "px",
+        "label": "Size - mobile",
+        "default": 14
+      },
+      {
+        "type": "header",
+        "content": "Verified text settings"
+      },
+      {
+        "type": "checkbox",
+        "id": "verified_custom",
+        "label": "Use custom font",
+        "default": false
+      },
+      {
+        "type": "font_picker",
+        "id": "verified_font",
+        "label": "Font family",
+        "default": "josefin_sans_n4"
+      },
+      {
+        "type": "range",
+        "id": "verified_size",
+        "min": 0,
+        "max": 32,
+        "step": 1,
+        "unit": "px",
+        "label": "Font size",
+        "default": 10
+      },
+      {
+        "type": "range",
+        "id": "verified_size_mobile",
+        "min": 0,
+        "max": 32,
+        "step": 1,
+        "unit": "px",
+        "label": "Font size - mobile",
+        "default": 10
+      },    
+      {
+        "type": "range",
+        "id": "verified_height",
+        "min": 50,
+        "max": 200,
+        "step": 10,
+        "unit": "%",
+        "label": "Line height",
+        "default": 100
+      },      
+      {
+        "type": "header",
+        "content": "Title settings"
+      },
+      {
+        "type": "checkbox",
+        "id": "title_custom",
+        "label": "Use custom font",
+        "default": false
+      },
+      {
+        "type": "font_picker",
+        "id": "title_font",
+        "label": "Font family",
+        "default": "josefin_sans_n4"
+      },
+      {
+        "type": "range",
+        "id": "title_size",
+        "min": 0,
+        "max": 32,
+        "step": 1,
+        "unit": "px",
+        "label": "Font size",
+        "default": 12
+      },
+      {
+        "type": "range",
+        "id": "title_size_mobile",
+        "min": 0,
+        "max": 32,
+        "step": 1,
+        "unit": "px",
+        "label": "Font size - mobile",
+        "default": 12
+      },    
+      {
+        "type": "range",
+        "id": "title_height",
+        "min": 50,
+        "max": 200,
+        "step": 10,
+        "unit": "%",
+        "label": "Line height",
+        "default": 150
+      },   
+      {
+        "type": "range",
+        "id": "title_mt",
+        "min": 0,
+        "max": 50,
+        "step": 1,
+        "unit": "px",
+        "label": "Margin top",
+        "default": 16
+      },
+      {
+        "type": "range",
+        "id": "title_mt_mobile",
+        "min": 0,
+        "max": 50,
+        "step": 1,
+        "unit": "px",
+        "label": "Margin top - mobile",
+        "default": 16
+      },
+      {
+        "type": "header",
+        "content": "Text settings"
+      },
+      {
+        "type": "checkbox",
+        "id": "text_custom",
+        "label": "Use custom font",
+        "default": false
+      },
+      {
+        "type": "font_picker",
+        "id": "text_font",
+        "label": "Font family",
+        "default": "josefin_sans_n4"
+      },
+      {
+        "type": "range",
+        "id": "text_size",
+        "min": 0,
+        "max": 32,
+        "step": 1,
+        "unit": "px",
+        "label": "Font size",
+        "default": 12
+      },
+      {
+        "type": "range",
+        "id": "text_size_mobile",
+        "min": 0,
+        "max": 32,
+        "step": 1,
+        "unit": "px",
+        "label": "Font size - mobile",
+        "default": 12
+      },    
+      {
+        "type": "range",
+        "id": "text_height",
+        "min": 50,
+        "max": 200,
+        "step": 10,
+        "unit": "%",
+        "label": "Line height",
+        "default": 150
+      },   
+      {
+        "type": "range",
+        "id": "text_mt",
+        "min": 0,
+        "max": 50,
+        "step": 1,
+        "unit": "px",
+        "label": "Margin top",
+        "default": 12
+      },
+      {
+        "type": "range",
+        "id": "text_mt_mobile",
+        "min": 0,
+        "max": 50,
+        "step": 1,
+        "unit": "px",
+        "label": "Margin top - mobile",
+        "default": 12
+      },
+      {
+        "type": "header",
+        "content": "Author settings"
+      },
+      {
+        "type": "checkbox",
+        "id": "author_custom",
+        "label": "Use custom font",
+        "default": false
+      },
+      {
+        "type": "font_picker",
+        "id": "author_font",
+        "label": "Font family",
+        "default": "josefin_sans_n4"
+      },
+      {
+        "type": "range",
+        "id": "author_size",
+        "min": 0,
+        "max": 32,
+        "step": 1,
+        "unit": "px",
+        "label": "Font size",
+        "default": 12
+      },
+      {
+        "type": "range",
+        "id": "author_size_mobile",
+        "min": 0,
+        "max": 32,
+        "step": 1,
+        "unit": "px",
+        "label": "Font size - mobile",
+        "default": 12
+      },    
+      {
+        "type": "range",
+        "id": "author_height",
+        "min": 50,
+        "max": 200,
+        "step": 10,
+        "unit": "%",
+        "label": "Line height",
+        "default": 130
+      },
+      {
+        "type": "range",
+        "id": "publication_mt",
+        "min": 0,
+        "max": 50,
+        "step": 1,
+        "unit": "px",
+        "label": "Margin top",
+        "default": 12
+      },
+      {
+        "type": "range",
+        "id": "publication_mt_mobile",
+        "min": 0,
+        "max": 50,
+        "step": 1,
+        "unit": "px",
+        "label": "Margin top - mobile",
+        "default": 12
+      },
+      {
+        "type": "header",
+        "content": "Publication time settings"
+      },
+      {
+        "type": "checkbox",
+        "id": "time_custom",
+        "label": "Use custom font",
+        "default": false
+      },
+      {
+        "type": "font_picker",
+        "id": "time_font",
+        "label": "Font family",
+        "default": "josefin_sans_n4"
+      },
+      {
+        "type": "range",
+        "id": "time_size",
+        "min": 0,
+        "max": 32,
+        "step": 1,
+        "unit": "px",
+        "label": "Font size",
+        "default": 12
+      },
+      {
+        "type": "range",
+        "id": "time_size_mobile",
+        "min": 0,
+        "max": 32,
+        "step": 1,
+        "unit": "px",
+        "label": "Font size - mobile",
+        "default": 12
+      },    
+      {
+        "type": "range",
+        "id": "time_height",
+        "min": 50,
+        "max": 200,
+        "step": 10,
+        "unit": "%",
+        "label": "Line height",
+        "default": 130
+      },   
+      {
+        "type": "header",
+        "content": "Arrow settings"
+      },
+      {
+        "type": "range",
+        "id": "arrow_size",
+        "min": 10,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Size",
+        "default": 32
+      },
+      {
+        "type": "range",
+        "id": "arrow_size_mobile",
+        "min": 10,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Size - mobile",
+        "default": 32
+      },
+      {
+        "type": "range",
+        "id": "arrow_icon_size",
+        "min": 5,
+        "max": 15,
+        "step": 1,
+        "unit": "px",
+        "label": "Icon size",
+        "default": 7
+      },
+      {
+        "type": "range",
+        "id": "arrow_icon_size_mobile",
+        "min": 5,
+        "max": 15,
+        "step": 1,
+        "unit": "px",
+        "label": "Icon size - mobile",
+        "default": 7
+      },
+      {
+        "type": "range",
+        "id": "arrow_border_thickness",
+        "min": 0,
+        "max": 10,
+        "step": 0.5,
+        "unit": "px",
+        "label": "Border thickness",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "arrow_radius",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Roundness",
+        "default": 100
+      },
+      {
+        "type": "select",
+        "id": "arrow_hover_effect",
+        "label": "Hover effect",
+        "default": "color",
+        "options": [
+          {
+            "label": "Change color",
+            "value": "color"
+          },
+          {
+            "label": "Change size",
+            "value": "scale"
+          },
+          {
+            "label": "Change arrow",
+            "value": "arrow"
+          },
+          {
+            "label": "None",
+            "value": "none"
+          }
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "arrow_show_desktop",
+        "label": "Show on desktop",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "arrow_show_mobile",
+        "label": "Show on mobile",
+        "default": false
+      }, 
+      {
+        "type": "header",
+        "content": "Bottom text settings"
+      },      
+      {
+        "type": "richtext",
+        "id": "bottom_text",
+        "label": "Text",
+        "default": "<p>Rated <strong>4.6</strong> / 5 based on 1289 reviews. Showing our 5-star reviews.</p>"
+      },
+      {
+        "type": "checkbox",
+        "id": "bottom_text_custom",
+        "label": "Use custom font",
+        "default": false
+      },
+      {
+        "type": "font_picker",
+        "id": "bottom_text_font",
+        "label": "Font family",
+        "default": "josefin_sans_n4"
+      },
+      {
+        "type": "range",
+        "id": "bottom_text_size",
+        "min": 0,
+        "max": 32,
+        "step": 1,
+        "unit": "px",
+        "label": "Font size",
+        "default": 13
+      },
+      {
+        "type": "range",
+        "id": "bottom_text_size_mobile",
+        "min": 0,
+        "max": 32,
+        "step": 1,
+        "unit": "px",
+        "label": "Font size - mobile",
+        "default": 13
+      },    
+      {
+        "type": "range",
+        "id": "bottom_text_height",
+        "min": 50,
+        "max": 200,
+        "step": 10,
+        "unit": "%",
+        "label": "Line height",
+        "default": 150
+      },   
+      {
+        "type": "range",
+        "id": "bottom_text_mt",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Margin top",
+        "default": 16
+      },
+      {
+        "type": "range",
+        "id": "bottom_text_mt_mobile",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Margin top - mobile",
+        "default": 16
+      },
+      {
+        "type": "text_alignment",
+        "id": "bottom_text_align",
+        "label": "Alignment",
+        "default": "center"
+      },
+      {
+        "type": "text_alignment",
+        "id": "bottom_text_align_mobile",
+        "label": "Alignment - mobile",
+        "default": "center"
+      },
+      {
+        "type": "header",
+        "content": "Review colors"
+      },
+      {
+        "type": "color",
+        "id": "title_color",
+        "label": "Title",
+        "default": "#1F2936"
+      },   
+      {
+        "type": "color",
+        "id": "text_color",
+        "label": "Text",
+        "default": "#191919"
+      }, 
+      {
+        "type": "color",
+        "id": "author_color",
+        "label": "Author",
+        "default": "#636464"
+      }, 
+      {
+        "type": "color",
+        "id": "time_color",
+        "label": "Publication time",
+        "default": "#636464"
+      },
+      {
+        "type": "color",        
+        "id": "item_bg_color",
+        "label": "Background",
+        "default": "#F8F9FA"
+      },
+      {
+        "type": "color",        
+        "id": "item_border_color",
+        "label": "Border",
+        "default": "#E2E7EC"
+      },
+      {
+        "type": "header",
+        "content": "Default stars colors"
+      },
+      {
+        "type": "color",
+        "label": "Stars",
+        "id": "stars_color",
+        "default": "#FFFFFF"
+      },  
+      {
+        "type": "color",
+        "label": "Background",
+        "id": "stars_bg_color",
+        "default": "#00B67A"
+      },
+      {
+        "type": "header",
+        "content": "Verified colors"
+      },   
+      {
+        "type": "color",
+        "label": "Icon",
+        "id": "verified_color",
+        "default": "#6C6C85"
+      }, 
+      {
+        "type": "color",
+        "label": "Text",
+        "id": "verified_text_color",
+        "default": "#6C6C85"
+      }, 
+      {
+        "type": "header",
+        "content": "Arrow colors"
+      },
+      {
+        "type": "color",
+        "label": "Icon",
+        "id": "arrow_color",
+        "default": "#000000"
+      },
+      {
+        "type": "color",
+        "label": "Icon hover",
+        "id": "arrow_hover_color",
+        "default": "#7B7B7B"
+      },
+      {
+        "type": "color",
+        "label": "Background",
+        "id": "arrow_bg_color",
+        "default": "#EDEDED"
+      },
+      {
+        "type": "color",
+        "label": "Background hover",
+        "id": "arrow_bg_hover_color",
+        "default": "#F5F5F5"
+      },
+      {
+        "type": "color",
+        "label": "Border",
+        "id": "arrow_border_color",
+        "default": "#C7C7C7"
+      },
+      {
+        "type": "color",
+        "label": "Border hover",
+        "id": "arrow_border_hover_color",
+        "default": "#C7C7C7"
+      },  
+      {
+        "type": "header",
+        "content": "Section colors"
+      },      
+      {
+        "type": "color",
+        "label": "Bottom text",
+        "id": "bottom_text_color",
+        "default": "#000000"
+      },
+      {
+        "type": "color",
+        "label": "Section background",
+        "id": "background_color",
+        "default": "#FFFFFF"
+      },
+      {
+        "type": "color_background",
+        "id": "background_gradient",
+        "label": "Section background gradient"
+      },
+      {
+        "type": "color",
+        "label": "Border",
+        "id": "border_color",
+        "default": "#000000"
+      },
+      {
+        "type": "header",
+        "content": "Section margin (outside)"
+      },
+      {
+        "type": "range",
+        "id": "margin_top",
+        "min": -20,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "Margin top",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "margin_bottom",
+        "min": -20,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "Margin bottom",
+        "default": 0
+      },
+      {
+        "type": "header",
+        "content": "Section padding (inside)"
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "Padding top",
+        "default": 0
+      },
+      {
+         "type": "range",
+         "id": "padding_bottom",
+         "min": 0,
+         "max": 100,
+         "step": 4,
+         "unit": "px",
+         "label": "Padding bottom",
+         "default": 0
+      },
+      {
+        "type": "range",
+        "id": "padding_horizontal",
+        "min": 0,
+        "max": 30,
+        "step": 1,
+        "unit": "px",
+        "label": "Padding sides",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "padding_horizontal_mobile",
+        "min": 0,
+        "max": 15,
+        "step": 0.5,
+        "unit": "px",
+        "label": "Padding sides mobile",
+        "default": 0
+      },
+      {
+        "type": "header",
+        "content": "Section settings"
+      },
+      {
+        "type": "range",
+        "id": "border_thickness",
+        "min": 0,
+        "max": 50,
+        "step": 1,
+        "unit": "px",
+        "label": "Border thickness",
+        "default": 0
+      },
+      {
+        "type": "checkbox",
+        "id": "lazy",
+        "label": "Lazy load",
+        "info": "Lazy load images for speed optimisation",
+        "default": true
+      }
+    ],
+    "blocks": [
+      {
+        "type": "item",
+        "name": "Review",
+        "settings": [
+          {
+            "type": "range",
+            "id": "stars_count",
+            "min": 0,
+            "max": 5,
+            "step": 0.5,
+            "label": "Stars count",
+            "default": 5
+          },
+          {
+            "type": "text",
+            "id": "verified_text",
+            "label": "Verified text",
+            "default": "Verified"
+          },
+          {
+            "type": "text",
+            "id": "title",
+            "label": "Title",
+            "default": "Title text"
+          },
+          {
+            "type": "richtext",
+            "id": "text",
+            "label": "Text",
+            "default": "<p>Text</p>"
+          },
+          {
+            "type": "text",
+            "id": "author",
+            "label": "Author",
+            "default": "Default Author"
+          },
+          {
+            "type": "text",
+            "id": "time",
+            "label": "Time",
+            "default": "15 hours ago"
+          }
+        ]
+      }
+    ],
+    "presets": [
+      {
+        "name": "SS - Product reviews #2",
+        "blocks": [
+          {
+            "type": "item"
+          },
+          {
+            "type": "item"
+          },
+          {
+            "type": "item"
+          },
+          {
+            "type": "item"
+          }
+        ]
+      }
+    ]
+  }
+{% endschema %}

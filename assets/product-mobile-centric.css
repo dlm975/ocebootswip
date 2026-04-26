@@ -1,0 +1,143 @@
+/*
+  Mobile-centric PDP styling for Horizon (black / white, soft radii).
+  Load ONLY on this template (see snippets/mobile-centric-styles.liquid).
+
+  If you paste into Theme settings > Custom CSS instead, scope rules to
+  your product template (or duplicate the if-snippet pattern in theme.liquid).
+*/
+
+#MainContent {
+  --pmc-radius-media: 18px;
+  --pmc-radius-control: 999px;
+  --pmc-radius-card: 16px;
+  --pmc-black: #0a0a0a;
+  --pmc-white: #ffffff;
+  --pmc-muted: #6e6e73;
+}
+
+#MainContent .section-background,
+#MainContent .color-scheme-1,
+#MainContent [class^='color-'] {
+  background: var(--pmc-white) !important;
+}
+
+#MainContent .product-information,
+#MainContent .product-information * {
+  --color-foreground: 10 10 10;
+}
+
+/* Hero + tile gallery: round primary media and thumbs */
+#MainContent .product-media-container img,
+#MainContent .product-media-container video,
+#MainContent [class*='product-media'] img,
+#MainContent .resource-list__item .product-card__media {
+  border-radius: var(--pmc-radius-media);
+}
+
+/* Title + price: calm, Apple-like */
+#MainContent .product-details h1,
+#MainContent .product-details [data-testid='product-title'] {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--pmc-black);
+}
+
+#MainContent .product-details .price,
+#MainContent .product-details [class*='price'] {
+  color: var(--pmc-black);
+}
+
+/* Variant area: two columns on phones, roomy tap targets */
+@media screen and (max-width: 749px) {
+  #MainContent .variant-picker__form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    align-items: start;
+  }
+
+  #MainContent .variant-picker__form > .variant-option,
+  #MainContent .variant-picker__form > fieldset {
+    min-width: 0;
+  }
+
+  #MainContent .variant-picker__form > .variant-option:only-child,
+  #MainContent .variant-picker__form > fieldset:only-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Single-value option = static “pill” */
+#MainContent .variant-option[data-testid='variant-option-single'] {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: var(--pmc-radius-control);
+  background: var(--pmc-black);
+  color: var(--pmc-white);
+  font-size: 0.875rem;
+}
+
+#MainContent
+  .variant-option[data-testid='variant-option-single']
+  .variant-option__swatch-value {
+  font-weight: 600;
+  color: var(--pmc-white);
+}
+
+/* Multi-value = select styled as dark pill */
+#MainContent .variant-option__select-wrapper {
+  border-radius: var(--pmc-radius-control);
+  border: 0;
+  background: var(--pmc-black);
+  color: var(--pmc-white);
+  overflow: hidden;
+}
+
+#MainContent .variant-option__select {
+  color: var(--pmc-white);
+  background: transparent;
+  font-weight: 600;
+}
+
+#MainContent .variant-option__select-wrapper .icon {
+  color: var(--pmc-white);
+}
+
+/* Variant “buttons” mode (if you switch back in JSON) */
+#MainContent .variant-option--buttons label {
+  border-radius: var(--pmc-radius-control);
+}
+
+#MainContent .variant-option--buttons input:checked + span,
+#MainContent .variant-option--buttons label:has(input:checked) {
+  background: var(--pmc-black);
+  color: var(--pmc-white);
+  border-color: var(--pmc-black);
+}
+
+/* Primary actions */
+#MainContent .product-details .button,
+#MainContent .product-details .button-secondary,
+#MainContent .product-details [class*='add-to-cart'] button {
+  border-radius: var(--pmc-radius-control);
+  min-height: 48px;
+}
+
+#MainContent .product-details .button,
+#MainContent .product-details [class*='add-to-cart'] button:not(.button-secondary) {
+  background: var(--pmc-black);
+  color: var(--pmc-white);
+  border-color: var(--pmc-black);
+}
+
+/* Accordions + featured strip */
+#MainContent .accordion .details__header {
+  border-radius: var(--pmc-radius-card);
+}
+
+#MainContent .section-resource-list .resource-list__item {
+  border-radius: var(--pmc-radius-card);
+  overflow: hidden;
+}

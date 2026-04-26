@@ -1,0 +1,605 @@
+{% doc %}
+  @prompt
+    A constantly looping scrolling section to display a featured collection. this should display 8 products wide on desktop and 5 wide on mobile. the section should be a solid colour background. the product card should display: main image, price incl currency, size variant.  there should not be an obvious product card shape as it will sit on top of the solid background. only the currency and size will be small rounded rectangles underneath the image with an outine around each. ensure colour/sizing/font customizability., the scroll should be slow. Enable hide/unhide variant/price pills. Enable Product image size adjustment., Ensure centering of pills to product image, Allow faster scroll speed., Increase the scroll speed drastically. Have a clickable collection title option
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-collection-scroll-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+    padding: {{ block.settings.section_padding }}px 0;
+    overflow: hidden;
+  }
+
+  .ai-collection-scroll-header-{{ ai_gen_id }} {
+    text-align: center;
+    margin-bottom: {{ block.settings.title_margin_bottom }}px;
+  }
+
+  .ai-collection-scroll-title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.title_font_size }}px;
+    font-weight: {{ block.settings.title_font_weight }};
+    color: {{ block.settings.title_color }};
+    margin: 0;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .ai-collection-scroll-title-{{ ai_gen_id }}:hover {
+    opacity: 0.8;
+  }
+
+  .ai-collection-scroll-track-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.gap }}px;
+    animation: ai-scroll-{{ ai_gen_id }} {{ block.settings.scroll_speed }}s linear infinite;
+    will-change: transform;
+  }
+
+  .ai-collection-scroll-track-{{ ai_gen_id }}:hover {
+    animation-play-state: paused;
+  }
+
+  @keyframes ai-scroll-{{ ai_gen_id }} {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .ai-collection-scroll-item-{{ ai_gen_id }} {
+    flex-shrink: 0;
+    width: calc((100% - ({{ block.settings.desktop_columns | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.desktop_columns }});
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-collection-scroll-item-{{ ai_gen_id }} {
+      width: calc((100% - ({{ block.settings.mobile_columns | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.mobile_columns }});
+    }
+  }
+
+  .ai-collection-scroll-product-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: {{ block.settings.content_gap }}px;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .ai-collection-scroll-image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    aspect-ratio: {{ block.settings.image_aspect_ratio }};
+    overflow: hidden;
+    border-radius: {{ block.settings.image_border_radius }}px;
+  }
+
+  .ai-collection-scroll-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .ai-collection-scroll-info-{{ ai_gen_id }} {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: {{ block.settings.pill_gap }}px;
+  }
+
+  .ai-collection-scroll-pill-{{ ai_gen_id }} {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: {{ block.settings.pill_padding_vertical }}px {{ block.settings.pill_padding_horizontal }}px;
+    background-color: {{ block.settings.pill_background }};
+    color: {{ block.settings.pill_text_color }};
+    border: {{ block.settings.pill_border_width }}px solid {{ block.settings.pill_border_color }};
+    border-radius: {{ block.settings.pill_border_radius }}px;
+    font-size: {{ block.settings.pill_font_size }}px;
+    font-weight: {{ block.settings.pill_font_weight }};
+    white-space: nowrap;
+  }
+
+  .ai-collection-scroll-empty-{{ ai_gen_id }} {
+    padding: 60px 20px;
+    text-align: center;
+    color: {{ block.settings.pill_text_color }};
+    font-size: 14px;
+  }
+{% endstyle %}
+
+<collection-scroll-{{ ai_gen_id }}
+  class="ai-collection-scroll-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  {% if block.settings.collection != blank and block.settings.collection.products.size > 0 %}
+    {% if block.settings.show_title and block.settings.collection_title != blank %}
+      <div class="ai-collection-scroll-header-{{ ai_gen_id }}">
+        {% if block.settings.title_clickable %}
+          <a
+            href="{{ block.settings.collection.url }}"
+            class="ai-collection-scroll-title-{{ ai_gen_id }}"
+          >
+            {{ block.settings.collection_title }}
+          </a>
+        {% else %}
+          <h2 class="ai-collection-scroll-title-{{ ai_gen_id }}">
+            {{ block.settings.collection_title }}
+          </h2>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="ai-collection-scroll-track-{{ ai_gen_id }}">
+      {% for product in block.settings.collection.products limit: 20 %}
+        <div class="ai-collection-scroll-item-{{ ai_gen_id }}">
+          <a
+            href="{{ product.url }}"
+            class="ai-collection-scroll-product-{{ ai_gen_id }}"
+          >
+            <div class="ai-collection-scroll-image-wrapper-{{ ai_gen_id }}">
+              {% if product.featured_image %}
+                <img
+                  src="{{ product.featured_image | image_url: width: 800 }}"
+                  alt="{{ product.featured_image.alt | escape }}"
+                  class="ai-collection-scroll-image-{{ ai_gen_id }}"
+                  loading="lazy"
+                  width="800"
+                  height="{{ 800 | divided_by: block.settings.image_aspect_ratio }}"
+                >
+              {% else %}
+                <div class="ai-collection-scroll-image-wrapper-{{ ai_gen_id }}">
+                  {{ 'product-1' | placeholder_svg_tag }}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="ai-collection-scroll-info-{{ ai_gen_id }}">
+              {% if block.settings.show_price %}
+                <span class="ai-collection-scroll-pill-{{ ai_gen_id }}">
+                  {{ product.price | money_with_currency }}
+                </span>
+              {% endif %}
+
+              {% if block.settings.show_variant and product.has_only_default_variant == false %}
+                {% assign size_option = null %}
+                {% for option in product.options_with_values %}
+                  {% assign option_name_downcase = option.name | downcase %}
+                  {% if option_name_downcase == 'size' %}
+                    {% assign size_option = option %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
+
+                {% if size_option != null and size_option.values.size > 0 %}
+                  <span class="ai-collection-scroll-pill-{{ ai_gen_id }}">
+                    {{ size_option.values | join: ', ' }}
+                  </span>
+                {% endif %}
+              {% endif %}
+            </div>
+          </a>
+        </div>
+      {% endfor %}
+
+      {% for product in block.settings.collection.products limit: 20 %}
+        <div class="ai-collection-scroll-item-{{ ai_gen_id }}">
+          <a
+            href="{{ product.url }}"
+            class="ai-collection-scroll-product-{{ ai_gen_id }}"
+          >
+            <div class="ai-collection-scroll-image-wrapper-{{ ai_gen_id }}">
+              {% if product.featured_image %}
+                <img
+                  src="{{ product.featured_image | image_url: width: 800 }}"
+                  alt="{{ product.featured_image.alt | escape }}"
+                  class="ai-collection-scroll-image-{{ ai_gen_id }}"
+                  loading="lazy"
+                  width="800"
+                  height="{{ 800 | divided_by: block.settings.image_aspect_ratio }}"
+                >
+              {% else %}
+                <div class="ai-collection-scroll-image-wrapper-{{ ai_gen_id }}">
+                  {{ 'product-1' | placeholder_svg_tag }}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="ai-collection-scroll-info-{{ ai_gen_id }}">
+              {% if block.settings.show_price %}
+                <span class="ai-collection-scroll-pill-{{ ai_gen_id }}">
+                  {{ product.price | money_with_currency }}
+                </span>
+              {% endif %}
+
+              {% if block.settings.show_variant and product.has_only_default_variant == false %}
+                {% assign size_option = null %}
+                {% for option in product.options_with_values %}
+                  {% assign option_name_downcase = option.name | downcase %}
+                  {% if option_name_downcase == 'size' %}
+                    {% assign size_option = option %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
+
+                {% if size_option != null and size_option.values.size > 0 %}
+                  <span class="ai-collection-scroll-pill-{{ ai_gen_id }}">
+                    {{ size_option.values | join: ', ' }}
+                  </span>
+                {% endif %}
+              {% endif %}
+            </div>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="ai-collection-scroll-empty-{{ ai_gen_id }}">
+      Select a collection to display products
+    </div>
+  {% endif %}
+</collection-scroll-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CollectionScroll{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.track = this.querySelector('.ai-collection-scroll-track-{{ ai_gen_id }}');
+        if (this.track) {
+          this.setupAccessibility();
+        }
+      }
+
+      setupAccessibility() {
+        this.track.setAttribute('role', 'list');
+        const items = this.querySelectorAll('.ai-collection-scroll-item-{{ ai_gen_id }}');
+        items.forEach(item => {
+          item.setAttribute('role', 'listitem');
+        });
+      }
+    }
+
+    customElements.define('collection-scroll-{{ ai_gen_id }}', CollectionScroll{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Collection scroll",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Collection"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "header",
+      "content": "Collection title"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_title",
+      "label": "Show title",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "collection_title",
+      "label": "Title"
+    },
+    {
+      "type": "checkbox",
+      "id": "title_clickable",
+      "label": "Make title clickable",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "label": "Title font size",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "select",
+      "id": "title_font_weight",
+      "label": "Title font weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semibold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "title_margin_bottom",
+      "label": "Title spacing",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "desktop_columns",
+      "label": "Desktop columns",
+      "min": 3,
+      "max": 12,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "mobile_columns",
+      "label": "Mobile columns",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Gap between products",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "content_gap",
+      "label": "Gap between image and info",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "label": "Section padding",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "range",
+      "id": "scroll_speed",
+      "label": "Scroll speed",
+      "min": 5,
+      "max": 200,
+      "step": 5,
+      "unit": "s",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Product image"
+    },
+    {
+      "type": "select",
+      "id": "image_aspect_ratio",
+      "label": "Aspect ratio",
+      "options": [
+        {
+          "value": "0.75",
+          "label": "Portrait (3:4)"
+        },
+        {
+          "value": "1",
+          "label": "Square (1:1)"
+        },
+        {
+          "value": "1.33",
+          "label": "Landscape (4:3)"
+        },
+        {
+          "value": "1.5",
+          "label": "Wide (3:2)"
+        }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Product info"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_price",
+      "label": "Show price",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_variant",
+      "label": "Show size variant",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Pill style"
+    },
+    {
+      "type": "range",
+      "id": "pill_gap",
+      "label": "Gap between pills",
+      "min": 4,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "pill_padding_vertical",
+      "label": "Vertical padding",
+      "min": 2,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "pill_padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "pill_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "pill_border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "pill_font_size",
+      "label": "Font size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "select",
+      "id": "pill_font_weight",
+      "label": "Font weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semibold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "pill_background",
+      "label": "Pill background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "pill_text_color",
+      "label": "Pill text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "pill_border_color",
+      "label": "Pill border",
+      "default": "#e6e6e6"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection scroll"
+    }
+  ]
+}
+{% endschema %}

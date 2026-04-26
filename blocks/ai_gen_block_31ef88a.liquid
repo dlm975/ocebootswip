@@ -1,0 +1,692 @@
+{% doc %}
+  @prompt
+    A Variant picker dropdown pill. If a Variant does not have multiple options, there should be no dropdown menu that opens out - just a starionary pill. The pills should be stacked side by side adapting text and pill size based on screen width. I, The Variant Title should be centered above its respective variant Label., The variant title should not be inside the pill. Both Title and Label fonts and font size should be customisable., The pills must occupy the full width of the screen, adapting to mobile or desktop sizing. Any out-of-stock variants must not be displayed as an option., Allow for font selection of the variant label.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-variant-picker-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .ai-variant-picker__container-{{ ai_gen_id }} {
+    display: flex;
+    flex-wrap: wrap;
+    gap: {{ block.settings.pill_gap }}px;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .ai-variant-picker__option-{{ ai_gen_id }} {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: {{ block.settings.title_gap }}px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ai-variant-picker__option-name-{{ ai_gen_id }} {
+    font-family: {{ block.settings.title_font.family }}, {{ block.settings.title_font.fallback_families }};
+    font-weight: {{ block.settings.title_font.weight }};
+    font-style: {{ block.settings.title_font.style }};
+    font-size: {{ block.settings.title_font_size }}px;
+    color: {{ block.settings.title_color }};
+    text-align: center;
+    {% if block.settings.title_text_transform == 'uppercase' %}
+      text-transform: uppercase;
+    {% endif %}
+  }
+
+  .ai-variant-picker__pill-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: {{ block.settings.pill_padding_vertical }}px {{ block.settings.pill_padding_horizontal }}px;
+    background-color: {{ block.settings.pill_background }};
+    color: {{ block.settings.pill_text_color }};
+    border: {{ block.settings.pill_border_width }}px solid {{ block.settings.pill_border_color }};
+    border-radius: {{ block.settings.pill_border_radius }}px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  .ai-variant-picker__pill-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.pill_hover_background }};
+    color: {{ block.settings.pill_hover_text_color }};
+    border-color: {{ block.settings.pill_hover_border_color }};
+  }
+
+  .ai-variant-picker__pill-{{ ai_gen_id }}.selected {
+    background-color: {{ block.settings.pill_selected_background }};
+    color: {{ block.settings.pill_selected_text_color }};
+    border-color: {{ block.settings.pill_selected_border_color }};
+  }
+
+  .ai-variant-picker__pill-{{ ai_gen_id }}.selected:hover {
+    background-color: {{ block.settings.pill_selected_hover_background }};
+    color: {{ block.settings.pill_selected_hover_text_color }};
+    border-color: {{ block.settings.pill_selected_hover_border_color }};
+  }
+
+  .ai-variant-picker__pill-{{ ai_gen_id }}.static {
+    cursor: default;
+  }
+
+  .ai-variant-picker__value-{{ ai_gen_id }} {
+    font-family: {{ block.settings.label_font.family }}, {{ block.settings.label_font.fallback_families }};
+    font-weight: {{ block.settings.label_font.weight }};
+    font-style: {{ block.settings.label_font.style }};
+    font-size: {{ block.settings.label_font_size }}px;
+    flex: 1;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    {% if block.settings.label_text_transform == 'uppercase' %}
+      text-transform: uppercase;
+    {% endif %}
+  }
+
+  .ai-variant-picker__chevron-{{ ai_gen_id }} {
+    width: 12px;
+    height: 12px;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .ai-variant-picker__pill-{{ ai_gen_id }}.open .ai-variant-picker__chevron-{{ ai_gen_id }} {
+    transform: rotate(180deg);
+  }
+
+  .ai-variant-picker__dropdown-{{ ai_gen_id }} {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background-color: {{ block.settings.dropdown_background }};
+    border: 1px solid {{ block.settings.dropdown_border_color }};
+    border-radius: {{ block.settings.dropdown_border_radius }}px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+  }
+
+  .ai-variant-picker__dropdown-{{ ai_gen_id }}.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .ai-variant-picker__dropdown-item-{{ ai_gen_id }} {
+    padding: 12px 16px;
+    cursor: pointer;
+    color: {{ block.settings.dropdown_text_color }};
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: {{ block.settings.label_font.family }}, {{ block.settings.label_font.fallback_families }};
+    font-weight: {{ block.settings.label_font.weight }};
+    font-style: {{ block.settings.label_font.style }};
+  }
+
+  .ai-variant-picker__dropdown-item-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.dropdown_hover_background }};
+  }
+
+  .ai-variant-picker__dropdown-item-{{ ai_gen_id }}.selected {
+    background-color: {{ block.settings.dropdown_selected_background }};
+    color: {{ block.settings.dropdown_selected_text_color }};
+    font-weight: 600;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-variant-picker__option-name-{{ ai_gen_id }} {
+      font-size: {{ block.settings.title_font_size | times: 0.9 }}px;
+    }
+
+    .ai-variant-picker__pill-{{ ai_gen_id }} {
+      padding: {{ block.settings.pill_padding_vertical | times: 0.8 }}px {{ block.settings.pill_padding_horizontal | times: 0.8 }}px;
+    }
+
+    .ai-variant-picker__value-{{ ai_gen_id }} {
+      font-size: {{ block.settings.label_font_size | times: 0.9 }}px;
+    }
+
+    .ai-variant-picker__container-{{ ai_gen_id }} {
+      gap: {{ block.settings.pill_gap | times: 0.8 }}px;
+    }
+  }
+{% endstyle %}
+
+<variant-picker-{{ ai_gen_id }}
+  class="ai-variant-picker-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+  data-product-url="{{ product.url }}"
+>
+  {% if product %}
+    <div class="ai-variant-picker__container-{{ ai_gen_id }}">
+      {% for option in product.options_with_values %}
+        {% assign option_index = forloop.index0 %}
+        {% assign selected_value = product.selected_or_first_available_variant.options[option_index] %}
+        
+        {% assign available_values = '' %}
+        {% for variant in product.variants %}
+          {% if variant.available %}
+            {% assign variant_option_value = variant.options[option_index] %}
+            {% unless available_values contains variant_option_value %}
+              {% if available_values == '' %}
+                {% assign available_values = variant_option_value %}
+              {% else %}
+                {% assign available_values = available_values | append: '||' | append: variant_option_value %}
+              {% endif %}
+            {% endunless %}
+          {% endif %}
+        {% endfor %}
+        
+        {% assign available_values_array = available_values | split: '||' %}
+        {% assign has_multiple_values = false %}
+        {% if available_values_array.size > 1 %}
+          {% assign has_multiple_values = true %}
+        {% endif %}
+
+        <div class="ai-variant-picker__option-{{ ai_gen_id }}" data-option-index="{{ option_index }}">
+          <span class="ai-variant-picker__option-name-{{ ai_gen_id }}">{{ option.name }}</span>
+          <button
+            type="button"
+            class="ai-variant-picker__pill-{{ ai_gen_id }} {% if has_multiple_values %}selected{% else %}static{% endif %}"
+            data-option-name="{{ option.name }}"
+            {% unless has_multiple_values %}disabled{% endunless %}
+          >
+            <span class="ai-variant-picker__value-{{ ai_gen_id }}">{{ selected_value }}</span>
+            {% if has_multiple_values %}
+              <svg
+                class="ai-variant-picker__chevron-{{ ai_gen_id }}"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            {% endif %}
+          </button>
+
+          {% if has_multiple_values %}
+            <div class="ai-variant-picker__dropdown-{{ ai_gen_id }}" data-dropdown>
+              {% for value in available_values_array %}
+                <div
+                  class="ai-variant-picker__dropdown-item-{{ ai_gen_id }} {% if value == selected_value %}selected{% endif %}"
+                  data-value="{{ value }}"
+                  data-option-position="{{ option.position }}"
+                >
+                  {{ value }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="ai-variant-picker__container-{{ ai_gen_id }}">
+      <div class="ai-variant-picker__option-{{ ai_gen_id }}">
+        <span class="ai-variant-picker__option-name-{{ ai_gen_id }}">Size</span>
+        <button type="button" class="ai-variant-picker__pill-{{ ai_gen_id }} selected">
+          <span class="ai-variant-picker__value-{{ ai_gen_id }}">M</span>
+          <svg
+            class="ai-variant-picker__chevron-{{ ai_gen_id }}"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+      </div>
+      <div class="ai-variant-picker__option-{{ ai_gen_id }}">
+        <span class="ai-variant-picker__option-name-{{ ai_gen_id }}">Color</span>
+        <button type="button" class="ai-variant-picker__pill-{{ ai_gen_id }} static" disabled>
+          <span class="ai-variant-picker__value-{{ ai_gen_id }}">Blue</span>
+        </button>
+      </div>
+    </div>
+  {% endif %}
+</variant-picker-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class VariantPicker{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.currentVariant = null;
+      }
+
+      connectedCallback() {
+        this.pills = this.querySelectorAll('.ai-variant-picker__pill-{{ ai_gen_id }}:not(.static)');
+        this.dropdowns = this.querySelectorAll('.ai-variant-picker__dropdown-{{ ai_gen_id }}');
+        this.productUrl = this.dataset.productUrl;
+        
+        this.setupEventListeners();
+        this.initializeVariant();
+      }
+
+      initializeVariant() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const variantId = urlParams.get('variant');
+        
+        if (variantId && window.product && window.product.variants) {
+          this.currentVariant = window.product.variants.find(v => v.id == variantId);
+        }
+      }
+
+      setupEventListeners() {
+        this.pills.forEach((pill) => {
+          pill.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleDropdown(pill);
+          });
+        });
+
+        this.dropdowns.forEach((dropdown) => {
+          const items = dropdown.querySelectorAll('.ai-variant-picker__dropdown-item-{{ ai_gen_id }}');
+          items.forEach((item) => {
+            item.addEventListener('click', (e) => {
+              e.stopPropagation();
+              this.selectOption(item);
+            });
+          });
+        });
+
+        document.addEventListener('click', () => {
+          this.closeAllDropdowns();
+        });
+      }
+
+      toggleDropdown(pill) {
+        const option = pill.closest('.ai-variant-picker__option-{{ ai_gen_id }}');
+        const dropdown = option.querySelector('.ai-variant-picker__dropdown-{{ ai_gen_id }}');
+        const isOpen = dropdown.classList.contains('open');
+
+        this.closeAllDropdowns();
+
+        if (!isOpen) {
+          dropdown.classList.add('open');
+          pill.classList.add('open');
+        }
+      }
+
+      closeAllDropdowns() {
+        this.dropdowns.forEach((dropdown) => {
+          dropdown.classList.remove('open');
+        });
+        this.pills.forEach((pill) => {
+          pill.classList.remove('open');
+        });
+      }
+
+      selectOption(item) {
+        const dropdown = item.closest('.ai-variant-picker__dropdown-{{ ai_gen_id }}');
+        const option = dropdown.closest('.ai-variant-picker__option-{{ ai_gen_id }}');
+        const pill = option.querySelector('.ai-variant-picker__pill-{{ ai_gen_id }}');
+        const valueSpan = pill.querySelector('.ai-variant-picker__value-{{ ai_gen_id }}');
+        const optionName = pill.dataset.optionName;
+        const value = item.dataset.value;
+        const position = parseInt(item.dataset.optionPosition);
+
+        dropdown.querySelectorAll('.ai-variant-picker__dropdown-item-{{ ai_gen_id }}').forEach((i) => {
+          i.classList.remove('selected');
+        });
+        item.classList.add('selected');
+
+        valueSpan.textContent = value;
+
+        this.closeAllDropdowns();
+        this.updateVariant(position, value);
+      }
+
+      updateVariant(position, value) {
+        if (!window.product || !window.product.variants) return;
+
+        const selectedOptions = {};
+        this.querySelectorAll('.ai-variant-picker__option-{{ ai_gen_id }}').forEach((option) => {
+          const pill = option.querySelector('.ai-variant-picker__pill-{{ ai_gen_id }}');
+          const optionName = pill.dataset.optionName;
+          const valueSpan = pill.querySelector('.ai-variant-picker__value-{{ ai_gen_id }}');
+          const value = valueSpan.textContent.trim();
+          selectedOptions[optionName] = value;
+        });
+
+        const variant = window.product.variants.find((v) => {
+          return v.options.every((opt, idx) => {
+            const optionName = window.product.options[idx];
+            return selectedOptions[optionName] === opt;
+          });
+        });
+
+        if (variant) {
+          const url = new URL(window.location.href);
+          url.searchParams.set('variant', variant.id);
+          window.history.replaceState({}, '', url);
+
+          this.dispatchEvent(new CustomEvent('variant-change', {
+            detail: { variant: variant },
+            bubbles: true
+          }));
+        }
+      }
+    }
+
+    customElements.define('variant-picker-{{ ai_gen_id }}', VariantPicker{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Variant picker dropdown",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "pill_gap",
+      "label": "Gap between pills",
+      "min": 4,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "title_gap",
+      "label": "Gap between title and pill",
+      "min": 2,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "header",
+      "content": "Option title"
+    },
+    {
+      "type": "font_picker",
+      "id": "title_font",
+      "label": "Font",
+      "default": "assistant_n4"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "label": "Font size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "select",
+      "id": "title_text_transform",
+      "label": "Text transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Color",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "Option label"
+    },
+    {
+      "type": "font_picker",
+      "id": "label_font",
+      "label": "Font",
+      "default": "assistant_n4"
+    },
+    {
+      "type": "range",
+      "id": "label_font_size",
+      "label": "Font size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "label_text_transform",
+      "label": "Text transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "header",
+      "content": "Pill style"
+    },
+    {
+      "type": "range",
+      "id": "pill_padding_vertical",
+      "label": "Vertical padding",
+      "min": 4,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "pill_padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "pill_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "pill_border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "header",
+      "content": "Pill colors"
+    },
+    {
+      "type": "color",
+      "id": "pill_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "pill_text_color",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "pill_border_color",
+      "label": "Border",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "color",
+      "id": "pill_hover_background",
+      "label": "Hover background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "pill_hover_text_color",
+      "label": "Hover text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "pill_hover_border_color",
+      "label": "Hover border",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "header",
+      "content": "Selected pill colors"
+    },
+    {
+      "type": "color",
+      "id": "pill_selected_background",
+      "label": "Background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "pill_selected_text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "pill_selected_border_color",
+      "label": "Border",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "pill_selected_hover_background",
+      "label": "Hover background",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "pill_selected_hover_text_color",
+      "label": "Hover text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "pill_selected_hover_border_color",
+      "label": "Hover border",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "header",
+      "content": "Dropdown style"
+    },
+    {
+      "type": "range",
+      "id": "dropdown_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "color",
+      "id": "dropdown_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "dropdown_border_color",
+      "label": "Border",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "color",
+      "id": "dropdown_text_color",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "dropdown_hover_background",
+      "label": "Hover background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "dropdown_selected_background",
+      "label": "Selected background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "dropdown_selected_text_color",
+      "label": "Selected text",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Variant picker dropdown"
+    }
+  ]
+}
+{% endschema %}

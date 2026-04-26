@@ -1,0 +1,546 @@
+{% doc %}
+  @prompt
+    A constantly looping scrolling section to display a featured collection. this should display 8 products wide on desktop and 5 wide on mobile. the section should be a solid colour background. the product card should display: main image, price incl currency, size variant.  there should not be an obvious product card shape as it will sit on top of the solid background. only the currency and size will be small rounded rectangles underneath the image with an outine around each. ensure colour/sizing/font customizability., the scroll should be slow
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-scrolling-collection-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+    padding: {{ block.settings.section_padding }}px 0;
+    overflow: hidden;
+  }
+
+  .ai-scrolling-collection-wrapper-{{ ai_gen_id }} {
+    display: flex;
+    width: max-content;
+    animation: ai-scroll-{{ ai_gen_id }} {{ block.settings.scroll_speed }}s linear infinite;
+  }
+
+  .ai-scrolling-collection-track-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.product_gap }}px;
+  }
+
+  @keyframes ai-scroll-{{ ai_gen_id }} {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  {% if block.settings.pause_on_hover %}
+    .ai-scrolling-collection-wrapper-{{ ai_gen_id }}:hover {
+      animation-play-state: paused;
+    }
+  {% endif %}
+
+  .ai-product-card-{{ ai_gen_id }} {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: {{ block.settings.card_gap }}px;
+  }
+
+  .ai-product-image-{{ ai_gen_id }} {
+    width: {{ block.settings.image_width_desktop }}px;
+    height: {{ block.settings.image_height_desktop }}px;
+    object-fit: cover;
+    border-radius: {{ block.settings.image_border_radius }}px;
+  }
+
+  .ai-product-info-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: {{ block.settings.info_gap }}px;
+  }
+
+  .ai-product-badges-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.badge_gap }}px;
+    flex-wrap: wrap;
+  }
+
+  .ai-product-badge-{{ ai_gen_id }} {
+    padding: {{ block.settings.badge_padding_vertical }}px {{ block.settings.badge_padding_horizontal }}px;
+    border-radius: {{ block.settings.badge_border_radius }}px;
+    border: {{ block.settings.badge_border_width }}px solid {{ block.settings.badge_border_color }};
+    background-color: {{ block.settings.badge_background_color }};
+    color: {{ block.settings.badge_text_color }};
+    font-size: {{ block.settings.badge_font_size }}px;
+    font-weight: {{ block.settings.badge_font_weight }};
+    text-transform: {{ block.settings.badge_text_transform }};
+    white-space: nowrap;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-product-image-{{ ai_gen_id }} {
+      width: {{ block.settings.image_width_mobile }}px;
+      height: {{ block.settings.image_height_mobile }}px;
+    }
+  }
+{% endstyle %}
+
+<scrolling-collection-{{ ai_gen_id }}
+  class="ai-scrolling-collection-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  {% if block.settings.collection != blank %}
+    <div class="ai-scrolling-collection-wrapper-{{ ai_gen_id }}">
+      {% liquid
+        assign products = block.settings.collection.products
+        assign products_count = products.size
+        assign desktop_visible = 8
+        assign mobile_visible = 5
+        assign total_duplicates = desktop_visible | plus: 2
+      %}
+
+      <div class="ai-scrolling-collection-track-{{ ai_gen_id }}">
+        {% for i in (1..total_duplicates) %}
+          {% for product in products %}
+            <div class="ai-product-card-{{ ai_gen_id }}">
+              <a href="{{ product.url }}">
+                {% if product.featured_image %}
+                  <img
+                    src="{{ product.featured_image | image_url: width: 600 }}"
+                    alt="{{ product.featured_image.alt | escape }}"
+                    class="ai-product-image-{{ ai_gen_id }}"
+                    loading="lazy"
+                    width="600"
+                    height="600"
+                  >
+                {% else %}
+                  <div class="ai-product-image-{{ ai_gen_id }}" style="background-color: #f4f4f4;"></div>
+                {% endif %}
+              </a>
+
+              <div class="ai-product-info-{{ ai_gen_id }}">
+                <div class="ai-product-badges-{{ ai_gen_id }}">
+                  <div class="ai-product-badge-{{ ai_gen_id }}">
+                    {{ product.price | money_with_currency }}
+                  </div>
+
+                  {% liquid
+                    assign size_option = null
+                    for option in product.options_with_values
+                      assign option_name_downcase = option.name | downcase
+                      if option_name_downcase == 'size'
+                        assign size_option = option
+                        break
+                      endif
+                    endfor
+                  %}
+
+                  {% if size_option != null and size_option.values.size > 0 %}
+                    <div class="ai-product-badge-{{ ai_gen_id }}">
+                      {% if block.settings.size_display == 'first' %}
+                        {{ size_option.values.first }}
+                      {% elsif block.settings.size_display == 'range' %}
+                        {% if size_option.values.size == 1 %}
+                          {{ size_option.values.first }}
+                        {% else %}
+                          {{ size_option.values.first }} - {{ size_option.values.last }}
+                        {% endif %}
+                      {% elsif block.settings.size_display == 'count' %}
+                        {{ size_option.values.size }} sizes
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        {% endfor %}
+      </div>
+
+      <div class="ai-scrolling-collection-track-{{ ai_gen_id }}">
+        {% for i in (1..total_duplicates) %}
+          {% for product in products %}
+            <div class="ai-product-card-{{ ai_gen_id }}">
+              <a href="{{ product.url }}">
+                {% if product.featured_image %}
+                  <img
+                    src="{{ product.featured_image | image_url: width: 600 }}"
+                    alt="{{ product.featured_image.alt | escape }}"
+                    class="ai-product-image-{{ ai_gen_id }}"
+                    loading="lazy"
+                    width="600"
+                    height="600"
+                  >
+                {% else %}
+                  <div class="ai-product-image-{{ ai_gen_id }}" style="background-color: #f4f4f4;"></div>
+                {% endif %}
+              </a>
+
+              <div class="ai-product-info-{{ ai_gen_id }}">
+                <div class="ai-product-badges-{{ ai_gen_id }}">
+                  <div class="ai-product-badge-{{ ai_gen_id }}">
+                    {{ product.price | money_with_currency }}
+                  </div>
+
+                  {% liquid
+                    assign size_option = null
+                    for option in product.options_with_values
+                      assign option_name_downcase = option.name | downcase
+                      if option_name_downcase == 'size'
+                        assign size_option = option
+                        break
+                      endif
+                    endfor
+                  %}
+
+                  {% if size_option != null and size_option.values.size > 0 %}
+                    <div class="ai-product-badge-{{ ai_gen_id }}">
+                      {% if block.settings.size_display == 'first' %}
+                        {{ size_option.values.first }}
+                      {% elsif block.settings.size_display == 'range' %}
+                        {% if size_option.values.size == 1 %}
+                          {{ size_option.values.first }}
+                        {% else %}
+                          {{ size_option.values.first }} - {{ size_option.values.last }}
+                        {% endif %}
+                      {% elsif block.settings.size_display == 'count' %}
+                        {{ size_option.values.size }} sizes
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        {% endfor %}
+      </div>
+    </div>
+  {% else %}
+    <div style="text-align: center; padding: 60px 20px; color: #666;">
+      Select a collection to display products
+    </div>
+  {% endif %}
+</scrolling-collection-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class ScrollingCollection{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.wrapper = this.querySelector('.ai-scrolling-collection-wrapper-{{ ai_gen_id }}');
+        if (this.wrapper) {
+          this.setupAccessibility();
+        }
+      }
+
+      setupAccessibility() {
+        const links = this.querySelectorAll('a');
+        links.forEach(link => {
+          link.setAttribute('tabindex', '0');
+        });
+      }
+    }
+
+    customElements.define('scrolling-collection-{{ ai_gen_id }}', ScrollingCollection{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Scrolling collection",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Collection"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "select",
+      "id": "size_display",
+      "label": "Size display",
+      "options": [
+        {
+          "value": "first",
+          "label": "First size"
+        },
+        {
+          "value": "range",
+          "label": "Size range"
+        },
+        {
+          "value": "count",
+          "label": "Size count"
+        }
+      ],
+      "default": "first"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "label": "Section padding",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "product_gap",
+      "label": "Product gap",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Card gap",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "info_gap",
+      "label": "Info gap",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "range",
+      "id": "scroll_speed",
+      "label": "Scroll speed",
+      "min": 20,
+      "max": 200,
+      "step": 10,
+      "unit": "s",
+      "default": 80
+    },
+    {
+      "type": "checkbox",
+      "id": "pause_on_hover",
+      "label": "Pause on hover",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "header",
+      "content": "Product image"
+    },
+    {
+      "type": "range",
+      "id": "image_width_desktop",
+      "label": "Desktop width",
+      "min": 100,
+      "max": 400,
+      "step": 10,
+      "unit": "px",
+      "default": 200
+    },
+    {
+      "type": "range",
+      "id": "image_height_desktop",
+      "label": "Desktop height",
+      "min": 100,
+      "max": 400,
+      "step": 10,
+      "unit": "px",
+      "default": 200
+    },
+    {
+      "type": "range",
+      "id": "image_width_mobile",
+      "label": "Mobile width",
+      "min": 80,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "default": 140
+    },
+    {
+      "type": "range",
+      "id": "image_height_mobile",
+      "label": "Mobile height",
+      "min": 80,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "default": 140
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Badge style"
+    },
+    {
+      "type": "color",
+      "id": "badge_background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "badge_text_color",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "badge_border_color",
+      "label": "Border",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "range",
+      "id": "badge_border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "badge_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "badge_padding_vertical",
+      "label": "Padding vertical",
+      "min": 2,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "badge_padding_horizontal",
+      "label": "Padding horizontal",
+      "min": 4,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "badge_gap",
+      "label": "Badge gap",
+      "min": 4,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Badge typography"
+    },
+    {
+      "type": "range",
+      "id": "badge_font_size",
+      "label": "Font size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "select",
+      "id": "badge_font_weight",
+      "label": "Font weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semibold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "select",
+      "id": "badge_text_transform",
+      "label": "Text case",
+      "options": [
+        {
+          "value": "none",
+          "label": "Default"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        }
+      ],
+      "default": "none"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Scrolling collection"
+    }
+  ]
+}
+{% endschema %}

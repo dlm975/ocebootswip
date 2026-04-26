@@ -1,0 +1,296 @@
+{% doc %}
+  @prompt
+    a product description as a dropdown, make it smaller
+
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-product-dropdown-{{ ai_gen_id }} {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .ai-dropdown-trigger-{{ ai_gen_id }} {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: {{ block.settings.padding }}px;
+    background-color: {{ block.settings.background_color }};
+    color: {{ block.settings.text_color }};
+    border: {{ block.settings.border_width }}px solid {{ block.settings.border_color }};
+    border-radius: {{ block.settings.border_radius }}px;
+    cursor: pointer;
+    font-size: {{ block.settings.font_size }}px;
+    transition: all 0.3s ease;
+  }
+
+  .ai-dropdown-trigger-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.hover_background_color }};
+    color: {{ block.settings.hover_text_color }};
+  }
+
+  .ai-dropdown-title-{{ ai_gen_id }} {
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .ai-dropdown-icon-{{ ai_gen_id }} {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.3s ease;
+  }
+
+  .ai-dropdown-icon-{{ ai_gen_id }}.open {
+    transform: rotate(180deg);
+  }
+
+  .ai-dropdown-content-{{ ai_gen_id }} {
+    max-height: 0;
+    overflow: hidden;
+    background-color: {{ block.settings.content_background_color }};
+    color: {{ block.settings.content_text_color }};
+    border: {{ block.settings.border_width }}px solid {{ block.settings.border_color }};
+    border-top: none;
+    border-radius: 0 0 {{ block.settings.border_radius }}px {{ block.settings.border_radius }}px;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+  }
+
+  .ai-dropdown-content-{{ ai_gen_id }}.open {
+    max-height: 300px;
+    padding: {{ block.settings.padding }}px;}
+
+  .ai-dropdown-description-{{ ai_gen_id }} {
+    font-size: {{ block.settings.content_font_size }}px;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .ai-dropdown-description-{{ ai_gen_id }} p:first-child {
+    margin-top: 0;
+  }
+
+  .ai-dropdown-description-{{ ai_gen_id }} p:last-child {
+    margin-bottom: 0;
+  }
+
+  .ai-dropdown-empty-state-{{ ai_gen_id }} {
+    font-style: italic;
+    color: #999;
+    text-align: center;
+    padding: 12px;
+    font-size: 12px;
+  }
+{% endstyle %}
+
+<product-description-dropdown-{{ ai_gen_id }}
+  class="ai-product-dropdown-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <button
+    class="ai-dropdown-trigger-{{ ai_gen_id }}"
+    aria-expanded="false"
+    aria-controls="dropdown-content-{{ ai_gen_id }}"
+  >
+    <h3 class="ai-dropdown-title-{{ ai_gen_id }}">
+      {{ block.settings.dropdown_title }}
+    </h3>
+    <svg
+      class="ai-dropdown-icon-{{ ai_gen_id }}"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <polyline points="6,9 12,15 18,9"></polyline>
+    </svg>
+  </button>
+
+  <div
+    id="dropdown-content-{{ ai_gen_id }}"
+    class="ai-dropdown-content-{{ ai_gen_id }}"
+  >
+    {% if product.description != blank %}
+      <div class="ai-dropdown-description-{{ ai_gen_id }}">
+        {{ product.description }}
+      </div>
+    {% else %}
+      <div class="ai-dropdown-empty-state-{{ ai_gen_id }}">
+        Add a product description to display content here
+      </div>
+    {% endif %}
+  </div>
+</product-description-dropdown-{{ ai_gen_id }}><script>
+  (function() {
+    class ProductDescriptionDropdown{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.trigger = this.querySelector('.ai-dropdown-trigger-{{ ai_gen_id }}');
+        this.content = this.querySelector('.ai-dropdown-content-{{ ai_gen_id }}');
+        this.icon = this.querySelector('.ai-dropdown-icon-{{ ai_gen_id }}');
+
+        this.trigger.addEventListener('click', this.toggleDropdown.bind(this));
+      }
+
+      toggleDropdown() {
+        const isOpen = this.content.classList.contains('open');
+        
+        if (isOpen) {
+          this.closeDropdown();
+        } else {
+          this.openDropdown();
+        }
+      }
+
+      openDropdown() {
+        this.content.classList.add('open');
+        this.icon.classList.add('open');
+        this.trigger.setAttribute('aria-expanded', 'true');
+      }
+
+      closeDropdown() {
+        this.content.classList.remove('open');
+        this.icon.classList.remove('open');
+        this.trigger.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    customElements.define('product-description-dropdown-{{ ai_gen_id }}', ProductDescriptionDropdown{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Product dropdown",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "dropdown_title",
+      "label": "Dropdown title",
+      "default": "Description"
+    },
+    {
+      "type": "header",
+      "content": "Trigger style"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "hover_background_color",
+      "label": "Hover background color",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "color",
+      "id": "hover_text_color",
+      "label": "Hover text color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Font size",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Content style"
+    },
+    {
+      "type": "color",
+      "id": "content_background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "content_text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "content_font_size",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "label": "Font size",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "padding",
+      "min": 4,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "min": 0,
+      "max": 3,
+      "step": 1,
+      "unit": "px",
+      "label": "Border width",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#e6e6e6"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product dropdown"
+    }
+  ],
+  "tag": null
+}
+{% endschema %}

@@ -1,0 +1,436 @@
+{% doc %}
+  @prompt
+    A Variant picker dropdown pill. , Customisable dropdown arrow position. If a Variant does not have multiple options, there should be no dropdown menu that opens out - just a starionary pill. The pills should be stacked side by side adapting text and pill size based on screen width, The dropdown arrow should sit in the center (top to bottom) of the pill. The pills should sit side by side horizontally.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-variant-dropdown-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+  }
+
+  .ai-variant-dropdown__container-{{ ai_gen_id }} {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: {{ block.settings.pill_gap }}px;
+    overflow-x: auto;
+  }
+
+  .ai-variant-dropdown__wrapper-{{ ai_gen_id }} {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ai-variant-dropdown__label-{{ ai_gen_id }} {
+    display: block;
+    margin-bottom: 8px;
+    font-size: {{ block.settings.label_font_size }}px;
+    color: {{ block.settings.label_color }};
+    font-weight: 500;
+  }
+
+  .ai-variant-dropdown__select-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .ai-variant-dropdown__select-{{ ai_gen_id }} {
+    appearance: none;
+    width: 100%;
+    padding: {{ block.settings.padding_vertical }}px {{ block.settings.padding_horizontal }}px;
+    {% if block.settings.arrow_position == 'right' %}
+      padding-right: calc({{ block.settings.padding_horizontal }}px + 24px);
+    {% elsif block.settings.arrow_position == 'left' %}
+      padding-left: calc({{ block.settings.padding_horizontal }}px + 24px);
+    {% endif %}
+    background-color: {{ block.settings.background_color }};
+    color: {{ block.settings.text_color }};
+    border: {{ block.settings.border_width }}px solid {{ block.settings.border_color }};
+    border-radius: {{ block.settings.border_radius }}px;
+    font-size: {{ block.settings.text_font_size }}px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: {{ block.settings.text_alignment }};
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ai-variant-dropdown__select-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.hover_background_color }};
+    border-color: {{ block.settings.hover_border_color }};
+  }
+
+  .ai-variant-dropdown__select-{{ ai_gen_id }}:focus {
+    outline: 2px solid {{ block.settings.focus_color }};
+    outline-offset: 2px;
+    border-color: {{ block.settings.focus_color }};
+  }
+
+  .ai-variant-dropdown__select-{{ ai_gen_id }}[data-single-option] {
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .ai-variant-dropdown__icon-{{ ai_gen_id }} {
+    position: absolute;
+    {% if block.settings.arrow_position == 'right' %}
+      right: {{ block.settings.padding_horizontal }}px;
+    {% elsif block.settings.arrow_position == 'left' %}
+      left: {{ block.settings.padding_horizontal }}px;
+    {% endif %}
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: {{ block.settings.text_color }};
+    width: 16px;
+    height: 16px;
+  }
+
+  .ai-variant-dropdown__icon-{{ ai_gen_id }}--hidden {
+    display: none;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-variant-dropdown__container-{{ ai_gen_id }} {
+      flex-wrap: wrap;
+    }
+
+    .ai-variant-dropdown__wrapper-{{ ai_gen_id }} {
+      flex: 1 1 calc(50% - {{ block.settings.pill_gap | divided_by: 2 }}px);
+      min-width: calc(50% - {{ block.settings.pill_gap | divided_by: 2 }}px);
+    }
+  }
+{% endstyle %}
+
+<variant-dropdown-{{ ai_gen_id }}
+  class="ai-variant-dropdown-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  {% if product.has_only_default_variant == false %}
+    <div class="ai-variant-dropdown__container-{{ ai_gen_id }}">
+      {% for option in product.options_with_values %}
+        {% assign option_value_count = option.values | size %}
+        <div class="ai-variant-dropdown__wrapper-{{ ai_gen_id }}">
+          {% if block.settings.show_label %}
+            <label
+              for="ai-variant-dropdown-{{ ai_gen_id }}-{{ option.position }}"
+              class="ai-variant-dropdown__label-{{ ai_gen_id }}"
+            >
+              {{ option.name }}
+            </label>
+          {% endif %}
+
+          <div class="ai-variant-dropdown__select-wrapper-{{ ai_gen_id }}">
+            <select
+              id="ai-variant-dropdown-{{ ai_gen_id }}-{{ option.position }}"
+              class="ai-variant-dropdown__select-{{ ai_gen_id }}"
+              data-option-position="{{ option.position }}"
+              {% if option_value_count == 1 %}
+                data-single-option
+              {% endif %}
+              aria-label="{{ option.name }}"
+            >
+              {% for value in option.values %}
+                <option
+                  value="{{ value | escape }}"
+                  {% if option.selected_value == value %}
+                    selected
+                  {% endif %}
+                >
+                  {{ value }}
+                </option>
+              {% endfor %}
+            </select>
+
+            <svg
+              class="ai-variant-dropdown__icon-{{ ai_gen_id }} {% if option_value_count == 1 %}ai-variant-dropdown__icon-{{ ai_gen_id }}--hidden{% endif %}"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</variant-dropdown-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class VariantDropdown{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.product = null;
+        this.variants = [];
+      }
+
+      connectedCallback() {
+        this.initializeProduct();
+        this.setupEventListeners();
+      }
+
+      initializeProduct() {
+        const productJson = document.querySelector('[data-product-json]');
+        if (productJson) {
+          this.product = JSON.parse(productJson.textContent);
+          this.variants = this.product.variants || [];
+        }
+      }
+
+      setupEventListeners() {
+        const selects = this.querySelectorAll('.ai-variant-dropdown__select-{{ ai_gen_id }}');
+        
+        selects.forEach((select) => {
+          if (!select.hasAttribute('data-single-option')) {
+            select.addEventListener('change', () => {
+              this.handleVariantChange();
+            });
+          }
+        });
+      }
+
+      handleVariantChange() {
+        const selectedOptions = this.getSelectedOptions();
+        const matchedVariant = this.findMatchingVariant(selectedOptions);
+
+        if (matchedVariant) {
+          this.updateURL(matchedVariant.id);
+          this.dispatchVariantChangeEvent(matchedVariant);
+        }
+      }
+
+      getSelectedOptions() {
+        const selects = this.querySelectorAll('.ai-variant-dropdown__select-{{ ai_gen_id }}');
+        const options = [];
+        
+        selects.forEach((select) => {
+          options.push(select.value);
+        });
+        
+        return options;
+      }
+
+      findMatchingVariant(selectedOptions) {
+        return this.variants.find((variant) => {
+          return selectedOptions.every((option, index) => {
+            return variant.options[index] === option;
+          });
+        });
+      }
+
+      updateURL(variantId) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('variant', variantId);
+        window.history.replaceState({}, '', url);
+      }
+
+      dispatchVariantChangeEvent(variant) {
+        this.dispatchEvent(
+          new CustomEvent('variant:change', {
+            detail: { variant },
+            bubbles: true,
+            composed: true
+          })
+        );
+      }
+    }
+
+    customElements.define('variant-dropdown-{{ ai_gen_id }}', VariantDropdown{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Variant dropdown pill",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Label"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_label",
+      "label": "Show label",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "label_font_size",
+      "label": "Label font size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Label color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Dropdown"
+    },
+    {
+      "type": "range",
+      "id": "text_font_size",
+      "label": "Text size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical",
+      "label": "Vertical padding",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "pill_gap",
+      "label": "Gap between pills",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Arrow"
+    },
+    {
+      "type": "select",
+      "id": "arrow_position",
+      "label": "Arrow position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "right"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border",
+      "default": "#00000021"
+    },
+    {
+      "type": "color",
+      "id": "hover_background_color",
+      "label": "Hover background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "hover_border_color",
+      "label": "Hover border",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "color",
+      "id": "focus_color",
+      "label": "Focus outline",
+      "default": "#000000"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Variant dropdown pill"
+    }
+  ]
+}
+{% endschema %}

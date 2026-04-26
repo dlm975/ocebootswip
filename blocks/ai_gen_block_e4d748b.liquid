@@ -1,0 +1,332 @@
+{% doc %}
+  @prompt
+    A HERO SECTION. A background color changer. A large text section. There should be an animation on this text as the page loads. the animation should be a powerful enlarge and dissolve in type animation.  a subheading underneath this with an animation whereby the words are dissolved in after the Main heading animation is completed. , THE MAIN HEADING MUST HAVE ABILITY TO SPAN ACROSS MULTIPLE LINES LIKE A PARAGRAPH, MUST HAVE FONT SELECTION CAPAPBILITY, each line of text in the heading section should load sequentially. 
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-hero-section-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    min-height: {{ block.settings.section_height }}vh;
+    background-color: {{ block.settings.background_color }};
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .ai-hero-content-{{ ai_gen_id }} {
+    max-width: 1200px;
+    width: 100%;
+    text-align: {{ block.settings.text_alignment }};
+  }
+
+  .ai-hero-heading-{{ ai_gen_id }} {
+    font-family: {{ block.settings.heading_font.family }}, {{ block.settings.heading_font.fallback_families }};
+    font-weight: {{ block.settings.heading_font.weight }};
+    font-style: {{ block.settings.heading_font.style }};
+    font-size: {{ block.settings.heading_size }}px;
+    color: {{ block.settings.heading_color }};
+    margin: 0 0 20px;
+    line-height: 1.2;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .ai-hero-heading-line-{{ ai_gen_id }} {
+    display: block;
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  .ai-hero-heading-line-{{ ai_gen_id }}.ai-line-animated-{{ ai_gen_id }} {
+    animation: ai-hero-enlarge-dissolve-{{ ai_gen_id }} 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  .ai-hero-subheading-{{ ai_gen_id }} {
+    font-family: {{ block.settings.subheading_font.family }}, {{ block.settings.subheading_font.fallback_families }};
+    font-weight: {{ block.settings.subheading_font.weight }};
+    font-style: {{ block.settings.subheading_font.style }};
+    font-size: {{ block.settings.subheading_size }}px;
+    color: {{ block.settings.subheading_color }};
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .ai-hero-subheading-word-{{ ai_gen_id }} {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .ai-hero-subheading-word-{{ ai_gen_id }}.ai-word-animated-{{ ai_gen_id }} {
+    animation: ai-hero-word-dissolve-{{ ai_gen_id }} 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+
+  @keyframes ai-hero-enlarge-dissolve-{{ ai_gen_id }} {
+    0% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    60% {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes ai-hero-word-dissolve-{{ ai_gen_id }} {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-hero-heading-{{ ai_gen_id }} {
+      font-size: {{ block.settings.heading_size | times: 0.6 }}px;
+    }
+
+    .ai-hero-subheading-{{ ai_gen_id }} {
+      font-size: {{ block.settings.subheading_size | times: 0.8 }}px;
+    }
+
+    .ai-hero-section-{{ ai_gen_id }} {
+      min-height: {{ block.settings.section_height | times: 0.7 }}vh;
+      padding: 40px 20px;
+    }
+  }
+{% endstyle %}
+
+<hero-section-{{ ai_gen_id }}
+  class="ai-hero-section-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-hero-content-{{ ai_gen_id }}">
+    {% if block.settings.heading != blank %}
+      <h1 class="ai-hero-heading-{{ ai_gen_id }}">
+        {% assign lines = block.settings.heading | newline_to_br | split: '<br />' %}
+        {% for line in lines %}
+          {% if line != blank %}
+            <span class="ai-hero-heading-line-{{ ai_gen_id }}">{{ line }}</span>
+          {% endif %}
+        {% endfor %}
+      </h1>
+    {% endif %}
+
+    {% if block.settings.subheading != blank %}
+      <div class="ai-hero-subheading-{{ ai_gen_id }}">
+        {% assign words = block.settings.subheading | split: ' ' %}
+        {% for word in words %}
+          <span class="ai-hero-subheading-word-{{ ai_gen_id }}">{{ word }}</span>{% unless forloop.last %} {% endunless %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</hero-section-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class HeroSection{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.lineAnimationDuration = 1000;
+        this.lineAnimationDelay = 300;
+        this.wordAnimationDelay = 150;
+      }
+
+      connectedCallback() {
+        this.headingLines = this.querySelectorAll('.ai-hero-heading-line-{{ ai_gen_id }}');
+        this.subheadingWords = this.querySelectorAll('.ai-hero-subheading-word-{{ ai_gen_id }}');
+        
+        if ('IntersectionObserver' in window) {
+          this.setupIntersectionObserver();
+        } else {
+          this.animateContent();
+        }
+      }
+
+      setupIntersectionObserver() {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              this.animateContent();
+              observer.unobserve(entry.target);
+            }
+          });
+        }, {
+          threshold: 0.2
+        });
+
+        observer.observe(this);
+      }
+
+      animateContent() {
+        if (this.headingLines.length > 0) {
+          this.animateHeadingLines();
+        }
+      }
+
+      animateHeadingLines() {
+        this.headingLines.forEach((line, index) => {
+          setTimeout(() => {
+            line.classList.add('ai-line-animated-{{ ai_gen_id }}');
+            
+            if (index === this.headingLines.length - 1 && this.subheadingWords.length > 0) {
+              setTimeout(() => {
+                this.animateSubheadingWords();
+              }, this.lineAnimationDuration);
+            }
+          }, index * this.lineAnimationDelay);
+        });
+      }
+
+      animateSubheadingWords() {
+        this.subheadingWords.forEach((word, index) => {
+          setTimeout(() => {
+            word.classList.add('ai-word-animated-{{ ai_gen_id }}');
+          }, index * this.wordAnimationDelay);
+        });
+      }
+    }
+
+    customElements.define('hero-section-{{ ai_gen_id }}', HeroSection{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Animated hero section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Welcome to Our Store"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Discover amazing products crafted with care and passion"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "section_height",
+      "label": "Section height",
+      "min": 40,
+      "max": 100,
+      "step": 5,
+      "unit": "vh",
+      "default": 70
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Heading style"
+    },
+    {
+      "type": "font_picker",
+      "id": "heading_font",
+      "label": "Font",
+      "default": "inter_i8"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Size",
+      "min": 24,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 72
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Subheading style"
+    },
+    {
+      "type": "font_picker",
+      "id": "subheading_font",
+      "label": "Font",
+      "default": "inter_i4"
+    },
+    {
+      "type": "range",
+      "id": "subheading_size",
+      "label": "Size",
+      "min": 12,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "subheading_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Animated hero section"
+    }
+  ],
+  "tag": null
+}
+{% endschema %}

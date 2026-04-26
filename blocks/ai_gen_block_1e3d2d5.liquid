@@ -1,0 +1,1020 @@
+{% doc %}
+  @prompt
+    BEFORE YOU EVEN START: as this is a navigation bar, it MUST constantly sit above all other sections in the theme so it is visible at all times. - Create a sticky navigation bar that stays fixed at the bottom of the page at all times. The bar should be a long horizontal rectangle with heavily rounded edges (large border radius). Add a prominent shadow effect to create a 3D appearance that makes it appear to float above the page. The navigation bar should contain customizable menu links and remain visible even when scrolling. Use a glass like texture for the background . Create an opacity slider for this. Ideally the content in the bar will be "Shop By Size" that when clicked, the bar will then present with 3 options: US Size, UK Size, EU Size. When the size type options is clicked, a list will expanded onto the screen with the range of size options, each linked to a collection in my store, Make sure that behaviourally it is "at FRONT" at all times, with no other elements hovering above. Provide ability to change main button text and size type label font. Also make the "Shop By Size" text disappear on the size type label screen.
+    
+    
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-sticky-nav-{{ ai_gen_id }} {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    width: 90%;
+    max-width: {{ block.settings.max_width }}px;
+    display: block;
+  }
+
+  .ai-sticky-nav-container-{{ ai_gen_id }} {
+    background: {{ block.settings.background_color }};
+    backdrop-filter: blur({{ block.settings.blur_amount }}px);
+    border-radius: {{ block.settings.border_radius }}px;
+    padding: {{ block.settings.padding_vertical }}px {{ block.settings.padding_horizontal }}px;
+    box-shadow: 0 {{ block.settings.shadow_offset_y }}px {{ block.settings.shadow_blur }}px {{ block.settings.shadow_spread }}px rgba(0, 0, 0, {{ block.settings.shadow_opacity | divided_by: 100.0 }});
+    opacity: {{ block.settings.bar_opacity | divided_by: 100.0 }};
+    transition: all 0.3s ease;
+  }
+
+  .ai-sticky-nav-main-button-{{ ai_gen_id }} {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: {{ block.settings.text_color }};
+    font-family: {{ block.settings.main_button_font.family }}, {{ block.settings.main_button_font.fallback_families }};
+    font-weight: {{ block.settings.main_button_font.weight }};
+    font-size: {{ block.settings.main_button_font_size }}px;
+  }
+
+  .ai-sticky-nav-main-button-{{ ai_gen_id }}:hover {
+    opacity: 0.8;
+  }
+
+  .ai-sticky-nav-icon-{{ ai_gen_id }} {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+  }
+
+  .ai-sticky-nav-icon-{{ ai_gen_id }}.rotated {
+    transform: rotate(180deg);
+  }
+
+  .ai-sticky-nav-size-types-{{ ai_gen_id }} {
+    display: none;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .ai-sticky-nav-size-types-{{ ai_gen_id }}.active {
+    display: flex;
+  }
+
+  .ai-sticky-nav-size-type-button-{{ ai_gen_id }} {
+    background: none;
+    border: 2px solid {{ block.settings.text_color }};
+    border-radius: {{ block.settings.size_button_radius }}px;
+    padding: 10px 20px;
+    cursor: pointer;
+    color: {{ block.settings.text_color }};
+    font-family: {{ block.settings.size_type_font.family }}, {{ block.settings.size_type_font.fallback_families }};
+    font-weight: {{ block.settings.size_type_font.weight }};
+    font-size: {{ block.settings.size_type_font_size }}px;
+    transition: all 0.3s ease;
+  }
+
+  .ai-sticky-nav-size-type-button-{{ ai_gen_id }}:hover {
+    background: {{ block.settings.text_color }};
+    color: {{ block.settings.background_color }};
+  }
+
+  .ai-sticky-nav-size-list-{{ ai_gen_id }} {
+    position: fixed;
+    bottom: calc(20px + {{ block.settings.padding_vertical | times: 2 | plus: 60 }}px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: {{ block.settings.max_width }}px;
+    background: {{ block.settings.background_color }};
+    backdrop-filter: blur({{ block.settings.blur_amount }}px);
+    border-radius: {{ block.settings.border_radius }}px;
+    padding: 20px;
+    box-shadow: 0 {{ block.settings.shadow_offset_y }}px {{ block.settings.shadow_blur }}px {{ block.settings.shadow_spread }}px rgba(0, 0, 0, {{ block.settings.shadow_opacity | divided_by: 100.0 }});
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 9998;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  .ai-sticky-nav-size-list-{{ ai_gen_id }}.active {
+    opacity: {{ block.settings.bar_opacity | divided_by: 100.0 }};
+    visibility: visible;
+  }
+
+  .ai-sticky-nav-size-list-header-{{ ai_gen_id }} {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid {{ block.settings.text_color }};
+  }
+
+  .ai-sticky-nav-size-list-title-{{ ai_gen_id }} {
+    color: {{ block.settings.text_color }};
+    font-family: {{ block.settings.size_type_font.family }}, {{ block.settings.size_type_font.fallback_families }};
+    font-weight: {{ block.settings.size_type_font.weight }};
+    font-size: {{ block.settings.size_type_font_size }}px;
+    margin: 0;
+  }
+
+  .ai-sticky-nav-close-button-{{ ai_gen_id }} {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: {{ block.settings.text_color }};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-sticky-nav-close-button-{{ ai_gen_id }}:hover {
+    opacity: 0.7;
+  }
+
+  .ai-sticky-nav-size-grid-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 12px;
+  }
+
+  .ai-sticky-nav-size-link-{{ ai_gen_id }} {
+    display: block;
+    text-align: center;
+    padding: 12px;
+    background: none;
+    border: 2px solid {{ block.settings.text_color }};
+    border-radius: {{ block.settings.size_button_radius }}px;
+    color: {{ block.settings.text_color }};
+    text-decoration: none;
+    font-family: {{ block.settings.size_type_font.family }}, {{ block.settings.size_type_font.fallback_families }};
+    font-weight: {{ block.settings.size_type_font.weight }};
+    font-size: {{ block.settings.size_type_font_size }}px;
+    transition: all 0.3s ease;
+  }
+
+  .ai-sticky-nav-size-link-{{ ai_gen_id }}:hover {
+    background: {{ block.settings.text_color }};
+    color: {{ block.settings.background_color }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-sticky-nav-{{ ai_gen_id }} {
+      width: 95%;
+    }
+
+    .ai-sticky-nav-size-grid-{{ ai_gen_id }} {
+      grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+      gap: 8px;
+    }
+
+    .ai-sticky-nav-size-link-{{ ai_gen_id }} {
+      padding: 10px 8px;
+      font-size: {{ block.settings.size_type_font_size | times: 0.9 }}px;
+    }
+  }
+{% endstyle %}
+
+<sticky-nav-{{ ai_gen_id }} class="ai-sticky-nav-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-sticky-nav-container-{{ ai_gen_id }}">
+    <button
+      class="ai-sticky-nav-main-button-{{ ai_gen_id }}"
+      data-main-button
+      aria-label="{{ block.settings.main_button_text }}"
+      aria-expanded="false"
+    >
+      <span class="ai-sticky-nav-main-text-{{ ai_gen_id }}">{{ block.settings.main_button_text }}</span>
+      <svg
+        class="ai-sticky-nav-icon-{{ ai_gen_id }}"
+        data-icon
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </button>
+
+    <div class="ai-sticky-nav-size-types-{{ ai_gen_id }}" data-size-types>
+      <button
+        class="ai-sticky-nav-size-type-button-{{ ai_gen_id }}"
+        data-size-type="us"
+      >
+        {{ block.settings.us_size_label }}
+      </button>
+      <button
+        class="ai-sticky-nav-size-type-button-{{ ai_gen_id }}"
+        data-size-type="uk"
+      >
+        {{ block.settings.uk_size_label }}
+      </button>
+      <button
+        class="ai-sticky-nav-size-type-button-{{ ai_gen_id }}"
+        data-size-type="eu"
+      >
+        {{ block.settings.eu_size_label }}
+      </button>
+    </div>
+  </div>
+
+  <div class="ai-sticky-nav-size-list-{{ ai_gen_id }}" data-size-list-us>
+    <div class="ai-sticky-nav-size-list-header-{{ ai_gen_id }}">
+      <h3 class="ai-sticky-nav-size-list-title-{{ ai_gen_id }}">{{ block.settings.us_size_label }}</h3>
+      <button class="ai-sticky-nav-close-button-{{ ai_gen_id }}" data-close-list aria-label="Close">
+        <svg
+          width="24"
+          height="24"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <div class="ai-sticky-nav-size-grid-{{ ai_gen_id }}">
+      {% for i in (1..12) %}
+        {% assign size_key = 'us_size_' | append: i %}
+        {% assign collection_key = 'us_collection_' | append: i %}
+        {% if block.settings[size_key] != blank and block.settings[collection_key] != blank %}
+          <a
+            href="{{ block.settings[collection_key].url }}"
+            class="ai-sticky-nav-size-link-{{ ai_gen_id }}"
+          >
+            {{ block.settings[size_key] }}
+          </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="ai-sticky-nav-size-list-{{ ai_gen_id }}" data-size-list-uk>
+    <div class="ai-sticky-nav-size-list-header-{{ ai_gen_id }}">
+      <h3 class="ai-sticky-nav-size-list-title-{{ ai_gen_id }}">{{ block.settings.uk_size_label }}</h3>
+      <button class="ai-sticky-nav-close-button-{{ ai_gen_id }}" data-close-list aria-label="Close">
+        <svg
+          width="24"
+          height="24"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <div class="ai-sticky-nav-size-grid-{{ ai_gen_id }}">
+      {% for i in (1..12) %}
+        {% assign size_key = 'uk_size_' | append: i %}
+        {% assign collection_key = 'uk_collection_' | append: i %}
+        {% if block.settings[size_key] != blank and block.settings[collection_key] != blank %}
+          <a
+            href="{{ block.settings[collection_key].url }}"
+            class="ai-sticky-nav-size-link-{{ ai_gen_id }}"
+          >
+            {{ block.settings[size_key] }}
+          </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="ai-sticky-nav-size-list-{{ ai_gen_id }}" data-size-list-eu>
+    <div class="ai-sticky-nav-size-list-header-{{ ai_gen_id }}">
+      <h3 class="ai-sticky-nav-size-list-title-{{ ai_gen_id }}">{{ block.settings.eu_size_label }}</h3>
+      <button class="ai-sticky-nav-close-button-{{ ai_gen_id }}" data-close-list aria-label="Close">
+        <svg
+          width="24"
+          height="24"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <div class="ai-sticky-nav-size-grid-{{ ai_gen_id }}">
+      {% for i in (1..12) %}
+        {% assign size_key = 'eu_size_' | append: i %}
+        {% assign collection_key = 'eu_collection_' | append: i %}
+        {% if block.settings[size_key] != blank and block.settings[collection_key] != blank %}
+          <a
+            href="{{ block.settings[collection_key].url }}"
+            class="ai-sticky-nav-size-link-{{ ai_gen_id }}"
+          >
+            {{ block.settings[size_key] }}
+          </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</sticky-nav-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class StickyNav{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.mainButton = this.querySelector('[data-main-button]');
+        this.mainText = this.querySelector('.ai-sticky-nav-main-text-{{ ai_gen_id }}');
+        this.icon = this.querySelector('[data-icon]');
+        this.sizeTypesContainer = this.querySelector('[data-size-types]');
+        this.sizeTypeButtons = this.querySelectorAll('[data-size-type]');
+        this.sizeLists = {
+          us: this.querySelector('[data-size-list-us]'),
+          uk: this.querySelector('[data-size-list-uk]'),
+          eu: this.querySelector('[data-size-list-eu]')
+        };
+        this.closeButtons = this.querySelectorAll('[data-close-list]');
+        this.currentState = 'main';
+      }
+
+      connectedCallback() {
+        this.setupEventListeners();
+      }
+
+      setupEventListeners() {
+        this.mainButton.addEventListener('click', () => this.toggleSizeTypes());
+
+        this.sizeTypeButtons.forEach(button => {
+          button.addEventListener('click', (e) => {
+            const sizeType = e.currentTarget.getAttribute('data-size-type');
+            this.showSizeList(sizeType);
+          });
+        });
+
+        this.closeButtons.forEach(button => {
+          button.addEventListener('click', () => this.closeSizeList());
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!this.contains(e.target)) {
+            this.resetToMain();
+          }
+        });
+      }
+
+      toggleSizeTypes() {
+        if (this.currentState === 'main') {
+          this.mainText.style.display = 'none';
+          this.sizeTypesContainer.classList.add('active');
+          this.icon.classList.add('rotated');
+          this.mainButton.setAttribute('aria-expanded', 'true');
+          this.currentState = 'sizeTypes';
+        } else {
+          this.resetToMain();
+        }
+      }
+
+      showSizeList(sizeType) {
+        Object.values(this.sizeLists).forEach(list => {
+          list.classList.remove('active');
+        });
+
+        if (this.sizeLists[sizeType]) {
+          this.sizeLists[sizeType].classList.add('active');
+          this.currentState = 'sizeList';
+        }
+      }
+
+      closeSizeList() {
+        Object.values(this.sizeLists).forEach(list => {
+          list.classList.remove('active');
+        });
+        this.currentState = 'sizeTypes';
+      }
+
+      resetToMain() {
+        this.mainText.style.display = '';
+        this.sizeTypesContainer.classList.remove('active');
+        this.icon.classList.remove('rotated');
+        this.mainButton.setAttribute('aria-expanded', 'false');
+        Object.values(this.sizeLists).forEach(list => {
+          list.classList.remove('active');
+        });
+        this.currentState = 'main';
+      }
+    }
+
+    customElements.define('sticky-nav-{{ ai_gen_id }}', StickyNav{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Sticky size navigation",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Main button"
+    },
+    {
+      "type": "text",
+      "id": "main_button_text",
+      "label": "Button text",
+      "default": "Shop By Size"
+    },
+    {
+      "type": "font_picker",
+      "id": "main_button_font",
+      "label": "Font",
+      "default": "inter_i5"
+    },
+    {
+      "type": "range",
+      "id": "main_button_font_size",
+      "label": "Font size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Size type labels"
+    },
+    {
+      "type": "text",
+      "id": "us_size_label",
+      "label": "US size label",
+      "default": "US Size"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_label",
+      "label": "UK size label",
+      "default": "UK Size"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_label",
+      "label": "EU size label",
+      "default": "EU Size"
+    },
+    {
+      "type": "font_picker",
+      "id": "size_type_font",
+      "label": "Font",
+      "default": "inter_i4"
+    },
+    {
+      "type": "range",
+      "id": "size_type_font_size",
+      "label": "Font size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "US sizes"
+    },
+    {
+      "type": "text",
+      "id": "us_size_1",
+      "label": "Size 1"
+    },
+    {
+      "type": "collection",
+      "id": "us_collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "text",
+      "id": "us_size_2",
+      "label": "Size 2"
+    },
+    {
+      "type": "collection",
+      "id": "us_collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "text",
+      "id": "us_size_3",
+      "label": "Size 3"
+    },
+    {
+      "type": "collection",
+      "id": "us_collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "text",
+      "id": "us_size_4",
+      "label": "Size 4"
+    },
+    {
+      "type": "collection",
+      "id": "us_collection_4",
+      "label": "Collection 4"
+    },
+    {
+      "type": "text",
+      "id": "us_size_5",
+      "label": "Size 5"
+    },
+    {
+      "type": "collection",
+      "id": "us_collection_5",
+      "label": "Collection 5"
+    },
+    {
+      "type": "text",
+      "id": "us_size_6",
+      "label": "Size 6"
+    },
+    {
+      "type": "collection",
+      "id": "us_collection_6",
+      "label": "Collection 6"
+    },
+    {
+      "type": "text",
+      "id": "us_size_7",
+      "label": "Size 7"
+    },
+    {
+      "type": "collection",
+      "id": "us_collection_7",
+      "label": "Collection 7"
+    },
+    {
+      "type": "text",
+      "id": "us_size_8",
+      "label": "Size 8"
+    },
+    {
+      "type": "collection",
+      "id": "us_collection_8",
+      "label": "Collection 8"
+    },
+    {
+      "type": "text",
+      "id": "us_size_9",
+      "label": "Size 9"
+    },
+    {
+      "type": "collection",
+      "id": "us_collection_9",
+      "label": "Collection 9"
+    },
+    {
+      "type": "text",
+      "id": "us_size_10",
+      "label": "Size 10"
+    },
+    {
+      "type": "collection",
+      "id": "us_collection_10",
+      "label": "Collection 10"
+    },
+    {
+      "type": "text",
+      "id": "us_size_11",
+      "label": "Size 11"
+    },
+    {
+      "type": "collection",
+      "id": "us_collection_11",
+      "label": "Collection 11"
+    },
+    {
+      "type": "text",
+      "id": "us_size_12",
+      "label": "Size 12"
+    },
+    {
+      "type": "collection",
+      "id": "us_collection_12",
+      "label": "Collection 12"
+    },
+    {
+      "type": "header",
+      "content": "UK sizes"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_1",
+      "label": "Size 1"
+    },
+    {
+      "type": "collection",
+      "id": "uk_collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_2",
+      "label": "Size 2"
+    },
+    {
+      "type": "collection",
+      "id": "uk_collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_3",
+      "label": "Size 3"
+    },
+    {
+      "type": "collection",
+      "id": "uk_collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_4",
+      "label": "Size 4"
+    },
+    {
+      "type": "collection",
+      "id": "uk_collection_4",
+      "label": "Collection 4"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_5",
+      "label": "Size 5"
+    },
+    {
+      "type": "collection",
+      "id": "uk_collection_5",
+      "label": "Collection 5"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_6",
+      "label": "Size 6"
+    },
+    {
+      "type": "collection",
+      "id": "uk_collection_6",
+      "label": "Collection 6"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_7",
+      "label": "Size 7"
+    },
+    {
+      "type": "collection",
+      "id": "uk_collection_7",
+      "label": "Collection 7"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_8",
+      "label": "Size 8"
+    },
+    {
+      "type": "collection",
+      "id": "uk_collection_8",
+      "label": "Collection 8"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_9",
+      "label": "Size 9"
+    },
+    {
+      "type": "collection",
+      "id": "uk_collection_9",
+      "label": "Collection 9"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_10",
+      "label": "Size 10"
+    },
+    {
+      "type": "collection",
+      "id": "uk_collection_10",
+      "label": "Collection 10"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_11",
+      "label": "Size 11"
+    },
+    {
+      "type": "collection",
+      "id": "uk_collection_11",
+      "label": "Collection 11"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_12",
+      "label": "Size 12"
+    },
+    {
+      "type": "collection",
+      "id": "uk_collection_12",
+      "label": "Collection 12"
+    },
+    {
+      "type": "header",
+      "content": "EU sizes"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_1",
+      "label": "Size 1"
+    },
+    {
+      "type": "collection",
+      "id": "eu_collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_2",
+      "label": "Size 2"
+    },
+    {
+      "type": "collection",
+      "id": "eu_collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_3",
+      "label": "Size 3"
+    },
+    {
+      "type": "collection",
+      "id": "eu_collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_4",
+      "label": "Size 4"
+    },
+    {
+      "type": "collection",
+      "id": "eu_collection_4",
+      "label": "Collection 4"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_5",
+      "label": "Size 5"
+    },
+    {
+      "type": "collection",
+      "id": "eu_collection_5",
+      "label": "Collection 5"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_6",
+      "label": "Size 6"
+    },
+    {
+      "type": "collection",
+      "id": "eu_collection_6",
+      "label": "Collection 6"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_7",
+      "label": "Size 7"
+    },
+    {
+      "type": "collection",
+      "id": "eu_collection_7",
+      "label": "Collection 7"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_8",
+      "label": "Size 8"
+    },
+    {
+      "type": "collection",
+      "id": "eu_collection_8",
+      "label": "Collection 8"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_9",
+      "label": "Size 9"
+    },
+    {
+      "type": "collection",
+      "id": "eu_collection_9",
+      "label": "Collection 9"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_10",
+      "label": "Size 10"
+    },
+    {
+      "type": "collection",
+      "id": "eu_collection_10",
+      "label": "Collection 10"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_11",
+      "label": "Size 11"
+    },
+    {
+      "type": "collection",
+      "id": "eu_collection_11",
+      "label": "Collection 11"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_12",
+      "label": "Size 12"
+    },
+    {
+      "type": "collection",
+      "id": "eu_collection_12",
+      "label": "Collection 12"
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Maximum width",
+      "min": 300,
+      "max": 1200,
+      "step": 50,
+      "unit": "px",
+      "default": 800
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "size_button_radius",
+      "label": "Size button radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical",
+      "label": "Vertical padding",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 16,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Glass effect"
+    },
+    {
+      "type": "range",
+      "id": "bar_opacity",
+      "label": "Opacity",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 90
+    },
+    {
+      "type": "range",
+      "id": "blur_amount",
+      "label": "Blur amount",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Shadow"
+    },
+    {
+      "type": "range",
+      "id": "shadow_offset_y",
+      "label": "Vertical offset",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "shadow_blur",
+      "label": "Blur",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "shadow_spread",
+      "label": "Spread",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "shadow_opacity",
+      "label": "Opacity",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "%",
+      "default": 20
+    }
+  ],
+  "presets": [
+    {
+      "name": "Sticky size navigation"
+    }
+  ]
+}
+{% endschema %}

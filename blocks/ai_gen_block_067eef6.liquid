@@ -1,0 +1,690 @@
+{% doc %}
+  @prompt
+    a testimonial section. 3 rows of testimonial cards. the cards are long rounded rectangle capsules with a circular pic, name and description. that should slide horizontally across the screen as the user scrolls to give an interactive feeling. each testimonial will be editable,  the padding between rows should be small. there should be 5 cards of testimonials per row. these rows should slide as the user scrolls down the screen, not automatically., the first row should begin with testimonial 2 in the center of screen. the second row should begin with testimonial 4 in the center of screen. the first row should begin with testimonial 2 in the center of screen. the background color should span the full width of screen., the section should fit tightly to the left side of the screen without any white space.  there should be no horizontal scrollability as the cards should slide themselves into view, disregard the tight to left comment. the section should be centered and cover full screen frame width, with no white/ dead space on either side, provide a setting to adjust section width and positioning
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-testimonials-wrapper-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+    padding: {{ block.settings.section_padding }}px 0;
+  }
+
+  .ai-testimonials-{{ ai_gen_id }} {
+    display: block;
+    width: {{ block.settings.section_width }}%;
+    {% if block.settings.section_alignment == 'left' %}
+      margin-left: 0;
+      margin-right: auto;
+    {% elsif block.settings.section_alignment == 'right' %}
+      margin-left: auto;
+      margin-right: 0;
+    {% else %}
+      margin-left: auto;
+      margin-right: auto;
+    {% endif %}
+    overflow: hidden;
+  }
+
+  .ai-testimonials-row-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.gap_between_cards }}px;
+    margin-bottom: {{ block.settings.gap_between_rows }}px;
+    will-change: transform;
+  }
+
+  .ai-testimonials-row-{{ ai_gen_id }}:last-child {
+    margin-bottom: 0;
+  }
+
+  .ai-testimonial-card-{{ ai_gen_id }} {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: {{ block.settings.card_padding }}px {{ block.settings.card_padding | times: 1.5 }}px;
+    background-color: {{ block.settings.card_background }};
+    border-radius: {{ block.settings.card_border_radius }}px;
+    min-width: {{ block.settings.card_min_width }}px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .ai-testimonial-image-{{ ai_gen_id }} {
+    flex-shrink: 0;
+    width: {{ block.settings.image_size }}px;
+    height: {{ block.settings.image_size }}px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: #f0f0f0;
+  }
+
+  .ai-testimonial-image-{{ ai_gen_id }} img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-testimonial-image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-testimonial-image-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-testimonial-content-{{ ai_gen_id }} {
+    flex-grow: 1;
+    min-width: 0;
+  }
+
+  .ai-testimonial-name-{{ ai_gen_id }} {
+    font-size: {{ block.settings.name_font_size }}px;
+    font-weight: 600;
+    color: {{ block.settings.name_color }};
+    margin: 0 0 4px 0;
+  }
+
+  .ai-testimonial-description-{{ ai_gen_id }} {
+    font-size: {{ block.settings.description_font_size }}px;
+    color: {{ block.settings.description_color }};
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-testimonials-{{ ai_gen_id }} {
+      width: 100%;
+    }
+
+    .ai-testimonial-card-{{ ai_gen_id }} {
+      min-width: {{ block.settings.card_min_width | times: 0.8 }}px;
+    }
+
+    .ai-testimonial-image-{{ ai_gen_id }} {
+      width: {{ block.settings.image_size | times: 0.8 }}px;
+      height: {{ block.settings.image_size | times: 0.8 }}px;
+    }
+  }
+{% endstyle %}
+
+<div class="ai-testimonials-wrapper-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <testimonials-slider-{{ ai_gen_id }}
+    class="ai-testimonials-{{ ai_gen_id }}"
+    data-scroll-speed="{{ block.settings.scroll_speed }}"
+  >
+    {% for row_num in (1..3) %}
+      <div class="ai-testimonials-row-{{ ai_gen_id }}" data-row="{{ row_num }}">
+        {% for card_num in (1..5) %}
+          {% liquid
+            assign testimonial_index = row_num | minus: 1 | times: 5 | plus: card_num
+            assign image_key = 'testimonial_' | append: testimonial_index | append: '_image'
+            assign name_key = 'testimonial_' | append: testimonial_index | append: '_name'
+            assign description_key = 'testimonial_' | append: testimonial_index | append: '_description'
+
+            assign testimonial_image = block.settings[image_key]
+            assign testimonial_name = block.settings[name_key]
+            assign testimonial_description = block.settings[description_key]
+          %}
+
+          <div class="ai-testimonial-card-{{ ai_gen_id }}">
+            <div class="ai-testimonial-image-{{ ai_gen_id }}">
+              {% if testimonial_image %}
+                <img
+                  src="{{ testimonial_image | image_url: width: 200 }}"
+                  alt="{{ testimonial_name | escape }}"
+                  loading="lazy"
+                  width="200"
+                  height="200"
+                >
+              {% else %}
+                <div class="ai-testimonial-image-placeholder-{{ ai_gen_id }}">
+                  {{ 'image' | placeholder_svg_tag }}
+                </div>
+              {% endif %}
+            </div>
+            <div class="ai-testimonial-content-{{ ai_gen_id }}">
+              {% if testimonial_name != blank %}
+                <h3 class="ai-testimonial-name-{{ ai_gen_id }}">{{ testimonial_name }}</h3>
+              {% else %}
+                <h3 class="ai-testimonial-name-{{ ai_gen_id }}">Customer {{ testimonial_index }}</h3>
+              {% endif %}
+              {% if testimonial_description != blank %}
+                <p class="ai-testimonial-description-{{ ai_gen_id }}">{{ testimonial_description }}</p>
+              {% else %}
+                <p class="ai-testimonial-description-{{ ai_gen_id }}">Add a testimonial description</p>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </testimonials-slider-{{ ai_gen_id }}>
+</div>
+
+<script>
+  (function() {
+    class TestimonialsSlider{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.rows = this.querySelectorAll('.ai-testimonials-row-{{ ai_gen_id }}');
+        this.scrollSpeed = parseFloat(this.dataset.scrollSpeed) || 0.5;
+        this.lastScrollY = window.scrollY;
+        this.rowOffsets = [0, 0, 0];
+        this.isInitialized = false;
+      }
+
+      connectedCallback() {
+        this.initializeRows();
+        this.handleScroll = this.handleScroll.bind(this);
+        window.addEventListener('scroll', this.handleScroll, { passive: true });
+        this.handleScroll();
+      }
+
+      disconnectedCallback() {
+        window.removeEventListener('scroll', this.handleScroll);
+      }
+
+      initializeRows() {
+        this.rows.forEach((row, index) => {
+          const rowNum = parseInt(row.dataset.row);
+          let initialOffset = 0;
+
+          if (rowNum === 1) {
+            const cardWidth = row.querySelector('.ai-testimonial-card-{{ ai_gen_id }}').offsetWidth;
+            const gap = {{ block.settings.gap_between_cards }};
+            initialOffset = -(cardWidth + gap);
+          } else if (rowNum === 2) {
+            const cardWidth = row.querySelector('.ai-testimonial-card-{{ ai_gen_id }}').offsetWidth;
+            const gap = {{ block.settings.gap_between_cards }};
+            initialOffset = -(cardWidth + gap) * 3;
+          } else if (rowNum === 3) {
+            const cardWidth = row.querySelector('.ai-testimonial-card-{{ ai_gen_id }}').offsetWidth;
+            const gap = {{ block.settings.gap_between_cards }};
+            initialOffset = -(cardWidth + gap);
+          }
+
+          this.rowOffsets[index] = initialOffset;
+          row.style.transform = `translateX(${initialOffset}px)`;
+        });
+
+        this.isInitialized = true;
+      }
+
+      handleScroll() {
+        const currentScrollY = window.scrollY;
+        const scrollDelta = currentScrollY - this.lastScrollY;
+
+        this.rows.forEach((row, index) => {
+          const rowNum = parseInt(row.dataset.row);
+          let direction = 1;
+
+          if (rowNum === 2) {
+            direction = -1;
+          }
+
+          this.rowOffsets[index] += scrollDelta * this.scrollSpeed * direction;
+
+          row.style.transform = `translateX(${this.rowOffsets[index]}px)`;
+        });
+
+        this.lastScrollY = currentScrollY;
+      }
+    }
+
+    customElements.define('testimonials-slider-{{ ai_gen_id }}', TestimonialsSlider{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Testimonials slider",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section layout"
+    },
+    {
+      "type": "range",
+      "id": "section_width",
+      "label": "Section width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "select",
+      "id": "section_alignment",
+      "label": "Section alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "label": "Section padding",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "gap_between_rows",
+      "label": "Gap between rows",
+      "min": 5,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "gap_between_cards",
+      "label": "Gap between cards",
+      "min": 10,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "scroll_speed",
+      "label": "Scroll speed",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "default": 0.5
+    },
+    {
+      "type": "header",
+      "content": "Card style"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Card background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Card border radius",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "card_padding",
+      "label": "Card padding",
+      "min": 10,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "card_min_width",
+      "label": "Card minimum width",
+      "min": 200,
+      "max": 500,
+      "step": 20,
+      "unit": "px",
+      "default": 320
+    },
+    {
+      "type": "range",
+      "id": "image_size",
+      "label": "Image size",
+      "min": 40,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "name_font_size",
+      "label": "Name font size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "name_color",
+      "label": "Name color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "description_font_size",
+      "label": "Description font size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description color",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "Row 1 testimonials"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_1_image",
+      "label": "Testimonial 1 image"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_1_name",
+      "label": "Testimonial 1 name",
+      "default": "Sarah Johnson"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_1_description",
+      "label": "Testimonial 1 description",
+      "default": "Absolutely love these products! Quality is outstanding."
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_2_image",
+      "label": "Testimonial 2 image"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_2_name",
+      "label": "Testimonial 2 name",
+      "default": "Michael Chen"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_2_description",
+      "label": "Testimonial 2 description",
+      "default": "Best purchase I've made this year. Highly recommend!"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_3_image",
+      "label": "Testimonial 3 image"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_3_name",
+      "label": "Testimonial 3 name",
+      "default": "Emma Williams"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_3_description",
+      "label": "Testimonial 3 description",
+      "default": "Exceeded my expectations in every way possible."
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_4_image",
+      "label": "Testimonial 4 image"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_4_name",
+      "label": "Testimonial 4 name",
+      "default": "David Martinez"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_4_description",
+      "label": "Testimonial 4 description",
+      "default": "Customer service was amazing and the product is perfect."
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_5_image",
+      "label": "Testimonial 5 image"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_5_name",
+      "label": "Testimonial 5 name",
+      "default": "Lisa Anderson"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_5_description",
+      "label": "Testimonial 5 description",
+      "default": "Will definitely be ordering again. Five stars!"
+    },
+    {
+      "type": "header",
+      "content": "Row 2 testimonials"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_6_image",
+      "label": "Testimonial 6 image"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_6_name",
+      "label": "Testimonial 6 name",
+      "default": "James Taylor"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_6_description",
+      "label": "Testimonial 6 description",
+      "default": "Great value for money. Couldn't be happier!"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_7_image",
+      "label": "Testimonial 7 image"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_7_name",
+      "label": "Testimonial 7 name",
+      "default": "Sophia Brown"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_7_description",
+      "label": "Testimonial 7 description",
+      "default": "The quality speaks for itself. Truly impressed."
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_8_image",
+      "label": "Testimonial 8 image"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_8_name",
+      "label": "Testimonial 8 name",
+      "default": "Robert Wilson"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_8_description",
+      "label": "Testimonial 8 description",
+      "default": "Fast shipping and excellent product. Thank you!"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_9_image",
+      "label": "Testimonial 9 image"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_9_name",
+      "label": "Testimonial 9 name",
+      "default": "Olivia Davis"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_9_description",
+      "label": "Testimonial 9 description",
+      "default": "Exactly what I was looking for. Perfect fit!"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_10_image",
+      "label": "Testimonial 10 image"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_10_name",
+      "label": "Testimonial 10 name",
+      "default": "Daniel Garcia"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_10_description",
+      "label": "Testimonial 10 description",
+      "default": "Outstanding quality and service. Highly satisfied!"
+    },
+    {
+      "type": "header",
+      "content": "Row 3 testimonials"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_11_image",
+      "label": "Testimonial 11 image"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_11_name",
+      "label": "Testimonial 11 name",
+      "default": "Ava Rodriguez"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_11_description",
+      "label": "Testimonial 11 description",
+      "default": "Love everything about this purchase. Amazing!"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_12_image",
+      "label": "Testimonial 12 image"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_12_name",
+      "label": "Testimonial 12 name",
+      "default": "Matthew Miller"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_12_description",
+      "label": "Testimonial 12 description",
+      "default": "Best decision ever. Product is top-notch!"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_13_image",
+      "label": "Testimonial 13 image"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_13_name",
+      "label": "Testimonial 13 name",
+      "default": "Isabella Martinez"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_13_description",
+      "label": "Testimonial 13 description",
+      "default": "Fantastic experience from start to finish."
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_14_image",
+      "label": "Testimonial 14 image"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_14_name",
+      "label": "Testimonial 14 name",
+      "default": "Christopher Lee"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_14_description",
+      "label": "Testimonial 14 description",
+      "default": "Couldn't ask for better quality. Superb!"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_15_image",
+      "label": "Testimonial 15 image"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_15_name",
+      "label": "Testimonial 15 name",
+      "default": "Mia Thompson"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_15_description",
+      "label": "Testimonial 15 description",
+      "default": "Absolutely perfect. Will recommend to everyone!"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Testimonials slider"
+    }
+  ]
+}
+{% endschema %}

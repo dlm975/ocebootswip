@@ -1,0 +1,580 @@
+{% doc %}
+  @prompt
+    a floating nav bar with all the of payment buttons on it. ie Add to Cart, Shop Pay, Apple Pay button etc. Make colour schemes etc customisable. It should have a shadow, have opacity sliders etc, the buttons should all be small and fit horizontally on the same line. Add to Cart should be a Cart Logo with a plus symbol, Shop Pay should be the Shop App Logo, Apple Pay should be the apple pay logo, Allow image/logo uploads for each button. The button also must be linked to the desired checkout method. , the buttons should fill the full bar. they dont need to be square
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-floating-payment-nav-{{ ai_gen_id }} {
+    position: fixed;
+    bottom: {{ block.settings.bottom_offset }}px;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    display: block;
+    padding: 0 16px;
+    pointer-events: none;
+  }
+
+  .ai-floating-payment-nav__container-{{ ai_gen_id }} {
+    max-width: {{ block.settings.max_width }}px;
+    margin: 0 auto;
+    background-color: {{ block.settings.background_color }};
+    border-radius: {{ block.settings.border_radius }}px;
+    padding: {{ block.settings.padding_vertical }}px {{ block.settings.padding_horizontal }}px;
+    box-shadow: 0 {{ block.settings.shadow_vertical }}px {{ block.settings.shadow_blur }}px {{ block.settings.shadow_spread }}px rgba(0, 0, 0, {{ block.settings.shadow_opacity | divided_by: 100.0 }});
+    opacity: {{ block.settings.opacity | divided_by: 100.0 }};
+    pointer-events: auto;
+    backdrop-filter: blur({{ block.settings.backdrop_blur }}px);
+    -webkit-backdrop-filter: blur({{ block.settings.backdrop_blur }}px);
+  }
+
+  .ai-floating-payment-nav__content-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: center;
+    gap: {{ block.settings.button_spacing }}px;
+  }
+
+  .ai-floating-payment-nav__button-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: {{ block.settings.button_padding }}px;
+    border-radius: {{ block.settings.button_border_radius }}px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    flex: 1;
+    text-decoration: none;
+    min-height: {{ block.settings.button_height }}px;
+  }
+
+  .ai-floating-payment-nav__add-to-cart-{{ ai_gen_id }} {
+    background-color: {{ block.settings.add_to_cart_bg }};
+  }
+
+  .ai-floating-payment-nav__add-to-cart-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.add_to_cart_hover_bg }};
+  }
+
+  .ai-floating-payment-nav__shop-pay-{{ ai_gen_id }} {
+    background-color: {{ block.settings.shop_pay_bg }};
+  }
+
+  .ai-floating-payment-nav__shop-pay-{{ ai_gen_id }}:hover {
+    opacity: 0.9;
+  }
+
+  .ai-floating-payment-nav__apple-pay-{{ ai_gen_id }} {
+    background-color: {{ block.settings.apple_pay_bg }};
+  }
+
+  .ai-floating-payment-nav__apple-pay-{{ ai_gen_id }}:hover {
+    opacity: 0.9;
+  }
+
+  .ai-floating-payment-nav__icon-{{ ai_gen_id }} {
+    width: {{ block.settings.icon_size }}px;
+    height: {{ block.settings.icon_size }}px;
+    display: block;
+    object-fit: contain;
+  }
+
+  .ai-floating-payment-nav__icon-svg-{{ ai_gen_id }} {
+    width: {{ block.settings.icon_size }}px;
+    height: {{ block.settings.icon_size }}px;
+    display: block;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-floating-payment-nav-{{ ai_gen_id }} {
+      bottom: {{ block.settings.mobile_bottom_offset }}px;
+    }
+
+    .ai-floating-payment-nav__container-{{ ai_gen_id }} {
+      padding: {{ block.settings.mobile_padding_vertical }}px {{ block.settings.mobile_padding_horizontal }}px;
+    }
+  }
+{% endstyle %}
+
+<floating-payment-nav-{{ ai_gen_id }}
+  class="ai-floating-payment-nav-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-floating-payment-nav__container-{{ ai_gen_id }}">
+    <div class="ai-floating-payment-nav__content-{{ ai_gen_id }}">
+      {% if block.settings.show_add_to_cart %}
+        <button
+          type="button"
+          class="ai-floating-payment-nav__button-{{ ai_gen_id }} ai-floating-payment-nav__add-to-cart-{{ ai_gen_id }}"
+          data-add-to-cart
+          aria-label="Add to cart"
+        >
+          {% if block.settings.add_to_cart_image %}
+            <img
+              src="{{ block.settings.add_to_cart_image | image_url: width: 100 }}"
+              alt="Add to cart"
+              class="ai-floating-payment-nav__icon-{{ ai_gen_id }}"
+              loading="lazy"
+            >
+          {% else %}
+            <svg
+              class="ai-floating-payment-nav__icon-svg-{{ ai_gen_id }}"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="{{ block.settings.add_to_cart_icon_color }}"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="10" y1="11" x2="14" y2="11"></line>
+            </svg>
+          {% endif %}
+        </button>
+      {% endif %}
+
+      {% if block.settings.show_shop_pay %}
+        <button
+          type="button"
+          class="ai-floating-payment-nav__button-{{ ai_gen_id }} ai-floating-payment-nav__shop-pay-{{ ai_gen_id }}"
+          data-shop-pay
+          aria-label="Buy with Shop Pay"
+        >
+          {% if block.settings.shop_pay_image %}
+            <img
+              src="{{ block.settings.shop_pay_image | image_url: width: 100 }}"
+              alt="Shop Pay"
+              class="ai-floating-payment-nav__icon-{{ ai_gen_id }}"
+              loading="lazy"
+            >
+          {% else %}
+            <svg
+              class="ai-floating-payment-nav__icon-svg-{{ ai_gen_id }}"
+              viewBox="0 0 80 80"
+              fill="none"
+            >
+              <path
+                d="M40 0C17.9 0 0 17.9 0 40s17.9 40 40 40 40-17.9 40-40S62.1 0 40 0zm0 72c-17.6 0-32-14.4-32-32S22.4 8 40 8s32 14.4 32 32-14.4 32-32 32z"
+                fill="{{ block.settings.shop_pay_icon_color }}"
+              />
+              <path
+                d="M52.5 28.5c-1.4-1.4-3.7-1.4-5.1 0L40 35.9l-7.4-7.4c-1.4-1.4-3.7-1.4-5.1 0-1.4 1.4-1.4 3.7 0 5.1l7.4 7.4-7.4 7.4c-1.4 1.4-1.4 3.7 0 5.1.7.7 1.6 1 2.5 1s1.8-.3 2.5-1l7.4-7.4 7.4 7.4c.7.7 1.6 1 2.5 1s1.8-.3 2.5-1c1.4-1.4 1.4-3.7 0-5.1L45 41l7.4-7.4c1.5-1.4 1.5-3.7.1-5.1z"
+                fill="{{ block.settings.shop_pay_icon_color }}"
+              />
+            </svg>
+          {% endif %}
+        </button>
+      {% endif %}
+
+      {% if block.settings.show_apple_pay %}
+        <button
+          type="button"
+          class="ai-floating-payment-nav__button-{{ ai_gen_id }} ai-floating-payment-nav__apple-pay-{{ ai_gen_id }}"
+          data-apple-pay
+          aria-label="Buy with Apple Pay"
+        >
+          {% if block.settings.apple_pay_image %}
+            <img
+              src="{{ block.settings.apple_pay_image | image_url: width: 100 }}"
+              alt="Apple Pay"
+              class="ai-floating-payment-nav__icon-{{ ai_gen_id }}"
+              loading="lazy"
+            >
+          {% else %}
+            <svg
+              class="ai-floating-payment-nav__icon-svg-{{ ai_gen_id }}"
+              viewBox="0 0 24 24"
+              fill="{{ block.settings.apple_pay_icon_color }}"
+            >
+              <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+            </svg>
+          {% endif %}
+        </button>
+      {% endif %}
+    </div>
+  </div>
+</floating-payment-nav-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class FloatingPaymentNav{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.addToCartButton = this.querySelector('[data-add-to-cart]');
+        this.shopPayButton = this.querySelector('[data-shop-pay]');
+        this.applePayButton = this.querySelector('[data-apple-pay]');
+
+        this.setupEventListeners();
+      }
+
+      setupEventListeners() {
+        if (this.addToCartButton) {
+          this.addToCartButton.addEventListener('click', () => {
+            const productForm = document.querySelector('form[action*="/cart/add"]');
+            if (productForm) {
+              const submitButton = productForm.querySelector('[type="submit"]');
+              if (submitButton) {
+                submitButton.click();
+              }
+            }
+          });
+        }
+
+        if (this.shopPayButton) {
+          this.shopPayButton.addEventListener('click', () => {
+            const shopPayButton = document.querySelector('.shopify-payment-button__button--unbranded');
+            if (shopPayButton) {
+              shopPayButton.click();
+            } else {
+              const dynamicCheckoutButton = document.querySelector('.shopify-payment-button button');
+              if (dynamicCheckoutButton) {
+                dynamicCheckoutButton.click();
+              }
+            }
+          });
+        }
+
+        if (this.applePayButton) {
+          this.applePayButton.addEventListener('click', () => {
+            const applePayButton = document.querySelector('[data-testid="Checkout-button"]');
+            if (applePayButton) {
+              applePayButton.click();
+            } else {
+              const dynamicCheckoutButton = document.querySelector('.shopify-payment-button button');
+              if (dynamicCheckoutButton) {
+                dynamicCheckoutButton.click();
+              }
+            }
+          });
+        }
+      }
+    }
+
+    customElements.define('floating-payment-nav-{{ ai_gen_id }}', FloatingPaymentNav{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Floating payment nav",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Maximum width",
+      "min": 200,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "default": 400
+    },
+    {
+      "type": "range",
+      "id": "bottom_offset",
+      "label": "Bottom offset",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "mobile_bottom_offset",
+      "label": "Mobile bottom offset",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical",
+      "label": "Vertical padding",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_vertical",
+      "label": "Mobile vertical padding",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_horizontal",
+      "label": "Mobile horizontal padding",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "opacity",
+      "label": "Opacity",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 95
+    },
+    {
+      "type": "range",
+      "id": "backdrop_blur",
+      "label": "Backdrop blur",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Shadow"
+    },
+    {
+      "type": "range",
+      "id": "shadow_vertical",
+      "label": "Vertical offset",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "shadow_blur",
+      "label": "Blur",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "shadow_spread",
+      "label": "Spread",
+      "min": -10,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "shadow_opacity",
+      "label": "Opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 15
+    },
+    {
+      "type": "header",
+      "content": "Button visibility"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_add_to_cart",
+      "label": "Show Add to Cart",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_shop_pay",
+      "label": "Show Shop Pay",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_apple_pay",
+      "label": "Show Apple Pay",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Button style"
+    },
+    {
+      "type": "range",
+      "id": "button_height",
+      "label": "Button height",
+      "min": 32,
+      "max": 64,
+      "step": 2,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "Icon size",
+      "min": 16,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "button_padding",
+      "label": "Padding",
+      "min": 4,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "button_spacing",
+      "label": "Spacing between",
+      "min": 4,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Add to Cart button"
+    },
+    {
+      "type": "image_picker",
+      "id": "add_to_cart_image",
+      "label": "Custom image"
+    },
+    {
+      "type": "color",
+      "id": "add_to_cart_bg",
+      "label": "Background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "add_to_cart_icon_color",
+      "label": "Icon color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "add_to_cart_hover_bg",
+      "label": "Hover background",
+      "default": "#333333"
+    },
+    {
+      "type": "header",
+      "content": "Shop Pay button"
+    },
+    {
+      "type": "image_picker",
+      "id": "shop_pay_image",
+      "label": "Custom image"
+    },
+    {
+      "type": "color",
+      "id": "shop_pay_bg",
+      "label": "Background",
+      "default": "#5a31f4"
+    },
+    {
+      "type": "color",
+      "id": "shop_pay_icon_color",
+      "label": "Icon color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Apple Pay button"
+    },
+    {
+      "type": "image_picker",
+      "id": "apple_pay_image",
+      "label": "Custom image"
+    },
+    {
+      "type": "color",
+      "id": "apple_pay_bg",
+      "label": "Background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "apple_pay_icon_color",
+      "label": "Icon color",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Floating payment nav"
+    }
+  ]
+}
+{% endschema %}

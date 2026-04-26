@@ -1,0 +1,735 @@
+{% doc %}
+  @prompt
+    A Variant picker dropdown pill. If a Variant does not have multiple options, there should be no dropdown menu that opens out - just a starionary pill. The pills should be stacked side by side adapting text and pill size based on screen width. I, The Variant Title should be centered above its respective variant Label., The variant title should not be inside the pill. Both Title and Label fonts and font size should be customisable., The pills must occupy the full width of the screen, adapting to mobile or desktop sizing. Any out-of-stock variants must not be displayed as an option., Allow for font selection of the variant label. It is vital that the price changes to match the variant that is selected. It is also vital that whatever variant is selected is actually added to cart when clicked "Add to cart", The pills should sit side by side horizontally.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-variant-picker-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+  }
+
+  .ai-variant-picker__container-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: row;
+    gap: {{ block.settings.spacing_between_options }}px;
+    width: 100%;
+  }
+
+  .ai-variant-picker__option-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: {{ block.settings.title_label_spacing }}px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ai-variant-picker__title-{{ ai_gen_id }} {
+    font-family: {{ block.settings.title_font.family }}, {{ block.settings.title_font.fallback_families }};
+    font-weight: {{ block.settings.title_font.weight }};
+    font-size: {{ block.settings.title_font_size }}px;
+    text-align: center;
+    color: {{ block.settings.title_color }};
+    margin: 0;
+  }
+
+  .ai-variant-picker__pill-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+  }
+
+  .ai-variant-picker__pill-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: {{ block.settings.pill_padding_vertical }}px {{ block.settings.pill_padding_horizontal }}px;
+    background-color: {{ block.settings.pill_background }};
+    color: {{ block.settings.pill_text_color }};
+    border: {{ block.settings.pill_border_width }}px solid {{ block.settings.pill_border_color }};
+    border-radius: {{ block.settings.pill_border_radius }}px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: {{ block.settings.label_font.family }}, {{ block.settings.label_font.fallback_families }};
+    font-weight: {{ block.settings.label_font.weight }};
+    font-size: {{ block.settings.label_font_size }}px;
+    text-align: center;
+    position: relative;
+  }
+
+  .ai-variant-picker__pill-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.pill_hover_background }};
+    color: {{ block.settings.pill_hover_text_color }};
+    border-color: {{ block.settings.pill_hover_border_color }};
+  }
+
+  .ai-variant-picker__pill-{{ ai_gen_id }}.ai-variant-picker__pill--selected-{{ ai_gen_id }} {
+    background-color: {{ block.settings.pill_selected_background }};
+    color: {{ block.settings.pill_selected_text_color }};
+    border-color: {{ block.settings.pill_selected_border_color }};
+  }
+
+  .ai-variant-picker__pill-{{ ai_gen_id }}.ai-variant-picker__pill--selected-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.pill_selected_hover_background }};
+    color: {{ block.settings.pill_selected_hover_text_color }};
+    border-color: {{ block.settings.pill_selected_hover_border_color }};
+  }
+
+  .ai-variant-picker__pill-{{ ai_gen_id }}.ai-variant-picker__pill--static-{{ ai_gen_id }} {
+    cursor: default;
+  }
+
+  .ai-variant-picker__pill-label-{{ ai_gen_id }} {
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ai-variant-picker__pill-icon-{{ ai_gen_id }} {
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .ai-variant-picker__pill-{{ ai_gen_id }}.ai-variant-picker__pill--open-{{ ai_gen_id }} .ai-variant-picker__pill-icon-{{ ai_gen_id }} {
+    transform: rotate(180deg);
+  }
+
+  .ai-variant-picker__dropdown-{{ ai_gen_id }} {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background-color: {{ block.settings.dropdown_background }};
+    border: {{ block.settings.dropdown_border_width }}px solid {{ block.settings.dropdown_border_color }};
+    border-radius: {{ block.settings.dropdown_border_radius }}px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+  }
+
+  .ai-variant-picker__dropdown-{{ ai_gen_id }}.ai-variant-picker__dropdown--open-{{ ai_gen_id }} {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .ai-variant-picker__dropdown-option-{{ ai_gen_id }} {
+    padding: {{ block.settings.dropdown_option_padding }}px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    font-family: {{ block.settings.label_font.family }}, {{ block.settings.label_font.fallback_families }};
+    font-weight: {{ block.settings.label_font.weight }};
+    font-size: {{ block.settings.label_font_size }}px;
+    color: {{ block.settings.dropdown_text_color }};
+    text-align: center;
+  }
+
+  .ai-variant-picker__dropdown-option-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.dropdown_hover_background }};
+    color: {{ block.settings.dropdown_hover_text_color }};
+  }
+
+  .ai-variant-picker__dropdown-option-{{ ai_gen_id }}.ai-variant-picker__dropdown-option--selected-{{ ai_gen_id }} {
+    background-color: {{ block.settings.dropdown_selected_background }};
+    color: {{ block.settings.dropdown_selected_text_color }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-variant-picker__title-{{ ai_gen_id }} {
+      font-size: calc({{ block.settings.title_font_size }}px * 0.9);
+    }
+
+    .ai-variant-picker__pill-{{ ai_gen_id }} {
+      font-size: calc({{ block.settings.label_font_size }}px * 0.9);
+      padding: calc({{ block.settings.pill_padding_vertical }}px * 0.9) calc({{ block.settings.pill_padding_horizontal }}px * 0.9);
+    }
+
+    .ai-variant-picker__dropdown-option-{{ ai_gen_id }} {
+      font-size: calc({{ block.settings.label_font_size }}px * 0.9);
+    }
+  }
+{% endstyle %}
+
+<variant-picker-{{ ai_gen_id }}
+  class="ai-variant-picker-{{ ai_gen_id }}"
+  data-product-id="{{ product.id }}"
+  data-section-id="{{ section.id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-variant-picker__container-{{ ai_gen_id }}">
+    {% for option in product.options_with_values %}
+      {% assign option_index = forloop.index0 %}
+      {% assign available_values = '' %}
+      {% assign available_count = 0 %}
+
+      {% for variant in product.variants %}
+        {% if variant.available %}
+          {% case option_index %}
+            {% when 0 %}
+              {% assign option_value = variant.option1 %}
+            {% when 1 %}
+              {% assign option_value = variant.option2 %}
+            {% when 2 %}
+              {% assign option_value = variant.option3 %}
+          {% endcase %}
+
+          {% unless available_values contains option_value %}
+            {% if available_values == '' %}
+              {% assign available_values = option_value %}
+            {% else %}
+              {% assign available_values = available_values | append: '|||' | append: option_value %}
+            {% endif %}
+            {% assign available_count = available_count | plus: 1 %}
+          {% endunless %}
+        {% endif %}
+      {% endfor %}
+
+      {% assign available_values_array = available_values | split: '|||' %}
+
+      {% if available_count > 0 %}
+        <div class="ai-variant-picker__option-{{ ai_gen_id }}" data-option-index="{{ option_index }}">
+          <div class="ai-variant-picker__title-{{ ai_gen_id }}">{{ option.name }}</div>
+
+          <div class="ai-variant-picker__pill-wrapper-{{ ai_gen_id }}">
+            {% if available_count == 1 %}
+              <div class="ai-variant-picker__pill-{{ ai_gen_id }} ai-variant-picker__pill--static-{{ ai_gen_id }} ai-variant-picker__pill--selected-{{ ai_gen_id }}">
+                <span class="ai-variant-picker__pill-label-{{ ai_gen_id }}">{{ available_values_array[0] }}</span>
+              </div>
+            {% else %}
+              <button
+                type="button"
+                class="ai-variant-picker__pill-{{ ai_gen_id }}"
+                data-option-name="{{ option.name }}"
+                aria-expanded="false"
+                aria-haspopup="listbox"
+              >
+                <span class="ai-variant-picker__pill-label-{{ ai_gen_id }}">
+                  {% case option_index %}
+                    {% when 0 %}
+                      {{ product.selected_or_first_available_variant.option1 }}
+                    {% when 1 %}
+                      {{ product.selected_or_first_available_variant.option2 }}
+                    {% when 2 %}
+                      {{ product.selected_or_first_available_variant.option3 }}
+                  {% endcase %}
+                </span>
+                <svg class="ai-variant-picker__pill-icon-{{ ai_gen_id }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+
+              <div class="ai-variant-picker__dropdown-{{ ai_gen_id }}" role="listbox">
+                {% for value in available_values_array %}
+                  <div
+                    class="ai-variant-picker__dropdown-option-{{ ai_gen_id }}"
+                    data-value="{{ value }}"
+                    data-option-index="{{ option_index }}"
+                    role="option"
+                  >
+                    {{ value }}
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</variant-picker-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class VariantPicker{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.productId = this.dataset.productId;
+        this.sectionId = this.dataset.sectionId;
+        this.currentVariant = null;
+        this.selectedOptions = {};
+      }
+
+      connectedCallback() {
+        this.pills = this.querySelectorAll('.ai-variant-picker__pill-{{ ai_gen_id }}:not(.ai-variant-picker__pill--static-{{ ai_gen_id }})');
+        this.dropdowns = this.querySelectorAll('.ai-variant-picker__dropdown-{{ ai_gen_id }}');
+        
+        this.initializeSelectedOptions();
+        this.setupEventListeners();
+        this.updateSelectedStates();
+      }
+
+      initializeSelectedOptions() {
+        const options = this.querySelectorAll('.ai-variant-picker__option-{{ ai_gen_id }}');
+        options.forEach((option) => {
+          const optionIndex = option.dataset.optionIndex;
+          const pill = option.querySelector('.ai-variant-picker__pill-{{ ai_gen_id }}');
+          
+          if (pill) {
+            const label = pill.querySelector('.ai-variant-picker__pill-label-{{ ai_gen_id }}');
+            if (label) {
+              this.selectedOptions[optionIndex] = label.textContent.trim();
+            }
+          }
+        });
+      }
+
+      setupEventListeners() {
+        this.pills.forEach((pill) => {
+          pill.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleDropdown(pill);
+          });
+        });
+
+        this.querySelectorAll('.ai-variant-picker__dropdown-option-{{ ai_gen_id }}').forEach((option) => {
+          option.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.selectOption(option);
+          });
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!e.target.closest('.ai-variant-picker-{{ ai_gen_id }}')) {
+            this.closeAllDropdowns();
+          }
+        });
+      }
+
+      toggleDropdown(pill) {
+        const wrapper = pill.closest('.ai-variant-picker__pill-wrapper-{{ ai_gen_id }}');
+        const dropdown = wrapper.querySelector('.ai-variant-picker__dropdown-{{ ai_gen_id }}');
+        const isOpen = dropdown.classList.contains('ai-variant-picker__dropdown--open-{{ ai_gen_id }}');
+
+        this.closeAllDropdowns();
+
+        if (!isOpen) {
+          dropdown.classList.add('ai-variant-picker__dropdown--open-{{ ai_gen_id }}');
+          pill.classList.add('ai-variant-picker__pill--open-{{ ai_gen_id }}');
+          pill.setAttribute('aria-expanded', 'true');
+        }
+      }
+
+      closeAllDropdowns() {
+        this.dropdowns.forEach((dropdown) => {
+          dropdown.classList.remove('ai-variant-picker__dropdown--open-{{ ai_gen_id }}');
+        });
+        this.pills.forEach((pill) => {
+          pill.classList.remove('ai-variant-picker__pill--open-{{ ai_gen_id }}');
+          pill.setAttribute('aria-expanded', 'false');
+        });
+      }
+
+      selectOption(option) {
+        const value = option.dataset.value;
+        const optionIndex = option.dataset.optionIndex;
+        const wrapper = option.closest('.ai-variant-picker__pill-wrapper-{{ ai_gen_id }}');
+        const pill = wrapper.querySelector('.ai-variant-picker__pill-{{ ai_gen_id }}');
+        const label = pill.querySelector('.ai-variant-picker__pill-label-{{ ai_gen_id }}');
+
+        this.selectedOptions[optionIndex] = value;
+        label.textContent = value;
+
+        this.closeAllDropdowns();
+        this.updateSelectedStates();
+        this.updateVariant();
+      }
+
+      updateSelectedStates() {
+        this.querySelectorAll('.ai-variant-picker__dropdown-option-{{ ai_gen_id }}').forEach((option) => {
+          const optionIndex = option.dataset.optionIndex;
+          const value = option.dataset.value;
+          
+          if (this.selectedOptions[optionIndex] === value) {
+            option.classList.add('ai-variant-picker__dropdown-option--selected-{{ ai_gen_id }}');
+          } else {
+            option.classList.remove('ai-variant-picker__dropdown-option--selected-{{ ai_gen_id }}');
+          }
+        });
+      }
+
+      updateVariant() {
+        fetch(`${window.location.pathname}?section_id=${this.sectionId}`)
+          .then((response) => response.text())
+          .then((html) => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const productData = doc.querySelector('[data-product-json]');
+            
+            if (productData) {
+              const product = JSON.parse(productData.textContent);
+              const variant = product.variants.find((v) => {
+                return (
+                  (!this.selectedOptions['0'] || v.option1 === this.selectedOptions['0']) &&
+                  (!this.selectedOptions['1'] || v.option2 === this.selectedOptions['1']) &&
+                  (!this.selectedOptions['2'] || v.option3 === this.selectedOptions['2'])
+                );
+              });
+
+              if (variant) {
+                this.updateURL(variant.id);
+                this.updatePrice(variant);
+                this.updateAddToCartForm(variant.id);
+              }
+            }
+          })
+          .catch((error) => {
+            console.error('Error updating variant:', error);
+          });
+      }
+
+      updateURL(variantId) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('variant', variantId);
+        window.history.replaceState({}, '', url);
+      }
+
+      updatePrice(variant) {
+        const priceElements = document.querySelectorAll('[data-product-price]');
+        priceElements.forEach((element) => {
+          if (variant.compare_at_price && variant.compare_at_price > variant.price) {
+            element.innerHTML = `
+              <span class="price-item price-item--sale">
+                ${this.formatMoney(variant.price)}
+              </span>
+              <span class="price-item price-item--regular">
+                ${this.formatMoney(variant.compare_at_price)}
+              </span>
+            `;
+          } else {
+            element.innerHTML = `
+              <span class="price-item">
+                ${this.formatMoney(variant.price)}
+              </span>
+            `;
+          }
+        });
+      }
+
+      updateAddToCartForm(variantId) {
+        const forms = document.querySelectorAll('form[action*="/cart/add"]');
+        forms.forEach((form) => {
+          const variantInput = form.querySelector('[name="id"]');
+          if (variantInput) {
+            variantInput.value = variantId;
+          }
+        });
+      }
+
+      formatMoney(cents) {
+        const amount = cents / 100;
+        return new Intl.NumberFormat('en-NZ', {
+          style: 'currency',
+          currency: 'NZD'
+        }).format(amount);
+      }
+    }
+
+    customElements.define('variant-picker-{{ ai_gen_id }}', VariantPicker{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Variant picker pills",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "spacing_between_options",
+      "label": "Spacing between options",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "title_label_spacing",
+      "label": "Title to label spacing",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Variant title"
+    },
+    {
+      "type": "font_picker",
+      "id": "title_font",
+      "label": "Font",
+      "default": "inter_i5"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "label": "Font size",
+      "min": 10,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Variant label"
+    },
+    {
+      "type": "font_picker",
+      "id": "label_font",
+      "label": "Font",
+      "default": "inter_i4"
+    },
+    {
+      "type": "range",
+      "id": "label_font_size",
+      "label": "Font size",
+      "min": 10,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Pill style"
+    },
+    {
+      "type": "range",
+      "id": "pill_padding_vertical",
+      "label": "Vertical padding",
+      "min": 4,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "pill_padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 8,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "pill_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "pill_border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "pill_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "pill_text_color",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "pill_border_color",
+      "label": "Border",
+      "default": "#00000021"
+    },
+    {
+      "type": "header",
+      "content": "Pill hover"
+    },
+    {
+      "type": "color",
+      "id": "pill_hover_background",
+      "label": "Background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "pill_hover_text_color",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "pill_hover_border_color",
+      "label": "Border",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "header",
+      "content": "Pill selected"
+    },
+    {
+      "type": "color",
+      "id": "pill_selected_background",
+      "label": "Background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "pill_selected_text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "pill_selected_border_color",
+      "label": "Border",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Pill selected hover"
+    },
+    {
+      "type": "color",
+      "id": "pill_selected_hover_background",
+      "label": "Background",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "pill_selected_hover_text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "pill_selected_hover_border_color",
+      "label": "Border",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "header",
+      "content": "Dropdown style"
+    },
+    {
+      "type": "range",
+      "id": "dropdown_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "dropdown_border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "dropdown_option_padding",
+      "label": "Option padding",
+      "min": 6,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "dropdown_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "dropdown_border_color",
+      "label": "Border",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "color",
+      "id": "dropdown_text_color",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Dropdown hover"
+    },
+    {
+      "type": "color",
+      "id": "dropdown_hover_background",
+      "label": "Background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "dropdown_hover_text_color",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Dropdown selected"
+    },
+    {
+      "type": "color",
+      "id": "dropdown_selected_background",
+      "label": "Background",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "color",
+      "id": "dropdown_selected_text_color",
+      "label": "Text",
+      "default": "#000000"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Variant picker pills"
+    }
+  ]
+}
+{% endschema %}

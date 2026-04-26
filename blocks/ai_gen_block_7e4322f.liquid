@@ -1,0 +1,1021 @@
+{% doc %}
+  @prompt
+    Create a sticky navigation bar that stays fixed at the bottom of the page at all times. The bar should be a long horizontal rectangle with heavily rounded edges (large border radius). Add a prominent shadow effect to create a 3D appearance that makes it appear to float above the page. The navigation bar should contain customizable menu links and remain visible even when scrolling. Use a glass like texture for the background . Create an opacity slider for this. Ideally the content in the bar will be "Shop By Size" that when clicked, the bar will then present with 3 options: US Size, UK Size, EU Size. When the size type options is clicked, a list will expanded onto the screen with the range of size options, each linked to a collection in my store, Make sure that behaviourally it is "at FRONT" at all times, with no other elements hovering above. Provide ability to change main button text and size type label font. Also make the "Shop By Size" text disappear on the size type label screen.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-sticky-nav-{{ ai_gen_id }} {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 99999;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 90vw;
+    display: block;
+  }
+
+  .ai-sticky-nav-container-{{ ai_gen_id }} {
+    background: {{ block.settings.background_color }};
+    backdrop-filter: blur({{ block.settings.blur_amount }}px);
+    -webkit-backdrop-filter: blur({{ block.settings.blur_amount }}px);
+    border-radius: {{ block.settings.border_radius }}px;
+    padding: {{ block.settings.padding }}px {{ block.settings.padding | times: 1.5 }}px;
+    box-shadow: 0 {{ block.settings.shadow_offset }}px {{ block.settings.shadow_blur }}px {{ block.settings.shadow_spread }}px {{ block.settings.shadow_color }};
+    opacity: {{ block.settings.opacity | divided_by: 100.0 }};
+    transition: all 0.3s ease;
+  }
+
+  .ai-sticky-nav-main-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .ai-sticky-nav-trigger-{{ ai_gen_id }} {
+    background: none;
+    border: none;
+    color: {{ block.settings.text_color }};
+    font-family: {{ block.settings.main_button_font.family }}, {{ block.settings.main_button_font.fallback_families }};
+    font-weight: {{ block.settings.main_button_font.weight }};
+    font-style: {{ block.settings.main_button_font.style }};
+    font-size: {{ block.settings.font_size }}px;
+    cursor: pointer;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: opacity 0.3s ease;
+  }
+
+  .ai-sticky-nav-trigger-{{ ai_gen_id }}:hover {
+    opacity: 0.7;
+  }
+
+  .ai-sticky-nav-trigger-{{ ai_gen_id }} svg {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+  }
+
+  .ai-sticky-nav-trigger-{{ ai_gen_id }}.active svg {
+    transform: rotate(180deg);
+  }
+
+  .ai-sticky-nav-trigger-{{ ai_gen_id }}.hidden {
+    display: none;
+  }
+
+  .ai-sticky-nav-options-{{ ai_gen_id }} {
+    display: none;
+    gap: 12px;
+  }
+
+  .ai-sticky-nav-options-{{ ai_gen_id }}.active {
+    display: flex;
+  }
+
+  .ai-sticky-nav-option-btn-{{ ai_gen_id }} {
+    background: {{ block.settings.option_bg_color }};
+    color: {{ block.settings.option_text_color }};
+    font-family: {{ block.settings.size_type_font.family }}, {{ block.settings.size_type_font.fallback_families }};
+    font-weight: {{ block.settings.size_type_font.weight }};
+    font-style: {{ block.settings.size_type_font.style }};
+    border: 1px solid {{ block.settings.option_border_color }};
+    border-radius: {{ block.settings.option_border_radius }}px;
+    padding: 8px 20px;
+    font-size: {{ block.settings.option_font_size }}px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .ai-sticky-nav-option-btn-{{ ai_gen_id }}:hover {
+    background: {{ block.settings.option_hover_bg_color }};
+    color: {{ block.settings.option_hover_text_color }};
+  }
+
+  .ai-sticky-nav-sizes-{{ ai_gen_id }} {
+    position: fixed;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: {{ block.settings.background_color }};
+    backdrop-filter: blur({{ block.settings.blur_amount }}px);
+    -webkit-backdrop-filter: blur({{ block.settings.blur_amount }}px);
+    border-radius: {{ block.settings.border_radius }}px;
+    padding: 20px;
+    box-shadow: 0 {{ block.settings.shadow_offset }}px {{ block.settings.shadow_blur }}px {{ block.settings.shadow_spread }}px {{ block.settings.shadow_color }};
+    opacity: {{ block.settings.opacity | divided_by: 100.0 }};
+    max-height: 400px;
+    overflow-y: auto;
+    display: none;
+    z-index: 99998;
+    min-width: 200px;
+  }
+
+  .ai-sticky-nav-sizes-{{ ai_gen_id }}.active {
+    display: block;
+  }
+
+  .ai-sticky-nav-sizes-header-{{ ai_gen_id }} {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid {{ block.settings.option_border_color }};
+  }
+
+  .ai-sticky-nav-sizes-title-{{ ai_gen_id }} {
+    color: {{ block.settings.text_color }};
+    font-family: {{ block.settings.size_type_font.family }}, {{ block.settings.size_type_font.fallback_families }};
+    font-weight: {{ block.settings.size_type_font.weight }};
+    font-style: {{ block.settings.size_type_font.style }};
+    font-size: {{ block.settings.font_size }}px;
+    margin: 0;
+  }
+
+  .ai-sticky-nav-close-{{ ai_gen_id }} {
+    background: none;
+    border: none;
+    color: {{ block.settings.text_color }};
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-sticky-nav-close-{{ ai_gen_id }} svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .ai-sticky-nav-size-list-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ai-sticky-nav-size-link-{{ ai_gen_id }} {
+    color: {{ block.settings.text_color }};
+    text-decoration: none;
+    padding: 10px 16px;
+    border-radius: {{ block.settings.option_border_radius }}px;
+    background: {{ block.settings.option_bg_color }};
+    border: 1px solid {{ block.settings.option_border_color }};
+    transition: all 0.3s ease;
+    text-align: center;
+    font-size: {{ block.settings.option_font_size }}px;
+  }
+
+  .ai-sticky-nav-size-link-{{ ai_gen_id }}:hover {
+    background: {{ block.settings.option_hover_bg_color }};
+    color: {{ block.settings.option_hover_text_color }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-sticky-nav-{{ ai_gen_id }} {
+      width: 90%;
+      bottom: 10px;
+    }
+
+    .ai-sticky-nav-container-{{ ai_gen_id }} {
+      padding: {{ block.settings.padding | times: 0.8 }}px {{ block.settings.padding | times: 1.2 }}px;
+    }
+
+    .ai-sticky-nav-trigger-{{ ai_gen_id }} {
+      font-size: {{ block.settings.font_size | times: 0.9 }}px;
+      padding: 6px 12px;
+    }
+
+    .ai-sticky-nav-option-btn-{{ ai_gen_id }} {
+      font-size: {{ block.settings.option_font_size | times: 0.9 }}px;
+      padding: 6px 16px;
+    }
+
+    .ai-sticky-nav-sizes-{{ ai_gen_id }} {
+      bottom: 90px;
+      width: 80%;
+      max-width: 300px;
+    }
+  }
+{% endstyle %}
+
+<sticky-size-nav-{{ ai_gen_id }}
+  class="ai-sticky-nav-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-sticky-nav-container-{{ ai_gen_id }}">
+    <div class="ai-sticky-nav-main-{{ ai_gen_id }}">
+      <button
+        class="ai-sticky-nav-trigger-{{ ai_gen_id }}"
+        aria-label="Shop by size"
+        aria-expanded="false"
+      >
+        {{ block.settings.main_text }}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+
+      <div class="ai-sticky-nav-options-{{ ai_gen_id }}">
+        <button
+          class="ai-sticky-nav-option-btn-{{ ai_gen_id }}"
+          data-size-type="us"
+        >
+          {{ block.settings.us_label }}
+        </button>
+        <button
+          class="ai-sticky-nav-option-btn-{{ ai_gen_id }}"
+          data-size-type="uk"
+        >
+          {{ block.settings.uk_label }}
+        </button>
+        <button
+          class="ai-sticky-nav-option-btn-{{ ai_gen_id }}"
+          data-size-type="eu"
+        >
+          {{ block.settings.eu_label }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="ai-sticky-nav-sizes-{{ ai_gen_id }}">
+    <div class="ai-sticky-nav-sizes-header-{{ ai_gen_id }}">
+      <h3 class="ai-sticky-nav-sizes-title-{{ ai_gen_id }}"></h3>
+      <button
+        class="ai-sticky-nav-close-{{ ai_gen_id }}"
+        aria-label="Close size list"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <div class="ai-sticky-nav-size-list-{{ ai_gen_id }}"></div>
+  </div>
+</sticky-size-nav-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class StickySizeNav{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.trigger = this.querySelector('.ai-sticky-nav-trigger-{{ ai_gen_id }}');
+        this.optionsContainer = this.querySelector('.ai-sticky-nav-options-{{ ai_gen_id }}');
+        this.optionButtons = this.querySelectorAll('.ai-sticky-nav-option-btn-{{ ai_gen_id }}');
+        this.sizesPanel = this.querySelector('.ai-sticky-nav-sizes-{{ ai_gen_id }}');
+        this.sizesList = this.querySelector('.ai-sticky-nav-size-list-{{ ai_gen_id }}');
+        this.sizesTitle = this.querySelector('.ai-sticky-nav-sizes-title-{{ ai_gen_id }}');
+        this.closeButton = this.querySelector('.ai-sticky-nav-close-{{ ai_gen_id }}');
+
+        this.sizeData = {
+          us: [
+            {% if block.settings.us_collection_1 != blank %}
+              { size: '{{ block.settings.us_size_1 }}', url: '{{ block.settings.us_collection_1.url }}' },
+            {% endif %}
+            {% if block.settings.us_collection_2 != blank %}
+              { size: '{{ block.settings.us_size_2 }}', url: '{{ block.settings.us_collection_2.url }}' },
+            {% endif %}
+            {% if block.settings.us_collection_3 != blank %}
+              { size: '{{ block.settings.us_size_3 }}', url: '{{ block.settings.us_collection_3.url }}' },
+            {% endif %}
+            {% if block.settings.us_collection_4 != blank %}
+              { size: '{{ block.settings.us_size_4 }}', url: '{{ block.settings.us_collection_4.url }}' },
+            {% endif %}
+            {% if block.settings.us_collection_5 != blank %}
+              { size: '{{ block.settings.us_size_5 }}', url: '{{ block.settings.us_collection_5.url }}' },
+            {% endif %}
+            {% if block.settings.us_collection_6 != blank %}
+              { size: '{{ block.settings.us_size_6 }}', url: '{{ block.settings.us_collection_6.url }}' },
+            {% endif %}
+            {% if block.settings.us_collection_7 != blank %}
+              { size: '{{ block.settings.us_size_7 }}', url: '{{ block.settings.us_collection_7.url }}' },
+            {% endif %}
+            {% if block.settings.us_collection_8 != blank %}
+              { size: '{{ block.settings.us_size_8 }}', url: '{{ block.settings.us_collection_8.url }}' },
+            {% endif %}
+            {% if block.settings.us_collection_9 != blank %}
+              { size: '{{ block.settings.us_size_9 }}', url: '{{ block.settings.us_collection_9.url }}' },
+            {% endif %}
+            {% if block.settings.us_collection_10 != blank %}
+              { size: '{{ block.settings.us_size_10 }}', url: '{{ block.settings.us_collection_10.url }}' }
+            {% endif %}
+          ].filter(item => item.size && item.url),
+          uk: [
+            {% if block.settings.uk_collection_1 != blank %}
+              { size: '{{ block.settings.uk_size_1 }}', url: '{{ block.settings.uk_collection_1.url }}' },
+            {% endif %}
+            {% if block.settings.uk_collection_2 != blank %}
+              { size: '{{ block.settings.uk_size_2 }}', url: '{{ block.settings.uk_collection_2.url }}' },
+            {% endif %}
+            {% if block.settings.uk_collection_3 != blank %}
+              { size: '{{ block.settings.uk_size_3 }}', url: '{{ block.settings.uk_collection_3.url }}' },
+            {% endif %}
+            {% if block.settings.uk_collection_4 != blank %}
+              { size: '{{ block.settings.uk_size_4 }}', url: '{{ block.settings.uk_collection_4.url }}' },
+            {% endif %}
+            {% if block.settings.uk_collection_5 != blank %}
+              { size: '{{ block.settings.uk_size_5 }}', url: '{{ block.settings.uk_collection_5.url }}' },
+            {% endif %}
+            {% if block.settings.uk_collection_6 != blank %}
+              { size: '{{ block.settings.uk_size_6 }}', url: '{{ block.settings.uk_collection_6.url }}' },
+            {% endif %}
+            {% if block.settings.uk_collection_7 != blank %}
+              { size: '{{ block.settings.uk_size_7 }}', url: '{{ block.settings.uk_collection_7.url }}' },
+            {% endif %}
+            {% if block.settings.uk_collection_8 != blank %}
+              { size: '{{ block.settings.uk_size_8 }}', url: '{{ block.settings.uk_collection_8.url }}' },
+            {% endif %}
+            {% if block.settings.uk_collection_9 != blank %}
+              { size: '{{ block.settings.uk_size_9 }}', url: '{{ block.settings.uk_collection_9.url }}' },
+            {% endif %}
+            {% if block.settings.uk_collection_10 != blank %}
+              { size: '{{ block.settings.uk_size_10 }}', url: '{{ block.settings.uk_collection_10.url }}' }
+            {% endif %}
+          ].filter(item => item.size && item.url),
+          eu: [
+            {% if block.settings.eu_collection_1 != blank %}
+              { size: '{{ block.settings.eu_size_1 }}', url: '{{ block.settings.eu_collection_1.url }}' },
+            {% endif %}
+            {% if block.settings.eu_collection_2 != blank %}
+              { size: '{{ block.settings.eu_size_2 }}', url: '{{ block.settings.eu_collection_2.url }}' },
+            {% endif %}
+            {% if block.settings.eu_collection_3 != blank %}
+              { size: '{{ block.settings.eu_size_3 }}', url: '{{ block.settings.eu_collection_3.url }}' },
+            {% endif %}
+            {% if block.settings.eu_collection_4 != blank %}
+              { size: '{{ block.settings.eu_size_4 }}', url: '{{ block.settings.eu_collection_4.url }}' },
+            {% endif %}
+            {% if block.settings.eu_collection_5 != blank %}
+              { size: '{{ block.settings.eu_size_5 }}', url: '{{ block.settings.eu_collection_5.url }}' },
+            {% endif %}
+            {% if block.settings.eu_collection_6 != blank %}
+              { size: '{{ block.settings.eu_size_6 }}', url: '{{ block.settings.eu_collection_6.url }}' },
+            {% endif %}
+            {% if block.settings.eu_collection_7 != blank %}
+              { size: '{{ block.settings.eu_size_7 }}', url: '{{ block.settings.eu_collection_7.url }}' },
+            {% endif %}
+            {% if block.settings.eu_collection_8 != blank %}
+              { size: '{{ block.settings.eu_size_8 }}', url: '{{ block.settings.eu_collection_8.url }}' },
+            {% endif %}
+            {% if block.settings.eu_collection_9 != blank %}
+              { size: '{{ block.settings.eu_size_9 }}', url: '{{ block.settings.eu_collection_9.url }}' },
+            {% endif %}
+            {% if block.settings.eu_collection_10 != blank %}
+              { size: '{{ block.settings.eu_size_10 }}', url: '{{ block.settings.eu_collection_10.url }}' }
+            {% endif %}
+          ].filter(item => item.size && item.url)
+        };
+      }
+
+      connectedCallback() {
+        this.setupEventListeners();
+      }
+
+      setupEventListeners() {
+        this.trigger.addEventListener('click', () => this.toggleOptions());
+        
+        this.optionButtons.forEach(button => {
+          button.addEventListener('click', (e) => {
+            const sizeType = e.target.getAttribute('data-size-type');
+            this.showSizes(sizeType);
+          });
+        });
+
+        this.closeButton.addEventListener('click', () => this.closeSizes());
+
+        document.addEventListener('click', (e) => {
+          if (!this.contains(e.target)) {
+            this.closeAll();
+          }
+        });
+      }
+
+      toggleOptions() {
+        const isActive = this.optionsContainer.classList.contains('active');
+        
+        if (isActive) {
+          this.optionsContainer.classList.remove('active');
+          this.trigger.classList.remove('active');
+          this.trigger.classList.remove('hidden');
+          this.trigger.setAttribute('aria-expanded', 'false');
+        } else {
+          this.optionsContainer.classList.add('active');
+          this.trigger.classList.add('active');
+          this.trigger.classList.add('hidden');
+          this.trigger.setAttribute('aria-expanded', 'true');
+          this.closeSizes();
+        }
+      }
+
+      showSizes(sizeType) {
+        const sizes = this.sizeData[sizeType];
+        const labels = {
+          us: '{{ block.settings.us_label }}',
+          uk: '{{ block.settings.uk_label }}',
+          eu: '{{ block.settings.eu_label }}'
+        };
+
+        this.sizesTitle.textContent = labels[sizeType];
+        this.sizesList.innerHTML = '';
+
+        if (sizes.length === 0) {
+          this.sizesList.innerHTML = '<p style="color: {{ block.settings.text_color }}; text-align: center; padding: 20px;">No sizes configured</p>';
+        } else {
+          sizes.forEach(item => {
+            const link = document.createElement('a');
+            link.href = item.url;
+            link.className = 'ai-sticky-nav-size-link-{{ ai_gen_id }}';
+            link.textContent = item.size;
+            this.sizesList.appendChild(link);
+          });
+        }
+
+        this.sizesPanel.classList.add('active');
+        this.optionsContainer.classList.remove('active');
+        this.trigger.classList.remove('active');
+        this.trigger.classList.remove('hidden');
+        this.trigger.setAttribute('aria-expanded', 'false');
+      }
+
+      closeSizes() {
+        this.sizesPanel.classList.remove('active');
+      }
+
+      closeAll() {
+        this.optionsContainer.classList.remove('active');
+        this.trigger.classList.remove('active');
+        this.trigger.classList.remove('hidden');
+        this.trigger.setAttribute('aria-expanded', 'false');
+        this.closeSizes();
+      }
+    }
+
+    customElements.define('sticky-size-nav-{{ ai_gen_id }}', StickySizeNav{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Sticky size navigation",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Main button"
+    },
+    {
+      "type": "text",
+      "id": "main_text",
+      "label": "Main button text",
+      "default": "Shop By Size"
+    },
+    {
+      "type": "font_picker",
+      "id": "main_button_font",
+      "label": "Font",
+      "default": "assistant_n4"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Size type labels"
+    },
+    {
+      "type": "font_picker",
+      "id": "size_type_font",
+      "label": "Font",
+      "default": "assistant_n4"
+    },
+    {
+      "type": "text",
+      "id": "us_label",
+      "label": "US label",
+      "default": "US Size"
+    },
+    {
+      "type": "text",
+      "id": "uk_label",
+      "label": "UK label",
+      "default": "UK Size"
+    },
+    {
+      "type": "text",
+      "id": "eu_label",
+      "label": "EU label",
+      "default": "EU Size"
+    },
+    {
+      "type": "header",
+      "content": "US sizes"
+    },
+    {
+      "type": "text",
+      "id": "us_size_1",
+      "label": "Size 1"
+    },
+    {
+      "type": "collection",
+      "id": "us_collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "text",
+      "id": "us_size_2",
+      "label": "Size 2"
+    },
+    {
+      "type": "collection",
+      "id": "us_collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "text",
+      "id": "us_size_3",
+      "label": "Size 3"
+    },
+    {
+      "type": "collection",
+      "id": "us_collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "text",
+      "id": "us_size_4",
+      "label": "Size 4"
+    },
+    {
+      "type": "collection",
+      "id": "us_collection_4",
+      "label": "Collection 4"
+    },
+    {
+      "type": "text",
+      "id": "us_size_5",
+      "label": "Size 5"
+    },
+    {
+      "type": "collection",
+      "id": "us_collection_5",
+      "label": "Collection 5"
+    },
+    {
+      "type": "text",
+      "id": "us_size_6",
+      "label": "Size 6"
+    },
+    {
+      "type": "collection",
+      "id": "us_collection_6",
+      "label": "Collection 6"
+    },
+    {
+      "type": "text",
+      "id": "us_size_7",
+      "label": "Size 7"
+    },
+    {
+      "type": "collection",
+      "id": "us_collection_7",
+      "label": "Collection 7"
+    },
+    {
+      "type": "text",
+      "id": "us_size_8",
+      "label": "Size 8"
+    },
+    {
+      "type": "collection",
+      "id": "us_collection_8",
+      "label": "Collection 8"
+    },
+    {
+      "type": "text",
+      "id": "us_size_9",
+      "label": "Size 9"
+    },
+    {
+      "type": "collection",
+      "id": "us_collection_9",
+      "label": "Collection 9"
+    },
+    {
+      "type": "text",
+      "id": "us_size_10",
+      "label": "Size 10"
+    },
+    {
+      "type": "collection",
+      "id": "us_collection_10",
+      "label": "Collection 10"
+    },
+    {
+      "type": "header",
+      "content": "UK sizes"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_1",
+      "label": "Size 1"
+    },
+    {
+      "type": "collection",
+      "id": "uk_collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_2",
+      "label": "Size 2"
+    },
+    {
+      "type": "collection",
+      "id": "uk_collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_3",
+      "label": "Size 3"
+    },
+    {
+      "type": "collection",
+      "id": "uk_collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_4",
+      "label": "Size 4"
+    },
+    {
+      "type": "collection",
+      "id": "uk_collection_4",
+      "label": "Collection 4"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_5",
+      "label": "Size 5"
+    },
+    {
+      "type": "collection",
+      "id": "uk_collection_5",
+      "label": "Collection 5"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_6",
+      "label": "Size 6"
+    },
+    {
+      "type": "collection",
+      "id": "uk_collection_6",
+      "label": "Collection 6"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_7",
+      "label": "Size 7"
+    },
+    {
+      "type": "collection",
+      "id": "uk_collection_7",
+      "label": "Collection 7"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_8",
+      "label": "Size 8"
+    },
+    {
+      "type": "collection",
+      "id": "uk_collection_8",
+      "label": "Collection 8"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_9",
+      "label": "Size 9"
+    },
+    {
+      "type": "collection",
+      "id": "uk_collection_9",
+      "label": "Collection 9"
+    },
+    {
+      "type": "text",
+      "id": "uk_size_10",
+      "label": "Size 10"
+    },
+    {
+      "type": "collection",
+      "id": "uk_collection_10",
+      "label": "Collection 10"
+    },
+    {
+      "type": "header",
+      "content": "EU sizes"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_1",
+      "label": "Size 1"
+    },
+    {
+      "type": "collection",
+      "id": "eu_collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_2",
+      "label": "Size 2"
+    },
+    {
+      "type": "collection",
+      "id": "eu_collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_3",
+      "label": "Size 3"
+    },
+    {
+      "type": "collection",
+      "id": "eu_collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_4",
+      "label": "Size 4"
+    },
+    {
+      "type": "collection",
+      "id": "eu_collection_4",
+      "label": "Collection 4"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_5",
+      "label": "Size 5"
+    },
+    {
+      "type": "collection",
+      "id": "eu_collection_5",
+      "label": "Collection 5"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_6",
+      "label": "Size 6"
+    },
+    {
+      "type": "collection",
+      "id": "eu_collection_6",
+      "label": "Collection 6"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_7",
+      "label": "Size 7"
+    },
+    {
+      "type": "collection",
+      "id": "eu_collection_7",
+      "label": "Collection 7"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_8",
+      "label": "Size 8"
+    },
+    {
+      "type": "collection",
+      "id": "eu_collection_8",
+      "label": "Collection 8"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_9",
+      "label": "Size 9"
+    },
+    {
+      "type": "collection",
+      "id": "eu_collection_9",
+      "label": "Collection 9"
+    },
+    {
+      "type": "text",
+      "id": "eu_size_10",
+      "label": "Size 10"
+    },
+    {
+      "type": "collection",
+      "id": "eu_collection_10",
+      "label": "Collection 10"
+    },
+    {
+      "type": "header",
+      "content": "Bar style"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 70
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding",
+      "label": "Padding",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "opacity",
+      "label": "Opacity",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 95
+    },
+    {
+      "type": "range",
+      "id": "blur_amount",
+      "label": "Blur amount",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Shadow"
+    },
+    {
+      "type": "range",
+      "id": "shadow_offset",
+      "label": "Offset",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "shadow_blur",
+      "label": "Blur",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "shadow_spread",
+      "label": "Spread",
+      "min": -10,
+      "max": 10,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "shadow_color",
+      "label": "Shadow color",
+      "default": "rgba(0, 0, 0, 0.2)"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "rgba(255, 255, 255, 0.8)"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Option buttons"
+    },
+    {
+      "type": "range",
+      "id": "option_font_size",
+      "label": "Font size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "option_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "option_bg_color",
+      "label": "Background",
+      "default": "rgba(255, 255, 255, 0.5)"
+    },
+    {
+      "type": "color",
+      "id": "option_text_color",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "option_border_color",
+      "label": "Border",
+      "default": "rgba(0, 0, 0, 0.1)"
+    },
+    {
+      "type": "color",
+      "id": "option_hover_bg_color",
+      "label": "Hover background",
+      "default": "rgba(0, 0, 0, 0.1)"
+    },
+    {
+      "type": "color",
+      "id": "option_hover_text_color",
+      "label": "Hover text",
+      "default": "#000000"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Sticky size navigation"
+    }
+  ]
+}
+{% endschema %}

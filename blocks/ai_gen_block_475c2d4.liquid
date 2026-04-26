@@ -1,0 +1,442 @@
+{% doc %}
+  @prompt
+    A constantly looping scrolling section to display a featured collection. this should display 8 products wide on desktop and 5 wide on mobile. the section should be a solid colour background. the product card should display: main image, with a size variant pill below.  there should not be an obvious product card shape as it will sit on top of the solid background. only the currency and size will be small rounded rectangles underneath the image with an outine around each. ensure colour/sizing/font customizability., give option to remove price pill
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-scrolling-collection-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+    padding: {{ block.settings.section_padding }}px 0;
+    overflow: hidden;
+  }
+
+  .ai-scrolling-collection__wrapper-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.product_gap }}px;
+    animation: ai-scroll-{{ ai_gen_id }} {{ block.settings.scroll_speed }}s linear infinite;
+    will-change: transform;
+  }
+
+  .ai-scrolling-collection__track-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.product_gap }}px;
+    flex-shrink: 0;
+  }
+
+  .ai-scrolling-collection__product-{{ ai_gen_id }} {
+    flex-shrink: 0;
+    width: calc((100% - (7 * {{ block.settings.product_gap }}px)) / 8);
+    display: flex;
+    flex-direction: column;
+    gap: {{ block.settings.content_gap }}px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-scrolling-collection__product-{{ ai_gen_id }} {
+      width: calc((100% - (4 * {{ block.settings.product_gap }}px)) / 5);
+    }
+  }
+
+  .ai-scrolling-collection__image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    overflow: hidden;
+  }
+
+  .ai-scrolling-collection__image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .ai-scrolling-collection__info-{{ ai_gen_id }} {
+    display: flex;
+    flex-wrap: wrap;
+    gap: {{ block.settings.pill_gap }}px;
+  }
+
+  .ai-scrolling-collection__pill-{{ ai_gen_id }} {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: {{ block.settings.pill_padding_vertical }}px {{ block.settings.pill_padding_horizontal }}px;
+    background-color: {{ block.settings.pill_background }};
+    color: {{ block.settings.pill_text_color }};
+    border: {{ block.settings.pill_border_width }}px solid {{ block.settings.pill_border_color }};
+    border-radius: {{ block.settings.pill_border_radius }}px;
+    font-size: {{ block.settings.pill_font_size }}px;
+    font-weight: {{ block.settings.pill_font_weight }};
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  @keyframes ai-scroll-{{ ai_gen_id }} {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .ai-scrolling-collection__wrapper-{{ ai_gen_id }}:hover {
+    animation-play-state: paused;
+  }
+{% endstyle %}
+
+<scrolling-collection-{{ ai_gen_id }}
+  class="ai-scrolling-collection-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  {% if block.settings.collection != blank %}
+    <div class="ai-scrolling-collection__wrapper-{{ ai_gen_id }}">
+      <div class="ai-scrolling-collection__track-{{ ai_gen_id }}">
+        {% for product in block.settings.collection.products limit: 20 %}
+          <div class="ai-scrolling-collection__product-{{ ai_gen_id }}">
+            <div class="ai-scrolling-collection__image-wrapper-{{ ai_gen_id }}">
+              {% if product.featured_image %}
+                <img
+                  src="{{ product.featured_image | image_url: width: 400 }}"
+                  alt="{{ product.featured_image.alt | escape }}"
+                  class="ai-scrolling-collection__image-{{ ai_gen_id }}"
+                  loading="lazy"
+                  width="400"
+                  height="400"
+                >
+              {% else %}
+                <div class="ai-scrolling-collection__image-placeholder-{{ ai_gen_id }}">
+                  {{ 'product-1' | placeholder_svg_tag }}
+                </div>
+              {% endif %}
+            </div>
+            <div class="ai-scrolling-collection__info-{{ ai_gen_id }}">
+              {% if block.settings.show_price %}
+                <span class="ai-scrolling-collection__pill-{{ ai_gen_id }}">
+                  {{ product.price | money }}
+                </span>
+              {% endif %}
+              {% if product.variants.size > 0 %}
+                {% assign size_option = product.options_with_values | where: 'name', block.settings.size_option_name | first %}
+                {% if size_option %}
+                  {% assign first_size = size_option.values | first %}
+                  <span class="ai-scrolling-collection__pill-{{ ai_gen_id }}">
+                    {{ first_size }}
+                  </span>
+                {% endif %}
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="ai-scrolling-collection__track-{{ ai_gen_id }}" aria-hidden="true">
+        {% for product in block.settings.collection.products limit: 20 %}
+          <div class="ai-scrolling-collection__product-{{ ai_gen_id }}">
+            <div class="ai-scrolling-collection__image-wrapper-{{ ai_gen_id }}">
+              {% if product.featured_image %}
+                <img
+                  src="{{ product.featured_image | image_url: width: 400 }}"
+                  alt="{{ product.featured_image.alt | escape }}"
+                  class="ai-scrolling-collection__image-{{ ai_gen_id }}"
+                  loading="lazy"
+                  width="400"
+                  height="400"
+                >
+              {% else %}
+                <div class="ai-scrolling-collection__image-placeholder-{{ ai_gen_id }}">
+                  {{ 'product-1' | placeholder_svg_tag }}
+                </div>
+              {% endif %}
+            </div>
+            <div class="ai-scrolling-collection__info-{{ ai_gen_id }}">
+              {% if block.settings.show_price %}
+                <span class="ai-scrolling-collection__pill-{{ ai_gen_id }}">
+                  {{ product.price | money }}
+                </span>
+              {% endif %}
+              {% if product.variants.size > 0 %}
+                {% assign size_option = product.options_with_values | where: 'name', block.settings.size_option_name | first %}
+                {% if size_option %}
+                  {% assign first_size = size_option.values | first %}
+                  <span class="ai-scrolling-collection__pill-{{ ai_gen_id }}">
+                    {{ first_size }}
+                  </span>
+                {% endif %}
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% else %}
+    <div class="ai-scrolling-collection__wrapper-{{ ai_gen_id }}">
+      <div class="ai-scrolling-collection__track-{{ ai_gen_id }}">
+        {% for i in (1..8) %}
+          <div class="ai-scrolling-collection__product-{{ ai_gen_id }}">
+            <div class="ai-scrolling-collection__image-wrapper-{{ ai_gen_id }}">
+              <div class="ai-scrolling-collection__image-placeholder-{{ ai_gen_id }}">
+                {{ 'product-1' | placeholder_svg_tag }}
+              </div>
+            </div>
+            <div class="ai-scrolling-collection__info-{{ ai_gen_id }}">
+              {% if block.settings.show_price %}
+                <span class="ai-scrolling-collection__pill-{{ ai_gen_id }}">
+                  $0.00
+                </span>
+              {% endif %}
+              <span class="ai-scrolling-collection__pill-{{ ai_gen_id }}">
+                Size
+              </span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="ai-scrolling-collection__track-{{ ai_gen_id }}" aria-hidden="true">
+        {% for i in (1..8) %}
+          <div class="ai-scrolling-collection__product-{{ ai_gen_id }}">
+            <div class="ai-scrolling-collection__image-wrapper-{{ ai_gen_id }}">
+              <div class="ai-scrolling-collection__image-placeholder-{{ ai_gen_id }}">
+                {{ 'product-1' | placeholder_svg_tag }}
+              </div>
+            </div>
+            <div class="ai-scrolling-collection__info-{{ ai_gen_id }}">
+              {% if block.settings.show_price %}
+                <span class="ai-scrolling-collection__pill-{{ ai_gen_id }}">
+                  $0.00
+                </span>
+              {% endif %}
+              <span class="ai-scrolling-collection__pill-{{ ai_gen_id }}">
+                Size
+              </span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+</scrolling-collection-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class ScrollingCollection{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.wrapper = this.querySelector('.ai-scrolling-collection__wrapper-{{ ai_gen_id }}');
+        this.setupAccessibility();
+      }
+
+      setupAccessibility() {
+        if (this.wrapper) {
+          this.wrapper.setAttribute('role', 'region');
+          this.wrapper.setAttribute('aria-label', 'Scrolling product collection');
+        }
+      }
+    }
+
+    customElements.define('scrolling-collection-{{ ai_gen_id }}', ScrollingCollection{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Scrolling collection",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Collection"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_price",
+      "label": "Show price",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "size_option_name",
+      "label": "Size option name",
+      "default": "Size",
+      "info": "Enter the exact name of your size option (e.g., Size, UK Size)"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "label": "Section padding",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "product_gap",
+      "label": "Product gap",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "content_gap",
+      "label": "Content gap",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "scroll_speed",
+      "label": "Scroll speed",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "s",
+      "default": 40,
+      "info": "Higher values = slower scroll"
+    },
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "header",
+      "content": "Pills"
+    },
+    {
+      "type": "range",
+      "id": "pill_gap",
+      "label": "Gap between pills",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "pill_padding_vertical",
+      "label": "Vertical padding",
+      "min": 2,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "pill_padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 4,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "pill_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "pill_border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "pill_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "pill_text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "pill_border_color",
+      "label": "Border color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "pill_font_size",
+      "label": "Font size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "select",
+      "id": "pill_font_weight",
+      "label": "Font weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semibold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "400"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Scrolling collection"
+    }
+  ]
+}
+{% endschema %}
