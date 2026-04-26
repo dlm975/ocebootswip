@@ -81,6 +81,25 @@
     to   { transform: translateX(-50%); }
   }
 
+  /* Static layout on desktop — no scroll, single centered row */
+  @media screen and (min-width: 750px) {
+    .tlb-bar-{{ ai_gen_id }} {
+      overflow: visible;
+    }
+
+    .tlb-track-{{ ai_gen_id }} {
+      animation: none;
+      width: 100%;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* Hide the duplicate set used only for the seamless loop */
+    .tlb-track-{{ ai_gen_id }} img[aria-hidden="true"] {
+      display: none;
+    }
+  }
+
   .tlb-empty-{{ ai_gen_id }} {
     width: 100%;
     text-align: center;
