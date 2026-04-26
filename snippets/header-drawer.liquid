@@ -1147,14 +1147,16 @@
     z-index: -1;
   }
 
-  /* Auto-height inner containers */
-  .header-drawer .menu-drawer__navigation-container {
-    grid-template-rows: auto auto;
-    height: auto;
-  }
-
+  /* Auto-height inner containers so overflow-y on the drawer scrolls content */
+  .header-drawer .menu-drawer__inner-container,
+  .header-drawer .menu-drawer__navigation-container,
   .header-drawer .menu-drawer__inner-submenu {
     height: auto;
+    overflow: visible;
+  }
+
+  .header-drawer .menu-drawer__navigation-container {
+    grid-template-rows: auto auto;
   }
 
   /* ---- Text: black on white ---- */
