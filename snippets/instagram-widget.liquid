@@ -265,29 +265,28 @@
     width: 100%;
   }
 
-  /* --- See More bar --- */
+  /* --- See More pill --- */
   .igw-see-more {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
     gap: 8px;
-    width: calc(100% + 48px);
-    margin: 16px -24px 0;
-    padding: 18px 24px;
+    margin: 20px auto 24px;
+    padding: 13px 28px;
     background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
-    border-top: none;
     color: #ffffff;
     font-size: 0.95rem;
     font-weight: 800;
     letter-spacing: 0.02em;
     text-decoration: none;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    border-radius: 999px;
     transition: filter 0.18s ease, transform 0.18s ease;
-    border-radius: 0 0 14px 14px;
+    box-shadow: 0 4px 16px rgba(214, 36, 159, 0.35);
   }
 
   .igw-see-more:hover {
     filter: brightness(1.08);
+    transform: translateY(-1px);
   }
 </style>
 
