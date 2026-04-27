@@ -281,6 +281,16 @@
                 "padding-inline-end": 0
               },
               "blocks": {}
+            },
+            "testimonials_001": {
+              "type": "product-testimonials",
+              "settings": {
+                "section_title": "Famous Customers",
+                "name_1": "Jordan M.",
+                "detail_1": "Best boots I've ever owned \u2014 worth every penny.",
+                "name_2": "Alex R.",
+                "detail_2": "Arrived fast and fit perfectly first try."
+              }
             }
           },
           "block_order": [
@@ -291,7 +301,8 @@
             "essential_upsell_app_block_zgTHkC",
             "trust_bar_001",
             "desc_accordion_001",
-            "faq_accordion_001"
+            "faq_accordion_001",
+            "testimonials_001"
           ]
         }
       },
