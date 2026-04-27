@@ -9,37 +9,110 @@
     {{ block.settings.section_title }}
   </h3>
 
-  {%- for i in (1..5) -%}
-    {%- assign name_key   = 'name_'   | append: i -%}
-    {%- assign detail_key = 'detail_' | append: i -%}
-    {%- assign photo_key  = 'photo_'  | append: i -%}
-    {%- assign t_name   = block.settings[name_key] -%}
-    {%- assign t_detail = block.settings[detail_key] -%}
-    {%- assign t_photo  = block.settings[photo_key] -%}
-
-    {%- if t_name != blank or request.visual_preview_mode -%}
-      <div class="pdp-testimonial-item">
-        <span class="pdp-testimonial-item__avatar" aria-hidden="true">
-          {%- if t_photo != blank -%}
-            {{ t_photo | image_url: width: 80 | image_tag: width: 44, height: 44, style: 'width:44px;height:44px;object-fit:cover;border-radius:50%;display:block;' }}
-          {%- else -%}
-            <span class="pdp-testimonial-item__avatar-initials">
-              {{- t_name | slice: 0 | upcase -}}
-            </span>
-          {%- endif -%}
-        </span>
-        <div class="pdp-testimonial-item__body">
-          <div class="pdp-testimonial-item__top">
-            <span class="pdp-testimonial-item__name">{{ t_name }}</span>
-            <span class="pdp-testimonial-item__stars" aria-label="5 out of 5 stars">★★★★★</span>
-          </div>
-          {%- if t_detail != blank -%}
-            <p class="pdp-testimonial-item__detail">{{ t_detail }}</p>
-          {%- endif -%}
+  {%- if block.settings.name_1 != blank or request.visual_preview_mode -%}
+    <div class="pdp-testimonial-item">
+      <span class="pdp-testimonial-item__avatar" aria-hidden="true">
+        {%- if block.settings.photo_1 != blank -%}
+          {{ block.settings.photo_1 | image_url: width: 80 | image_tag: width: 44, height: 44, style: 'width:44px;height:44px;object-fit:cover;border-radius:50%;display:block;' }}
+        {%- else -%}
+          <span class="pdp-testimonial-item__avatar-initials">{{ block.settings.name_1 | slice: 0 | upcase }}</span>
+        {%- endif -%}
+      </span>
+      <div class="pdp-testimonial-item__body">
+        <div class="pdp-testimonial-item__top">
+          <span class="pdp-testimonial-item__name">{{ block.settings.name_1 }}</span>
+          <span class="pdp-testimonial-item__stars" aria-label="5 out of 5 stars">★★★★★</span>
         </div>
+        {%- if block.settings.detail_1 != blank -%}
+          <p class="pdp-testimonial-item__detail">{{ block.settings.detail_1 }}</p>
+        {%- endif -%}
       </div>
-    {%- endif -%}
-  {%- endfor -%}
+    </div>
+  {%- endif -%}
+
+  {%- if block.settings.name_2 != blank -%}
+    <div class="pdp-testimonial-item">
+      <span class="pdp-testimonial-item__avatar" aria-hidden="true">
+        {%- if block.settings.photo_2 != blank -%}
+          {{ block.settings.photo_2 | image_url: width: 80 | image_tag: width: 44, height: 44, style: 'width:44px;height:44px;object-fit:cover;border-radius:50%;display:block;' }}
+        {%- else -%}
+          <span class="pdp-testimonial-item__avatar-initials">{{ block.settings.name_2 | slice: 0 | upcase }}</span>
+        {%- endif -%}
+      </span>
+      <div class="pdp-testimonial-item__body">
+        <div class="pdp-testimonial-item__top">
+          <span class="pdp-testimonial-item__name">{{ block.settings.name_2 }}</span>
+          <span class="pdp-testimonial-item__stars" aria-label="5 out of 5 stars">★★★★★</span>
+        </div>
+        {%- if block.settings.detail_2 != blank -%}
+          <p class="pdp-testimonial-item__detail">{{ block.settings.detail_2 }}</p>
+        {%- endif -%}
+      </div>
+    </div>
+  {%- endif -%}
+
+  {%- if block.settings.name_3 != blank -%}
+    <div class="pdp-testimonial-item">
+      <span class="pdp-testimonial-item__avatar" aria-hidden="true">
+        {%- if block.settings.photo_3 != blank -%}
+          {{ block.settings.photo_3 | image_url: width: 80 | image_tag: width: 44, height: 44, style: 'width:44px;height:44px;object-fit:cover;border-radius:50%;display:block;' }}
+        {%- else -%}
+          <span class="pdp-testimonial-item__avatar-initials">{{ block.settings.name_3 | slice: 0 | upcase }}</span>
+        {%- endif -%}
+      </span>
+      <div class="pdp-testimonial-item__body">
+        <div class="pdp-testimonial-item__top">
+          <span class="pdp-testimonial-item__name">{{ block.settings.name_3 }}</span>
+          <span class="pdp-testimonial-item__stars" aria-label="5 out of 5 stars">★★★★★</span>
+        </div>
+        {%- if block.settings.detail_3 != blank -%}
+          <p class="pdp-testimonial-item__detail">{{ block.settings.detail_3 }}</p>
+        {%- endif -%}
+      </div>
+    </div>
+  {%- endif -%}
+
+  {%- if block.settings.name_4 != blank -%}
+    <div class="pdp-testimonial-item">
+      <span class="pdp-testimonial-item__avatar" aria-hidden="true">
+        {%- if block.settings.photo_4 != blank -%}
+          {{ block.settings.photo_4 | image_url: width: 80 | image_tag: width: 44, height: 44, style: 'width:44px;height:44px;object-fit:cover;border-radius:50%;display:block;' }}
+        {%- else -%}
+          <span class="pdp-testimonial-item__avatar-initials">{{ block.settings.name_4 | slice: 0 | upcase }}</span>
+        {%- endif -%}
+      </span>
+      <div class="pdp-testimonial-item__body">
+        <div class="pdp-testimonial-item__top">
+          <span class="pdp-testimonial-item__name">{{ block.settings.name_4 }}</span>
+          <span class="pdp-testimonial-item__stars" aria-label="5 out of 5 stars">★★★★★</span>
+        </div>
+        {%- if block.settings.detail_4 != blank -%}
+          <p class="pdp-testimonial-item__detail">{{ block.settings.detail_4 }}</p>
+        {%- endif -%}
+      </div>
+    </div>
+  {%- endif -%}
+
+  {%- if block.settings.name_5 != blank -%}
+    <div class="pdp-testimonial-item">
+      <span class="pdp-testimonial-item__avatar" aria-hidden="true">
+        {%- if block.settings.photo_5 != blank -%}
+          {{ block.settings.photo_5 | image_url: width: 80 | image_tag: width: 44, height: 44, style: 'width:44px;height:44px;object-fit:cover;border-radius:50%;display:block;' }}
+        {%- else -%}
+          <span class="pdp-testimonial-item__avatar-initials">{{ block.settings.name_5 | slice: 0 | upcase }}</span>
+        {%- endif -%}
+      </span>
+      <div class="pdp-testimonial-item__body">
+        <div class="pdp-testimonial-item__top">
+          <span class="pdp-testimonial-item__name">{{ block.settings.name_5 }}</span>
+          <span class="pdp-testimonial-item__stars" aria-label="5 out of 5 stars">★★★★★</span>
+        </div>
+        {%- if block.settings.detail_5 != blank -%}
+          <p class="pdp-testimonial-item__detail">{{ block.settings.detail_5 }}</p>
+        {%- endif -%}
+      </div>
+    </div>
+  {%- endif -%}
 
 </div>
 
