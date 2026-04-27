@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "main": {
@@ -164,17 +173,29 @@
               },
               "blocks": {}
             },
+            "urgency_stock_001": {
+              "type": "product-urgency-stock",
+              "settings": {
+                "threshold": 5,
+                "dot_color": "red",
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            },
             "buy_buttons_pKHp9V": {
               "type": "buy-buttons",
               "name": "t:names.product_buy_buttons",
               "settings": {
+                "urgency_text": "In another cart - act fast",
                 "stacking": false,
                 "show_pickup_availability": false,
                 "padding-block-start": 0,
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
-                "padding-inline-end": 0,
-                "urgency_text": "In another cart - act fast"
+                "padding-inline-end": 0
               },
               "blocks": {
                 "quantity": {
@@ -205,22 +226,15 @@
               "type": "shopify://apps/essential-upsell/blocks/app-block/50627fd9-24fd-4250-8614-accc12826d80",
               "settings": {}
             },
-            "urgency_stock_001": {
-              "type": "product-urgency-stock",
-              "settings": {
-                "threshold": 5,
-                "dot_color": "red",
-                "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            },
             "trust_bar_001": {
               "type": "product-trust-bar",
               "settings": {
-                "text": "Authentic boots. Verified sellers.",
+                "icon_1": "shopify://shop_images/Twitter_Verified_Badge.svg",
+                "text_1": "Verified Boots",
+                "icon_2": "shopify://shop_images/Noto_Emoji_v2.034_2708.svg",
+                "text_2": "Express Shipping",
+                "icon_3": "shopify://shop_images/RecyclingSymbolGreen.png",
+                "text_3": "Accept Returns",
                 "padding-block-start": 8,
                 "padding-block-end": 8,
                 "padding-inline-start": 0,
