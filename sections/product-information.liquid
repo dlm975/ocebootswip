@@ -294,12 +294,17 @@
     container-type: inline-size;
   }
 
-  /* Thumbnail strip: show max 4 at once, scroll for the rest */
+  /* Thumbnail strip: max 4 visible, scroll for the rest, centred against main image */
   .product-information slideshow-controls[thumbnails] scroll-hint {
     max-height: calc(4 * (var(--thumbnail-width, 72px) + 6px));
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: rgba(0,0,0,0.3) transparent;
+  }
+
+  /* Centre the thumbnail column vertically within the media-gallery grid row */
+  .product-information slideshow-controls[thumbnails]:is([pagination-position='right'], [pagination-position='left']) {
+    justify-content: center;
   }
 {% endstylesheet %}
 

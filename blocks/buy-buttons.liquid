@@ -69,12 +69,24 @@
         >
           {% content_for 'block', type: 'quantity', id: 'quantity' %}
 
-          {% content_for 'block',
-            type: 'add-to-cart',
-            id: 'add-to-cart',
-            can_add_to_cart: can_add_to_cart,
-            add_to_cart_text: add_to_cart_text
-          %}
+          <div class="add-to-cart-group">
+            {% content_for 'block',
+              type: 'add-to-cart',
+              id: 'add-to-cart',
+              can_add_to_cart: can_add_to_cart,
+              add_to_cart_text: add_to_cart_text
+            %}
+            {%- if block.settings.urgency_text != blank -%}
+              <div class="cart-urgency-inline" aria-live="polite">
+                <span class="cart-urgency-inline__icon" aria-hidden="true">
+                  <svg viewBox="0 0 10 16" fill="currentColor" width="11" height="11">
+                    <path d="M6 0L0 9h4.5L4 16l6-9H5.5z"/>
+                  </svg>
+                </span>
+                <span>{{ block.settings.urgency_text }}</span>
+              </div>
+            {%- endif -%}
+          </div>
           <span
             class="product-form-text__error hidden"
             ref="addToCartTextError"
@@ -231,6 +243,37 @@
 
   .product-form-buttons--stacked > *:not(.quantity-selector) {
     flex-basis: 51%; /* Force the buttons to be on separate rows */
+  }
+
+  /* Urgency notice grouped with add-to-cart */
+  .add-to-cart-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+    min-width: 185px;
+  }
+
+  .cart-urgency-inline {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: #744210;
+    background: #fffbeb;
+    border: 1px solid #f6e05e;
+    border-radius: 6px;
+    padding: 6px 12px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .cart-urgency-inline__icon {
+    color: #c05621;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
   }
 
   .quantity-selector {
@@ -390,6 +433,13 @@
     {
       "type": "paragraph",
       "content": "t:content.resource_reference_product"
+    },
+    {
+      "type": "text",
+      "id": "urgency_text",
+      "label": "Urgency message (shown under add-to-cart)",
+      "default": "In another cart",
+      "info": "Leave blank to hide."
     },
     {
       "type": "checkbox",
