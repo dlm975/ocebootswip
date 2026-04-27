@@ -1,0 +1,107 @@
+<div
+  class="pdp-trust-bar"
+  style="{% render 'spacing-style', settings: block.settings %}"
+  {{ block.shopify_attributes }}
+>
+  {%- if block.settings.icon != blank -%}
+    <div class="pdp-trust-bar__icon">
+      {{
+        block.settings.icon
+        | image_url: width: 48
+        | image_tag: width: 24, height: 24, style: 'object-fit: contain'
+      }}
+    </div>
+  {%- else -%}
+    <div class="pdp-trust-bar__icon pdp-trust-bar__icon--default" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+      </svg>
+    </div>
+  {%- endif -%}
+  {%- if block.settings.text != blank -%}
+    <span class="pdp-trust-bar__text">{{ block.settings.text }}</span>
+  {%- endif -%}
+</div>
+
+<style>
+  .pdp-trust-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--color-background-subdued, #f7f7f7);
+    border-radius: 8px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .pdp-trust-bar__icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .pdp-trust-bar__icon--default {
+    color: var(--color-foreground, #111);
+  }
+
+  .pdp-trust-bar__text {
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Trust Bar",
+  "tag": null,
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "icon",
+      "label": "Icon / Logo"
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Text",
+      "default": "Authentic boots. Verified sellers."
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "Left",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "Right",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Trust Bar",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}

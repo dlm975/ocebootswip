@@ -1,0 +1,88 @@
+<div
+  class="cart-urgency-notice"
+  style="{% render 'spacing-style', settings: block.settings %}"
+  {{ block.shopify_attributes }}
+>
+  <span class="cart-urgency-icon" aria-hidden="true">
+    <svg viewBox="0 0 10 16" fill="currentColor" width="12" height="12">
+      <path d="M6 0L0 9h4.5L4 16l6-9H5.5z"/>
+    </svg>
+  </span>
+  <span class="cart-urgency-text">{{ block.settings.text }}</span>
+</div>
+
+<style>
+  .cart-urgency-notice {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.8rem;
+    color: #744210;
+    background: #fffbeb;
+    border: 1px solid #f6e05e;
+    border-radius: 6px;
+    padding: 7px 12px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .cart-urgency-icon {
+    color: #c05621;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .cart-urgency-text {
+    font-weight: 500;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Cart Urgency",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Message",
+      "default": "In another cart"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 4
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "Left",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "Right",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Cart Urgency",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}

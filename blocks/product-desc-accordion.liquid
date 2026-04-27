@@ -1,0 +1,127 @@
+{% liquid
+  assign product = closest.product
+  if request.visual_preview_mode and product == blank
+    assign product = collections.all.products.first
+  endif
+  assign desc = product.description
+%}
+
+{% if desc != blank or request.visual_preview_mode %}
+<details
+  class="pdp-accordion pdp-accordion--{{ block.id }}"
+  {% if block.settings.open_by_default %}open{% endif %}
+  style="{% render 'spacing-style', settings: block.settings %}"
+  {{ block.shopify_attributes }}
+>
+  <summary class="pdp-accordion__summary">
+    <span>{{ block.settings.heading }}</span>
+    <svg class="pdp-accordion__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="16" height="16">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </summary>
+  <div class="pdp-accordion__body rte">
+    {% if desc != blank %}
+      {{ desc }}
+    {% else %}
+      <p>Product description will appear here.</p>
+    {% endif %}
+  </div>
+</details>
+{% endif %}
+
+<style>
+  .pdp-accordion {
+    border-top: 1px solid var(--color-border, #e2e8f0);
+    width: 100%;
+  }
+
+  .pdp-accordion:last-of-type {
+    border-bottom: 1px solid var(--color-border, #e2e8f0);
+  }
+
+  .pdp-accordion__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    list-style: none;
+    user-select: none;
+    gap: 12px;
+  }
+
+  .pdp-accordion__summary::-webkit-details-marker { display: none; }
+  .pdp-accordion__summary::marker { display: none; }
+
+  .pdp-accordion__chevron {
+    transition: transform 0.22s ease;
+    flex-shrink: 0;
+  }
+
+  .pdp-accordion[open] .pdp-accordion__chevron {
+    transform: rotate(180deg);
+  }
+
+  .pdp-accordion__body {
+    padding-bottom: 16px;
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Description Accordion",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Description"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_by_default",
+      "label": "Open by default",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "Left",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "Right",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Description Accordion",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}

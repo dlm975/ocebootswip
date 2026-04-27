@@ -1,0 +1,157 @@
+{% liquid
+  assign variant = closest.product.selected_or_first_available_variant
+  assign inventory_quantity = variant.inventory_quantity
+  assign inventory_managed = false
+  if variant.inventory_management == 'shopify'
+    assign inventory_managed = true
+  endif
+
+  assign show_urgency = false
+  if inventory_managed and inventory_quantity > 0 and inventory_quantity <= block.settings.threshold
+    assign show_urgency = true
+  endif
+%}
+
+{% if show_urgency or request.visual_preview_mode %}
+<div
+  class="product-urgency-stock"
+  style="{% render 'spacing-style', settings: block.settings %}"
+  {{ block.shopify_attributes }}
+>
+  <span class="urgency-dot urgency-dot--{{ block.settings.dot_color }}"></span>
+  <span class="urgency-text">
+    {% if request.visual_preview_mode and show_urgency == false %}
+      Only 1 left in stock!
+    {% elsif inventory_quantity == 1 %}
+      Only 1 left in stock!
+    {% else %}
+      Only {{ inventory_quantity }} left in stock!
+    {% endif %}
+  </span>
+</div>
+{% endif %}
+
+<style>
+  .product-urgency-stock {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding-block: 2px;
+  }
+
+  .urgency-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .urgency-dot--red {
+    background: #e53e3e;
+    box-shadow: 0 0 0 0 rgba(229,62,62,0.4);
+    animation: urgency-pulse-red 1.6s ease-in-out infinite;
+  }
+
+  .urgency-dot--orange {
+    background: #ed8936;
+    box-shadow: 0 0 0 0 rgba(237,137,54,0.4);
+    animation: urgency-pulse-orange 1.6s ease-in-out infinite;
+  }
+
+  .urgency-dot--amber {
+    background: #d69e2e;
+    box-shadow: 0 0 0 0 rgba(214,158,46,0.4);
+    animation: urgency-pulse-amber 1.6s ease-in-out infinite;
+  }
+
+  @keyframes urgency-pulse-red {
+    0%   { box-shadow: 0 0 0 0 rgba(229,62,62,0.5); }
+    70%  { box-shadow: 0 0 0 7px rgba(229,62,62,0); }
+    100% { box-shadow: 0 0 0 0 rgba(229,62,62,0); }
+  }
+
+  @keyframes urgency-pulse-orange {
+    0%   { box-shadow: 0 0 0 0 rgba(237,137,54,0.5); }
+    70%  { box-shadow: 0 0 0 7px rgba(237,137,54,0); }
+    100% { box-shadow: 0 0 0 0 rgba(237,137,54,0); }
+  }
+
+  @keyframes urgency-pulse-amber {
+    0%   { box-shadow: 0 0 0 0 rgba(214,158,46,0.5); }
+    70%  { box-shadow: 0 0 0 7px rgba(214,158,46,0); }
+    100% { box-shadow: 0 0 0 0 rgba(214,158,46,0); }
+  }
+
+  .urgency-text {
+    color: #c53030;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Stock Urgency",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Shows when inventory is low to create urgency."
+    },
+    {
+      "type": "range",
+      "id": "threshold",
+      "label": "Show when stock is at or below",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "select",
+      "id": "dot_color",
+      "label": "Dot colour",
+      "options": [
+        { "value": "red", "label": "Red" },
+        { "value": "orange", "label": "Orange" },
+        { "value": "amber", "label": "Amber" }
+      ],
+      "default": "red"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "Left",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "Right",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Stock Urgency",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}

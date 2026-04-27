@@ -281,6 +281,26 @@
   body:has(#header-group #header-component[data-sticky-state='active']) .product-details.sticky-content--desktop {
     --sticky-header-offset: var(--header-height);
   }
+
+  /* Adaptive product title — clamp font-size so it fits on one line */
+  .product-information h1 {
+    font-size: clamp(1rem, 4cqw, 2.4rem);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .product-details {
+    container-type: inline-size;
+  }
+
+  /* Thumbnail strip: show max 4 at once, scroll for the rest */
+  .product-information slideshow-controls[thumbnails] scroll-hint {
+    max-height: calc(4 * (var(--thumbnail-width, 72px) + 6px));
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,0,0,0.3) transparent;
+  }
 {% endstylesheet %}
 
 {% schema %}

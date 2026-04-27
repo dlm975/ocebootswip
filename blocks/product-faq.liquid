@@ -1,0 +1,244 @@
+{% liquid
+  assign has_questions = false
+  for i in (1..8)
+    assign q_key = 'q' | append: i
+    assign a_key = 'a' | append: i
+    if block.settings[q_key] != blank and block.settings[a_key] != blank
+      assign has_questions = true
+      break
+    endif
+  endfor
+%}
+
+{% if has_questions or request.visual_preview_mode %}
+<details
+  class="pdp-accordion pdp-accordion--{{ block.id }}"
+  {% if block.settings.open_by_default %}open{% endif %}
+  style="{% render 'spacing-style', settings: block.settings %}"
+  {{ block.shopify_attributes }}
+>
+  <summary class="pdp-accordion__summary">
+    <span>{{ block.settings.heading }}</span>
+    <svg class="pdp-accordion__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="16" height="16">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </summary>
+  <div class="pdp-accordion__body pdp-faq__body">
+    {% for i in (1..8) %}
+      {%- assign q_key = 'q' | append: i -%}
+      {%- assign a_key = 'a' | append: i -%}
+      {%- assign q_text = block.settings[q_key] -%}
+      {%- assign a_text = block.settings[a_key] -%}
+      {% if q_text != blank and a_text != blank %}
+        <div class="pdp-faq__item">
+          <p class="pdp-faq__question">{{ q_text }}</p>
+          <p class="pdp-faq__answer">{{ a_text }}</p>
+        </div>
+      {% endif %}
+    {% endfor %}
+    {% if request.visual_preview_mode and has_questions == false %}
+      <div class="pdp-faq__item">
+        <p class="pdp-faq__question">What sizes are available?</p>
+        <p class="pdp-faq__answer">We stock EU 36–48 across all models. Check the size guide for brand-specific conversions.</p>
+      </div>
+      <div class="pdp-faq__item">
+        <p class="pdp-faq__question">Are these boots authentic?</p>
+        <p class="pdp-faq__answer">Yes — every boot is 100% authentic, sourced directly from authorised retailers and brand distributors.</p>
+      </div>
+    {% endif %}
+  </div>
+</details>
+{% endif %}
+
+<style>
+  .pdp-faq__body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .pdp-faq__item {
+    padding-left: 12px;
+    border-left: 3px solid var(--color-foreground, #111);
+  }
+
+  .pdp-faq__question {
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin: 0 0 4px;
+  }
+
+  .pdp-faq__answer {
+    font-size: 0.875rem;
+    opacity: 0.7;
+    margin: 0;
+    line-height: 1.5;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "FAQ Accordion",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "FAQ"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_by_default",
+      "label": "Open by default",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Question 1"
+    },
+    {
+      "type": "text",
+      "id": "q1",
+      "label": "Question"
+    },
+    {
+      "type": "textarea",
+      "id": "a1",
+      "label": "Answer"
+    },
+    {
+      "type": "header",
+      "content": "Question 2"
+    },
+    {
+      "type": "text",
+      "id": "q2",
+      "label": "Question"
+    },
+    {
+      "type": "textarea",
+      "id": "a2",
+      "label": "Answer"
+    },
+    {
+      "type": "header",
+      "content": "Question 3"
+    },
+    {
+      "type": "text",
+      "id": "q3",
+      "label": "Question"
+    },
+    {
+      "type": "textarea",
+      "id": "a3",
+      "label": "Answer"
+    },
+    {
+      "type": "header",
+      "content": "Question 4"
+    },
+    {
+      "type": "text",
+      "id": "q4",
+      "label": "Question"
+    },
+    {
+      "type": "textarea",
+      "id": "a4",
+      "label": "Answer"
+    },
+    {
+      "type": "header",
+      "content": "Question 5"
+    },
+    {
+      "type": "text",
+      "id": "q5",
+      "label": "Question"
+    },
+    {
+      "type": "textarea",
+      "id": "a5",
+      "label": "Answer"
+    },
+    {
+      "type": "header",
+      "content": "Question 6"
+    },
+    {
+      "type": "text",
+      "id": "q6",
+      "label": "Question"
+    },
+    {
+      "type": "textarea",
+      "id": "a6",
+      "label": "Answer"
+    },
+    {
+      "type": "header",
+      "content": "Question 7"
+    },
+    {
+      "type": "text",
+      "id": "q7",
+      "label": "Question"
+    },
+    {
+      "type": "textarea",
+      "id": "a7",
+      "label": "Answer"
+    },
+    {
+      "type": "header",
+      "content": "Question 8"
+    },
+    {
+      "type": "text",
+      "id": "q8",
+      "label": "Question"
+    },
+    {
+      "type": "textarea",
+      "id": "a8",
+      "label": "Answer"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "Left",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "Right",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "FAQ Accordion",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}
