@@ -189,7 +189,7 @@
               "type": "buy-buttons",
               "name": "t:names.product_buy_buttons",
               "settings": {
-                "urgency_text": "In another cart - act fast",
+                "urgency_text": "In another cart - act fast!!",
                 "stacking": false,
                 "show_pickup_availability": false,
                 "padding-block-start": 0,
