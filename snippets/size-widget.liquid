@@ -296,18 +296,61 @@
     const shopBtn  = document.getElementById('sbz-shop-btn');
 
     const SYSTEMS = {
-      us: [4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 13],
-      uk: [3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 12],
-      eu: [35, 36, 36.5, 37, 37.5, 38, 38.5, 39, 40, 40.5, 41, 41.5, 42, 43, 44, 44.5, 45, 46, 47]
+      us: [6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 12.5, 13],
+      uk: [5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12],
+      eu: [39, 40, 40.5, 41, 42, 42.5, 43, 44, 44.5, 45, 45.5, 46, 47, 47.5]
     };
 
-    function sizeHandle(sys, size) {
-      return 'size-' + sys + '-' + String(size).replace('.', '-');
-    }
-
-    function sizeLabel(size) {
-      return String(size);
-    }
+    const URLS = {
+      us: {
+        '6.5':  'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+6.5+-+UK+5.5&filter.v.option.size=US+6.5+-+UK+6&sort_by=created-descending&grid=default',
+        '7':    'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+7+-+UK+6&filter.v.option.size=US+7+-+UK+6&sort_by=created-descending&grid=default',
+        '7.5':  'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+7.5+-+UK+6.5&filter.v.option.size=US+7.5+-+UK+7&sort_by=created-descending&grid=default',
+        '8':    'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+7.5+-+UK+7&filter.v.option.size=gid%3A%2F%2Fshopify%2FFilterSettingGroup%2F48562487&sort_by=created-descending&grid=default',
+        '8.5':  'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+8.5+-+UK+7.5&filter.v.option.size=US+8.5+-+UK+8&sort_by=created-descending&grid=default',
+        '9':    'https://oceboots.com/collections/all-football-boots?filter.v.option.size=gid%3A%2F%2Fshopify%2FFilterSettingGroup%2F48595255&sort_by=created-descending&grid=default',
+        '9.5':  'https://oceboots.com/collections/all-football-boots?filter.v.option.size=gid%3A%2F%2Fshopify%2FFilterSettingGroup%2F48628023&sort_by=created-descending&grid=default',
+        '10':   'https://oceboots.com/collections/all-football-boots?filter.v.option.size=gid%3A%2F%2Fshopify%2FFilterSettingGroup%2F48529719&sort_by=created-descending&grid=default',
+        '10.5': 'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+10.5+-+UK+9.5&filter.v.option.size=US+10.5+-+UK+10&sort_by=created-descending&grid=default',
+        '11':   'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+11+-+UK+10&filter.v.option.size=US+11+-+UK+10.5&sort_by=created-descending&grid=default',
+        '11.5': 'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+11.5+-+UK+10.5&filter.v.option.size=US+11.5+-+UK+11&sort_by=created-descending&grid=default',
+        '12':   'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+12+-+UK+11&filter.v.option.size=US+12+-+UK+11.5&sort_by=created-descending&grid=default',
+        '12.5': 'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+12.5+-+UK+11.5&sort_by=created-descending&grid=default',
+        '13':   'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+13+-+UK+12&filter.v.option.size=US+13+-+UK+12.5&sort_by=created-descending&grid=default'
+      },
+      uk: {
+        '5.5':  'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+6.5+-+UK+5.5&filter.v.option.size=US+6.5+-+UK+6&sort_by=created-descending&grid=default',
+        '6':    'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+6.5+-+UK+6&filter.v.option.size=US+7+-+UK+6&sort_by=created-descending&grid=default',
+        '6.5':  'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+7+-+UK+6.5&filter.v.option.size=US+7.5+-+UK+6.5&sort_by=created-descending&grid=default',
+        '7':    'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+7.5+-+UK+7&filter.v.option.size=gid%3A%2F%2Fshopify%2FFilterSettingGroup%2F48562487&sort_by=created-descending&grid=default',
+        '7.5':  'https://oceboots.com/collections/all-football-boots?filter.v.option.size=gid%3A%2F%2Fshopify%2FFilterSettingGroup%2F48562487&filter.v.option.size=US+8.5+-+UK+7.5&sort_by=created-descending&grid=default',
+        '8':    'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+8.5+-+UK+8&filter.v.option.size=gid%3A%2F%2Fshopify%2FFilterSettingGroup%2F48595255&sort_by=created-descending&grid=default',
+        '8.5':  'https://oceboots.com/collections/all-football-boots?filter.v.option.size=gid%3A%2F%2Fshopify%2FFilterSettingGroup%2F48595255&filter.v.option.size=gid%3A%2F%2Fshopify%2FFilterSettingGroup%2F48628023&sort_by=created-descending&grid=default',
+        '9':    'https://oceboots.com/collections/all-football-boots?filter.v.option.size=gid%3A%2F%2Fshopify%2FFilterSettingGroup%2F48628023&filter.v.option.size=gid%3A%2F%2Fshopify%2FFilterSettingGroup%2F48529719&sort_by=created-descending&grid=default',
+        '9.5':  'https://oceboots.com/collections/all-football-boots?filter.v.option.size=gid%3A%2F%2Fshopify%2FFilterSettingGroup%2F48529719&filter.v.option.size=US+10.5+-+UK+9.5&sort_by=created-descending&grid=default',
+        '10':   'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+10.5+-+UK+10&filter.v.option.size=US+11+-+UK+10&sort_by=created-descending&grid=default',
+        '10.5': 'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+11+-+UK+10.5&filter.v.option.size=US+11.5+-+UK+10.5&sort_by=created-descending&grid=default',
+        '11':   'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+11.5+-+UK+11&filter.v.option.size=US+12+-+UK+11&sort_by=created-descending&grid=default',
+        '11.5': 'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+12+-+UK+11.5&filter.v.option.size=US+12.5+-+UK+11.5&sort_by=created-descending&grid=default',
+        '12':   'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+13+-+UK+12&sort_by=created-descending&grid=default'
+      },
+      eu: {
+        '39':   'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+6.5+-+UK+5.5&filter.v.option.size=US+6.5+-+UK+6&sort_by=created-descending&grid=default',
+        '40':   'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+7+-+UK+6&filter.v.option.size=US+7+-+UK+6&sort_by=created-descending&grid=default',
+        '40.5': 'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+7.5+-+UK+6.5&filter.v.option.size=US+7.5+-+UK+7&sort_by=created-descending&grid=default',
+        '41':   'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+7.5+-+UK+7&filter.v.option.size=gid%3A%2F%2Fshopify%2FFilterSettingGroup%2F48562487&sort_by=created-descending&grid=default',
+        '42':   'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+8.5+-+UK+7.5&filter.v.option.size=US+8.5+-+UK+8&sort_by=created-descending&grid=default',
+        '42.5': 'https://oceboots.com/collections/all-football-boots?filter.v.option.size=gid%3A%2F%2Fshopify%2FFilterSettingGroup%2F48595255&sort_by=created-descending&grid=default',
+        '43':   'https://oceboots.com/collections/all-football-boots?filter.v.option.size=gid%3A%2F%2Fshopify%2FFilterSettingGroup%2F48628023&sort_by=created-descending&grid=default',
+        '44':   'https://oceboots.com/collections/all-football-boots?filter.v.option.size=gid%3A%2F%2Fshopify%2FFilterSettingGroup%2F48529719&sort_by=created-descending&grid=default',
+        '44.5': 'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+10.5+-+UK+9.5&filter.v.option.size=US+10.5+-+UK+10&sort_by=created-descending&grid=default',
+        '45':   'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+11+-+UK+10&filter.v.option.size=US+11+-+UK+10.5&sort_by=created-descending&grid=default',
+        '45.5': 'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+11.5+-+UK+10.5&filter.v.option.size=US+11.5+-+UK+11&sort_by=created-descending&grid=default',
+        '46':   'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+12+-+UK+11&filter.v.option.size=US+12+-+UK+11.5&sort_by=created-descending&grid=default',
+        '47':   'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+12.5+-+UK+11.5&sort_by=created-descending&grid=default',
+        '47.5': 'https://oceboots.com/collections/all-football-boots?filter.v.option.size=US+13+-+UK+12&filter.v.option.size=US+13+-+UK+12.5&sort_by=created-descending&grid=default'
+      }
+    };
 
     let activeSys = 'us';
     let selectedSize = null;
@@ -320,22 +363,20 @@
         btn.className = 'sbz-size-btn';
         btn.dataset.sys = sys;
         btn.dataset.size = size;
-        btn.textContent = sizeLabel(size);
+        btn.textContent = String(size);
         btn.addEventListener('click', function () { selectSize(sys, size, btn); });
         grid.appendChild(btn);
       });
     });
 
     function selectSize(sys, size, btn) {
-      /* Deselect all in current grid */
       document.querySelectorAll('#sbz-grid-' + sys + ' .sbz-size-btn').forEach(function (b) {
         b.classList.remove('sbz-size-selected');
       });
       btn.classList.add('sbz-size-selected');
       selectedSize = size;
 
-      var handle = sizeHandle(sys, size);
-      shopBtn.href = '/collections/' + handle;
+      shopBtn.href = URLS[sys][String(size)] || '#';
       shopBtn.classList.add('sbz-shop-active');
       shopBtn.removeAttribute('aria-disabled');
     }
