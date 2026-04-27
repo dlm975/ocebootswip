@@ -305,9 +305,17 @@
     box-shadow: 0 8px 24px rgba(0,0,0,0.14);
     padding: 6px;
     min-width: 100%;
-    display: flex;
     flex-direction: column;
     gap: 2px;
+  }
+
+  /* Hidden attribute must beat display: flex — explicit override */
+  .pill-option__dropdown[hidden] {
+    display: none !important;
+  }
+
+  .pill-option__dropdown:not([hidden]) {
+    display: flex;
   }
 
   /* ── Individual option inside dropdown ── */
@@ -525,10 +533,36 @@
 
 <script>
   (function () {
-    /* Use event delegation so this survives DOM morphing after variant fetch */
+
+    /* ── On first page load only: replace pill labels with "Choose {option}" ── */
+    function initChooseLabels() {
+      document.querySelectorAll('.pill-option--interactive').forEach(function (pill) {
+        if (pill.dataset.pillInit) return; /* already initialised (re-run guard) */
+        pill.dataset.pillInit = 'true';
+        var valueSpan = pill.querySelector('.pill-option__value');
+        var optionName = pill.dataset.optionName || 'option';
+        if (valueSpan) {
+          valueSpan.dataset.selectedValue = valueSpan.textContent; /* preserve for after selection */
+          valueSpan.textContent = 'Choose ' + optionName;
+        }
+        /* Mark all dropdown items as unselected visually */
+        pill.querySelectorAll('.pill-option__item').forEach(function (item) {
+          item.classList.remove('pill-option__item--selected');
+          item.setAttribute('aria-selected', 'false');
+        });
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initChooseLabels);
+    } else {
+      initChooseLabels();
+    }
+
+    /* ── Event delegation — survives DOM morphing after variant fetch ── */
     document.addEventListener('click', function (e) {
 
-      /* Toggle pill dropdown */
+      /* Toggle pill dropdown open / closed */
       var pillBtn = e.target.closest('.pill-option--interactive .pill-option__btn');
       if (pillBtn) {
         e.stopPropagation();
@@ -536,7 +570,7 @@
         var dropdown = pillOption.querySelector('.pill-option__dropdown');
         var isOpen = pillBtn.getAttribute('aria-expanded') === 'true';
 
-        /* Close all open pill dropdowns first */
+        /* Close every open pill first */
         document.querySelectorAll('.pill-option__btn[aria-expanded="true"]').forEach(function (b) {
           b.setAttribute('aria-expanded', 'false');
           b.closest('.pill-option').querySelector('.pill-option__dropdown').hidden = true;
@@ -549,7 +583,7 @@
         return;
       }
 
-      /* Select an option from the pill dropdown */
+      /* Select an option from inside the dropdown */
       var pillItem = e.target.closest('.pill-option__item');
       if (pillItem) {
         var pillOption = pillItem.closest('.pill-option');
@@ -558,7 +592,7 @@
         var select = pillOption.querySelector('.pill-option__select');
         var value = pillItem.dataset.value;
 
-        /* Update hidden select (property + attribute, matching variant-picker.js expectations) */
+        /* Update hidden select (property + attribute — both needed for variant-picker.js) */
         Array.from(select.options).forEach(function (opt) {
           if (opt.value === value) {
             opt.selected = true;
@@ -569,27 +603,27 @@
           }
         });
 
-        /* Update pill label */
+        /* Show selected value in pill label */
         var valueSpan = pillBtn.querySelector('.pill-option__value');
         if (valueSpan) valueSpan.textContent = value;
 
-        /* Update active state */
+        /* Mark selected item, clear others */
         dropdown.querySelectorAll('.pill-option__item').forEach(function (item) {
-          var isSelected = item.dataset.value === value;
-          item.classList.toggle('pill-option__item--selected', isSelected);
-          item.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+          var sel = item.dataset.value === value;
+          item.classList.toggle('pill-option__item--selected', sel);
+          item.setAttribute('aria-selected', sel ? 'true' : 'false');
         });
 
         /* Close dropdown */
         pillBtn.setAttribute('aria-expanded', 'false');
         dropdown.hidden = true;
 
-        /* Fire change event → caught by variant-picker.js */
+        /* Dispatch change → variant-picker.js handles re-fetch + cart sync */
         select.dispatchEvent(new Event('change', { bubbles: true }));
         return;
       }
 
-      /* Click outside → close all */
+      /* Outside click → close all */
       if (!e.target.closest('.pill-option')) {
         document.querySelectorAll('.pill-option__btn[aria-expanded="true"]').forEach(function (b) {
           b.setAttribute('aria-expanded', 'false');
@@ -598,7 +632,7 @@
       }
     });
 
-    /* Close on Escape */
+    /* Escape key → close all */
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
         document.querySelectorAll('.pill-option__btn[aria-expanded="true"]').forEach(function (b) {
@@ -607,5 +641,6 @@
         });
       }
     });
+
   })();
 </script>
