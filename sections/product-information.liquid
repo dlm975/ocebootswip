@@ -282,18 +282,6 @@
     --sticky-header-offset: var(--header-height);
   }
 
-  /* Adaptive product title — clamp font-size so it fits on one line */
-  .product-information h1 {
-    font-size: clamp(1rem, 4cqw, 2.4rem);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .product-details {
-    container-type: inline-size;
-  }
-
   /* Thumbnail strip: max 4 visible, scroll for the rest, centred against main image */
   .product-information slideshow-controls[thumbnails] scroll-hint {
     max-height: calc(4 * (var(--thumbnail-width, 72px) + 6px));
