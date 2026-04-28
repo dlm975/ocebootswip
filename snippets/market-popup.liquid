@@ -390,23 +390,65 @@
 
     if (localStorage.getItem(STORAGE_KEY)) return;
 
+    var ALIASES = {
+      'usa': 'united states', 'us': 'united states',
+      'uk': 'united kingdom', 'gb': 'united kingdom', 'brit': 'united kingdom',
+      'aus': 'australia',
+      'can': 'canada',
+      'nz': 'new zealand',
+      'ire': 'ireland',
+      'ger': 'germany',
+      'fra': 'france',
+      'esp': 'spain', 'spa': 'spain',
+      'ita': 'italy',
+      'ned': 'netherlands', 'hol': 'netherlands',
+      'swe': 'sweden',
+      'nor': 'norway',
+      'den': 'denmark',
+      'uae': 'united arab emirates',
+      'sa':  'south africa',
+      'jpn': 'japan', 'jp': 'japan'
+    };
+
+    var PRIORITY = [
+      'united states', 'united kingdom', 'australia', 'canada', 'new zealand',
+      'ireland', 'germany', 'france', 'netherlands', 'sweden', 'norway',
+      'denmark', 'spain', 'italy', 'japan', 'south africa', 'united arab emirates'
+    ];
+
+    var optionsByName = {};
+    options.forEach(function (btn) { optionsByName[btn.dataset.name] = btn; });
+
     /* Show single best match as user types */
     searchInput.addEventListener('input', function () {
-      var q = searchInput.value.trim().toLowerCase();
-      if (!q) {
+      var raw = searchInput.value.trim().toLowerCase();
+      if (!raw) {
         list.hidden = true;
         noResults.hidden = true;
         return;
       }
+      var q = ALIASES[raw] || raw;
       var best = null;
-      for (var i = 0; i < options.length; i++) {
-        if (options[i].dataset.name.indexOf(q) === 0) { best = options[i]; break; }
+
+      /* 1. Priority list — starts-with */
+      for (var i = 0; i < PRIORITY.length && !best; i++) {
+        var opt = optionsByName[PRIORITY[i]];
+        if (opt && opt.dataset.name.indexOf(q) === 0) best = opt;
       }
-      if (!best) {
-        for (var i = 0; i < options.length; i++) {
-          if (options[i].dataset.name.indexOf(q) !== -1) { best = options[i]; break; }
-        }
+      /* 2. Any option — starts-with */
+      for (var i = 0; i < options.length && !best; i++) {
+        if (options[i].dataset.name.indexOf(q) === 0) best = options[i];
       }
+      /* 3. Priority list — contains */
+      for (var i = 0; i < PRIORITY.length && !best; i++) {
+        var opt = optionsByName[PRIORITY[i]];
+        if (opt && opt.dataset.name.indexOf(q) !== -1) best = opt;
+      }
+      /* 4. Any option — contains */
+      for (var i = 0; i < options.length && !best; i++) {
+        if (options[i].dataset.name.indexOf(q) !== -1) best = options[i];
+      }
+
       options.forEach(function (btn) { btn.style.display = (btn === best) ? '' : 'none'; });
       list.hidden = !best;
       noResults.hidden = !!best;
