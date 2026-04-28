@@ -11,63 +11,92 @@
     <h2 class="mkt-title">Choose your region</h2>
     <p class="mkt-subtitle">Select your location for correct pricing &amp; shipping.</p>
 
-    <div class="mkt-search-wrap">
-      <svg class="mkt-search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" aria-hidden="true">
-        <circle cx="8.5" cy="8.5" r="5.5"/>
-        <line x1="13" y1="13" x2="18" y2="18"/>
-      </svg>
-      <input
-        type="text"
-        id="mkt-search"
-        class="mkt-search"
-        placeholder="Search country…"
-        autocomplete="off"
-        spellcheck="false"
-        aria-label="Search countries"
-        aria-controls="mkt-list"
-      >
-    </div>
-
     {%- form 'localization', id: 'mkt-form' -%}
-      <div class="mkt-list" id="mkt-list" role="listbox">
-        {%- for country in localization.available_countries -%}
-          <button
-            type="submit"
-            class="mkt-option{% if country.iso_code == localization.country.iso_code %} mkt-option--current{% endif %}"
-            name="country_code"
-            value="{{ country.iso_code }}"
-            data-name="{{ country.name | downcase }}"
-            role="option"
-            aria-selected="{% if country.iso_code == localization.country.iso_code %}true{% else %}false{% endif %}"
+
+      <!-- Detected market card -->
+      <button
+        type="submit"
+        class="mkt-detected"
+        name="country_code"
+        value="{{ localization.country.iso_code }}"
+        id="mkt-detected-btn"
+      >
+        <span class="mkt-flag-circle">
+          <img
+            src="https://flagcdn.com/w80/{{ localization.country.iso_code | downcase }}.png"
+            width="80"
+            height="60"
+            alt="{{ localization.country.name }} flag"
+            onerror="this.style.display='none'"
           >
-            <span class="mkt-flag-circle">
-              <img
-                src="https://flagcdn.com/w80/{{ country.iso_code | downcase }}.png"
-                width="80"
-                height="60"
-                alt="{{ country.name }} flag"
-                loading="lazy"
-                onerror="this.style.display='none'"
-              >
-            </span>
-            <span class="mkt-info">
-              <span class="mkt-name">{{ country.name }}</span>
-              <span class="mkt-currency">{{ country.currency.iso_code }} {{ country.currency.symbol }}</span>
-            </span>
-            {%- if country.iso_code == localization.country.iso_code -%}
-              <span class="mkt-tick" aria-label="Current region">
-                <svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="1.5 6 4.5 9.5 10.5 2.5"/>
-                </svg>
+        </span>
+        <span class="mkt-info">
+          <span class="mkt-name">{{ localization.country.name }}</span>
+          <span class="mkt-currency">{{ localization.country.currency.iso_code }} {{ localization.country.currency.symbol }}</span>
+        </span>
+        <span class="mkt-tick" aria-hidden="true">
+          <svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1.5 6 4.5 9.5 10.5 2.5"/>
+          </svg>
+        </span>
+      </button>
+
+      <button type="button" class="mkt-confirm" id="mkt-confirm">Continue</button>
+
+      <div class="mkt-divider">
+        <span>or search for a different region</span>
+      </div>
+
+      <div class="mkt-search-wrap">
+        <svg class="mkt-search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" aria-hidden="true">
+          <circle cx="8.5" cy="8.5" r="5.5"/>
+          <line x1="13" y1="13" x2="18" y2="18"/>
+        </svg>
+        <input
+          type="text"
+          id="mkt-search"
+          class="mkt-search"
+          placeholder="Search country…"
+          autocomplete="off"
+          spellcheck="false"
+          aria-label="Search countries"
+          aria-controls="mkt-list"
+        >
+      </div>
+
+      <div class="mkt-list" id="mkt-list" role="listbox" hidden>
+        {%- for country in localization.available_countries -%}
+          {%- unless country.iso_code == localization.country.iso_code -%}
+            <button
+              type="submit"
+              class="mkt-option"
+              name="country_code"
+              value="{{ country.iso_code }}"
+              data-name="{{ country.name | downcase }}"
+              role="option"
+              aria-selected="false"
+            >
+              <span class="mkt-flag-circle">
+                <img
+                  src="https://flagcdn.com/w80/{{ country.iso_code | downcase }}.png"
+                  width="80"
+                  height="60"
+                  alt="{{ country.name }} flag"
+                  loading="lazy"
+                  onerror="this.style.display='none'"
+                >
               </span>
-            {%- endif -%}
-          </button>
+              <span class="mkt-info">
+                <span class="mkt-name">{{ country.name }}</span>
+                <span class="mkt-currency">{{ country.currency.iso_code }} {{ country.currency.symbol }}</span>
+              </span>
+            </button>
+          {%- endunless -%}
         {%- endfor -%}
       </div>
       <p class="mkt-no-results" id="mkt-no-results" hidden>No countries found.</p>
-    {%- endform -%}
 
-    <button class="mkt-dismiss" id="mkt-dismiss">Continue without changing</button>
+    {%- endform -%}
 
   </div>
 </div>
@@ -111,11 +140,11 @@
     color: #fff;
     border-radius: 20px;
     width: min(400px, 92vw);
-    padding: 28px 24px 20px;
+    padding: 28px 24px 24px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
     box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7);
     transform: translateY(18px) scale(0.97);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -137,6 +166,71 @@
     color: rgba(255, 255, 255, 0.4);
     margin: 0;
     text-align: center;
+  }
+
+  /* Detected country card */
+  .mkt-detected {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 14px;
+    color: #fff;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+    margin-top: 4px;
+    transition: background 0.13s, border-color 0.13s;
+  }
+
+  .mkt-detected:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.28);
+  }
+
+  /* Continue button */
+  .mkt-confirm {
+    width: 100%;
+    padding: 13px;
+    background: #fff;
+    color: #111;
+    border: none;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.13s;
+  }
+
+  .mkt-confirm:hover {
+    background: rgba(255, 255, 255, 0.88);
+  }
+
+  /* Divider */
+  .mkt-divider {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+    margin: 2px 0;
+  }
+
+  .mkt-divider::before,
+  .mkt-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .mkt-divider span {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.28);
+    white-space: nowrap;
   }
 
   /* Search */
@@ -180,7 +274,7 @@
   /* Scrollable list */
   .mkt-list {
     width: 100%;
-    max-height: 300px;
+    max-height: 260px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -208,12 +302,6 @@
   .mkt-option:hover {
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.12);
-    color: #fff;
-  }
-
-  .mkt-option--current {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.18);
     color: #fff;
   }
 
@@ -259,7 +347,7 @@
     color: rgba(255, 255, 255, 0.38);
   }
 
-  .mkt-option--current .mkt-currency {
+  .mkt-detected .mkt-currency {
     color: rgba(255, 255, 255, 0.55);
   }
 
@@ -280,65 +368,47 @@
     font-size: 0.8rem;
     color: rgba(255, 255, 255, 0.35);
     text-align: center;
-    margin: 8px 0 0;
+    margin: 4px 0 0;
     width: 100%;
-  }
-
-  .mkt-dismiss {
-    font-family: inherit;
-    font-size: 0.72rem;
-    color: rgba(255, 255, 255, 0.22);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px 8px;
-    transition: color 0.15s;
-  }
-
-  .mkt-dismiss:hover {
-    color: rgba(255, 255, 255, 0.5);
   }
 </style>
 
 <script>
   (function () {
     var STORAGE_KEY = 'oce_market_confirmed';
-    var overlay    = document.getElementById('mkt-overlay');
-    var backdrop   = document.getElementById('mkt-backdrop');
-    var dismissBtn = document.getElementById('mkt-dismiss');
+    var overlay     = document.getElementById('mkt-overlay');
+    var backdrop    = document.getElementById('mkt-backdrop');
+    var confirmBtn  = document.getElementById('mkt-confirm');
+    var detectedBtn = document.getElementById('mkt-detected-btn');
     var searchInput = document.getElementById('mkt-search');
-    var list       = document.getElementById('mkt-list');
-    var noResults  = document.getElementById('mkt-no-results');
-    var options    = Array.prototype.slice.call(list.querySelectorAll('.mkt-option'));
+    var list        = document.getElementById('mkt-list');
+    var noResults   = document.getElementById('mkt-no-results');
+    var options     = Array.prototype.slice.call(list.querySelectorAll('.mkt-option'));
 
     if (localStorage.getItem(STORAGE_KEY)) return;
 
-    /* Filter list as user types */
+    /* Show list and filter as user types */
     searchInput.addEventListener('input', function () {
       var q = searchInput.value.trim().toLowerCase();
+      if (!q) {
+        list.hidden = true;
+        noResults.hidden = true;
+        return;
+      }
+      list.hidden = false;
       var visible = 0;
       options.forEach(function (btn) {
-        var match = !q || btn.dataset.name.indexOf(q) !== -1;
+        var match = btn.dataset.name.indexOf(q) !== -1;
         btn.style.display = match ? '' : 'none';
         if (match) visible++;
       });
       noResults.hidden = visible > 0;
     });
 
-    /* Scroll detected country into view */
-    function scrollToCurrent() {
-      var current = list.querySelector('.mkt-option--current');
-      if (current) current.scrollIntoView({ block: 'nearest' });
-    }
-
     function open() {
       overlay.classList.add('mkt-open');
       overlay.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
-      setTimeout(function () {
-        searchInput.focus();
-        scrollToCurrent();
-      }, 320);
     }
 
     function close() {
@@ -350,13 +420,16 @@
 
     setTimeout(open, 500);
 
+    confirmBtn.addEventListener('click', close);
+    detectedBtn.addEventListener('click', function () {
+      localStorage.setItem(STORAGE_KEY, '1');
+    });
     options.forEach(function (btn) {
       btn.addEventListener('click', function () {
         localStorage.setItem(STORAGE_KEY, '1');
       });
     });
 
-    dismissBtn.addEventListener('click', close);
     backdrop.addEventListener('click', close);
 
     document.addEventListener('keydown', function (e) {
