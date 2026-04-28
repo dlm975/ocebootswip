@@ -203,6 +203,7 @@
     font-size: 0.9rem;
     font-weight: 700;
     cursor: pointer;
+    margin-top: 6px;
     transition: background 0.13s;
   }
 
@@ -387,7 +388,7 @@
 
     if (localStorage.getItem(STORAGE_KEY)) return;
 
-    /* Show list and filter as user types */
+    /* Show single best match as user types */
     searchInput.addEventListener('input', function () {
       var q = searchInput.value.trim().toLowerCase();
       if (!q) {
@@ -395,14 +396,18 @@
         noResults.hidden = true;
         return;
       }
-      list.hidden = false;
-      var visible = 0;
-      options.forEach(function (btn) {
-        var match = btn.dataset.name.indexOf(q) !== -1;
-        btn.style.display = match ? '' : 'none';
-        if (match) visible++;
-      });
-      noResults.hidden = visible > 0;
+      var best = null;
+      for (var i = 0; i < options.length; i++) {
+        if (options[i].dataset.name.indexOf(q) === 0) { best = options[i]; break; }
+      }
+      if (!best) {
+        for (var i = 0; i < options.length; i++) {
+          if (options[i].dataset.name.indexOf(q) !== -1) { best = options[i]; break; }
+        }
+      }
+      options.forEach(function (btn) { btn.style.display = (btn === best) ? '' : 'none'; });
+      list.hidden = !best;
+      noResults.hidden = !!best;
     });
 
     function open() {
