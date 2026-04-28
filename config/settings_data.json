@@ -12,7 +12,7 @@
     "logo": "shopify://shop_images/OCE.png",
     "favicon": "shopify://shop_images/e_4.png",
     "type_body_font": "inter_i4",
-    "type_subheading_font": "instrument_serif_n4",
+    "type_subheading_font": "sans_serif_i4",
     "type_heading_font": "inter_i8",
     "type_accent_font": "inter_i5",
     "type_size_paragraph": "14",
