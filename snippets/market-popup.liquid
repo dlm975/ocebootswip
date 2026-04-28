@@ -11,16 +11,45 @@
     <h2 class="mkt-title">Choose your region</h2>
     <p class="mkt-subtitle">Select your location for correct pricing &amp; shipping.</p>
 
+    <div class="mkt-search-wrap">
+      <svg class="mkt-search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" aria-hidden="true">
+        <circle cx="8.5" cy="8.5" r="5.5"/>
+        <line x1="13" y1="13" x2="18" y2="18"/>
+      </svg>
+      <input
+        type="text"
+        id="mkt-search"
+        class="mkt-search"
+        placeholder="Search country…"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Search countries"
+        aria-controls="mkt-list"
+      >
+    </div>
+
     {%- form 'localization', id: 'mkt-form' -%}
-      <div class="mkt-list">
+      <div class="mkt-list" id="mkt-list" role="listbox">
         {%- for country in localization.available_countries -%}
           <button
             type="submit"
             class="mkt-option{% if country.iso_code == localization.country.iso_code %} mkt-option--current{% endif %}"
             name="country_code"
             value="{{ country.iso_code }}"
+            data-name="{{ country.name | downcase }}"
+            role="option"
+            aria-selected="{% if country.iso_code == localization.country.iso_code %}true{% else %}false{% endif %}"
           >
-            <span class="mkt-flag-circle">{{ country.flag_pictogram }}</span>
+            <span class="mkt-flag-circle">
+              <img
+                src="https://flagcdn.com/w40/{{ country.iso_code | downcase }}.png"
+                width="40"
+                height="30"
+                alt="{{ country.name }} flag"
+                loading="lazy"
+                onerror="this.style.display='none'"
+              >
+            </span>
             <span class="mkt-info">
               <span class="mkt-name">{{ country.name }}</span>
               <span class="mkt-currency">{{ country.currency.iso_code }} {{ country.currency.symbol }}</span>
@@ -35,6 +64,7 @@
           </button>
         {%- endfor -%}
       </div>
+      <p class="mkt-no-results" id="mkt-no-results" hidden>No countries found.</p>
     {%- endform -%}
 
     <button class="mkt-dismiss" id="mkt-dismiss">Continue without changing</button>
@@ -85,7 +115,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
     box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7);
     transform: translateY(18px) scale(0.97);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -104,19 +134,57 @@
 
   .mkt-subtitle {
     font-size: 0.78rem;
-    color: rgba(255, 255, 255, 0.45);
+    color: rgba(255, 255, 255, 0.4);
     margin: 0;
     text-align: center;
+  }
+
+  /* Search */
+  .mkt-search-wrap {
+    position: relative;
+    width: 100%;
+  }
+
+  .mkt-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.35);
+    pointer-events: none;
+  }
+
+  .mkt-search {
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 10px 12px 10px 36px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .mkt-search::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  .mkt-search:focus {
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.11);
   }
 
   /* Scrollable list */
   .mkt-list {
     width: 100%;
-    max-height: 320px;
+    max-height: 300px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
   }
@@ -126,15 +194,15 @@
     align-items: center;
     gap: 12px;
     width: 100%;
-    padding: 9px 10px;
+    padding: 8px 10px;
     background: transparent;
     border: 1px solid transparent;
-    border-radius: 12px;
-    color: rgba(255, 255, 255, 0.75);
+    border-radius: 11px;
+    color: rgba(255, 255, 255, 0.7);
     font-family: inherit;
     cursor: pointer;
     text-align: left;
-    transition: background 0.14s, border-color 0.14s, color 0.14s;
+    transition: background 0.13s, border-color 0.13s, color 0.13s;
   }
 
   .mkt-option:hover {
@@ -145,22 +213,28 @@
 
   .mkt-option--current {
     background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.18);
     color: #fff;
   }
 
-  /* Circular flag */
+  /* Circular flag image */
   .mkt-flag-circle {
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
-    flex-shrink: 0;
-    overflow: hidden;
+  }
+
+  .mkt-flag-circle img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    display: block;
   }
 
   .mkt-info {
@@ -175,11 +249,14 @@
     font-size: 0.85rem;
     font-weight: 600;
     line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .mkt-currency {
-    font-size: 0.72rem;
-    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.71rem;
+    color: rgba(255, 255, 255, 0.38);
   }
 
   .mkt-option--current .mkt-currency {
@@ -199,10 +276,18 @@
     margin-left: auto;
   }
 
+  .mkt-no-results {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.35);
+    text-align: center;
+    margin: 8px 0 0;
+    width: 100%;
+  }
+
   .mkt-dismiss {
     font-family: inherit;
     font-size: 0.72rem;
-    color: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.22);
     background: none;
     border: none;
     cursor: pointer;
@@ -221,13 +306,39 @@
     var overlay    = document.getElementById('mkt-overlay');
     var backdrop   = document.getElementById('mkt-backdrop');
     var dismissBtn = document.getElementById('mkt-dismiss');
+    var searchInput = document.getElementById('mkt-search');
+    var list       = document.getElementById('mkt-list');
+    var noResults  = document.getElementById('mkt-no-results');
+    var options    = Array.prototype.slice.call(list.querySelectorAll('.mkt-option'));
 
     if (localStorage.getItem(STORAGE_KEY)) return;
+
+    /* Filter list as user types */
+    searchInput.addEventListener('input', function () {
+      var q = searchInput.value.trim().toLowerCase();
+      var visible = 0;
+      options.forEach(function (btn) {
+        var match = !q || btn.dataset.name.indexOf(q) !== -1;
+        btn.style.display = match ? '' : 'none';
+        if (match) visible++;
+      });
+      noResults.hidden = visible > 0;
+    });
+
+    /* Scroll detected country into view */
+    function scrollToCurrent() {
+      var current = list.querySelector('.mkt-option--current');
+      if (current) current.scrollIntoView({ block: 'nearest' });
+    }
 
     function open() {
       overlay.classList.add('mkt-open');
       overlay.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
+      setTimeout(function () {
+        searchInput.focus();
+        scrollToCurrent();
+      }, 320);
     }
 
     function close() {
@@ -239,7 +350,7 @@
 
     setTimeout(open, 500);
 
-    document.querySelectorAll('#mkt-form button').forEach(function (btn) {
+    options.forEach(function (btn) {
       btn.addEventListener('click', function () {
         localStorage.setItem(STORAGE_KEY, '1');
       });
