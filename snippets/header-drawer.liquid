@@ -550,6 +550,30 @@
             country_style: section.settings.country_selector_style
           %}
         {%- endif -%}
+
+        <button
+          type="button"
+          class="mkt-drawer-trigger"
+          onclick="document.dispatchEvent(new CustomEvent('mkt:open'))"
+          aria-label="Change region or currency"
+        >
+          <span class="mkt-flag-circle mkt-flag-circle--drawer">
+            <img
+              src="https://flagcdn.com/w80/{{ localization.country.iso_code | downcase }}.png"
+              width="80"
+              height="60"
+              alt="{{ localization.country.name }} flag"
+              onerror="this.style.display='none'"
+            >
+          </span>
+          <span class="mkt-drawer-trigger__info">
+            <span class="mkt-drawer-trigger__name">{{ localization.country.name }}</span>
+            <span class="mkt-drawer-trigger__currency">{{ localization.country.currency.iso_code }} {{ localization.country.currency.symbol }}</span>
+          </span>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true">
+            <polyline points="8 5 13 10 8 15"/>
+          </svg>
+        </button>
       </div>
 
       {% liquid
@@ -1032,6 +1056,58 @@
     margin-block: auto var(--padding-sm);
     margin-inline-start: var(--padding-xl);
     background-color: rgb(var(--color-foreground) 0.03);
+  }
+
+  .mkt-drawer-trigger {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px var(--drawer-padding, 20px);
+    background: transparent;
+    border: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    color: #111;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+    margin-inline-start: calc(var(--padding-xl) * -1);
+    padding-inline-start: var(--padding-xl);
+    width: calc(100% + var(--padding-xl));
+    transition: background 0.13s;
+  }
+
+  .mkt-drawer-trigger:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  .mkt-drawer-trigger__info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mkt-drawer-trigger__name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .mkt-drawer-trigger__currency {
+    font-size: 0.71rem;
+    color: rgba(0, 0, 0, 0.4);
+  }
+
+  .mkt-drawer-trigger svg {
+    color: rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
+  }
+
+  /* Drawer flag circle — same shape, light bg for white drawer */
+  .mkt-flag-circle--drawer {
+    background: rgba(0, 0, 0, 0.06);
   }
 
   .menu-drawer__account {

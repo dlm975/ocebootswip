@@ -412,8 +412,6 @@
     var noResults   = document.getElementById('mkt-no-results');
     var options     = Array.prototype.slice.call(list.querySelectorAll('.mkt-option'));
 
-    if (localStorage.getItem(STORAGE_KEY)) return;
-
     var ALIASES = {
       'usa': 'united states', 'us': 'united states',
       'uk': 'united kingdom', 'gb': 'united kingdom', 'brit': 'united kingdom',
@@ -498,6 +496,9 @@
     });
 
     function open() {
+      searchInput.value = '';
+      list.hidden = true;
+      noResults.hidden = true;
       overlay.classList.add('mkt-open');
       overlay.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
@@ -510,7 +511,13 @@
       document.body.style.overflow = '';
     }
 
-    setTimeout(open, 500);
+    /* Auto-show on load only if not yet confirmed */
+    if (!localStorage.getItem(STORAGE_KEY)) {
+      setTimeout(open, 500);
+    }
+
+    /* Manual trigger from drawer button */
+    document.addEventListener('mkt:open', open);
 
     confirmBtn.addEventListener('click', close);
     detectedBtn.addEventListener('click', function () {
