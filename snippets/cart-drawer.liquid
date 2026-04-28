@@ -98,12 +98,11 @@
               {% render 'cart-products' %}
             </scroll-hint>
 
-            <div class="cd-boost">
-              {%- comment -%}Free shipping threshold in minor currency units (e.g. 15000 = £150){%- endcomment -%}
-              {%- assign cd_threshold = 15000 -%}
-              {%- if cart.total_price < cd_threshold -%}
-                {%- assign cd_remaining = cd_threshold | minus: cart.total_price -%}
-                {%- assign cd_pct = cart.total_price | times: 100 | divided_by: cd_threshold -%}
+            {%- assign cd_threshold = 15000 -%}
+            {%- if cart.total_price < cd_threshold -%}
+              {%- assign cd_remaining = cd_threshold | minus: cart.total_price -%}
+              {%- assign cd_pct = cart.total_price | times: 100 | divided_by: cd_threshold -%}
+              <div class="cd-boost">
                 <div class="cd-shipping">
                   <div class="cd-shipping__label">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" aria-hidden="true">
@@ -115,21 +114,8 @@
                     <div class="cd-track__fill" style="width: {{ cd_pct }}%"></div>
                   </div>
                 </div>
-              {%- else -%}
-                <div class="cd-shipping cd-shipping--done">
-                  <svg viewBox="0 0 12 12" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <polyline points="1.5 6 4.5 9.5 10.5 2.5"/>
-                  </svg>
-                  <strong>Free shipping unlocked!</strong>
-                </div>
-              {%- endif -%}
-              <div class="cd-urgency">
-                <svg viewBox="0 0 10 16" fill="currentColor" width="11" height="11" aria-hidden="true">
-                  <path d="M6 0L0 9h4.5L4 16l6-9H5.5z"/>
-                </svg>
-                <span>High demand — order now to avoid delays</span>
               </div>
-            </div>
+            {%- endif -%}
 
             <div
               class="cart-drawer__summary"
@@ -187,19 +173,6 @@
     color: var(--color-foreground);
   }
 
-  .cd-shipping--done {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 0.8rem;
-    color: #15803d;
-  }
-
-  .cd-shipping--done svg {
-    color: #16a34a;
-    flex-shrink: 0;
-  }
-
   .cd-track {
     height: 4px;
     background: rgba(0, 0, 0, 0.08);
@@ -215,22 +188,62 @@
     min-width: 4px;
   }
 
-  .cd-urgency {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 0.78rem;
-    font-weight: 500;
-    color: #744210;
-    background: #fffbeb;
-    border: 1px solid #f6e05e;
-    border-radius: 8px;
-    padding: 7px 10px;
+  /* ── Compact summary panel ── */
+  .cart-drawer__summary {
+    gap: 6px;
+    padding: 10px var(--padding-xl) 12px;
+    mask-image: none;
   }
 
-  .cd-urgency svg {
-    color: #c05621;
-    flex-shrink: 0;
+  .cart-drawer__summary .cart__summary-totals {
+    gap: 4px;
+    margin-top: 0;
+    border-top: 1px solid var(--color-border);
+    padding-top: 8px;
+  }
+
+  .cart-drawer__summary .cart__summary-totals:not(:has(.cart__original-total-container:empty)) {
+    border-top: 1px solid var(--color-border);
+    padding-top: 8px;
+  }
+
+  .cart-drawer__summary .cart__total {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .cart-drawer__summary .cart__total-label {
+    font-size: 0.75rem;
+  }
+
+  .cart-drawer__summary .cart__total-value {
+    font-size: 1rem;
+  }
+
+  .cart-drawer__summary .tax-note,
+  .cart-drawer__summary .cart__installments {
+    display: none;
+  }
+
+  .cart-drawer__summary .cart__ctas {
+    gap: 0;
+  }
+
+  .cart-drawer__summary .cart__checkout-button {
+    height: 42px;
+    font-size: 0.85rem;
+    padding-block: 0;
+  }
+
+  .cart-drawer__summary .additional-checkout-buttons {
+    display: none;
+  }
+
+  .cart-drawer__summary .cart-actions {
+    padding-block: 6px;
+    gap: 4px;
   }
 
   /* ── Existing component styles ── */

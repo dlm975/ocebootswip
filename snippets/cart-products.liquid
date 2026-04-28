@@ -216,6 +216,11 @@
                     </ul>
                   {% endif %}
 
+                  <div class="cart-item-stock" aria-label="Only 1 left in stock">
+                    <span class="cart-item-stock__dot" aria-hidden="true"></span>
+                    <span>1 left in stock</span>
+                  </div>
+
                   <div>
                     {% if item.original_price != item.final_price %}
                       <span class="visually-hidden">{{ 'content.price_sale' | t }}</span>
@@ -747,5 +752,29 @@
   .cart-items__properties dt,
   .cart-items__properties dd {
     display: inline;
+  }
+
+  .cart-item-stock {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: #dc2626;
+    margin-block-start: var(--margin-2xs);
+  }
+
+  .cart-item-stock__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ef4444;
+    flex-shrink: 0;
+    animation: stock-blink 1.4s ease-in-out infinite;
+  }
+
+  @keyframes stock-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.15; }
   }
 {% endstylesheet %}
