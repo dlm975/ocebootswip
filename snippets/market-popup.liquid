@@ -65,6 +65,30 @@
       </div>
 
       <div class="mkt-list" id="mkt-list" role="listbox" hidden>
+        <button
+          type="submit"
+          class="mkt-option mkt-eu-option"
+          name="country_code"
+          value=""
+          data-name="european union"
+          role="option"
+          aria-selected="false"
+        >
+          <span class="mkt-flag-circle">
+            <img
+              src="https://flagcdn.com/w80/eu.png"
+              width="80"
+              height="60"
+              alt="European Union flag"
+              loading="lazy"
+              onerror="this.style.display='none'"
+            >
+          </span>
+          <span class="mkt-info">
+            <span class="mkt-name">European Union</span>
+            <span class="mkt-currency">EUR €</span>
+          </span>
+        </button>
         {%- for country in localization.available_countries -%}
           {%- unless country.iso_code == localization.country.iso_code -%}
             <button
@@ -407,17 +431,36 @@
       'den': 'denmark',
       'uae': 'united arab emirates',
       'sa':  'south africa',
-      'jpn': 'japan', 'jp': 'japan'
+      'jpn': 'japan', 'jp': 'japan',
+      'eu':  'european union'
     };
 
     var PRIORITY = [
       'united states', 'united kingdom', 'australia', 'canada', 'new zealand',
-      'ireland', 'germany', 'france', 'netherlands', 'sweden', 'norway',
-      'denmark', 'spain', 'italy', 'japan', 'south africa', 'united arab emirates'
+      'european union', 'ireland', 'germany', 'france', 'netherlands', 'sweden',
+      'norway', 'denmark', 'spain', 'italy', 'japan', 'south africa', 'united arab emirates'
     ];
 
     var optionsByName = {};
     options.forEach(function (btn) { optionsByName[btn.dataset.name] = btn; });
+
+    /* Wire EU button to first available EUR country, or remove it */
+    var euBtn = list.querySelector('.mkt-eu-option');
+    if (euBtn) {
+      var eurOption = null;
+      for (var i = 0; i < options.length; i++) {
+        if (options[i] === euBtn) continue;
+        var currEl = options[i].querySelector('.mkt-currency');
+        if (currEl && currEl.textContent.indexOf('EUR') !== -1) { eurOption = options[i]; break; }
+      }
+      if (eurOption) {
+        euBtn.value = eurOption.value;
+      } else {
+        euBtn.parentNode.removeChild(euBtn);
+        options = options.filter(function (b) { return b !== euBtn; });
+        delete optionsByName['european union'];
+      }
+    }
 
     /* Show single best match as user types */
     searchInput.addEventListener('input', function () {
