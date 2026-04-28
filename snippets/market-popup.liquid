@@ -1,0 +1,239 @@
+<div
+  id="mkt-overlay"
+  aria-hidden="true"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Select your region"
+>
+  <div class="mkt-backdrop" id="mkt-backdrop"></div>
+  <div class="mkt-panel">
+
+    <h2 class="mkt-title">Choose your region</h2>
+    <p class="mkt-subtitle">Select your location for correct pricing &amp; shipping.</p>
+
+    {%- form 'localization', id: 'mkt-form' -%}
+      <div class="mkt-grid">
+        {%- for country in localization.available_countries -%}
+          <button
+            type="submit"
+            class="mkt-option{% if country.iso_code == localization.country.iso_code %} mkt-option--current{% endif %}"
+            name="country_code"
+            value="{{ country.iso_code }}"
+            aria-label="{{ country.name }} — {{ country.currency.iso_code }}"
+          >
+            <span class="mkt-flag">{{ country.flag_pictogram }}</span>
+            <span class="mkt-name">{{ country.name }}</span>
+            <span class="mkt-currency">{{ country.currency.iso_code }} {{ country.currency.symbol }}</span>
+            {%- if country.iso_code == localization.country.iso_code -%}
+              <span class="mkt-tick" aria-hidden="true">
+                <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="1.5 6 4.5 9.5 10.5 2.5"/>
+                </svg>
+              </span>
+            {%- endif -%}
+          </button>
+        {%- endfor -%}
+      </div>
+    {%- endform -%}
+
+    <button class="mkt-dismiss" id="mkt-dismiss" aria-label="Close">
+      Continue without changing
+    </button>
+
+  </div>
+</div>
+
+<style>
+  #mkt-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  #mkt-overlay.mkt-open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .mkt-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0px) brightness(1);
+    transition: backdrop-filter 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s;
+  }
+
+  #mkt-overlay.mkt-open .mkt-backdrop {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(12px) brightness(0.6);
+  }
+
+  .mkt-panel {
+    position: relative;
+    z-index: 1;
+    background: #111;
+    color: #fff;
+    border-radius: 20px;
+    width: min(480px, 92vw);
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 32px 28px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7);
+    transform: translateY(20px) scale(0.97);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  #mkt-overlay.mkt-open .mkt-panel {
+    transform: translateY(0) scale(1);
+  }
+
+  .mkt-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: 0.01em;
+    color: #fff;
+  }
+
+  .mkt-subtitle {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 0;
+    text-align: center;
+  }
+
+  .mkt-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 8px;
+    width: 100%;
+  }
+
+  .mkt-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 14px 10px 12px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.8);
+    font-family: inherit;
+    font-size: 0.78rem;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    text-align: center;
+  }
+
+  .mkt-option:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+  }
+
+  .mkt-option--current {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #fff;
+  }
+
+  .mkt-flag {
+    font-size: 1.6rem;
+    line-height: 1;
+  }
+
+  .mkt-name {
+    font-weight: 600;
+    font-size: 0.8rem;
+  }
+
+  .mkt-currency {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  .mkt-option--current .mkt-currency {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .mkt-tick {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    color: #111;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mkt-dismiss {
+    font-family: inherit;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.3);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: color 0.15s;
+  }
+
+  .mkt-dismiss:hover {
+    color: rgba(255, 255, 255, 0.6);
+  }
+</style>
+
+<script>
+  (function () {
+    var STORAGE_KEY = 'oce_market_confirmed';
+    var overlay   = document.getElementById('mkt-overlay');
+    var backdrop  = document.getElementById('mkt-backdrop');
+    var dismissBtn = document.getElementById('mkt-dismiss');
+
+    if (localStorage.getItem(STORAGE_KEY)) return;
+
+    function open() {
+      overlay.classList.add('mkt-open');
+      overlay.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function close() {
+      localStorage.setItem(STORAGE_KEY, '1');
+      overlay.classList.remove('mkt-open');
+      overlay.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    setTimeout(open, 500);
+
+    document.querySelectorAll('#mkt-form button').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        localStorage.setItem(STORAGE_KEY, '1');
+      });
+    });
+
+    dismissBtn.addEventListener('click', close);
+    backdrop.addEventListener('click', close);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && overlay.classList.contains('mkt-open')) close();
+    });
+  })();
+</script>
