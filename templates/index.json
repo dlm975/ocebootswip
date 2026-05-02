@@ -357,12 +357,128 @@
         "brand_link_10": "",
         "brand_label_10": ""
       }
+    },
+    "product_spotlight_HMicki": {
+      "type": "product-spotlight",
+      "blocks": {
+        "colourway_jnnzkR": {
+          "type": "colourway",
+          "settings": {
+            "product": "nike-mercurial-vapor-16-elite-fg-blueprint-1",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
+        "colourway_rtAgK9": {
+          "type": "colourway",
+          "settings": {
+            "product": "nike-mercurial-vapor-16-elite-fg",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
+        "colourway_ma4kxL": {
+          "type": "colourway",
+          "settings": {
+            "product": "nike-mercurial-vapor-16-elite-fg-1",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
+        "colourway_TQX7WK": {
+          "type": "colourway",
+          "settings": {
+            "product": "nike-mercurial-vapor-16-elite-fg-3",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
+        "colourway_CgF3jh": {
+          "type": "colourway",
+          "settings": {
+            "product": "nike-mercurial-vapor-16-elite-fg-4",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
+        "colourway_Lqx8kX": {
+          "type": "colourway",
+          "settings": {
+            "product": "nike-mercurial-vapor-16-elite-fg-020326",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
+        "colourway_XXY6zN": {
+          "type": "colourway",
+          "settings": {
+            "product": "nike-mercurial-vapor-16-elite-fg-km",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
+        "colourway_YGLtg9": {
+          "type": "colourway",
+          "settings": {
+            "product": "nike-mercurial-vapor-16-elite-fg-lv8",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
+        "colourway_mGiWkX": {
+          "type": "colourway",
+          "settings": {
+            "product": "nike-mercurial-vapor-16-elite-fg-vini-fly-070925",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
+        "colourway_4zcqeb": {
+          "type": "colourway",
+          "settings": {
+            "product": "nike-mercurial-vapor-16-elite-fg-nike-by-you",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
+        "colourway_Y8qAjT": {
+          "type": "colourway",
+          "settings": {
+            "product": "nike-mercurial-vapor-16-elite-fg-olympics",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        }
+      },
+      "block_order": [
+        "colourway_jnnzkR",
+        "colourway_rtAgK9",
+        "colourway_ma4kxL",
+        "colourway_TQX7WK",
+        "colourway_CgF3jh",
+        "colourway_Lqx8kX",
+        "colourway_XXY6zN",
+        "colourway_YGLtg9",
+        "colourway_mGiWkX",
+        "colourway_4zcqeb",
+        "colourway_Y8qAjT"
+      ],
+      "name": "Product Spotlight",
+      "settings": {
+        "title": "",
+        "subtitle": "",
+        "size_label": "Size",
+        "buy_label": "Buy Now",
+        "padding-block-start": 60,
+        "padding-block-end": 60
+      }
     }
   },
   "order": [
     "1770583639efe53d54",
     "17706063529fca8395",
     "newly_listed_fc",
-    "brand_tiles_main"
+    "brand_tiles_main",
+    "product_spotlight_HMicki"
   ]
 }
