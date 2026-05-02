@@ -9,10 +9,11 @@
 
   <div class="pdp-tc-stack" data-tc-stack>
     {%- for i in (1..6) -%}
-      {%- assign name_key   = 'name_'   | append: i -%}
-      {%- assign detail_key = 'detail_' | append: i -%}
-      {%- assign photo_key  = 'photo_'  | append: i -%}
-      {%- assign name_val   = block.settings[name_key] -%}
+      {%- assign name_key    = 'name_'    | append: i -%}
+      {%- assign detail_key  = 'detail_'  | append: i -%}
+      {%- assign photo_key   = 'photo_'   | append: i -%}
+      {%- assign product_key = 'product_' | append: i -%}
+      {%- assign name_val    = block.settings[name_key] -%}
       {%- if name_val != blank or request.visual_preview_mode -%}
 
         <div class="pdp-tc">
@@ -34,6 +35,12 @@
               <p class="pdp-tc__detail">{{ detail_val }}</p>
             {%- endif -%}
           </div>
+          {%- assign product_val = block.settings[product_key] -%}
+          {%- if product_val != blank -%}
+            <div class="pdp-tc__product">
+              {{ product_val | image_url: width: 160 | image_tag: width: 40, height: 40, loading: 'lazy', style: 'width:40px;height:40px;object-fit:cover;border-radius:6px;display:block;' }}
+            </div>
+          {%- endif -%}
         </div>
 
       {%- endif -%}
@@ -148,6 +155,15 @@
     letter-spacing: 0.01em;
   }
 
+  .pdp-tc__product {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-left: auto;
+  }
+
   /* Expand button */
   .pdp-tc-btn {
     align-self: center;
@@ -244,7 +260,12 @@
     {
       "type": "image_picker",
       "id": "photo_1",
-      "label": "Photo"
+      "label": "Customer photo"
+    },
+    {
+      "type": "image_picker",
+      "id": "product_1",
+      "label": "Product image"
     },
     {
       "type": "text",
@@ -265,7 +286,12 @@
     {
       "type": "image_picker",
       "id": "photo_2",
-      "label": "Photo"
+      "label": "Customer photo"
+    },
+    {
+      "type": "image_picker",
+      "id": "product_2",
+      "label": "Product image"
     },
     {
       "type": "text",
@@ -286,7 +312,12 @@
     {
       "type": "image_picker",
       "id": "photo_3",
-      "label": "Photo"
+      "label": "Customer photo"
+    },
+    {
+      "type": "image_picker",
+      "id": "product_3",
+      "label": "Product image"
     },
     {
       "type": "text",
@@ -305,7 +336,12 @@
     {
       "type": "image_picker",
       "id": "photo_4",
-      "label": "Photo"
+      "label": "Customer photo"
+    },
+    {
+      "type": "image_picker",
+      "id": "product_4",
+      "label": "Product image"
     },
     {
       "type": "text",
@@ -324,7 +360,12 @@
     {
       "type": "image_picker",
       "id": "photo_5",
-      "label": "Photo"
+      "label": "Customer photo"
+    },
+    {
+      "type": "image_picker",
+      "id": "product_5",
+      "label": "Product image"
     },
     {
       "type": "text",
@@ -343,7 +384,12 @@
     {
       "type": "image_picker",
       "id": "photo_6",
-      "label": "Photo"
+      "label": "Customer photo"
+    },
+    {
+      "type": "image_picker",
+      "id": "product_6",
+      "label": "Product image"
     },
     {
       "type": "text",
