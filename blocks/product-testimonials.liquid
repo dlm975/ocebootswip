@@ -4,44 +4,55 @@
   {{ block.shopify_attributes }}
 >
 
-  {%- for i in (1..6) -%}
-    {%- assign name_key   = 'name_'   | append: i -%}
-    {%- assign detail_key = 'detail_' | append: i -%}
-    {%- assign photo_key  = 'photo_'  | append: i -%}
-    {%- assign name_val   = block.settings[name_key] -%}
-    {%- if name_val != blank or request.visual_preview_mode -%}
+  <div class="pdp-tc-stack" data-tc-stack>
+    {%- for i in (1..6) -%}
+      {%- assign name_key   = 'name_'   | append: i -%}
+      {%- assign detail_key = 'detail_' | append: i -%}
+      {%- assign photo_key  = 'photo_'  | append: i -%}
+      {%- assign name_val   = block.settings[name_key] -%}
+      {%- if name_val != blank or request.visual_preview_mode -%}
 
-      <div class="pdp-tc">
-        <div class="pdp-tc__avatar">
-          {%- assign photo_val = block.settings[photo_key] -%}
-          {%- if photo_val != blank -%}
-            {{ photo_val | image_url: width: 160 | image_tag: width: 40, height: 40, loading: 'lazy', style: 'width:40px;height:40px;object-fit:cover;border-radius:50%;display:block;' }}
-          {%- else -%}
-            <span class="pdp-tc__initials">{{ name_val | slice: 0 | upcase }}</span>
-          {%- endif -%}
-        </div>
-        <div class="pdp-tc__body">
-          <div class="pdp-tc__top">
-            <span class="pdp-tc__name">{{ name_val | default: 'Customer' }}</span>
-            <span class="pdp-tc__stars" aria-label="5 stars">★★★★★</span>
+        <div class="pdp-tc">
+          <div class="pdp-tc__avatar">
+            {%- assign photo_val = block.settings[photo_key] -%}
+            {%- if photo_val != blank -%}
+              {{ photo_val | image_url: width: 160 | image_tag: width: 40, height: 40, loading: 'lazy', style: 'width:40px;height:40px;object-fit:cover;border-radius:50%;display:block;' }}
+            {%- else -%}
+              <span class="pdp-tc__initials">{{ name_val | slice: 0 | upcase }}</span>
+            {%- endif -%}
           </div>
-          {%- assign detail_val = block.settings[detail_key] -%}
-          {%- if detail_val != blank -%}
-            <p class="pdp-tc__detail">{{ detail_val }}</p>
-          {%- endif -%}
+          <div class="pdp-tc__body">
+            <div class="pdp-tc__top">
+              <span class="pdp-tc__name">{{ name_val | default: 'Customer' }}</span>
+              <span class="pdp-tc__stars" aria-label="5 stars">★★★★★</span>
+            </div>
+            {%- assign detail_val = block.settings[detail_key] -%}
+            {%- if detail_val != blank -%}
+              <p class="pdp-tc__detail">{{ detail_val }}</p>
+            {%- endif -%}
+          </div>
         </div>
-      </div>
 
-    {%- endif -%}
-  {%- endfor -%}
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+
+  <button class="pdp-tc-btn" data-tc-expand aria-expanded="false">
+    <span class="pdp-tc-btn__icon">+</span>
+  </button>
 
 </div>
 
 <style>
   .pdp-testimonials {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .pdp-tc-stack {
+    position: relative;
   }
 
   .pdp-tc {
@@ -53,6 +64,7 @@
     padding: 10px 12px;
     background: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    box-sizing: border-box;
   }
 
   .pdp-tc__avatar {
@@ -119,12 +131,89 @@
     text-overflow: ellipsis;
   }
 
-  @media screen and (max-width: 480px) {
-    .pdp-testimonials {
-      grid-template-columns: 1fr;
-    }
+  /* Expand button */
+  .pdp-tc-btn {
+    align-self: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0, 0, 0, 0.18);
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background 0.15s, transform 0.15s;
+  }
+
+  .pdp-tc-btn:hover {
+    background: #f5f5f5;
+  }
+
+  .pdp-tc-btn__icon {
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: #333;
+    line-height: 1;
+    user-select: none;
   }
 </style>
+
+<script>
+  (function () {
+    var PEEK = 30;
+
+    document.querySelectorAll('[data-tc-stack]').forEach(function (stack) {
+      var cards = Array.from(stack.querySelectorAll('.pdp-tc'));
+      var btn = stack.parentElement.querySelector('[data-tc-expand]');
+
+      if (cards.length <= 1) {
+        if (btn) btn.style.display = 'none';
+        return;
+      }
+
+      function collapse() {
+        var cardH = cards[0].offsetHeight;
+        stack.style.height = (cardH + PEEK * (cards.length - 1)) + 'px';
+        cards.forEach(function (card, i) {
+          card.style.position = 'absolute';
+          card.style.top = (i * PEEK) + 'px';
+          card.style.left = '0';
+          card.style.width = '100%';
+          card.style.zIndex = cards.length - i;
+        });
+        btn.setAttribute('aria-expanded', 'false');
+        btn.querySelector('.pdp-tc-btn__icon').textContent = '+';
+      }
+
+      function expand() {
+        stack.style.height = 'auto';
+        cards.forEach(function (card) {
+          card.style.position = 'static';
+          card.style.top = '';
+          card.style.left = '';
+          card.style.width = '';
+          card.style.zIndex = '';
+          card.style.marginBottom = '8px';
+        });
+        btn.setAttribute('aria-expanded', 'true');
+        btn.querySelector('.pdp-tc-btn__icon').textContent = '−';
+      }
+
+      btn.addEventListener('click', function () {
+        if (btn.getAttribute('aria-expanded') === 'true') {
+          collapse();
+        } else {
+          expand();
+        }
+      });
+
+      collapse();
+    });
+  })();
+</script>
 
 {% schema %}
 {
