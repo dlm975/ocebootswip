@@ -4,8 +4,7 @@
   {{ block.shopify_attributes }}
 >
 
-  {%- assign cards = '' | split: '' -%}
-  {%- for i in (1..5) -%}
+  {%- for i in (1..6) -%}
     {%- assign name_key   = 'name_'   | append: i -%}
     {%- assign detail_key = 'detail_' | append: i -%}
     {%- assign photo_key  = 'photo_'  | append: i -%}
@@ -16,14 +15,16 @@
         <div class="pdp-tc__avatar">
           {%- assign photo_val = block.settings[photo_key] -%}
           {%- if photo_val != blank -%}
-            {{ photo_val | image_url: width: 100 | image_tag: width: 50, height: 50, loading: 'lazy', style: 'width:50px;height:50px;object-fit:cover;border-radius:50%;display:block;' }}
+            {{ photo_val | image_url: width: 200 | image_tag: width: 50, height: 50, loading: 'lazy', style: 'width:50px;height:50px;object-fit:cover;border-radius:50%;display:block;' }}
           {%- else -%}
             <span class="pdp-tc__initials">{{ name_val | slice: 0 | upcase }}</span>
           {%- endif -%}
         </div>
         <div class="pdp-tc__body">
-          <span class="pdp-tc__name">{{ name_val | default: 'Customer' }}</span>
-          <span class="pdp-tc__stars" aria-label="5 stars">★★★★★</span>
+          <div class="pdp-tc__top">
+            <span class="pdp-tc__name">{{ name_val | default: 'Customer' }}</span>
+            <span class="pdp-tc__stars" aria-label="5 stars">★★★★★</span>
+          </div>
           {%- assign detail_val = block.settings[detail_key] -%}
           {%- if detail_val != blank -%}
             <p class="pdp-tc__detail">{{ detail_val }}</p>
@@ -47,10 +48,11 @@
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    border: 1.5px solid rgba(0, 0, 0, 0.13);
+    border: 1.5px solid rgba(0, 0, 0, 0.1);
     border-radius: 12px;
     padding: 14px;
     background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
   }
 
   .pdp-tc__avatar {
@@ -75,28 +77,41 @@
   .pdp-tc__body {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 3px;
     min-width: 0;
+  }
+
+  .pdp-tc__top {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+    overflow: hidden;
   }
 
   .pdp-tc__name {
     font-size: 0.82rem;
     font-weight: 700;
     color: #111;
-    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 1;
+    min-width: 0;
   }
 
   .pdp-tc__stars {
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     color: #f59e0b;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     line-height: 1;
+    flex-shrink: 0;
   }
 
   .pdp-tc__detail {
     font-size: 0.75rem;
     color: #555;
-    margin: 2px 0 0;
+    margin: 0;
     line-height: 1.35;
   }
 
@@ -166,12 +181,12 @@
     {
       "type": "text",
       "id": "name_3",
-      "label": "Name",
+      "label": "Name"
     },
     {
       "type": "text",
       "id": "detail_3",
-      "label": "Details",
+      "label": "Details"
     },
     {
       "type": "header",
@@ -185,12 +200,12 @@
     {
       "type": "text",
       "id": "name_4",
-      "label": "Name",
+      "label": "Name"
     },
     {
       "type": "text",
       "id": "detail_4",
-      "label": "Details",
+      "label": "Details"
     },
     {
       "type": "header",
@@ -204,12 +219,31 @@
     {
       "type": "text",
       "id": "name_5",
-      "label": "Name",
+      "label": "Name"
     },
     {
       "type": "text",
       "id": "detail_5",
-      "label": "Details",
+      "label": "Details"
+    },
+    {
+      "type": "header",
+      "content": "Testimonial 6"
+    },
+    {
+      "type": "image_picker",
+      "id": "photo_6",
+      "label": "Photo"
+    },
+    {
+      "type": "text",
+      "id": "name_6",
+      "label": "Name"
+    },
+    {
+      "type": "text",
+      "id": "detail_6",
+      "label": "Details"
     },
     {
       "type": "header",
