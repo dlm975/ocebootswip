@@ -15,7 +15,7 @@
         <div class="pdp-tc__avatar">
           {%- assign photo_val = block.settings[photo_key] -%}
           {%- if photo_val != blank -%}
-            {{ photo_val | image_url: width: 200 | image_tag: width: 50, height: 50, loading: 'lazy', style: 'width:50px;height:50px;object-fit:cover;border-radius:50%;display:block;' }}
+            {{ photo_val | image_url: width: 160 | image_tag: width: 40, height: 40, loading: 'lazy', style: 'width:40px;height:40px;object-fit:cover;border-radius:50%;display:block;' }}
           {%- else -%}
             <span class="pdp-tc__initials">{{ name_val | slice: 0 | upcase }}</span>
           {%- endif -%}
@@ -46,19 +46,19 @@
 
   .pdp-tc {
     display: flex;
-    align-items: flex-start;
-    gap: 12px;
+    align-items: center;
+    gap: 10px;
     border: 1.5px solid rgba(0, 0, 0, 0.1);
     border-radius: 12px;
-    padding: 14px;
+    padding: 10px 12px;
     background: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
   }
 
   .pdp-tc__avatar {
     flex-shrink: 0;
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     overflow: hidden;
     background: #e8e8e8;
@@ -68,7 +68,7 @@
   }
 
   .pdp-tc__initials {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #666;
     line-height: 1;
@@ -77,8 +77,9 @@
   .pdp-tc__body {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 1px;
     min-width: 0;
+    overflow: hidden;
   }
 
   .pdp-tc__top {
@@ -112,7 +113,10 @@
     font-size: 0.75rem;
     color: #555;
     margin: 0;
-    line-height: 1.35;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   @media screen and (max-width: 480px) {
