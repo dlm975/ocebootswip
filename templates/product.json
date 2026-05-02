@@ -254,6 +254,31 @@
               },
               "blocks": {}
             },
+            "testimonials_001": {
+              "type": "product-testimonials",
+              "settings": {
+                "photo_1": "shopify://shop_images/IMG_7779_537ba6a9-a9ba-4ca4-831c-aa91bcdf526c.jpg",
+                "name_1": "Cameron Archer",
+                "detail_1": "Southampton F.C. - Premier League",
+                "photo_2": "shopify://shop_images/IMG_4087_92d37382-43f5-4adc-bc41-0f70ca290fb3.jpg",
+                "name_2": "Bryan Lasme",
+                "detail_2": "Schalke 04 - Bundesliga",
+                "photo_3": "shopify://shop_images/IMG_4084_f535780f-0678-4da3-81e8-cc518edb932d.jpg",
+                "name_3": "Nicholas Pierini",
+                "detail_3": "Venezia F.C. - Serie A",
+                "photo_4": "shopify://shop_images/IMG_4093_2d462edc-3fb8-4d71-9fe1-eb3233a97b88.jpg",
+                "name_4": "Lois Openda",
+                "detail_4": "Juventus F.C. - Serie A",
+                "photo_5": "shopify://shop_images/IMG_4089_f21aa9fe-a5bb-4b19-bd3d-f904bda4875e.jpg",
+                "name_5": "Garang Kuol",
+                "detail_5": "Newcastle United -  Premier League",
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            },
             "faq_accordion_001": {
               "type": "product-faq",
               "settings": {
@@ -279,16 +304,6 @@
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
-              },
-              "blocks": {}
-            },
-            "testimonials_001": {
-              "type": "product-testimonials",
-              "settings": {
-                "name_1": "Jordan M.",
-                "detail_1": "Best boots I've ever owned — worth every penny.",
-                "name_2": "Alex R.",
-                "detail_2": "Arrived fast and fit perfectly first try."
               },
               "blocks": {}
             }
