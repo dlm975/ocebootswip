@@ -1,0 +1,70 @@
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol class="breadcrumb__list">
+    <li class="breadcrumb__item">
+      <a href="{{ routes.root_url }}" class="breadcrumb__link">Home</a>
+    </li>
+    {%- if collection -%}
+      <li class="breadcrumb__item">
+        <a href="{{ collection.url }}" class="breadcrumb__link">{{ collection.title }}</a>
+      </li>
+    {%- elsif closest.product.collections.size > 0 -%}
+      {%- assign bc_col = closest.product.collections | first -%}
+      <li class="breadcrumb__item">
+        <a href="{{ bc_col.url }}" class="breadcrumb__link">{{ bc_col.title }}</a>
+      </li>
+    {%- endif -%}
+    <li class="breadcrumb__item breadcrumb__item--current" aria-current="page">
+      {{- closest.product.title | truncate: 60 -}}
+    </li>
+  </ol>
+</nav>
+
+<style>
+  .breadcrumb {
+    grid-column: 1 / -1;
+    width: 100%;
+    padding-block: 10px 4px;
+  }
+
+  .breadcrumb__list {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.76rem;
+    color: rgba(var(--color-foreground-rgb), 0.45);
+  }
+
+  .breadcrumb__item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .breadcrumb__item:not(:last-child)::after {
+    content: '/';
+    opacity: 0.4;
+  }
+
+  .breadcrumb__link {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .breadcrumb__link:hover {
+    color: rgb(var(--color-foreground-rgb));
+  }
+
+  .breadcrumb__item--current {
+    color: rgba(var(--color-foreground-rgb), 0.65);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 240px;
+  }
+</style>

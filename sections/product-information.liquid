@@ -51,6 +51,9 @@
     {% assign product_href = '#ProductInformation-' | append: section.id %}
     {% render 'skip-to-content-link', href: product_href, text: 'accessibility.skip_to_product_info' %}
   {% endif %}
+
+  {%- render 'breadcrumbs' -%}
+
   <div
     class="{{ product_grid_class }}"
     data-product-grid-content
