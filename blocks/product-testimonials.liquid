@@ -4,6 +4,7 @@
   {{ block.shopify_attributes }}
 >
 
+  <div class="pdp-testimonials__divider"></div>
   <p class="pdp-testimonials__title">Famous Customers</p>
 
   <div class="pdp-tc-stack" data-tc-stack>
@@ -133,6 +134,12 @@
     text-overflow: ellipsis;
   }
 
+  .pdp-testimonials__divider {
+    border-top: 1px solid var(--color-border, #e2e8f0);
+    width: 100%;
+    margin-bottom: 14px;
+  }
+
   .pdp-testimonials__title {
     font-size: 0.82rem;
     font-weight: 700;
@@ -189,7 +196,7 @@
         stack.style.height = (cardH + PEEK * (cards.length - 1)) + 'px';
         cards.forEach(function (card, i) {
           card.style.position = 'absolute';
-          card.style.top = ((cards.length - 1 - i) * PEEK) + 'px';
+          card.style.top = (i * PEEK) + 'px';
           card.style.left = '0';
           card.style.width = '100%';
           card.style.zIndex = i + 1;
