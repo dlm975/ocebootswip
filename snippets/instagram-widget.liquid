@@ -1,4 +1,4 @@
-{% comment %} Floating Instagram widget — homepage & collection pages only {% endcomment %}
+{% comment %} Floating Instagram widget — IG profile layout {% endcomment %}
 
 <!-- Floating trigger -->
 <button id="igw-trigger" aria-label="Follow us on Instagram">
@@ -18,25 +18,51 @@
       </svg>
     </button>
 
-    <div class="igw-header">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36">
-        <defs>
-          <radialGradient id="igw-grad" cx="30%" cy="107%" r="150%">
-            <stop offset="0%"  stop-color="#fdf497"/>
-            <stop offset="5%"  stop-color="#fdf497"/>
-            <stop offset="45%" stop-color="#fd5949"/>
-            <stop offset="60%" stop-color="#d6249f"/>
-            <stop offset="90%" stop-color="#285AEB"/>
-          </radialGradient>
-        </defs>
-        <path fill="url(#igw-grad)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-      </svg>
-      <span class="igw-handle">@oceboots</span>
+    <!-- Profile header -->
+    <div class="igw-profile">
+      <div class="igw-avatar-ring">
+        {%- if settings.instagram_avatar != blank -%}
+          <img
+            src="{{ settings.instagram_avatar | image_url: width: 160 }}"
+            alt="@oceboots"
+            class="igw-avatar-img"
+            width="80"
+            height="80"
+          >
+        {%- else -%}
+          <div class="igw-avatar-placeholder">O</div>
+        {%- endif -%}
+      </div>
+
+      <span class="igw-username">oceboots</span>
+
+      <div class="igw-stats">
+        <span class="igw-stat">
+          <strong>{{ settings.instagram_follower_count | default: '12.4K' }}</strong>
+          <span>Followers</span>
+        </span>
+      </div>
+
+      <a
+        class="igw-follow-btn"
+        href="https://www.instagram.com/oceboots/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >Follow</a>
     </div>
 
-    <div class="igw-reels" id="igw-reels">
+    <!-- Reels section -->
+    <div class="igw-reels-header">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true">
+        <rect x="2" y="2" width="20" height="20" rx="2.5"/>
+        <path d="M7 2v20M17 2v20M2 12h20M2 7h5M17 7h5M2 17h5M17 17h5"/>
+      </svg>
+      <span>Reels</span>
+    </div>
+
+    <div class="igw-reels-grid" id="igw-reels">
       {%- if settings.instagram_video_1 != blank -%}
-        <div class="igw-reel-wrapper">
+        <div class="igw-reel-cell">
           <video class="igw-reel-video" autoplay muted loop playsinline>
             {%- for source in settings.instagram_video_1.sources -%}
               <source src="{{ source.url }}" type="{{ source.mime_type }}">
@@ -45,7 +71,7 @@
         </div>
       {%- endif -%}
       {%- if settings.instagram_video_2 != blank -%}
-        <div class="igw-reel-wrapper">
+        <div class="igw-reel-cell">
           <video class="igw-reel-video" autoplay muted loop playsinline>
             {%- for source in settings.instagram_video_2.sources -%}
               <source src="{{ source.url }}" type="{{ source.mime_type }}">
@@ -54,7 +80,7 @@
         </div>
       {%- endif -%}
       {%- if settings.instagram_video_3 != blank -%}
-        <div class="igw-reel-wrapper">
+        <div class="igw-reel-cell">
           <video class="igw-reel-video" autoplay muted loop playsinline>
             {%- for source in settings.instagram_video_3.sources -%}
               <source src="{{ source.url }}" type="{{ source.mime_type }}">
@@ -67,19 +93,10 @@
       {%- endif -%}
     </div>
 
-    <a class="igw-see-more" href="https://www.instagram.com/oceboots/" target="_blank" rel="noopener noreferrer">
-      <span>Follow on Instagram</span>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
-        <line x1="5" y1="12" x2="19" y2="12"/>
-        <polyline points="12 5 19 12 12 19"/>
-      </svg>
-    </a>
-
   </div>
 </div>
 
 <style>
-  /* Instagram's exact font stack applied to the entire panel */
   #igw-overlay,
   #igw-trigger {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -139,103 +156,177 @@
     backdrop-filter: blur(18px) brightness(0.45);
   }
 
-  /* --- Panel --- */
+  /* --- Panel (phone-width, IG profile look) --- */
   .igw-panel {
     position: relative;
     z-index: 1;
-    background: #000000;
-    border-radius: 14px;
-    width: min(780px, 94vw);
+    background: #000;
+    border-radius: 18px;
+    width: min(430px, 94vw);
     max-height: 92vh;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 28px 24px 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    scrollbar-width: none;
     transform: translateY(16px);
     transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7);
+  }
+
+  .igw-panel::-webkit-scrollbar {
+    display: none;
   }
 
   #igw-overlay.igw-open .igw-panel {
     transform: translateY(0);
   }
 
-  /* --- Close --- */
+  /* --- Close button --- */
   .igw-close {
     position: absolute;
-    top: 14px;
-    right: 14px;
-    width: 32px;
-    height: 32px;
-    background: rgba(255, 255, 255, 0.08);
+    top: 12px;
+    right: 12px;
+    width: 30px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.1);
     border: none;
     border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(255, 255, 255, 0.65);
+    color: rgba(255, 255, 255, 0.7);
     transition: background 0.15s, color 0.15s;
     padding: 0;
+    z-index: 2;
   }
 
   .igw-close:hover {
-    background: rgba(255, 255, 255, 0.16);
-    color: #ffffff;
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
   }
 
-  /* --- Header --- */
-  .igw-header {
+  /* --- Profile header --- */
+  .igw-profile {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 20px;
+    padding: 32px 20px 20px;
+    gap: 10px;
   }
 
-  .igw-handle {
-    color: #ffffff;
-    font-size: 0.95rem;
-    font-weight: 600;
+  /* Avatar with IG gradient story ring */
+  .igw-avatar-ring {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    padding: 3px;
+    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+    flex-shrink: 0;
+  }
+
+  .igw-avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    border: 3px solid #000;
+  }
+
+  .igw-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #262626;
+    border: 3px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.5);
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .igw-username {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
     letter-spacing: 0.01em;
   }
 
-  /* --- Reels row --- */
-  .igw-reels {
+  /* Stats row — only followers shown */
+  .igw-stats {
     display: flex;
-    gap: 3px;
-    width: 100%;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+    gap: 32px;
   }
 
-  .igw-reels::-webkit-scrollbar {
-    display: none;
+  .igw-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    color: #fff;
+    font-size: 0.85rem;
   }
 
-  .igw-reel-wrapper {
-    flex: 0 0 220px;
-    height: 390px;
-    background: #1a1a1a;
-    scroll-snap-align: start;
+  .igw-stat strong {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .igw-stat span {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.78rem;
+  }
+
+  /* Follow button — IG blue pill */
+  .igw-follow-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px;
+    padding: 0 48px;
+    background: #0095f6;
+    color: #fff;
+    font-size: 0.88rem;
+    font-weight: 700;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.15s;
+    letter-spacing: 0.01em;
+    margin-top: 2px;
+  }
+
+  .igw-follow-btn:hover {
+    background: #1aa3ff;
+  }
+
+  /* --- Reels section header --- */
+  .igw-reels-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    padding: 12px 0;
+    color: rgba(255,255,255,0.85);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* --- Reels grid (3 columns, like IG) --- */
+  .igw-reels-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+
+  .igw-reel-cell {
+    aspect-ratio: 9 / 16;
     overflow: hidden;
-  }
-
-  /* First and last get rounded outer corners only */
-  .igw-reel-wrapper:first-child {
-    border-radius: 4px 0 0 4px;
-  }
-
-  .igw-reel-wrapper:last-child {
-    border-radius: 0 4px 4px 0;
-  }
-
-  .igw-reel-wrapper:only-child {
-    border-radius: 4px;
+    background: #111;
   }
 
   .igw-reel-video {
@@ -245,60 +336,12 @@
     display: block;
   }
 
-  @media screen and (min-width: 700px) {
-    .igw-reels {
-      overflow-x: visible;
-      justify-content: center;
-    }
-
-    .igw-reel-wrapper {
-      flex: 1 1 0;
-      max-width: 220px;
-    }
-  }
-
   .igw-reels-empty {
-    color: rgba(255, 255, 255, 0.35);
+    grid-column: 1 / -1;
+    color: rgba(255,255,255,0.35);
     font-size: 0.82rem;
     text-align: center;
-    padding: 48px 0;
-    width: 100%;
-  }
-
-  /* --- See More pill --- */
-  .igw-see-more {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin: 20px auto 24px;
-    padding: 13px 28px;
-    background: none;
-    isolation: isolate;
-    color: #ffffff;
-    font-size: 0.95rem;
-    font-weight: 800;
-    letter-spacing: 0.02em;
-    text-decoration: none;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
-    border-radius: 999px;
-    transition: filter 0.18s ease, transform 0.18s ease;
-    box-shadow: 0 4px 16px rgba(214, 36, 159, 0.35);
-  }
-
-  .igw-see-more::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 999px;
-    background: radial-gradient(circle at 30% 107%, #ffe000 0%, #ffcc00 5%, #ff2d00 45%, #cc0070 60%, #0040ff 90%);
-    filter: brightness(0.7);
-    z-index: -1;
-    transition: filter 0.18s ease;
-  }
-
-  .igw-see-more:hover::before {
-    filter: brightness(0.85);
+    padding: 48px 20px;
   }
 </style>
 

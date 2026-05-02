@@ -2319,6 +2319,21 @@
     "settings": [
       {
         "type": "header",
+        "content": "Profile"
+      },
+      {
+        "type": "image_picker",
+        "id": "instagram_avatar",
+        "label": "Profile picture"
+      },
+      {
+        "type": "text",
+        "id": "instagram_follower_count",
+        "label": "Follower count",
+        "default": "12.4K"
+      },
+      {
+        "type": "header",
         "content": "Reel videos"
       },
       {
