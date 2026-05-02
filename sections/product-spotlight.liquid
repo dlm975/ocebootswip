@@ -328,103 +328,118 @@
 
 <script>
   (function () {
-    var sid     = {{ section.id | json }};
-    var wrap    = document.getElementById('ps-' + sid);
+    var sid      = {{ section.id | json }};
+    var wrap     = document.getElementById('ps-' + sid);
     if (!wrap) return;
 
-    var bg      = document.getElementById('ps-bg-' + sid);
-    var heroImg = document.getElementById('ps-hero-' + sid);
-    var buyBtn  = document.getElementById('ps-buy-' + sid);
+    var bg       = document.getElementById('ps-bg-' + sid);
+    var heroImg  = document.getElementById('ps-hero-' + sid);
+    var buyBtn   = document.getElementById('ps-buy-' + sid);
     var sizeGrid = document.getElementById('ps-sizes-' + sid);
-    var thumbs  = Array.from(wrap.querySelectorAll('[data-ps-thumb]'));
+    var thumbs   = Array.from(wrap.querySelectorAll('[data-ps-thumb]'));
 
-    var activeIdx     = 0;
-    var activeSize    = null;
-    var productCache  = {};
+    var activeIdx  = 0;
+    var activeSize = null;
+    var cache      = {};
 
-    /* ── load product data for a given colourway index ── */
-    function getProductData(idx) {
-      if (productCache[idx]) return productCache[idx];
+    /* ── load + cache product data by colourway index ── */
+    function getData(idx) {
+      if (cache[idx]) return cache[idx];
       var el = document.getElementById('ps-data-' + sid + '-' + idx);
       if (!el) return null;
-      try {
-        productCache[idx] = JSON.parse(el.textContent);
-      } catch (e) {
-        return null;
-      }
-      return productCache[idx];
+      try { cache[idx] = JSON.parse(el.textContent); } catch (e) { return null; }
+      return cache[idx];
     }
 
-    /* ── build size buttons from product variants ── */
-    function renderSizes(idx) {
-      sizeGrid.innerHTML = '';
-      activeSize = null;
-
-      var data = getProductData(idx);
-      if (!data) return;
-
-      /* deduplicate sizes preserving order */
+    /* ── collect every unique size across ALL colourways, preserving order ── */
+    function allUniqueSizes() {
       var seen = [];
-      data.variants.forEach(function (v) {
-        if (seen.indexOf(v.size) === -1) seen.push(v.size);
+      thumbs.forEach(function (_, i) {
+        var d = getData(i);
+        if (!d) return;
+        d.variants.forEach(function (v) {
+          if (v.size && seen.indexOf(v.size) === -1) seen.push(v.size);
+        });
       });
+      return seen;
+    }
 
-      seen.forEach(function (size) {
-        /* a size is available if any variant with this size is available */
-        var available = data.variants.some(function (v) {
-          return v.size === size && v.available;
-        });
-
+    /* ── render all size buttons on init (once) ── */
+    function renderAllSizes() {
+      sizeGrid.innerHTML = '';
+      allUniqueSizes().forEach(function (size) {
         var btn = document.createElement('button');
-        btn.className = 'ps__size-btn' + (available ? '' : ' ps__size-btn--sold-out');
+        btn.className = 'ps__size-btn';
         btn.textContent = size;
-        btn.dataset.psSizeBtn = '';
         btn.dataset.size = size;
-        if (!available) btn.setAttribute('aria-disabled', 'true');
-
-        btn.addEventListener('click', function () {
-          if (!available) return;
-          selectSize(btn, data);
-        });
-
+        btn.addEventListener('click', function () { selectSize(btn); });
         sizeGrid.appendChild(btn);
       });
     }
 
-    /* ── select a size ── */
-    function selectSize(btn, data) {
+    /* ── when a size is clicked: filter colourways, update buy link ── */
+    function selectSize(btn) {
       var size = btn.dataset.size;
 
-      /* deselect */
+      /* toggle off */
       if (btn.classList.contains('ps__size-btn--active')) {
         btn.classList.remove('ps__size-btn--active');
         activeSize = null;
-        if (buyBtn && data) buyBtn.href = data.productUrl;
+        /* restore all colourways */
+        thumbs.forEach(function (t) { t.classList.remove('ps__thumb--unavailable'); });
+        /* reset buy to current colourway product */
+        var d = getData(activeIdx);
+        if (buyBtn && d) buyBtn.href = d.productUrl;
         return;
       }
 
-      Array.from(sizeGrid.querySelectorAll('[data-ps-size-btn]')).forEach(function (b) {
+      /* select */
+      Array.from(sizeGrid.querySelectorAll('.ps__size-btn')).forEach(function (b) {
         b.classList.remove('ps__size-btn--active');
       });
       btn.classList.add('ps__size-btn--active');
       activeSize = size;
 
-      /* find matching variant and update buy URL */
-      if (data && buyBtn) {
-        var match = data.variants.find(function (v) {
+      /* mark colourways that don't carry this size in-stock as unavailable */
+      var firstAvail = null;
+      thumbs.forEach(function (t, i) {
+        var d = getData(i);
+        var hasStock = d && d.variants.some(function (v) {
           return v.size === size && v.available;
         });
-        buyBtn.href = match ? match.url : data.productUrl;
+        t.classList.toggle('ps__thumb--unavailable', !hasStock);
+        if (hasStock && firstAvail === null) firstAvail = t;
+      });
+
+      /* if active colourway just became unavailable, jump to first available */
+      if (thumbs[activeIdx] && thumbs[activeIdx].classList.contains('ps__thumb--unavailable')) {
+        if (firstAvail) selectColourway(firstAvail, true);
+      } else {
+        updateBuyUrl();
       }
     }
 
-    /* ── select colourway ── */
-    function selectColourway(thumb) {
-      var idx    = parseInt(thumb.dataset.idx);
+    /* ── update buy URL based on current colourway + selected size ── */
+    function updateBuyUrl() {
+      if (!buyBtn) return;
+      var d = getData(activeIdx);
+      if (!d) return;
+      if (activeSize) {
+        var match = d.variants.find(function (v) {
+          return v.size === activeSize && v.available;
+        });
+        buyBtn.href = match ? match.url : d.productUrl;
+      } else {
+        buyBtn.href = d.productUrl;
+      }
+    }
+
+    /* ── select a colourway thumbnail ── */
+    function selectColourway(thumb, skipSizeReset) {
+      var idx   = parseInt(thumb.dataset.idx);
       var newImg = thumb.dataset.img;
       var newBg  = thumb.dataset.bg;
 
-      /* update active thumb */
       thumbs.forEach(function (t) {
         t.classList.remove('ps__thumb--active');
         t.setAttribute('aria-pressed', 'false');
@@ -446,23 +461,18 @@
       /* background */
       if (bg && newBg) bg.style.backgroundColor = newBg;
 
-      /* render sizes for this product */
-      renderSizes(idx);
-
-      /* reset buy button to product URL */
-      var data = getProductData(idx);
-      if (buyBtn && data) buyBtn.href = data.productUrl;
+      /* update buy URL (size stays selected) */
+      updateBuyUrl();
     }
 
-    /* ── wire up thumbnails ── */
+    /* ── wire up ── */
     thumbs.forEach(function (t) {
       t.addEventListener('click', function () { selectColourway(t); });
     });
 
-    /* ── init: render sizes for first colourway ── */
-    renderSizes(0);
-    var firstData = getProductData(0);
-    if (buyBtn && firstData) buyBtn.href = firstData.productUrl;
+    /* init */
+    renderAllSizes();
+    updateBuyUrl();
 
     /* preload hero images */
     thumbs.forEach(function (t) {
