@@ -511,10 +511,12 @@
       document.body.style.overflow = '';
     }
 
-    /* Auto-show on load only if not yet confirmed */
+    /* Auto-show only on collection pages, 3 s after load */
+    {%- if template.name == 'collection' -%}
     if (!localStorage.getItem(STORAGE_KEY)) {
-      setTimeout(open, 500);
+      setTimeout(open, 3000);
     }
+    {%- endif -%}
 
     /* Manual trigger from drawer button */
     document.addEventListener('mkt:open', open);
