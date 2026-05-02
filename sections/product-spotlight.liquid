@@ -1,0 +1,543 @@
+{% liquid
+  assign colourway_blocks = section.blocks | where: 'type', 'colourway'
+  assign first_block = colourway_blocks | first
+  assign initial_bg = first_block.settings.bg_color | default: '#111111'
+  assign initial_buy = first_block.settings.buy_url | default: '#'
+%}
+
+<div
+  class="section-background ps-bg"
+  id="ps-bg-{{ section.id }}"
+  style="background-color: {{ initial_bg }}; transition: background-color 0.45s ease;"
+></div>
+
+<div
+  class="ps section section--page-width page-width-normal spacing-style"
+  id="ps-{{ section.id }}"
+  data-ps
+  style="{% render 'spacing-style', settings: section.settings %}"
+>
+
+  <div class="ps__layout">
+
+    <!-- ── Left: hero image + title ── -->
+    <div class="ps__left">
+      <div class="ps__hero-wrap">
+        {%- if first_block != blank and first_block.settings.image != blank -%}
+          <img
+            id="ps-hero-{{ section.id }}"
+            class="ps__hero-img"
+            src="{{ first_block.settings.image | image_url: width: 1200 }}"
+            alt="{{ section.settings.title }}"
+            loading="eager"
+            width="1200"
+            height="1200"
+          >
+        {%- else -%}
+          <div class="ps__hero-fallback">
+            {{ 'product-1' | placeholder_svg_tag: 'ps__hero-svg' }}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <div class="ps__left-text">
+        <h2 class="ps__title" id="ps-title-{{ section.id }}">
+          {{- section.settings.title -}}
+        </h2>
+        {%- if section.settings.subtitle != blank -%}
+          <p class="ps__subtitle">{{ section.settings.subtitle }}</p>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <!-- ── Right: thumbs + size + buy ── -->
+    <div class="ps__right">
+
+      <!-- Colourway thumbnails -->
+      <div class="ps__thumbs" id="ps-thumbs-{{ section.id }}">
+        {%- for block in colourway_blocks -%}
+          <button
+            class="ps__thumb{% if forloop.first %} ps__thumb--active{% endif %}"
+            data-ps-thumb
+            data-idx="{{ forloop.index0 }}"
+            data-img="{{ block.settings.image | image_url: width: 1200 }}"
+            data-bg="{{ block.settings.bg_color | default: initial_bg }}"
+            data-buy="{{ block.settings.buy_url | default: '#' }}"
+            data-sizes="{{ block.settings.available_sizes | strip }}"
+            data-name="{{ block.settings.name | escape }}"
+            aria-label="{{ block.settings.name | default: 'Colourway ' | append: forloop.index }}"
+            aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
+            {{ block.shopify_attributes }}
+          >
+            {%- if block.settings.image != blank -%}
+              {{ block.settings.image | image_url: width: 200 | image_tag:
+                loading: 'lazy',
+                style: 'width:100%;height:100%;object-fit:cover;display:block;'
+              }}
+            {%- else -%}
+              <span class="ps__thumb-empty"></span>
+            {%- endif -%}
+          </button>
+        {%- endfor -%}
+      </div>
+
+      <!-- Size selector -->
+      {%- unless section.settings.sizes == blank -%}
+        <div class="ps__size-row">
+          <span class="ps__size-label">
+            {{- section.settings.size_label | default: 'Size' -}}
+          </span>
+          <div class="ps__size-grid" id="ps-sizes-{{ section.id }}">
+            {%- assign size_array = section.settings.sizes | split: ',' -%}
+            {%- for s in size_array -%}
+              <button class="ps__size-btn" data-ps-size data-size="{{ s | strip }}">
+                {{- s | strip -}}
+              </button>
+            {%- endfor -%}
+          </div>
+        </div>
+      {%- endunless -%}
+
+      <!-- Buy button -->
+      <a
+        id="ps-buy-{{ section.id }}"
+        class="ps__buy-btn"
+        href="{{ initial_buy }}"
+      >
+        {{- section.settings.buy_label | default: 'Buy Now' -}}
+      </a>
+
+    </div>
+  </div>
+
+</div>
+
+{% stylesheet %}
+  /* ── Wrapper layout ── */
+  .ps__layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ps__layout {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+  }
+
+  /* ── Left column ── */
+  .ps__left {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .ps__hero-wrap {
+    aspect-ratio: 1 / 1;
+    border-radius: 14px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.06);
+    position: relative;
+  }
+
+  .ps__hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    transition: opacity 0.25s ease;
+  }
+
+  .ps__hero-img.ps-fade {
+    opacity: 0;
+  }
+
+  .ps__hero-fallback,
+  .ps__hero-svg {
+    width: 100%;
+    height: 100%;
+    opacity: 0.15;
+  }
+
+  .ps__left-text {
+    padding-top: 16px;
+  }
+
+  .ps__title {
+    font-size: clamp(1.2rem, 2.5vw, 1.9rem);
+    font-weight: 800;
+    color: #fff;
+    margin: 0 0 6px;
+    line-height: 1.15;
+  }
+
+  .ps__subtitle {
+    font-size: 0.88rem;
+    color: rgba(255, 255, 255, 0.55);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* ── Right column ── */
+  .ps__right {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding-top: 4px;
+  }
+
+  /* ── Thumbnails ── */
+  .ps__thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .ps__thumb {
+    width: 68px;
+    height: 68px;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    overflow: hidden;
+    cursor: pointer;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.08);
+    transition: border-color 0.2s, opacity 0.25s, transform 0.15s, box-shadow 0.2s;
+    flex-shrink: 0;
+  }
+
+  .ps__thumb:hover {
+    transform: scale(1.07);
+    border-color: rgba(255, 255, 255, 0.45);
+  }
+
+  .ps__thumb--active {
+    border-color: #fff;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25);
+  }
+
+  .ps__thumb--unavailable {
+    opacity: 0.2;
+    pointer-events: none;
+    transform: none;
+  }
+
+  .ps__thumb-empty {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  /* ── Size selector ── */
+  .ps__size-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ps__size-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  .ps__size-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+
+  .ps__size-btn {
+    padding: 7px 13px;
+    border-radius: 8px;
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    background: transparent;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s, opacity 0.2s;
+    line-height: 1;
+  }
+
+  .ps__size-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.65);
+    color: #fff;
+  }
+
+  .ps__size-btn--active {
+    background: #fff;
+    color: #111;
+    border-color: #fff;
+  }
+
+  .ps__size-btn--unavailable {
+    opacity: 0.18;
+    pointer-events: none;
+  }
+
+  /* ── Buy button ── */
+  .ps__buy-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 17px 24px;
+    background: #fff;
+    color: #111;
+    font-size: 1rem;
+    font-weight: 800;
+    border-radius: 12px;
+    text-decoration: none;
+    letter-spacing: 0.01em;
+    transition: background 0.15s, transform 0.15s;
+    text-align: center;
+  }
+
+  .ps__buy-btn:hover {
+    background: rgba(255, 255, 255, 0.88);
+    transform: translateY(-1px);
+  }
+{% endstylesheet %}
+
+<script>
+  (function () {
+    var wrap = document.getElementById('ps-{{ section.id }}');
+    if (!wrap) return;
+
+    var bg      = document.getElementById('ps-bg-{{ section.id }}');
+    var heroImg = document.getElementById('ps-hero-{{ section.id }}');
+    var buyBtn  = document.getElementById('ps-buy-{{ section.id }}');
+    var thumbs  = Array.from(wrap.querySelectorAll('[data-ps-thumb]'));
+    var sizes   = Array.from(wrap.querySelectorAll('[data-ps-size]'));
+
+    var activeIdx  = 0;
+    var activeSize = null;
+
+    /* ── helpers ── */
+    function sizesInclude(sizesStr, size) {
+      if (!sizesStr || sizesStr.trim() === '') return true;
+      return sizesStr.split(',')
+        .map(function (s) { return s.trim().toLowerCase(); })
+        .indexOf(size.trim().toLowerCase()) !== -1;
+    }
+
+    /* ── select colourway ── */
+    function selectColourway(thumb) {
+      var idx    = parseInt(thumb.dataset.idx);
+      var newImg = thumb.dataset.img;
+      var newBg  = thumb.dataset.bg;
+      var newBuy = thumb.dataset.buy;
+
+      /* active thumb state */
+      thumbs.forEach(function (t) {
+        t.classList.remove('ps__thumb--active');
+        t.setAttribute('aria-pressed', 'false');
+      });
+      thumb.classList.add('ps__thumb--active');
+      thumb.setAttribute('aria-pressed', 'true');
+      activeIdx = idx;
+
+      /* hero image fade */
+      if (heroImg && newImg) {
+        heroImg.classList.add('ps-fade');
+        setTimeout(function () {
+          heroImg.src = newImg;
+          heroImg.onload = function () { heroImg.classList.remove('ps-fade'); };
+          if (heroImg.complete) heroImg.classList.remove('ps-fade');
+        }, 130);
+      }
+
+      /* background color */
+      if (bg && newBg) bg.style.backgroundColor = newBg;
+
+      /* buy link */
+      if (buyBtn && newBuy) buyBtn.href = newBuy;
+
+      /* re-evaluate size availability for new colourway */
+      if (activeSize) refreshSizes(activeSize);
+    }
+
+    /* ── select size ── */
+    function selectSize(btn) {
+      var size = btn.dataset.size;
+
+      if (btn.classList.contains('ps__size-btn--active')) {
+        /* deselect */
+        btn.classList.remove('ps__size-btn--active');
+        activeSize = null;
+        thumbs.forEach(function (t) { t.classList.remove('ps__thumb--unavailable'); });
+        return;
+      }
+
+      sizes.forEach(function (b) { b.classList.remove('ps__size-btn--active'); });
+      btn.classList.add('ps__size-btn--active');
+      activeSize = size;
+
+      refreshThumbs(size);
+    }
+
+    /* ── dim thumbnails that don't carry the active size ── */
+    function refreshThumbs(size) {
+      var firstAvail = null;
+      thumbs.forEach(function (t) {
+        var avail = sizesInclude(t.dataset.sizes, size);
+        t.classList.toggle('ps__thumb--unavailable', !avail);
+        if (avail && firstAvail === null) firstAvail = t;
+      });
+
+      /* if current colourway is now unavailable, jump to first available */
+      var current = thumbs[activeIdx];
+      if (current && current.classList.contains('ps__thumb--unavailable') && firstAvail) {
+        selectColourway(firstAvail);
+      }
+    }
+
+    /* ── dim sizes not available in the active colourway ── */
+    function refreshSizes(size) {
+      var current = thumbs[activeIdx];
+      if (!current) return;
+      var colourwaySizes = current.dataset.sizes;
+      sizes.forEach(function (b) {
+        var avail = sizesInclude(colourwaySizes, b.dataset.size);
+        b.classList.toggle('ps__size-btn--unavailable', !avail);
+      });
+    }
+
+    /* ── events ── */
+    thumbs.forEach(function (t) {
+      t.addEventListener('click', function () { selectColourway(t); });
+    });
+    sizes.forEach(function (b) {
+      b.addEventListener('click', function () { selectSize(b); });
+    });
+
+    /* preload all colourway images */
+    thumbs.forEach(function (t) {
+      if (t.dataset.img) { var i = new Image(); i.src = t.dataset.img; }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Product Spotlight",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Product"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Product name",
+      "default": "Nike Air Zoom Mercurial"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtitle / tagline"
+    },
+    {
+      "type": "header",
+      "content": "Sizes"
+    },
+    {
+      "type": "text",
+      "id": "sizes",
+      "label": "Size list (comma separated)",
+      "info": "e.g. UK 6, UK 7, UK 8, UK 9, UK 10, UK 11",
+      "default": "UK 6, UK 7, UK 8, UK 9, UK 10, UK 11"
+    },
+    {
+      "type": "text",
+      "id": "size_label",
+      "label": "Size label",
+      "default": "Size"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "buy_label",
+      "label": "Buy button text",
+      "default": "Buy Now"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0, "max": 120, "step": 4, "unit": "px", "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0, "max": 120, "step": 4, "unit": "px", "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "type": "colourway",
+      "name": "Colourway",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Hero image"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Colourway name",
+          "default": "Black / Gold"
+        },
+        {
+          "type": "color",
+          "id": "bg_color",
+          "label": "Background colour",
+          "default": "#111111"
+        },
+        {
+          "type": "text",
+          "id": "available_sizes",
+          "label": "Available sizes (comma separated)",
+          "info": "Leave blank = all sizes available. e.g. UK 7, UK 8, UK 9"
+        },
+        {
+          "type": "url",
+          "id": "buy_url",
+          "label": "Buy URL"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Spotlight",
+      "blocks": [
+        { "type": "colourway" },
+        { "type": "colourway" },
+        { "type": "colourway" }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  }
+}
+{% endschema %}
