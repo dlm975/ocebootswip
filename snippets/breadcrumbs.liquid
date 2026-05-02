@@ -3,18 +3,8 @@
     <li class="breadcrumb__item">
       <a href="{{ routes.root_url }}" class="breadcrumb__link">Home</a>
     </li>
-    {%- if collection -%}
-      <li class="breadcrumb__item">
-        <a href="{{ collection.url }}" class="breadcrumb__link">{{ collection.title }}</a>
-      </li>
-    {%- elsif closest.product.collections.size > 0 -%}
-      {%- assign bc_col = closest.product.collections | first -%}
-      <li class="breadcrumb__item">
-        <a href="{{ bc_col.url }}" class="breadcrumb__link">{{ bc_col.title }}</a>
-      </li>
-    {%- endif -%}
     <li class="breadcrumb__item breadcrumb__item--current" aria-current="page">
-      {{- closest.product.title | truncate: 60 -}}
+      <a href="/collections/all-football-boots" class="breadcrumb__link">All Football Boots</a>
     </li>
   </ol>
 </nav>
@@ -24,6 +14,7 @@
     grid-column: 1 / -1;
     width: 100%;
     padding-block: 10px 4px;
+    padding-inline: var(--padding-2xl, 32px);
   }
 
   .breadcrumb__list {
@@ -59,12 +50,8 @@
     color: rgb(var(--color-foreground-rgb));
   }
 
-  .breadcrumb__item--current {
+  .breadcrumb__item--current .breadcrumb__link {
     color: rgba(var(--color-foreground-rgb), 0.65);
     font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 240px;
   }
 </style>
