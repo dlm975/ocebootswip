@@ -1,14 +1,29 @@
 {% liquid
   assign colourway_blocks = section.blocks | where: 'type', 'colourway'
   assign first_block = colourway_blocks | first
-  assign initial_bg = first_block.settings.bg_color | default: '#111111'
-  assign initial_buy = first_block.settings.buy_url | default: '#'
+
+  if first_block != blank
+    assign first_product = first_block.settings.product
+    assign initial_bg = first_block.settings.bg_color | default: '#111111'
+
+    if first_block.settings.image != blank
+      assign first_hero = first_block.settings.image | image_url: width: 1200
+    elsif first_product != blank and first_product.featured_image != blank
+      assign first_hero = first_product.featured_image | image_url: width: 1200
+    endif
+
+    if section.settings.title != blank
+      assign display_title = section.settings.title
+    elsif first_product != blank
+      assign display_title = first_product.title
+    endif
+  endif
 %}
 
 <div
   class="section-background ps-bg"
   id="ps-bg-{{ section.id }}"
-  style="background-color: {{ initial_bg }}; transition: background-color 0.45s ease;"
+  style="background-color: {{ initial_bg | default: '#111' }}; transition: background-color 0.45s ease;"
 ></div>
 
 <div
@@ -23,12 +38,12 @@
     <!-- ── Left: hero image + title ── -->
     <div class="ps__left">
       <div class="ps__hero-wrap">
-        {%- if first_block != blank and first_block.settings.image != blank -%}
+        {%- if first_hero != blank -%}
           <img
             id="ps-hero-{{ section.id }}"
             class="ps__hero-img"
-            src="{{ first_block.settings.image | image_url: width: 1200 }}"
-            alt="{{ section.settings.title }}"
+            src="{{ first_hero }}"
+            alt="{{ display_title }}"
             loading="eager"
             width="1200"
             height="1200"
@@ -39,11 +54,8 @@
           </div>
         {%- endif -%}
       </div>
-
       <div class="ps__left-text">
-        <h2 class="ps__title" id="ps-title-{{ section.id }}">
-          {{- section.settings.title -}}
-        </h2>
+        <h2 class="ps__title" id="ps-title-{{ section.id }}">{{ display_title }}</h2>
         {%- if section.settings.subtitle != blank -%}
           <p class="ps__subtitle">{{ section.settings.subtitle }}</p>
         {%- endif -%}
@@ -56,53 +68,62 @@
       <!-- Colourway thumbnails -->
       <div class="ps__thumbs" id="ps-thumbs-{{ section.id }}">
         {%- for block in colourway_blocks -%}
+          {%- assign product = block.settings.product -%}
+
+          {%- comment -%}Resolve hero image: custom → product featured image{%- endcomment -%}
+          {%- if block.settings.image != blank -%}
+            {%- assign cw_hero = block.settings.image | image_url: width: 1200 -%}
+            {%- assign cw_thumb = block.settings.image | image_url: width: 200 -%}
+          {%- elsif product != blank and product.featured_image != blank -%}
+            {%- assign cw_hero = product.featured_image | image_url: width: 1200 -%}
+            {%- assign cw_thumb = product.featured_image | image_url: width: 200 -%}
+          {%- else -%}
+            {%- assign cw_hero = '' -%}
+            {%- assign cw_thumb = '' -%}
+          {%- endif -%}
+
+          {%- assign cw_name = block.settings.name -%}
+          {%- if cw_name == blank and product != blank -%}
+            {%- assign cw_name = product.title -%}
+          {%- endif -%}
+
           <button
             class="ps__thumb{% if forloop.first %} ps__thumb--active{% endif %}"
             data-ps-thumb
             data-idx="{{ forloop.index0 }}"
-            data-img="{{ block.settings.image | image_url: width: 1200 }}"
+            data-img="{{ cw_hero }}"
             data-bg="{{ block.settings.bg_color | default: initial_bg }}"
-            data-buy="{{ block.settings.buy_url | default: '#' }}"
-            data-sizes="{{ block.settings.available_sizes | strip }}"
-            data-name="{{ block.settings.name | escape }}"
-            aria-label="{{ block.settings.name | default: 'Colourway ' | append: forloop.index }}"
+            data-name="{{ cw_name | escape }}"
+            aria-label="{{ cw_name | escape }}"
             aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
             {{ block.shopify_attributes }}
           >
-            {%- if block.settings.image != blank -%}
-              {{ block.settings.image | image_url: width: 200 | image_tag:
-                loading: 'lazy',
-                style: 'width:100%;height:100%;object-fit:cover;display:block;'
-              }}
+            {%- if cw_thumb != blank -%}
+              <img
+                src="{{ cw_thumb }}"
+                alt="{{ cw_name }}"
+                loading="lazy"
+                style="width:100%;height:100%;object-fit:cover;display:block;"
+              >
             {%- else -%}
               <span class="ps__thumb-empty"></span>
             {%- endif -%}
           </button>
+
         {%- endfor -%}
       </div>
 
-      <!-- Size selector -->
-      {%- unless section.settings.sizes == blank -%}
-        <div class="ps__size-row">
-          <span class="ps__size-label">
-            {{- section.settings.size_label | default: 'Size' -}}
-          </span>
-          <div class="ps__size-grid" id="ps-sizes-{{ section.id }}">
-            {%- assign size_array = section.settings.sizes | split: ',' -%}
-            {%- for s in size_array -%}
-              <button class="ps__size-btn" data-ps-size data-size="{{ s | strip }}">
-                {{- s | strip -}}
-              </button>
-            {%- endfor -%}
-          </div>
-        </div>
-      {%- endunless -%}
+      <!-- Size selector — populated by JS from product variant data -->
+      <div class="ps__size-row" id="ps-size-row-{{ section.id }}">
+        <span class="ps__size-label">{{ section.settings.size_label | default: 'Size' }}</span>
+        <div class="ps__size-grid" id="ps-sizes-{{ section.id }}"></div>
+      </div>
 
       <!-- Buy button -->
       <a
         id="ps-buy-{{ section.id }}"
         class="ps__buy-btn"
-        href="{{ initial_buy }}"
+        href="{{ first_product.url | default: '#' }}"
       >
         {{- section.settings.buy_label | default: 'Buy Now' -}}
       </a>
@@ -110,10 +131,46 @@
     </div>
   </div>
 
+  <!-- ── Embedded product data (read by JS) ── -->
+  {%- for block in colourway_blocks -%}
+    {%- assign product = block.settings.product -%}
+    {%- if product == blank -%}{%- continue -%}{%- endif -%}
+
+    {%- comment -%}Find which option index is "Size"{%- endcomment -%}
+    {%- assign size_opt = 1 -%}
+    {%- for opt in product.options -%}
+      {%- assign opt_lower = opt | downcase -%}
+      {%- if opt_lower contains 'size' -%}
+        {%- assign size_opt = forloop.index -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    <script type="application/json" id="ps-data-{{ section.id }}-{{ forloop.index0 }}">
+    {
+      "productUrl": {{ product.url | json }},
+      "variants": [
+        {%- for variant in product.variants -%}
+          {%- if size_opt == 1 -%}{%- assign sv = variant.option1 -%}
+          {%- elsif size_opt == 2 -%}{%- assign sv = variant.option2 -%}
+          {%- elsif size_opt == 3 -%}{%- assign sv = variant.option3 -%}
+          {%- endif -%}
+          {
+            "id": {{ variant.id }},
+            "size": {{ sv | json }},
+            "available": {{ variant.available }},
+            "url": {{ product.url | append: '?variant=' | append: variant.id | json }}
+          }{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      ]
+    }
+    </script>
+
+  {%- endfor -%}
+
 </div>
 
 {% stylesheet %}
-  /* ── Wrapper layout ── */
   .ps__layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -128,19 +185,17 @@
     }
   }
 
-  /* ── Left column ── */
+  /* Left */
   .ps__left {
     display: flex;
     flex-direction: column;
-    gap: 0;
   }
 
   .ps__hero-wrap {
     aspect-ratio: 1 / 1;
     border-radius: 14px;
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.06);
-    position: relative;
+    background: rgba(255,255,255,0.06);
   }
 
   .ps__hero-img {
@@ -151,20 +206,12 @@
     transition: opacity 0.25s ease;
   }
 
-  .ps__hero-img.ps-fade {
-    opacity: 0;
-  }
+  .ps__hero-img.ps-fade { opacity: 0; }
 
-  .ps__hero-fallback,
-  .ps__hero-svg {
-    width: 100%;
-    height: 100%;
-    opacity: 0.15;
-  }
+  .ps__hero-fallback { width: 100%; height: 100%; opacity: 0.15; }
+  .ps__hero-svg { width: 100%; height: 100%; }
 
-  .ps__left-text {
-    padding-top: 16px;
-  }
+  .ps__left-text { padding-top: 16px; }
 
   .ps__title {
     font-size: clamp(1.2rem, 2.5vw, 1.9rem);
@@ -176,12 +223,12 @@
 
   .ps__subtitle {
     font-size: 0.88rem;
-    color: rgba(255, 255, 255, 0.55);
+    color: rgba(255,255,255,0.55);
     margin: 0;
     line-height: 1.5;
   }
 
-  /* ── Right column ── */
+  /* Right */
   .ps__right {
     display: flex;
     flex-direction: column;
@@ -189,7 +236,7 @@
     padding-top: 4px;
   }
 
-  /* ── Thumbnails ── */
+  /* Thumbnails */
   .ps__thumbs {
     display: flex;
     flex-wrap: wrap;
@@ -204,35 +251,17 @@
     overflow: hidden;
     cursor: pointer;
     padding: 0;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255,255,255,0.08);
     transition: border-color 0.2s, opacity 0.25s, transform 0.15s, box-shadow 0.2s;
     flex-shrink: 0;
   }
 
-  .ps__thumb:hover {
-    transform: scale(1.07);
-    border-color: rgba(255, 255, 255, 0.45);
-  }
+  .ps__thumb:hover { transform: scale(1.07); border-color: rgba(255,255,255,0.45); }
+  .ps__thumb--active { border-color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.25); }
+  .ps__thumb--unavailable { opacity: 0.2; pointer-events: none; transform: none; }
+  .ps__thumb-empty { display: block; width: 100%; height: 100%; background: rgba(255,255,255,0.15); }
 
-  .ps__thumb--active {
-    border-color: #fff;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25);
-  }
-
-  .ps__thumb--unavailable {
-    opacity: 0.2;
-    pointer-events: none;
-    transform: none;
-  }
-
-  .ps__thumb-empty {
-    display: block;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.15);
-  }
-
-  /* ── Size selector ── */
+  /* Sizes */
   .ps__size-row {
     display: flex;
     flex-direction: column;
@@ -244,21 +273,22 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: rgba(255, 255, 255, 0.55);
+    color: rgba(255,255,255,0.55);
   }
 
   .ps__size-grid {
     display: flex;
     flex-wrap: wrap;
     gap: 7px;
+    min-height: 36px;
   }
 
   .ps__size-btn {
     padding: 7px 13px;
     border-radius: 8px;
-    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    border: 1.5px solid rgba(255,255,255,0.25);
     background: transparent;
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255,255,255,0.8);
     font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
@@ -267,23 +297,15 @@
   }
 
   .ps__size-btn:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.65);
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.65);
     color: #fff;
   }
 
-  .ps__size-btn--active {
-    background: #fff;
-    color: #111;
-    border-color: #fff;
-  }
+  .ps__size-btn--active { background: #fff; color: #111; border-color: #fff; }
+  .ps__size-btn--sold-out { opacity: 0.3; text-decoration: line-through; cursor: not-allowed; }
 
-  .ps__size-btn--unavailable {
-    opacity: 0.18;
-    pointer-events: none;
-  }
-
-  /* ── Buy button ── */
+  /* Buy */
   .ps__buy-btn {
     display: flex;
     align-items: center;
@@ -301,32 +323,99 @@
     text-align: center;
   }
 
-  .ps__buy-btn:hover {
-    background: rgba(255, 255, 255, 0.88);
-    transform: translateY(-1px);
-  }
+  .ps__buy-btn:hover { background: rgba(255,255,255,0.88); transform: translateY(-1px); }
 {% endstylesheet %}
 
 <script>
   (function () {
-    var wrap = document.getElementById('ps-{{ section.id }}');
+    var sid     = {{ section.id | json }};
+    var wrap    = document.getElementById('ps-' + sid);
     if (!wrap) return;
 
-    var bg      = document.getElementById('ps-bg-{{ section.id }}');
-    var heroImg = document.getElementById('ps-hero-{{ section.id }}');
-    var buyBtn  = document.getElementById('ps-buy-{{ section.id }}');
+    var bg      = document.getElementById('ps-bg-' + sid);
+    var heroImg = document.getElementById('ps-hero-' + sid);
+    var buyBtn  = document.getElementById('ps-buy-' + sid);
+    var sizeGrid = document.getElementById('ps-sizes-' + sid);
     var thumbs  = Array.from(wrap.querySelectorAll('[data-ps-thumb]'));
-    var sizes   = Array.from(wrap.querySelectorAll('[data-ps-size]'));
 
-    var activeIdx  = 0;
-    var activeSize = null;
+    var activeIdx     = 0;
+    var activeSize    = null;
+    var productCache  = {};
 
-    /* ── helpers ── */
-    function sizesInclude(sizesStr, size) {
-      if (!sizesStr || sizesStr.trim() === '') return true;
-      return sizesStr.split(',')
-        .map(function (s) { return s.trim().toLowerCase(); })
-        .indexOf(size.trim().toLowerCase()) !== -1;
+    /* ── load product data for a given colourway index ── */
+    function getProductData(idx) {
+      if (productCache[idx]) return productCache[idx];
+      var el = document.getElementById('ps-data-' + sid + '-' + idx);
+      if (!el) return null;
+      try {
+        productCache[idx] = JSON.parse(el.textContent);
+      } catch (e) {
+        return null;
+      }
+      return productCache[idx];
+    }
+
+    /* ── build size buttons from product variants ── */
+    function renderSizes(idx) {
+      sizeGrid.innerHTML = '';
+      activeSize = null;
+
+      var data = getProductData(idx);
+      if (!data) return;
+
+      /* deduplicate sizes preserving order */
+      var seen = [];
+      data.variants.forEach(function (v) {
+        if (seen.indexOf(v.size) === -1) seen.push(v.size);
+      });
+
+      seen.forEach(function (size) {
+        /* a size is available if any variant with this size is available */
+        var available = data.variants.some(function (v) {
+          return v.size === size && v.available;
+        });
+
+        var btn = document.createElement('button');
+        btn.className = 'ps__size-btn' + (available ? '' : ' ps__size-btn--sold-out');
+        btn.textContent = size;
+        btn.dataset.psSizeBtn = '';
+        btn.dataset.size = size;
+        if (!available) btn.setAttribute('aria-disabled', 'true');
+
+        btn.addEventListener('click', function () {
+          if (!available) return;
+          selectSize(btn, data);
+        });
+
+        sizeGrid.appendChild(btn);
+      });
+    }
+
+    /* ── select a size ── */
+    function selectSize(btn, data) {
+      var size = btn.dataset.size;
+
+      /* deselect */
+      if (btn.classList.contains('ps__size-btn--active')) {
+        btn.classList.remove('ps__size-btn--active');
+        activeSize = null;
+        if (buyBtn && data) buyBtn.href = data.productUrl;
+        return;
+      }
+
+      Array.from(sizeGrid.querySelectorAll('[data-ps-size-btn]')).forEach(function (b) {
+        b.classList.remove('ps__size-btn--active');
+      });
+      btn.classList.add('ps__size-btn--active');
+      activeSize = size;
+
+      /* find matching variant and update buy URL */
+      if (data && buyBtn) {
+        var match = data.variants.find(function (v) {
+          return v.size === size && v.available;
+        });
+        buyBtn.href = match ? match.url : data.productUrl;
+      }
     }
 
     /* ── select colourway ── */
@@ -334,9 +423,8 @@
       var idx    = parseInt(thumb.dataset.idx);
       var newImg = thumb.dataset.img;
       var newBg  = thumb.dataset.bg;
-      var newBuy = thumb.dataset.buy;
 
-      /* active thumb state */
+      /* update active thumb */
       thumbs.forEach(function (t) {
         t.classList.remove('ps__thumb--active');
         t.setAttribute('aria-pressed', 'false');
@@ -345,7 +433,7 @@
       thumb.setAttribute('aria-pressed', 'true');
       activeIdx = idx;
 
-      /* hero image fade */
+      /* fade hero */
       if (heroImg && newImg) {
         heroImg.classList.add('ps-fade');
         setTimeout(function () {
@@ -355,71 +443,28 @@
         }, 130);
       }
 
-      /* background color */
+      /* background */
       if (bg && newBg) bg.style.backgroundColor = newBg;
 
-      /* buy link */
-      if (buyBtn && newBuy) buyBtn.href = newBuy;
+      /* render sizes for this product */
+      renderSizes(idx);
 
-      /* re-evaluate size availability for new colourway */
-      if (activeSize) refreshSizes(activeSize);
+      /* reset buy button to product URL */
+      var data = getProductData(idx);
+      if (buyBtn && data) buyBtn.href = data.productUrl;
     }
 
-    /* ── select size ── */
-    function selectSize(btn) {
-      var size = btn.dataset.size;
-
-      if (btn.classList.contains('ps__size-btn--active')) {
-        /* deselect */
-        btn.classList.remove('ps__size-btn--active');
-        activeSize = null;
-        thumbs.forEach(function (t) { t.classList.remove('ps__thumb--unavailable'); });
-        return;
-      }
-
-      sizes.forEach(function (b) { b.classList.remove('ps__size-btn--active'); });
-      btn.classList.add('ps__size-btn--active');
-      activeSize = size;
-
-      refreshThumbs(size);
-    }
-
-    /* ── dim thumbnails that don't carry the active size ── */
-    function refreshThumbs(size) {
-      var firstAvail = null;
-      thumbs.forEach(function (t) {
-        var avail = sizesInclude(t.dataset.sizes, size);
-        t.classList.toggle('ps__thumb--unavailable', !avail);
-        if (avail && firstAvail === null) firstAvail = t;
-      });
-
-      /* if current colourway is now unavailable, jump to first available */
-      var current = thumbs[activeIdx];
-      if (current && current.classList.contains('ps__thumb--unavailable') && firstAvail) {
-        selectColourway(firstAvail);
-      }
-    }
-
-    /* ── dim sizes not available in the active colourway ── */
-    function refreshSizes(size) {
-      var current = thumbs[activeIdx];
-      if (!current) return;
-      var colourwaySizes = current.dataset.sizes;
-      sizes.forEach(function (b) {
-        var avail = sizesInclude(colourwaySizes, b.dataset.size);
-        b.classList.toggle('ps__size-btn--unavailable', !avail);
-      });
-    }
-
-    /* ── events ── */
+    /* ── wire up thumbnails ── */
     thumbs.forEach(function (t) {
       t.addEventListener('click', function () { selectColourway(t); });
     });
-    sizes.forEach(function (b) {
-      b.addEventListener('click', function () { selectSize(b); });
-    });
 
-    /* preload all colourway images */
+    /* ── init: render sizes for first colourway ── */
+    renderSizes(0);
+    var firstData = getProductData(0);
+    if (buyBtn && firstData) buyBtn.href = firstData.productUrl;
+
+    /* preload hero images */
     thumbs.forEach(function (t) {
       if (t.dataset.img) { var i = new Image(); i.src = t.dataset.img; }
     });
@@ -438,8 +483,8 @@
     {
       "type": "text",
       "id": "title",
-      "label": "Product name",
-      "default": "Nike Air Zoom Mercurial"
+      "label": "Title override",
+      "info": "Leave blank to use the first linked product's title"
     },
     {
       "type": "textarea",
@@ -448,24 +493,13 @@
     },
     {
       "type": "header",
-      "content": "Sizes"
-    },
-    {
-      "type": "text",
-      "id": "sizes",
-      "label": "Size list (comma separated)",
-      "info": "e.g. UK 6, UK 7, UK 8, UK 9, UK 10, UK 11",
-      "default": "UK 6, UK 7, UK 8, UK 9, UK 10, UK 11"
+      "content": "Labels"
     },
     {
       "type": "text",
       "id": "size_label",
       "label": "Size label",
       "default": "Size"
-    },
-    {
-      "type": "header",
-      "content": "Button"
     },
     {
       "type": "text",
@@ -496,15 +530,10 @@
       "name": "Colourway",
       "settings": [
         {
-          "type": "image_picker",
-          "id": "image",
-          "label": "Hero image"
-        },
-        {
-          "type": "text",
-          "id": "name",
-          "label": "Colourway name",
-          "default": "Black / Gold"
+          "type": "product",
+          "id": "product",
+          "label": "Product",
+          "info": "Sizes and buy URL are pulled automatically from this product's variants"
         },
         {
           "type": "color",
@@ -513,15 +542,16 @@
           "default": "#111111"
         },
         {
-          "type": "text",
-          "id": "available_sizes",
-          "label": "Available sizes (comma separated)",
-          "info": "Leave blank = all sizes available. e.g. UK 7, UK 8, UK 9"
+          "type": "image_picker",
+          "id": "image",
+          "label": "Custom hero image",
+          "info": "Overrides the product's featured image"
         },
         {
-          "type": "url",
-          "id": "buy_url",
-          "label": "Buy URL"
+          "type": "text",
+          "id": "name",
+          "label": "Custom colourway name",
+          "info": "Overrides the product title in labels"
         }
       ]
     }
