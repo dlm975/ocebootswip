@@ -60,7 +60,7 @@
         </div>
       </div>
 
-      <!-- ── Right: soleplate → thumbs → sizes → buy ── -->
+      <!-- ── Right: soleplate → sizes → thumbs → buy ── -->
       <div class="ps__right">
 
         <!-- 1. Soleplate selector — built by JS from colourway data -->
@@ -69,7 +69,13 @@
           <div class="ps__soleplate-btns" id="ps-soleplates-{{ section.id }}"></div>
         </div>
 
-        <!-- 2. Colourway thumbnails (filtered by active soleplate) -->
+        <!-- 2. Size selector — populated by JS -->
+        <div class="ps__size-row" id="ps-size-row-{{ section.id }}">
+          <span class="ps__size-label">{{ section.settings.size_label | default: 'Size' }}</span>
+          <div class="ps__size-grid" id="ps-sizes-{{ section.id }}"></div>
+        </div>
+
+        <!-- 3. Colourway thumbnails (filtered by active soleplate) -->
         <div class="ps__thumbs" id="ps-thumbs-{{ section.id }}">
           {%- for block in colourway_blocks -%}
             {%- assign product = block.settings.product -%}
@@ -121,12 +127,6 @@
           {%- endfor -%}
         </div>
 
-        <!-- 3. Size selector — populated by JS -->
-        <div class="ps__size-row" id="ps-size-row-{{ section.id }}">
-          <span class="ps__size-label">{{ section.settings.size_label | default: 'Size' }}</span>
-          <div class="ps__size-grid" id="ps-sizes-{{ section.id }}"></div>
-        </div>
-
         <!-- 4. Cart form + buy button -->
         <form
           action="/cart/add"
@@ -147,7 +147,9 @@
             id="ps-buy-{{ section.id }}"
             class="ps__buy-btn"
           >
-            {{- section.settings.buy_label | default: 'Add to Cart' -}}
+            <span class="ps__buy-label">{{- section.settings.buy_label | default: 'Add to Cart' -}}</span>
+            <span class="ps__buy-sep" aria-hidden="true">-</span>
+            <span class="ps__buy-price"></span>
           </button>
         </form>
 
@@ -182,6 +184,7 @@
             "id": {{ variant.id }},
             "size": {{ sv | json }},
             "available": {{ variant.available }},
+            "price": {{ variant.price | money | json }},
             "url": {{ product.url | append: '?variant=' | append: variant.id | json }}
           }{% unless forloop.last %},{% endunless %}
         {%- endfor -%}
@@ -454,10 +457,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 10px;
     width: 100%;
     padding: 17px 24px;
-    background: #fff;
-    color: #111;
+    background: #16a34a;
+    color: #fff;
     font-size: 1rem;
     font-weight: 800;
     border-radius: 12px;
@@ -469,8 +473,12 @@
     font-family: inherit;
   }
 
-  .ps__buy-btn:hover:not(:disabled) { background: rgba(255,255,255,0.88); transform: translateY(-1px); }
+  .ps__buy-btn:hover:not(:disabled) { background: #15803d; transform: translateY(-1px); }
   .ps__buy-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+  .ps__buy-label { flex: 1; text-align: left; }
+  .ps__buy-sep   { opacity: 0.55; font-weight: 400; flex-shrink: 0; }
+  .ps__buy-price { flex-shrink: 0; text-align: right; }
 
   /* ── Mobile spacing squeeze ── */
   @media screen and (max-width: 749px) {
@@ -674,11 +682,12 @@
       }
     }
 
-    /* ── update cart variant input for active colourway + selected size ── */
+    /* ── update cart variant input + button label/price ── */
     function updateBuyUrl() {
       var d = getData(activeIdx);
       var variantId = '';
       var soldOut   = false;
+      var price     = '';
 
       if (d) {
         var match = activeSize
@@ -688,17 +697,29 @@
         if (match) {
           variantId = match.id;
           soldOut   = !match.available;
+          price     = match.price || '';
         } else {
           soldOut = true;
         }
       }
 
       if (variantInput) variantInput.value = variantId;
+
       if (buyBtn) {
         buyBtn.disabled = soldOut || !variantId;
-        buyBtn.textContent = soldOut
-          ? 'Sold Out'
-          : (wrap.dataset.buyLabel || '{{ section.settings.buy_label | default: "Add to Cart" | escape }}');
+        var labelEl = buyBtn.querySelector('.ps__buy-label');
+        var sepEl   = buyBtn.querySelector('.ps__buy-sep');
+        var priceEl = buyBtn.querySelector('.ps__buy-price');
+
+        if (soldOut) {
+          if (labelEl) labelEl.textContent = 'Sold Out';
+          if (sepEl)   sepEl.style.visibility = 'hidden';
+          if (priceEl) priceEl.textContent = '';
+        } else {
+          if (labelEl) labelEl.textContent = wrap.dataset.buyLabel || 'Add to Cart';
+          if (sepEl)   sepEl.style.visibility = '';
+          if (priceEl) priceEl.textContent = price;
+        }
       }
     }
 
