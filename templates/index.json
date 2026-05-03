@@ -364,6 +364,7 @@
         "colourway_jnnzkR": {
           "type": "colourway",
           "settings": {
+            "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg-blueprint-1",
             "bg_color": "#111111",
             "name": ""
@@ -372,6 +373,7 @@
         "colourway_rtAgK9": {
           "type": "colourway",
           "settings": {
+            "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg",
             "bg_color": "#111111",
             "name": ""
@@ -380,6 +382,7 @@
         "colourway_ma4kxL": {
           "type": "colourway",
           "settings": {
+            "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg-1",
             "bg_color": "#111111",
             "name": ""
@@ -388,6 +391,7 @@
         "colourway_TQX7WK": {
           "type": "colourway",
           "settings": {
+            "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg-3",
             "bg_color": "#111111",
             "name": ""
@@ -396,6 +400,7 @@
         "colourway_CgF3jh": {
           "type": "colourway",
           "settings": {
+            "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg-4",
             "bg_color": "#111111",
             "name": ""
@@ -404,6 +409,7 @@
         "colourway_Lqx8kX": {
           "type": "colourway",
           "settings": {
+            "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg-020326",
             "bg_color": "#111111",
             "name": ""
@@ -412,6 +418,7 @@
         "colourway_XXY6zN": {
           "type": "colourway",
           "settings": {
+            "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg-km",
             "bg_color": "#111111",
             "name": ""
@@ -420,6 +427,7 @@
         "colourway_YGLtg9": {
           "type": "colourway",
           "settings": {
+            "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg-lv8",
             "bg_color": "#111111",
             "name": ""
@@ -428,6 +436,7 @@
         "colourway_mGiWkX": {
           "type": "colourway",
           "settings": {
+            "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg-vini-fly-070925",
             "bg_color": "#111111",
             "name": ""
@@ -436,6 +445,7 @@
         "colourway_4zcqeb": {
           "type": "colourway",
           "settings": {
+            "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg-nike-by-you",
             "bg_color": "#111111",
             "name": ""
@@ -444,6 +454,7 @@
         "colourway_Y8qAjT": {
           "type": "colourway",
           "settings": {
+            "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg-olympics",
             "bg_color": "#111111",
             "name": ""
