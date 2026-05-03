@@ -361,6 +361,27 @@
     "product_spotlight_HMicki": {
       "type": "product-spotlight",
       "blocks": {
+        "soleplate_CB6Ujp": {
+          "type": "soleplate",
+          "settings": {
+            "name": "AG",
+            "image": "shopify://shop_images/EPDM-Rubber-Granules-Crumb-Rubber-Infill-Material-for-Turf-Playground-Surfaces.jpg_300x300_ea1d0e4c-072c-4f5c-8a47-a74c9b1586a0.jpg"
+          }
+        },
+        "soleplate_KBn4jP": {
+          "type": "soleplate",
+          "settings": {
+            "name": "SG",
+            "image": "shopify://shop_images/close-up-view-muddy-terrain-young-green-grass-emerging-rippled-texture-wet-soil-contrasts-fresh-grass-overcast-378267444.webp"
+          }
+        },
+        "soleplate_RhGgpF": {
+          "type": "soleplate",
+          "settings": {
+            "name": "FG",
+            "image": "shopify://shop_images/close-up-golf-green-grass-37662976.webp"
+          }
+        },
         "colourway_jnnzkR": {
           "type": "colourway",
           "settings": {
@@ -462,6 +483,9 @@
         }
       },
       "block_order": [
+        "soleplate_CB6Ujp",
+        "soleplate_KBn4jP",
+        "soleplate_RhGgpF",
         "colourway_jnnzkR",
         "colourway_rtAgK9",
         "colourway_ma4kxL",
