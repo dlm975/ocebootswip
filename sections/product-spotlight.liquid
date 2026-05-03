@@ -27,113 +27,123 @@
   style="background-color: {{ initial_bg | default: '#111' }}; {% render 'spacing-style', settings: section.settings %}"
 >
   <div class="ps-inner">
-  <div class="ps__layout">
 
-    <!-- ── Left: hero image + title ── -->
-    <div class="ps__left">
-      <div class="ps__hero-wrap">
-        {%- if first_hero != blank -%}
-          <img
-            id="ps-hero-{{ section.id }}"
-            class="ps__hero-img"
-            src="{{ first_hero }}"
-            alt="{{ display_title }}"
-            loading="eager"
-            width="1200"
-            height="1200"
-          >
-        {%- else -%}
-          <div class="ps__hero-fallback">
-            {{ 'product-1' | placeholder_svg_tag: 'ps__hero-svg' }}
-          </div>
-        {%- endif -%}
-      </div>
-      <div class="ps__left-text">
-        <h2 class="ps__title" id="ps-title-{{ section.id }}">{{ display_title }}</h2>
-        {%- if section.settings.subtitle != blank -%}
-          <p class="ps__subtitle">{{ section.settings.subtitle }}</p>
-        {%- endif -%}
-      </div>
+    <!-- ── Title spanning full width at top ── -->
+    <div class="ps__header">
+      <h2 class="ps__title" id="ps-title-{{ section.id }}">{{ display_title }}</h2>
+      {%- if section.settings.subtitle != blank -%}
+        <p class="ps__subtitle">{{ section.settings.subtitle }}</p>
+      {%- endif -%}
     </div>
 
-    <!-- ── Right: thumbs + size + buy ── -->
-    <div class="ps__right">
+    <div class="ps__layout">
 
-      <!-- Colourway thumbnails -->
-      <div class="ps__thumbs" id="ps-thumbs-{{ section.id }}">
-        {%- for block in colourway_blocks -%}
-          {%- assign product = block.settings.product -%}
-
-          {%- comment -%}Resolve hero image: custom → product featured image{%- endcomment -%}
-          {%- if block.settings.image != blank -%}
-            {%- assign cw_hero = block.settings.image | image_url: width: 1200 -%}
-            {%- assign cw_thumb = block.settings.image | image_url: width: 200 -%}
-          {%- elsif product != blank and product.featured_image != blank -%}
-            {%- assign cw_hero = product.featured_image | image_url: width: 1200 -%}
-            {%- assign cw_thumb = product.featured_image | image_url: width: 200 -%}
+      <!-- ── Left: hero image only ── -->
+      <div class="ps__left">
+        <div class="ps__hero-wrap">
+          {%- if first_hero != blank -%}
+            <img
+              id="ps-hero-{{ section.id }}"
+              class="ps__hero-img"
+              src="{{ first_hero }}"
+              alt="{{ display_title }}"
+              loading="eager"
+              width="1200"
+              height="1200"
+            >
           {%- else -%}
-            {%- assign cw_hero = '' -%}
-            {%- assign cw_thumb = '' -%}
+            <div class="ps__hero-fallback">
+              {{ 'product-1' | placeholder_svg_tag: 'ps__hero-svg' }}
+            </div>
           {%- endif -%}
+        </div>
+      </div>
 
-          {%- assign cw_name = block.settings.name -%}
-          {%- if cw_name == blank and product != blank -%}
-            {%- assign cw_name = product.title -%}
-          {%- endif -%}
+      <!-- ── Right: soleplate → thumbs → sizes → buy ── -->
+      <div class="ps__right">
 
-          <button
-            class="ps__thumb{% if forloop.first %} ps__thumb--active{% endif %}"
-            data-ps-thumb
-            data-idx="{{ forloop.index0 }}"
-            data-img="{{ cw_hero }}"
-            data-bg="{{ block.settings.bg_color | default: initial_bg }}"
-            data-name="{{ cw_name | escape }}"
-            aria-label="{{ cw_name | escape }}"
-            aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
-            {{ block.shopify_attributes }}
-          >
-            {%- if cw_thumb != blank -%}
-              <img
-                src="{{ cw_thumb }}"
-                alt="{{ cw_name }}"
-                width="68"
-                height="68"
-                loading="lazy"
-                style="width:100%;height:100%;object-fit:cover;display:block;"
-              >
+        <!-- 1. Soleplate selector — built by JS from colourway data -->
+        <div class="ps__soleplate-row" id="ps-soleplate-row-{{ section.id }}">
+          <span class="ps__soleplate-label">Soleplate</span>
+          <div class="ps__soleplate-btns" id="ps-soleplates-{{ section.id }}"></div>
+        </div>
+
+        <!-- 2. Colourway thumbnails (filtered by active soleplate) -->
+        <div class="ps__thumbs" id="ps-thumbs-{{ section.id }}">
+          {%- for block in colourway_blocks -%}
+            {%- assign product = block.settings.product -%}
+
+            {%- if block.settings.image != blank -%}
+              {%- assign cw_hero  = block.settings.image | image_url: width: 1200 -%}
+              {%- assign cw_thumb = block.settings.image | image_url: width: 200 -%}
+            {%- elsif product != blank and product.featured_image != blank -%}
+              {%- assign cw_hero  = product.featured_image | image_url: width: 1200 -%}
+              {%- assign cw_thumb = product.featured_image | image_url: width: 200 -%}
             {%- else -%}
-              <span class="ps__thumb-empty"></span>
+              {%- assign cw_hero  = '' -%}
+              {%- assign cw_thumb = '' -%}
             {%- endif -%}
-          </button>
 
-        {%- endfor -%}
+            {%- assign cw_name = block.settings.name -%}
+            {%- if cw_name == blank and product != blank -%}
+              {%- assign cw_name = product.title -%}
+            {%- endif -%}
+
+            {%- assign cw_soleplate = block.settings.soleplate | default: '' -%}
+
+            <button
+              class="ps__thumb{% if forloop.first %} ps__thumb--active{% endif %}"
+              data-ps-thumb
+              data-idx="{{ forloop.index0 }}"
+              data-img="{{ cw_hero }}"
+              data-bg="{{ block.settings.bg_color | default: initial_bg }}"
+              data-name="{{ cw_name | escape }}"
+              data-soleplate="{{ cw_soleplate | escape }}"
+              aria-label="{{ cw_name | escape }}"
+              aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
+              {{ block.shopify_attributes }}
+            >
+              {%- if cw_thumb != blank -%}
+                <img
+                  src="{{ cw_thumb }}"
+                  alt="{{ cw_name }}"
+                  width="68"
+                  height="68"
+                  loading="lazy"
+                  style="width:100%;height:100%;object-fit:cover;display:block;"
+                >
+              {%- else -%}
+                <span class="ps__thumb-empty"></span>
+              {%- endif -%}
+            </button>
+
+          {%- endfor -%}
+        </div>
+
+        <!-- 3. Size selector — populated by JS -->
+        <div class="ps__size-row" id="ps-size-row-{{ section.id }}">
+          <span class="ps__size-label">{{ section.settings.size_label | default: 'Size' }}</span>
+          <div class="ps__size-grid" id="ps-sizes-{{ section.id }}"></div>
+        </div>
+
+        <!-- 4. Buy button -->
+        <a
+          id="ps-buy-{{ section.id }}"
+          class="ps__buy-btn"
+          href="{{ first_product.url | default: '#' }}"
+        >
+          {{- section.settings.buy_label | default: 'Buy Now' -}}
+        </a>
+
       </div>
-
-      <!-- Size selector — populated by JS from product variant data -->
-      <div class="ps__size-row" id="ps-size-row-{{ section.id }}">
-        <span class="ps__size-label">{{ section.settings.size_label | default: 'Size' }}</span>
-        <div class="ps__size-grid" id="ps-sizes-{{ section.id }}"></div>
-      </div>
-
-      <!-- Buy button -->
-      <a
-        id="ps-buy-{{ section.id }}"
-        class="ps__buy-btn"
-        href="{{ first_product.url | default: '#' }}"
-      >
-        {{- section.settings.buy_label | default: 'Buy Now' -}}
-      </a>
-
     </div>
   </div>
-  </div>
 
-  <!-- ── Embedded product data (read by JS) ── -->
+  <!-- ── Embedded variant data per colourway (read by JS) ── -->
   {%- for block in colourway_blocks -%}
     {%- assign product = block.settings.product -%}
     {%- if product == blank -%}{%- continue -%}{%- endif -%}
 
-    {%- comment -%}Find which option index is "Size"{%- endcomment -%}
     {%- assign size_opt = 1 -%}
     {%- for opt in product.options -%}
       {%- assign opt_lower = opt | downcase -%}
@@ -179,9 +189,7 @@
   }
 
   @media screen and (min-width: 750px) {
-    .ps-outer {
-      margin-inline: 40px;
-    }
+    .ps-outer { margin-inline: 40px; }
   }
 
   .ps-inner {
@@ -190,13 +198,30 @@
   }
 
   @media screen and (min-width: 750px) {
-    .ps-inner {
-      padding-inline: 36px;
-      padding-top: 32px;
-    }
+    .ps-inner { padding-inline: 36px; padding-top: 32px; }
   }
 
-  /* ── Content grid ── */
+  /* ── Full-width title header ── */
+  .ps__header {
+    padding-bottom: 20px;
+  }
+
+  .ps__title {
+    font-size: clamp(1.4rem, 3vw, 2.2rem);
+    font-weight: 800;
+    color: #fff;
+    margin: 0 0 4px;
+    line-height: 1.15;
+  }
+
+  .ps__subtitle {
+    font-size: 0.88rem;
+    color: rgba(255,255,255,0.55);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* ── Two-column layout ── */
   .ps__layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -205,17 +230,11 @@
   }
 
   @media screen and (max-width: 749px) {
-    .ps__layout {
-      grid-template-columns: 1fr;
-      gap: 28px;
-    }
+    .ps__layout { grid-template-columns: 1fr; gap: 28px; }
   }
 
-  /* Left */
-  .ps__left {
-    display: flex;
-    flex-direction: column;
-  }
+  /* Left — hero image only */
+  .ps__left { display: flex; flex-direction: column; }
 
   .ps__hero-wrap {
     aspect-ratio: 1 / 1;
@@ -233,41 +252,63 @@
   }
 
   .ps__hero-img.ps-fade { opacity: 0; }
-
   .ps__hero-fallback { width: 100%; height: 100%; opacity: 0.15; }
   .ps__hero-svg { width: 100%; height: 100%; }
 
-  .ps__left-text { padding-top: 16px; }
-
-  .ps__title {
-    font-size: clamp(1.2rem, 2.5vw, 1.9rem);
-    font-weight: 800;
-    color: #fff;
-    margin: 0 0 6px;
-    line-height: 1.15;
-  }
-
-  .ps__subtitle {
-    font-size: 0.88rem;
-    color: rgba(255,255,255,0.55);
-    margin: 0;
-    line-height: 1.5;
-  }
-
-  /* Right */
+  /* Right column */
   .ps__right {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
     padding-top: 4px;
   }
 
-  /* Thumbnails */
-  .ps__thumbs {
+  /* ── Soleplate selector ── */
+  .ps__soleplate-row {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 8px;
   }
+
+  .ps__soleplate-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.55);
+  }
+
+  .ps__soleplate-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .ps__soleplate-btn {
+    padding: 7px 18px;
+    border-radius: 20px;
+    border: 1.5px solid rgba(255,255,255,0.25);
+    background: transparent;
+    color: rgba(255,255,255,0.7);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+
+  .ps__soleplate-btn:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.5);
+    color: #fff;
+  }
+
+  .ps__soleplate-btn--active { background: #fff; color: #111; border-color: #fff; }
+
+  /* ── Colourway thumbnails ── */
+  .ps__thumbs { display: flex; flex-wrap: wrap; gap: 8px; }
 
   .ps__thumb {
     width: 68px;
@@ -285,14 +326,11 @@
   .ps__thumb:hover { transform: scale(1.07); border-color: rgba(255,255,255,0.45); }
   .ps__thumb--active { border-color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.25); }
   .ps__thumb--unavailable { opacity: 0.2; pointer-events: none; transform: none; }
+  .ps__thumb--hidden { display: none; }
   .ps__thumb-empty { display: block; width: 100%; height: 100%; background: rgba(255,255,255,0.15); }
 
-  /* Sizes */
-  .ps__size-row {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
+  /* ── Size selector ── */
+  .ps__size-row { display: flex; flex-direction: column; gap: 10px; }
 
   .ps__size-label {
     font-size: 0.72rem;
@@ -302,12 +340,7 @@
     color: rgba(255,255,255,0.55);
   }
 
-  .ps__size-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 7px;
-    min-height: 36px;
-  }
+  .ps__size-grid { display: flex; flex-wrap: wrap; gap: 7px; min-height: 36px; }
 
   .ps__size-btn {
     padding: 7px 13px;
@@ -331,7 +364,7 @@
   .ps__size-btn--active { background: #fff; color: #111; border-color: #fff; }
   .ps__size-btn--sold-out { opacity: 0.3; text-decoration: line-through; cursor: not-allowed; }
 
-  /* Buy */
+  /* ── Buy button ── */
   .ps__buy-btn {
     display: flex;
     align-items: center;
@@ -358,17 +391,19 @@
     var wrap     = document.getElementById('ps-outer-' + sid);
     if (!wrap) return;
 
-    var bg       = wrap;
-    var heroImg  = document.getElementById('ps-hero-' + sid);
-    var buyBtn   = document.getElementById('ps-buy-' + sid);
-    var sizeGrid = document.getElementById('ps-sizes-' + sid);
-    var thumbs   = Array.from(document.querySelectorAll('#ps-outer-' + sid + ' [data-ps-thumb]'));
+    var heroImg       = document.getElementById('ps-hero-' + sid);
+    var buyBtn        = document.getElementById('ps-buy-' + sid);
+    var sizeGrid      = document.getElementById('ps-sizes-' + sid);
+    var spContainer   = document.getElementById('ps-soleplates-' + sid);
+    var spRow         = document.getElementById('ps-soleplate-row-' + sid);
+    var thumbs        = Array.from(wrap.querySelectorAll('[data-ps-thumb]'));
 
-    var activeIdx  = 0;
-    var activeSize = null;
-    var cache      = {};
+    var activeIdx       = 0;
+    var activeSize      = null;
+    var activeSoleplate = null;
+    var cache           = {};
 
-    /* ── load + cache product data by colourway index ── */
+    /* ── load + cache product data ── */
     function getData(idx) {
       if (cache[idx]) return cache[idx];
       var el = document.getElementById('ps-data-' + sid + '-' + idx);
@@ -377,10 +412,80 @@
       return cache[idx];
     }
 
-    /* ── collect every unique size across ALL colourways, preserving order ── */
+    /* ── visible thumbs (not hidden by soleplate filter) ── */
+    function visibleThumbs() {
+      return thumbs.filter(function (t) {
+        return !t.classList.contains('ps__thumb--hidden');
+      });
+    }
+
+    /* ── unique soleplates in declaration order ── */
+    function uniqueSoleplates() {
+      var seen = [];
+      thumbs.forEach(function (t) {
+        var sp = t.dataset.soleplate;
+        if (sp && seen.indexOf(sp) === -1) seen.push(sp);
+      });
+      return seen;
+    }
+
+    /* ── render soleplate pill buttons ── */
+    function renderSoleplates() {
+      var sps = uniqueSoleplates();
+      if (!sps.length) {
+        if (spRow) spRow.style.display = 'none';
+        return;
+      }
+      sps.forEach(function (sp, i) {
+        var btn = document.createElement('button');
+        btn.className = 'ps__soleplate-btn' + (i === 0 ? ' ps__soleplate-btn--active' : '');
+        btn.textContent = sp;
+        btn.dataset.soleplate = sp;
+        btn.addEventListener('click', function () { selectSoleplate(btn); });
+        spContainer.appendChild(btn);
+      });
+      filterBySoleplate(sps[0]);
+    }
+
+    /* ── filter colourway thumbs to those matching soleplate ── */
+    function filterBySoleplate(sp) {
+      activeSoleplate = sp;
+      /* reset size when soleplate changes */
+      activeSize = null;
+      Array.from(sizeGrid.querySelectorAll('.ps__size-btn')).forEach(function (b) {
+        b.classList.remove('ps__size-btn--active');
+      });
+
+      thumbs.forEach(function (t) {
+        var match = !sp || t.dataset.soleplate === sp;
+        t.classList.toggle('ps__thumb--hidden', !match);
+        t.classList.remove('ps__thumb--unavailable');
+      });
+
+      /* if currently active thumb got hidden, jump to first visible */
+      if (thumbs[activeIdx] && thumbs[activeIdx].classList.contains('ps__thumb--hidden')) {
+        var first = visibleThumbs()[0];
+        if (first) selectColourway(first, true);
+      }
+
+      renderAllSizes();
+      updateBuyUrl();
+    }
+
+    /* ── select a soleplate pill ── */
+    function selectSoleplate(btn) {
+      Array.from(spContainer.querySelectorAll('.ps__soleplate-btn')).forEach(function (b) {
+        b.classList.remove('ps__soleplate-btn--active');
+      });
+      btn.classList.add('ps__soleplate-btn--active');
+      filterBySoleplate(btn.dataset.soleplate);
+    }
+
+    /* ── unique sizes across visible colourways only ── */
     function allUniqueSizes() {
       var seen = [];
-      thumbs.forEach(function (_, i) {
+      visibleThumbs().forEach(function (t) {
+        var i = parseInt(t.dataset.idx);
         var d = getData(i);
         if (!d) return;
         d.variants.forEach(function (v) {
@@ -390,7 +495,7 @@
       return seen;
     }
 
-    /* ── render all size buttons on init (once) ── */
+    /* ── render size buttons (called on init and after soleplate change) ── */
     function renderAllSizes() {
       sizeGrid.innerHTML = '';
       allUniqueSizes().forEach(function (size) {
@@ -403,7 +508,7 @@
       });
     }
 
-    /* ── when a size is clicked: filter colourways, update buy link ── */
+    /* ── select a size ── */
     function selectSize(btn) {
       var size = btn.dataset.size;
 
@@ -411,24 +516,20 @@
       if (btn.classList.contains('ps__size-btn--active')) {
         btn.classList.remove('ps__size-btn--active');
         activeSize = null;
-        /* restore all colourways */
-        thumbs.forEach(function (t) { t.classList.remove('ps__thumb--unavailable'); });
-        /* reset buy to current colourway product */
-        var d = getData(activeIdx);
-        if (buyBtn && d) buyBtn.href = d.productUrl;
+        visibleThumbs().forEach(function (t) { t.classList.remove('ps__thumb--unavailable'); });
+        updateBuyUrl();
         return;
       }
 
-      /* select */
       Array.from(sizeGrid.querySelectorAll('.ps__size-btn')).forEach(function (b) {
         b.classList.remove('ps__size-btn--active');
       });
       btn.classList.add('ps__size-btn--active');
       activeSize = size;
 
-      /* mark colourways that don't carry this size in-stock as unavailable */
       var firstAvail = null;
-      thumbs.forEach(function (t, i) {
+      visibleThumbs().forEach(function (t) {
+        var i = parseInt(t.dataset.idx);
         var d = getData(i);
         var hasStock = d && d.variants.some(function (v) {
           return v.size === size && v.available;
@@ -437,7 +538,6 @@
         if (hasStock && firstAvail === null) firstAvail = t;
       });
 
-      /* if active colourway just became unavailable, jump to first available */
       if (thumbs[activeIdx] && thumbs[activeIdx].classList.contains('ps__thumb--unavailable')) {
         if (firstAvail) selectColourway(firstAvail, true);
       } else {
@@ -445,7 +545,7 @@
       }
     }
 
-    /* ── update buy URL based on current colourway + selected size ── */
+    /* ── update buy URL for active colourway + selected size ── */
     function updateBuyUrl() {
       if (!buyBtn) return;
       var d = getData(activeIdx);
@@ -460,9 +560,9 @@
       }
     }
 
-    /* ── select a colourway thumbnail ── */
+    /* ── select a colourway thumb ── */
     function selectColourway(thumb, skipSizeReset) {
-      var idx   = parseInt(thumb.dataset.idx);
+      var idx    = parseInt(thumb.dataset.idx);
       var newImg = thumb.dataset.img;
       var newBg  = thumb.dataset.bg;
 
@@ -474,7 +574,6 @@
       thumb.setAttribute('aria-pressed', 'true');
       activeIdx = idx;
 
-      /* fade hero */
       if (heroImg && newImg) {
         heroImg.classList.add('ps-fade');
         setTimeout(function () {
@@ -484,20 +583,18 @@
         }, 130);
       }
 
-      /* background */
-      if (bg && newBg) bg.style.backgroundColor = newBg;
+      if (newBg) wrap.style.backgroundColor = newBg;
 
-      /* update buy URL (size stays selected) */
       updateBuyUrl();
     }
 
-    /* ── wire up ── */
+    /* ── wire thumb clicks ── */
     thumbs.forEach(function (t) {
       t.addEventListener('click', function () { selectColourway(t); });
     });
 
-    /* init */
-    renderAllSizes();
+    /* ── init ── */
+    renderSoleplates();   /* also calls renderAllSizes + filterBySoleplate */
     updateBuyUrl();
 
     /* preload hero images */
@@ -565,6 +662,12 @@
       "type": "colourway",
       "name": "Colourway",
       "settings": [
+        {
+          "type": "text",
+          "id": "soleplate",
+          "label": "Soleplate",
+          "info": "e.g. FG, AG, SG, TF — colourways with the same soleplate are grouped together"
+        },
         {
           "type": "product",
           "id": "product",
