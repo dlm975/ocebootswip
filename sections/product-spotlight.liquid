@@ -262,7 +262,7 @@
   }
 
   @media screen and (max-width: 749px) {
-    .ps__layout { grid-template-columns: 1fr; gap: 28px; }
+    .ps__layout { grid-template-columns: 1fr; gap: 16px; }
   }
 
   /* Left — hero image only */
@@ -471,6 +471,18 @@
 
   .ps__buy-btn:hover:not(:disabled) { background: rgba(255,255,255,0.88); transform: translateY(-1px); }
   .ps__buy-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+  /* ── Mobile spacing squeeze ── */
+  @media screen and (max-width: 749px) {
+    .ps-inner         { padding-top: 16px; padding-bottom: 20px; }
+    .ps__header       { padding-bottom: 10px; }
+    .ps__right        { gap: 12px; padding-top: 0; }
+    .ps__soleplate-row { gap: 5px; }
+    .ps__soleplate-btns { gap: 7px; }
+    .ps__thumbs       { gap: 5px; }
+    .ps__size-row     { gap: 5px; }
+    .ps__size-grid    { gap: 5px; }
+  }
 {% endstylesheet %}
 
 <script>
