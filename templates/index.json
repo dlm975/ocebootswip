@@ -361,11 +361,11 @@
     "product_spotlight_HMicki": {
       "type": "product-spotlight",
       "blocks": {
-        "soleplate_CB6Ujp": {
+        "soleplate_RhGgpF": {
           "type": "soleplate",
           "settings": {
-            "name": "AG",
-            "image": "shopify://shop_images/EPDM-Rubber-Granules-Crumb-Rubber-Infill-Material-for-Turf-Playground-Surfaces.jpg_300x300_ea1d0e4c-072c-4f5c-8a47-a74c9b1586a0.jpg"
+            "name": "FG",
+            "image": "shopify://shop_images/close-up-golf-green-grass-37662976.webp"
           }
         },
         "soleplate_KBn4jP": {
@@ -375,11 +375,11 @@
             "image": "shopify://shop_images/close-up-view-muddy-terrain-young-green-grass-emerging-rippled-texture-wet-soil-contrasts-fresh-grass-overcast-378267444.webp"
           }
         },
-        "soleplate_RhGgpF": {
+        "soleplate_CB6Ujp": {
           "type": "soleplate",
           "settings": {
-            "name": "FG",
-            "image": "shopify://shop_images/close-up-golf-green-grass-37662976.webp"
+            "name": "AG",
+            "image": "shopify://shop_images/EPDM-Rubber-Granules-Crumb-Rubber-Infill-Material-for-Turf-Playground-Surfaces.jpg_300x300_ea1d0e4c-072c-4f5c-8a47-a74c9b1586a0.jpg"
           }
         },
         "colourway_WyFiJx": {
@@ -546,9 +546,9 @@
         }
       },
       "block_order": [
-        "soleplate_CB6Ujp",
-        "soleplate_KBn4jP",
         "soleplate_RhGgpF",
+        "soleplate_KBn4jP",
+        "soleplate_CB6Ujp",
         "colourway_WyFiJx",
         "colourway_rz4q3N",
         "colourway_z7BQgF",
