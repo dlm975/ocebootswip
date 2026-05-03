@@ -175,6 +175,21 @@
 
   {%- endfor -%}
 
+  <!-- ── Custom soleplate pill images (read by JS) ── -->
+  {%- assign soleplate_blocks = section.blocks | where: 'type', 'soleplate' -%}
+  {%- if soleplate_blocks.size > 0 -%}
+  <script type="application/json" id="ps-sp-data-{{ section.id }}">
+  [
+    {%- for block in soleplate_blocks -%}
+    {
+      "name": {{ block.settings.name | json }},
+      "imageUrl": {%- if block.settings.image != blank -%}{{ block.settings.image | image_url: width: 200 | json }}{%- else -%}""{%- endif -%}
+    }{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  ]
+  </script>
+  {%- endif -%}
+
 </div>
 
 {% stylesheet %}
@@ -195,10 +210,11 @@
   .ps-inner {
     padding-inline: 20px;
     padding-top: 24px;
+    padding-bottom: 28px;
   }
 
   @media screen and (min-width: 750px) {
-    .ps-inner { padding-inline: 36px; padding-top: 32px; }
+    .ps-inner { padding-inline: 36px; padding-top: 32px; padding-bottom: 36px; }
   }
 
   /* ── Full-width title header ── */
@@ -431,6 +447,19 @@
     var activeSoleplate = null;
     var cache           = {};
 
+    /* ── custom soleplate pill images keyed by name ── */
+    var spImages = (function () {
+      var el = document.getElementById('ps-sp-data-' + sid);
+      if (!el) return {};
+      try {
+        var map = {};
+        JSON.parse(el.textContent).forEach(function (sp) {
+          if (sp.name && sp.imageUrl) map[sp.name] = sp.imageUrl;
+        });
+        return map;
+      } catch (e) { return {}; }
+    })();
+
     /* ── load + cache product data ── */
     function getData(idx) {
       if (cache[idx]) return cache[idx];
@@ -465,9 +494,11 @@
         return;
       }
       sps.forEach(function (sp, i) {
-        /* use the hero image of the first colourway in this soleplate group */
-        var matchThumb = thumbs.find(function (t) { return t.dataset.soleplate === sp; });
-        var bgImg = matchThumb ? matchThumb.dataset.img : '';
+        /* custom block image → first colourway image fallback */
+        var bgImg = spImages[sp] || (function () {
+          var t = thumbs.find(function (t) { return t.dataset.soleplate === sp; });
+          return t ? t.dataset.img : '';
+        })();
 
         var btn = document.createElement('button');
         btn.className = 'ps__soleplate-btn' + (i === 0 ? ' ps__soleplate-btn--active' : '');
@@ -699,6 +730,24 @@
     }
   ],
   "blocks": [
+    {
+      "type": "soleplate",
+      "name": "Soleplate",
+      "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Soleplate name",
+          "info": "Must match the Soleplate field on colourway blocks exactly, e.g. FG"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Pill image",
+          "info": "Custom image shown on the circle button. Falls back to the first colourway image if left blank."
+        }
+      ]
+    },
     {
       "type": "colourway",
       "name": "Colourway",
