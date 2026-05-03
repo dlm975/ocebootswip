@@ -281,31 +281,59 @@
   .ps__soleplate-btns {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 10px;
   }
 
   .ps__soleplate-btn {
-    padding: 7px 18px;
-    border-radius: 20px;
-    border: 1.5px solid rgba(255,255,255,0.25);
-    background: transparent;
-    color: rgba(255,255,255,0.7);
-    font-size: 0.82rem;
-    font-weight: 700;
+    position: relative;
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    border: 2.5px solid transparent;
+    overflow: hidden;
     cursor: pointer;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    line-height: 1;
-    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    padding: 0;
+    background-color: rgba(255,255,255,0.08);
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
   }
 
-  .ps__soleplate-btn:hover {
-    background: rgba(255,255,255,0.1);
-    border-color: rgba(255,255,255,0.5);
+  .ps__soleplate-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.48);
+    transition: background 0.2s;
+  }
+
+  .ps__soleplate-btn:hover { transform: scale(1.07); }
+  .ps__soleplate-btn:hover::before { background: rgba(0,0,0,0.28); }
+
+  .ps__soleplate-btn--active {
+    border-color: #fff;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.25);
+  }
+
+  .ps__soleplate-btn--active::before { background: rgba(0,0,0,0.22); }
+
+  .ps__soleplate-btn__label {
+    position: relative;
+    z-index: 1;
     color: #fff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    text-align: center;
+    line-height: 1;
+    pointer-events: none;
+    text-shadow: 0 1px 5px rgba(0,0,0,0.7);
   }
-
-  .ps__soleplate-btn--active { background: #fff; color: #111; border-color: #fff; }
 
   /* ── Colourway thumbnails ── */
   .ps__thumbs { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -429,7 +457,7 @@
       return seen;
     }
 
-    /* ── render soleplate pill buttons ── */
+    /* ── render soleplate circle buttons ── */
     function renderSoleplates() {
       var sps = uniqueSoleplates();
       if (!sps.length) {
@@ -437,10 +465,20 @@
         return;
       }
       sps.forEach(function (sp, i) {
+        /* use the hero image of the first colourway in this soleplate group */
+        var matchThumb = thumbs.find(function (t) { return t.dataset.soleplate === sp; });
+        var bgImg = matchThumb ? matchThumb.dataset.img : '';
+
         var btn = document.createElement('button');
         btn.className = 'ps__soleplate-btn' + (i === 0 ? ' ps__soleplate-btn--active' : '');
-        btn.textContent = sp;
         btn.dataset.soleplate = sp;
+        if (bgImg) btn.style.backgroundImage = 'url(' + bgImg + ')';
+
+        var label = document.createElement('span');
+        label.className = 'ps__soleplate-btn__label';
+        label.textContent = sp;
+        btn.appendChild(label);
+
         btn.addEventListener('click', function () { selectSoleplate(btn); });
         spContainer.appendChild(btn);
       });
@@ -481,7 +519,7 @@
       filterBySoleplate(btn.dataset.soleplate);
     }
 
-    /* ── unique sizes across visible colourways only ── */
+    /* ── unique sizes across visible colourways only, sorted A-Z ── */
     function allUniqueSizes() {
       var seen = [];
       visibleThumbs().forEach(function (t) {
@@ -491,6 +529,9 @@
         d.variants.forEach(function (v) {
           if (v.size && seen.indexOf(v.size) === -1) seen.push(v.size);
         });
+      });
+      seen.sort(function (a, b) {
+        return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
       });
       return seen;
     }
