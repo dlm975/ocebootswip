@@ -382,6 +382,69 @@
             "image": "shopify://shop_images/close-up-golf-green-grass-37662976.webp"
           }
         },
+        "colourway_WyFiJx": {
+          "type": "colourway",
+          "settings": {
+            "soleplate": "AG",
+            "product": "nike-mercurial-vapor-16-elite-ag",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
+        "colourway_rz4q3N": {
+          "type": "colourway",
+          "settings": {
+            "soleplate": "AG",
+            "product": "nike-mercurial-vapor-16-elite-ag-nikeid-231125",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
+        "colourway_z7BQgF": {
+          "type": "colourway",
+          "settings": {
+            "soleplate": "AG",
+            "product": "nike-mercurial-vapor-16-elite-fg-nike-by-you-1",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
+        "colourway_iiiJwC": {
+          "type": "colourway",
+          "settings": {
+            "soleplate": "AG",
+            "product": "nike-mercurial-vapor-16-elite-ag-nike-by-you",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
+        "colourway_7pfaKJ": {
+          "type": "colourway",
+          "settings": {
+            "soleplate": "AG",
+            "product": "",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
+        "colourway_UQFwg6": {
+          "type": "colourway",
+          "settings": {
+            "soleplate": "SG",
+            "product": "nike-mercurial-vapor-16-elite-sg-pro-pro-020326",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
+        "colourway_PKUiXx": {
+          "type": "colourway",
+          "settings": {
+            "soleplate": "SG",
+            "product": "nike-mercurial-vapor-16-elite-sg-pro-oly-011125",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
         "colourway_jnnzkR": {
           "type": "colourway",
           "settings": {
@@ -486,6 +549,13 @@
         "soleplate_CB6Ujp",
         "soleplate_KBn4jP",
         "soleplate_RhGgpF",
+        "colourway_WyFiJx",
+        "colourway_rz4q3N",
+        "colourway_z7BQgF",
+        "colourway_iiiJwC",
+        "colourway_7pfaKJ",
+        "colourway_UQFwg6",
+        "colourway_PKUiXx",
         "colourway_jnnzkR",
         "colourway_rtAgK9",
         "colourway_ma4kxL",
