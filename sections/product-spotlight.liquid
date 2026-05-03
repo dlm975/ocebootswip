@@ -24,6 +24,7 @@
   class="ps-outer"
   id="ps-outer-{{ section.id }}"
   data-ps
+  data-buy-label="{{ section.settings.buy_label | default: 'Add to Cart' | escape }}"
   style="background-color: {{ initial_bg | default: '#111' }}; {% render 'spacing-style', settings: section.settings %}"
 >
   <div class="ps-inner">
@@ -126,14 +127,29 @@
           <div class="ps__size-grid" id="ps-sizes-{{ section.id }}"></div>
         </div>
 
-        <!-- 4. Buy button -->
-        <a
-          id="ps-buy-{{ section.id }}"
-          class="ps__buy-btn"
-          href="{{ first_product.url | default: '#' }}"
+        <!-- 4. Cart form + buy button -->
+        <form
+          action="/cart/add"
+          method="post"
+          id="ps-form-{{ section.id }}"
+          class="ps__cart-form"
         >
-          {{- section.settings.buy_label | default: 'Buy Now' -}}
-        </a>
+          <input
+            type="hidden"
+            name="id"
+            id="ps-variant-id-{{ section.id }}"
+            value="{{ first_product.variants.first.id | default: '' }}"
+          >
+          <input type="hidden" name="quantity" value="1">
+          <button
+            type="submit"
+            name="add"
+            id="ps-buy-{{ section.id }}"
+            class="ps__buy-btn"
+          >
+            {{- section.settings.buy_label | default: 'Add to Cart' -}}
+          </button>
+        </form>
 
       </div>
     </div>
@@ -351,12 +367,17 @@
     text-shadow: 0 1px 5px rgba(0,0,0,0.7);
   }
 
+  @media screen and (max-width: 749px) {
+    .ps__soleplate-btn { width: 52px; height: 52px; }
+    .ps__soleplate-btn__label { font-size: 0.58rem; }
+  }
+
   /* ── Colourway thumbnails ── */
-  .ps__thumbs { display: flex; flex-wrap: wrap; gap: 8px; }
+  .ps__thumbs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
 
   .ps__thumb {
-    width: 68px;
-    height: 68px;
+    width: 100%;
+    aspect-ratio: 1 / 1;
     border-radius: 10px;
     border: 2px solid transparent;
     overflow: hidden;
@@ -364,7 +385,11 @@
     padding: 0;
     background: rgba(255,255,255,0.08);
     transition: border-color 0.2s, opacity 0.25s, transform 0.15s, box-shadow 0.2s;
-    flex-shrink: 0;
+  }
+
+  @media screen and (min-width: 750px) {
+    .ps__thumbs { grid-template-columns: repeat(auto-fill, 68px); }
+    .ps__thumb { aspect-ratio: unset; width: 68px; height: 68px; }
   }
 
   .ps__thumb:hover { transform: scale(1.07); border-color: rgba(255,255,255,0.45); }
@@ -384,19 +409,33 @@
     color: rgba(255,255,255,0.55);
   }
 
-  .ps__size-grid { display: flex; flex-wrap: wrap; gap: 7px; min-height: 36px; }
+  .ps__size-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .ps__size-grid { display: flex; flex-wrap: wrap; }
+  }
 
   .ps__size-btn {
-    padding: 7px 13px;
+    padding: 7px 4px;
     border-radius: 8px;
     border: 1.5px solid rgba(255,255,255,0.25);
     background: transparent;
     color: rgba(255,255,255,0.8);
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.15s, border-color 0.15s, color 0.15s, opacity 0.2s;
     line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  @media screen and (min-width: 750px) {
+    .ps__size-btn { padding: 7px 13px; font-size: 0.8rem; }
   }
 
   .ps__size-btn:hover {
@@ -408,7 +447,9 @@
   .ps__size-btn--active { background: #fff; color: #111; border-color: #fff; }
   .ps__size-btn--sold-out { opacity: 0.3; text-decoration: line-through; cursor: not-allowed; }
 
-  /* ── Buy button ── */
+  /* ── Cart form + buy button ── */
+  .ps__cart-form { width: 100%; }
+
   .ps__buy-btn {
     display: flex;
     align-items: center;
@@ -420,13 +461,16 @@
     font-size: 1rem;
     font-weight: 800;
     border-radius: 12px;
-    text-decoration: none;
+    border: none;
+    cursor: pointer;
     letter-spacing: 0.01em;
     transition: background 0.15s, transform 0.15s;
     text-align: center;
+    font-family: inherit;
   }
 
-  .ps__buy-btn:hover { background: rgba(255,255,255,0.88); transform: translateY(-1px); }
+  .ps__buy-btn:hover:not(:disabled) { background: rgba(255,255,255,0.88); transform: translateY(-1px); }
+  .ps__buy-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 {% endstylesheet %}
 
 <script>
@@ -437,6 +481,7 @@
 
     var heroImg       = document.getElementById('ps-hero-' + sid);
     var buyBtn        = document.getElementById('ps-buy-' + sid);
+    var variantInput  = document.getElementById('ps-variant-id-' + sid);
     var sizeGrid      = document.getElementById('ps-sizes-' + sid);
     var spContainer   = document.getElementById('ps-soleplates-' + sid);
     var spRow         = document.getElementById('ps-soleplate-row-' + sid);
@@ -617,18 +662,31 @@
       }
     }
 
-    /* ── update buy URL for active colourway + selected size ── */
+    /* ── update cart variant input for active colourway + selected size ── */
     function updateBuyUrl() {
-      if (!buyBtn) return;
       var d = getData(activeIdx);
-      if (!d) return;
-      if (activeSize) {
-        var match = d.variants.find(function (v) {
-          return v.size === activeSize && v.available;
-        });
-        buyBtn.href = match ? match.url : d.productUrl;
-      } else {
-        buyBtn.href = d.productUrl;
+      var variantId = '';
+      var soldOut   = false;
+
+      if (d) {
+        var match = activeSize
+          ? d.variants.find(function (v) { return v.size === activeSize && v.available; })
+          : d.variants.find(function (v) { return v.available; }) || d.variants[0];
+
+        if (match) {
+          variantId = match.id;
+          soldOut   = !match.available;
+        } else {
+          soldOut = true;
+        }
+      }
+
+      if (variantInput) variantInput.value = variantId;
+      if (buyBtn) {
+        buyBtn.disabled = soldOut || !variantId;
+        buyBtn.textContent = soldOut
+          ? 'Sold Out'
+          : (wrap.dataset.buyLabel || '{{ section.settings.buy_label | default: "Add to Cart" | escape }}');
       }
     }
 
