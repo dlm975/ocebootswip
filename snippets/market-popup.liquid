@@ -5,120 +5,74 @@
   aria-modal="true"
   aria-label="Select your region"
 >
-  <div class="mkt-backdrop" id="mkt-backdrop"></div>
   <div class="mkt-panel">
 
-    <h2 class="mkt-title">Choose your region</h2>
-    <p class="mkt-subtitle">Select your location for correct pricing &amp; shipping.</p>
+    <div class="mkt-header">
+      <h2 class="mkt-title">Choose your region</h2>
+      <button type="button" class="mkt-close" id="mkt-close" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="16" height="16" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
 
     {%- form 'localization', id: 'mkt-form' -%}
 
-      <!-- Detected market card -->
-      <button
-        type="submit"
-        class="mkt-detected"
-        name="country_code"
-        value="{{ localization.country.iso_code }}"
-        id="mkt-detected-btn"
-      >
-        <span class="mkt-flag-circle">
-          <img
-            src="https://flagcdn.com/w80/{{ localization.country.iso_code | downcase }}.png"
-            width="80"
-            height="60"
-            alt="{{ localization.country.name }} flag"
-            onerror="this.style.display='none'"
-          >
-        </span>
-        <span class="mkt-info">
-          <span class="mkt-name">{{ localization.country.name }}</span>
-          <span class="mkt-currency">{{ localization.country.currency.iso_code }} {{ localization.country.currency.symbol }}</span>
-        </span>
-        <span class="mkt-tick" aria-hidden="true">
-          <svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="1.5 6 4.5 9.5 10.5 2.5"/>
-          </svg>
-        </span>
-      </button>
+      <div class="mkt-scroller" id="mkt-scroller">
 
-      <button type="button" class="mkt-confirm" id="mkt-confirm">Continue</button>
-
-      <div class="mkt-divider">
-        <span>or search for a different region</span>
-      </div>
-
-      <div class="mkt-search-wrap">
-        <svg class="mkt-search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" aria-hidden="true">
-          <circle cx="8.5" cy="8.5" r="5.5"/>
-          <line x1="13" y1="13" x2="18" y2="18"/>
-        </svg>
-        <input
-          type="text"
-          id="mkt-search"
-          class="mkt-search"
-          placeholder="Search country…"
-          autocomplete="off"
-          spellcheck="false"
-          aria-label="Search countries"
-          aria-controls="mkt-list"
-        >
-      </div>
-
-      <div class="mkt-list" id="mkt-list" role="listbox" hidden>
+        <!-- Current country first, highlighted -->
         <button
           type="submit"
-          class="mkt-option mkt-eu-option"
+          class="mkt-row mkt-row--current"
           name="country_code"
-          value=""
-          data-name="european union"
-          role="option"
-          aria-selected="false"
+          value="{{ localization.country.iso_code }}"
         >
-          <span class="mkt-flag-circle">
+          <span class="mkt-flag">
             <img
-              src="https://flagcdn.com/w80/eu.png"
-              width="80"
-              height="60"
-              alt="European Union flag"
-              loading="lazy"
+              src="https://flagcdn.com/w80/{{ localization.country.iso_code | downcase }}.png"
+              width="80" height="60"
+              alt="{{ localization.country.name }} flag"
               onerror="this.style.display='none'"
             >
           </span>
-          <span class="mkt-info">
-            <span class="mkt-name">European Union</span>
-            <span class="mkt-currency">EUR €</span>
+          <span class="mkt-row__info">
+            <span class="mkt-row__name">{{ localization.country.name }}</span>
+            <span class="mkt-row__currency">{{ localization.country.currency.iso_code }} {{ localization.country.currency.symbol }}</span>
+          </span>
+          <span class="mkt-row__check" aria-hidden="true">
+            <svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="1.5 6 4.5 9.5 10.5 2.5"/>
+            </svg>
           </span>
         </button>
+
+        <!-- All other available countries -->
         {%- for country in localization.available_countries -%}
           {%- unless country.iso_code == localization.country.iso_code -%}
             <button
               type="submit"
-              class="mkt-option"
+              class="mkt-row"
               name="country_code"
               value="{{ country.iso_code }}"
-              data-name="{{ country.name | downcase }}"
-              role="option"
-              aria-selected="false"
             >
-              <span class="mkt-flag-circle">
+              <span class="mkt-flag">
                 <img
                   src="https://flagcdn.com/w80/{{ country.iso_code | downcase }}.png"
-                  width="80"
-                  height="60"
+                  width="80" height="60"
                   alt="{{ country.name }} flag"
                   loading="lazy"
                   onerror="this.style.display='none'"
                 >
               </span>
-              <span class="mkt-info">
-                <span class="mkt-name">{{ country.name }}</span>
-                <span class="mkt-currency">{{ country.currency.iso_code }} {{ country.currency.symbol }}</span>
+              <span class="mkt-row__info">
+                <span class="mkt-row__name">{{ country.name }}</span>
+                <span class="mkt-row__currency">{{ country.currency.iso_code }} {{ country.currency.symbol }}</span>
               </span>
             </button>
           {%- endunless -%}
         {%- endfor -%}
+
       </div>
-      <p class="mkt-no-results" id="mkt-no-results" hidden>No countries found.</p>
 
     {%- endform -%}
 
@@ -133,209 +87,141 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0px) brightness(1);
+    opacity: 0;
+    transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+                backdrop-filter 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+                background 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
 
   #mkt-overlay.mkt-open {
     opacity: 1;
-    pointer-events: all;
-  }
-
-  .mkt-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0);
-    backdrop-filter: blur(0px) brightness(1);
-    transition: backdrop-filter 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s;
-  }
-
-  #mkt-overlay.mkt-open .mkt-backdrop {
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(12px) brightness(0.55);
+    pointer-events: auto;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(14px) brightness(0.5);
   }
 
   .mkt-panel {
-    position: relative;
-    z-index: 1;
     background: #111;
     color: #fff;
-    border-radius: 20px;
-    width: min(400px, 92vw);
-    padding: 28px 24px 24px;
+    border-radius: 22px;
+    width: min(380px, 92vw);
+    max-height: min(560px, 82vh);
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 12px;
     box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7);
-    transform: translateY(18px) scale(0.97);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(16px) scale(0.97);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
   }
 
   #mkt-overlay.mkt-open .mkt-panel {
     transform: translateY(0) scale(1);
   }
 
+  .mkt-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px 0;
+    flex-shrink: 0;
+  }
+
   .mkt-title {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     margin: 0;
     color: #fff;
   }
 
-  .mkt-subtitle {
-    font-size: 0.78rem;
-    color: rgba(255, 255, 255, 0.4);
-    margin: 0;
-    text-align: center;
-  }
-
-  /* Detected country card */
-  .mkt-detected {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    width: 100%;
-    padding: 12px 14px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 14px;
-    color: #fff;
-    font-family: inherit;
-    cursor: pointer;
-    text-align: left;
-    margin-top: 4px;
-    transition: background 0.13s, border-color 0.13s;
-  }
-
-  .mkt-detected:hover {
-    background: rgba(255, 255, 255, 0.14);
-    border-color: rgba(255, 255, 255, 0.28);
-  }
-
-  /* Continue button */
-  .mkt-confirm {
-    width: 100%;
-    padding: 13px;
-    background: #fff;
-    color: #111;
-    border: none;
-    border-radius: 12px;
-    font-family: inherit;
-    font-size: 0.9rem;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 6px;
-    transition: background 0.13s;
-  }
-
-  .mkt-confirm:hover {
-    background: rgba(255, 255, 255, 0.88);
-  }
-
-  /* Divider */
-  .mkt-divider {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    gap: 10px;
-    margin: 2px 0;
-  }
-
-  .mkt-divider::before,
-  .mkt-divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  .mkt-divider span {
-    font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.28);
-    white-space: nowrap;
-  }
-
-  /* Search */
-  .mkt-search-wrap {
-    position: relative;
-    width: 100%;
-  }
-
-  .mkt-search-icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: rgba(255, 255, 255, 0.35);
-    pointer-events: none;
-  }
-
-  .mkt-search {
-    width: 100%;
-    box-sizing: border-box;
+  .mkt-close {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.18);
     background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 10px;
-    padding: 10px 12px 10px 36px;
+    color: rgba(255, 255, 255, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    transition: background 0.13s, color 0.13s;
+  }
+
+  .mkt-close:hover {
+    background: rgba(255, 255, 255, 0.15);
     color: #fff;
-    font-family: inherit;
-    font-size: 0.85rem;
-    outline: none;
-    transition: border-color 0.15s, background 0.15s;
   }
 
-  .mkt-search::placeholder {
-    color: rgba(255, 255, 255, 0.3);
-  }
-
-  .mkt-search:focus {
-    border-color: rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.11);
-  }
-
-  .mkt-list[hidden] { display: none; }
-
-  /* Scrollable list */
-  .mkt-list {
-    width: 100%;
-    max-height: 260px;
+  .mkt-scroller {
     overflow-y: auto;
+    padding: 12px 12px 16px;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 3px;
+    -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
   }
 
-  .mkt-option {
+  .mkt-scroller::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .mkt-scroller::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .mkt-scroller::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+  }
+
+  .mkt-row {
     display: flex;
     align-items: center;
     gap: 12px;
     width: 100%;
-    padding: 8px 10px;
+    padding: 9px 10px;
     background: transparent;
     border: 1px solid transparent;
-    border-radius: 11px;
-    color: rgba(255, 255, 255, 0.7);
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.72);
     font-family: inherit;
     cursor: pointer;
     text-align: left;
-    transition: background 0.13s, border-color 0.13s, color 0.13s;
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 
-  .mkt-option:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.12);
+  .mkt-row:hover,
+  .mkt-row:active {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 255, 255, 0.13);
     color: #fff;
   }
 
-  /* Circular flag image */
-  .mkt-flag-circle {
-    width: 36px;
-    height: 36px;
+  .mkt-row--current {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    margin-bottom: 6px;
+  }
+
+  .mkt-row--current:hover,
+  .mkt-row--current:active {
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  .mkt-flag {
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     overflow: hidden;
     flex-shrink: 0;
@@ -345,14 +231,14 @@
     justify-content: center;
   }
 
-  .mkt-flag-circle img {
-    width: 50px;
-    height: 50px;
+  .mkt-flag img {
+    width: 48px;
+    height: 48px;
     object-fit: cover;
     display: block;
   }
 
-  .mkt-info {
+  .mkt-row__info {
     display: flex;
     flex-direction: column;
     gap: 1px;
@@ -360,8 +246,8 @@
     min-width: 0;
   }
 
-  .mkt-name {
-    font-size: 0.85rem;
+  .mkt-row__name {
+    font-size: 0.84rem;
     font-weight: 600;
     line-height: 1.2;
     white-space: nowrap;
@@ -369,16 +255,16 @@
     text-overflow: ellipsis;
   }
 
-  .mkt-currency {
-    font-size: 0.71rem;
+  .mkt-row__currency {
+    font-size: 0.7rem;
     color: rgba(255, 255, 255, 0.38);
   }
 
-  .mkt-detected .mkt-currency {
+  .mkt-row--current .mkt-row__currency {
     color: rgba(255, 255, 255, 0.55);
   }
 
-  .mkt-tick {
+  .mkt-row__check {
     width: 20px;
     height: 20px;
     border-radius: 50%;
@@ -388,117 +274,16 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    margin-left: auto;
-  }
-
-  .mkt-no-results {
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.35);
-    text-align: center;
-    margin: 4px 0 0;
-    width: 100%;
   }
 </style>
 
 <script>
   (function () {
     var STORAGE_KEY = 'oce_market_confirmed';
-    var overlay     = document.getElementById('mkt-overlay');
-    var backdrop    = document.getElementById('mkt-backdrop');
-    var confirmBtn  = document.getElementById('mkt-confirm');
-    var detectedBtn = document.getElementById('mkt-detected-btn');
-    var searchInput = document.getElementById('mkt-search');
-    var list        = document.getElementById('mkt-list');
-    var noResults   = document.getElementById('mkt-no-results');
-    var options     = Array.prototype.slice.call(list.querySelectorAll('.mkt-option'));
-
-    var ALIASES = {
-      'usa': 'united states', 'us': 'united states',
-      'uk': 'united kingdom', 'gb': 'united kingdom', 'brit': 'united kingdom',
-      'aus': 'australia',
-      'can': 'canada',
-      'nz': 'new zealand',
-      'ire': 'ireland',
-      'ger': 'germany',
-      'fra': 'france',
-      'esp': 'spain', 'spa': 'spain',
-      'ita': 'italy',
-      'ned': 'netherlands', 'hol': 'netherlands',
-      'swe': 'sweden',
-      'nor': 'norway',
-      'den': 'denmark',
-      'uae': 'united arab emirates',
-      'sa':  'south africa',
-      'jpn': 'japan', 'jp': 'japan',
-      'eu':  'european union'
-    };
-
-    var PRIORITY = [
-      'united states', 'united kingdom', 'australia', 'canada', 'new zealand',
-      'european union', 'ireland', 'germany', 'france', 'netherlands', 'sweden',
-      'norway', 'denmark', 'spain', 'italy', 'japan', 'south africa', 'united arab emirates'
-    ];
-
-    var optionsByName = {};
-    options.forEach(function (btn) { optionsByName[btn.dataset.name] = btn; });
-
-    /* Wire EU button to first available EUR country, or remove it */
-    var euBtn = list.querySelector('.mkt-eu-option');
-    if (euBtn) {
-      var eurOption = null;
-      for (var i = 0; i < options.length; i++) {
-        if (options[i] === euBtn) continue;
-        var currEl = options[i].querySelector('.mkt-currency');
-        if (currEl && currEl.textContent.indexOf('EUR') !== -1) { eurOption = options[i]; break; }
-      }
-      if (eurOption) {
-        euBtn.value = eurOption.value;
-      } else {
-        euBtn.parentNode.removeChild(euBtn);
-        options = options.filter(function (b) { return b !== euBtn; });
-        delete optionsByName['european union'];
-      }
-    }
-
-    /* Show single best match as user types */
-    searchInput.addEventListener('input', function () {
-      var raw = searchInput.value.trim().toLowerCase();
-      if (!raw) {
-        list.hidden = true;
-        noResults.hidden = true;
-        return;
-      }
-      var q = ALIASES[raw] || raw;
-      var best = null;
-
-      /* 1. Priority list — starts-with */
-      for (var i = 0; i < PRIORITY.length && !best; i++) {
-        var opt = optionsByName[PRIORITY[i]];
-        if (opt && opt.dataset.name.indexOf(q) === 0) best = opt;
-      }
-      /* 2. Any option — starts-with */
-      for (var i = 0; i < options.length && !best; i++) {
-        if (options[i].dataset.name.indexOf(q) === 0) best = options[i];
-      }
-      /* 3. Priority list — contains */
-      for (var i = 0; i < PRIORITY.length && !best; i++) {
-        var opt = optionsByName[PRIORITY[i]];
-        if (opt && opt.dataset.name.indexOf(q) !== -1) best = opt;
-      }
-      /* 4. Any option — contains */
-      for (var i = 0; i < options.length && !best; i++) {
-        if (options[i].dataset.name.indexOf(q) !== -1) best = options[i];
-      }
-
-      options.forEach(function (btn) { btn.style.display = (btn === best) ? '' : 'none'; });
-      list.hidden = !best;
-      noResults.hidden = !!best;
-    });
+    var overlay    = document.getElementById('mkt-overlay');
+    var closeBtn   = document.getElementById('mkt-close');
 
     function open() {
-      searchInput.value = '';
-      list.hidden = true;
-      noResults.hidden = true;
       overlay.classList.add('mkt-open');
       overlay.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
@@ -511,6 +296,24 @@
       document.body.style.overflow = '';
     }
 
+    /* Save confirmed state when any country row is clicked */
+    overlay.querySelectorAll('.mkt-row').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        localStorage.setItem(STORAGE_KEY, '1');
+      });
+    });
+
+    closeBtn.addEventListener('click', close);
+
+    /* Tap outside panel closes */
+    overlay.addEventListener('click', function (e) {
+      if (!e.target.closest('.mkt-panel')) close();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && overlay.classList.contains('mkt-open')) close();
+    });
+
     /* Auto-show only on collection pages, 3 s after load */
     {%- if template.name == 'collection' -%}
     if (!localStorage.getItem(STORAGE_KEY)) {
@@ -520,21 +323,5 @@
 
     /* Manual trigger from drawer button */
     document.addEventListener('mkt:open', open);
-
-    confirmBtn.addEventListener('click', close);
-    detectedBtn.addEventListener('click', function () {
-      localStorage.setItem(STORAGE_KEY, '1');
-    });
-    options.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        localStorage.setItem(STORAGE_KEY, '1');
-      });
-    });
-
-    backdrop.addEventListener('click', close);
-
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && overlay.classList.contains('mkt-open')) close();
-    });
   })();
 </script>
