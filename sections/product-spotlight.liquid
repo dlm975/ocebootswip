@@ -184,7 +184,7 @@
             "id": {{ variant.id }},
             "size": {{ sv | json }},
             "available": {{ variant.available }},
-            "price": {{ variant.price | money_with_currency | json }},
+            "price": {{ variant.price | money | json }},
             "url": {{ product.url | append: '?variant=' | append: variant.id | json }}
           }{% unless forloop.last %},{% endunless %}
         {%- endfor -%}
