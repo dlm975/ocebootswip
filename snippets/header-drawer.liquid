@@ -529,67 +529,27 @@
         </ul>
 
         {%- if data_header_drawer_type == 'mobile-drawer' and localization.available_countries.size > 1 -%}
-          <li class="menu-drawer__list-item{% if block.settings.drawer_dividers %} menu-drawer__list-item--divider{% endif %}">
-            <details
-              id="Details-menu-drawer-localization"
-              class="menu-drawer__menu-container"
-            >
-              <summary
-                class="menu-drawer__menu-item menu-drawer__menu-item--mainlist menu-drawer__animated-element focus-inset"
-                on:click="header-drawer/open"
-              >
-                <span class="menu-drawer__menu-item-text">
-                  {{ localization.country.name }} &middot; {{ localization.country.currency.iso_code }}
+          <li class="menu-drawer__list-item drawer-region-item{% if block.settings.drawer_dividers %} menu-drawer__list-item--divider{% endif %}">
+            {%- form 'localization', id: 'mobile-drawer-localization-form' -%}
+              <div class="drawer-region-wrapper">
+                <span class="drawer-region-label">
+                  {{ localization.country.name }} &middot; {{ localization.country.currency.iso_code }} {{ localization.country.currency.symbol }}
                 </span>
-                <span class="svg-wrapper icon-caret icon-caret--forward">
-                  {{- 'icon-caret.svg' | inline_asset_content -}}
-                </span>
-              </summary>
-              <div
-                id="menu-drawer-localization-panel"
-                class="menu-drawer__submenu has-submenu gradient motion-reduce color-{{ settings.drawer_color_scheme }}"
-                tabindex="-1"
-              >
-                <div class="menu-drawer__nav-buttons">
-                  <button
-                    class="button menu-drawer__back-button focus-inset"
-                    aria-expanded="true"
-                    on:click="header-drawer/back"
-                  >
-                    <span class="svg-wrapper icon-caret icon-caret--backward">
-                      {{- 'icon-caret.svg' | inline_asset_content -}}
-                    </span>
-                    <span class="menu-drawer__menu-item-text">{{ localization.country.name }} &middot; {{ localization.country.currency.iso_code }}</span>
-                  </button>
-                  <button
-                    class="button menu-drawer__close-button"
-                    type="button"
-                    on:click="header-drawer/close"
-                    aria-label="{{ 'actions.close' | t }}"
-                  >
-                    <span class="svg-wrapper header-drawer-icon header-drawer-icon--close">
-                      {{- 'icon-close.svg' | inline_asset_content -}}
-                    </span>
-                  </button>
-                </div>
-                {%- form 'localization', id: 'mobile-drawer-localization-form' -%}
-                  <ul class="menu-drawer__menu menu-drawer__menu--childlist" role="list" tabindex="-1">
-                    {%- for country in localization.available_countries -%}
-                      <li class="menu-drawer__list-item">
-                        <button
-                          type="submit"
-                          name="country_code"
-                          value="{{ country.iso_code }}"
-                          class="menu-drawer__menu-item menu-drawer__menu-item--parent focus-inset{% if country.iso_code == localization.country.iso_code %} menu-drawer__menu-item--active{% endif %}"
-                        >
-                          <span class="menu-drawer__menu-item-text">{{ country.name }} &middot; {{ country.currency.iso_code }} {{ country.currency.symbol }}</span>
-                        </button>
-                      </li>
-                    {%- endfor -%}
-                  </ul>
-                {%- endform -%}
+                <select
+                  name="country_code"
+                  class="drawer-region-select"
+                  onchange="this.form.submit()"
+                  aria-label="Select region"
+                >
+                  {%- for country in localization.available_countries -%}
+                    <option
+                      value="{{ country.iso_code }}"
+                      {% if country.iso_code == localization.country.iso_code %}selected{% endif %}
+                    >{{ country.name }} &middot; {{ country.currency.iso_code }} {{ country.currency.symbol }}</option>
+                  {%- endfor -%}
+                </select>
               </div>
-            </details>
+            {%- endform -%}
           </li>
         {%- endif -%}
 
@@ -1080,6 +1040,39 @@
     margin-block: auto var(--padding-sm);
     margin-inline-start: var(--padding-xl);
     background-color: rgb(var(--color-foreground) 0.03);
+  }
+
+  /* Region/currency selector nav item */
+  .drawer-region-item {
+    min-height: calc(2 * var(--padding-lg) + var(--icon-size-xs));
+    display: flex;
+    align-items: center;
+  }
+
+  .drawer-region-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: inherit;
+  }
+
+  .drawer-region-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--color-foreground);
+    letter-spacing: 0.04em;
+    pointer-events: none;
+  }
+
+  .drawer-region-select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    font-size: 16px; /* prevents iOS auto-zoom */
   }
 
 
