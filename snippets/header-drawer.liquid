@@ -527,31 +527,77 @@
             {%- endfor -%}
           {% endif %}
         </ul>
+
+        {%- if data_header_drawer_type == 'mobile-drawer' and localization.available_countries.size > 1 -%}
+          <li class="menu-drawer__list-item{% if block.settings.drawer_dividers %} menu-drawer__list-item--divider{% endif %}">
+            <details
+              id="Details-menu-drawer-localization"
+              class="menu-drawer__menu-container"
+            >
+              <summary
+                class="menu-drawer__menu-item menu-drawer__menu-item--mainlist menu-drawer__animated-element focus-inset"
+                on:click="header-drawer/open"
+              >
+                <span class="menu-drawer__menu-item-text">
+                  {{ localization.country.name }} &middot; {{ localization.country.currency.iso_code }}
+                </span>
+                <span class="svg-wrapper icon-caret icon-caret--forward">
+                  {{- 'icon-caret.svg' | inline_asset_content -}}
+                </span>
+              </summary>
+              <div
+                id="menu-drawer-localization-panel"
+                class="menu-drawer__submenu has-submenu gradient motion-reduce color-{{ settings.drawer_color_scheme }}"
+                tabindex="-1"
+              >
+                <div class="menu-drawer__nav-buttons">
+                  <button
+                    class="button menu-drawer__back-button focus-inset"
+                    aria-expanded="true"
+                    on:click="header-drawer/back"
+                  >
+                    <span class="svg-wrapper icon-caret icon-caret--backward">
+                      {{- 'icon-caret.svg' | inline_asset_content -}}
+                    </span>
+                    <span class="menu-drawer__menu-item-text">{{ localization.country.name }} &middot; {{ localization.country.currency.iso_code }}</span>
+                  </button>
+                  <button
+                    class="button menu-drawer__close-button"
+                    type="button"
+                    on:click="header-drawer/close"
+                    aria-label="{{ 'actions.close' | t }}"
+                  >
+                    <span class="svg-wrapper header-drawer-icon header-drawer-icon--close">
+                      {{- 'icon-close.svg' | inline_asset_content -}}
+                    </span>
+                  </button>
+                </div>
+                {%- form 'localization', id: 'mobile-drawer-localization-form' -%}
+                  <ul class="menu-drawer__menu menu-drawer__menu--childlist" role="list" tabindex="-1">
+                    {%- for country in localization.available_countries -%}
+                      <li class="menu-drawer__list-item">
+                        <button
+                          type="submit"
+                          name="country_code"
+                          value="{{ country.iso_code }}"
+                          class="menu-drawer__menu-item menu-drawer__menu-item--parent focus-inset{% if country.iso_code == localization.country.iso_code %} menu-drawer__menu-item--active{% endif %}"
+                        >
+                          <span class="menu-drawer__menu-item-text">{{ country.name }} &middot; {{ country.currency.iso_code }} {{ country.currency.symbol }}</span>
+                        </button>
+                      </li>
+                    {%- endfor -%}
+                  </ul>
+                {%- endform -%}
+              </div>
+            </details>
+          </li>
+        {%- endif -%}
+
       </nav>
       <div
         class="menu-drawer__utility-links menu-drawer__animated-element"
         style="--menu-drawer-animation-index: {{ linklist.links.size }};"
       >
-        {% liquid
-          assign show_language = section.settings.show_language
-          if localization.available_languages.size <= 1
-            assign show_language = false
-          endif
-
-          assign show_country = false
-          if localization.available_countries.size > 1
-            assign show_country = true
-          endif
-        %}
-        {% if data_header_drawer_type == 'mobile-drawer' %}
-          {% render 'drawer-localization',
-            show_country: show_country,
-            show_language: show_language,
-            country_style: section.settings.country_selector_style
-          %}
-        {%- endif -%}
-
-
       </div>
 
       {% liquid
