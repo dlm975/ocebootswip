@@ -610,41 +610,6 @@
     }
   }
 
-  /* Mobile: show localization selector in the header bar */
-  @media screen and (max-width: 749px) {
-    .header__columns .dropdown-localization {
-      display: flex !important;
-      grid-area: leftB;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .header__columns .dropdown-localization__button {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      padding: 0;
-      font-size: 0.7rem;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      line-height: 1;
-    }
-
-    .header__columns .dropdown-localization .icon-flag {
-      width: 18px;
-      height: 18px;
-    }
-
-    .header__columns .dropdown-localization .icon-caret {
-      display: none;
-    }
-
-    .header__columns .localization-wrapper {
-      top: 100%;
-      left: 0;
-      right: auto;
-    }
-  }
 {% endstylesheet %}
 
 {% schema %}

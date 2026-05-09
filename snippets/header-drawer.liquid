@@ -538,12 +538,12 @@
             assign show_language = false
           endif
 
-          assign show_country = section.settings.show_country
-          if localization.available_countries.size <= 1
-            assign show_country = false
+          assign show_country = false
+          if localization.available_countries.size > 1
+            assign show_country = true
           endif
         %}
-        {% if data_header_drawer_type == 'mobile-drawer' and show_country or show_language %}
+        {% if data_header_drawer_type == 'mobile-drawer' %}
           {% render 'drawer-localization',
             show_country: show_country,
             show_language: show_language,
