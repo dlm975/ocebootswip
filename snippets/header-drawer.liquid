@@ -1048,17 +1048,20 @@
 
   /* Region/currency selector nav item */
   .drawer-region-item {
-    min-height: calc(2 * var(--padding-lg) + var(--icon-size-xs));
     display: flex;
     align-items: center;
+    min-height: auto;
+    padding-block: 6px;
   }
 
   .drawer-region-wrapper {
     position: relative;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    width: 100%;
-    min-height: inherit;
+    background: #ffffff;
+    border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    padding: 6px 12px;
   }
 
   .drawer-region-label {
@@ -1069,6 +1072,7 @@
     font-weight: 600;
     color: #111111;
     letter-spacing: 0.04em;
+    white-space: nowrap;
     pointer-events: none;
   }
 
