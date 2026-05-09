@@ -526,33 +526,33 @@
               </li>
             {%- endfor -%}
           {% endif %}
+
+          {%- if data_header_drawer_type == 'mobile-drawer' and localization.available_countries.size > 1 -%}
+            <li class="menu-drawer__list-item drawer-region-item{% if block.settings.drawer_dividers %} menu-drawer__list-item--divider{% endif %}">
+              {%- form 'localization', id: 'mobile-drawer-localization-form' -%}
+                <div class="drawer-region-wrapper">
+                  <span class="drawer-region-label">
+                    {{ localization.country.name }} &middot; {{ localization.country.currency.iso_code }} {{ localization.country.currency.symbol }}
+                  </span>
+                  <select
+                    name="country_code"
+                    class="drawer-region-select"
+                    onchange="this.form.submit()"
+                    aria-label="Select region"
+                  >
+                    {%- for country in localization.available_countries -%}
+                      <option
+                        value="{{ country.iso_code }}"
+                        {% if country.iso_code == localization.country.iso_code %}selected{% endif %}
+                      >{{ country.name }} &middot; {{ country.currency.iso_code }} {{ country.currency.symbol }}</option>
+                    {%- endfor -%}
+                  </select>
+                </div>
+              {%- endform -%}
+            </li>
+          {%- endif -%}
+
         </ul>
-
-        {%- if data_header_drawer_type == 'mobile-drawer' and localization.available_countries.size > 1 -%}
-          <li class="menu-drawer__list-item drawer-region-item{% if block.settings.drawer_dividers %} menu-drawer__list-item--divider{% endif %}">
-            {%- form 'localization', id: 'mobile-drawer-localization-form' -%}
-              <div class="drawer-region-wrapper">
-                <span class="drawer-region-label">
-                  {{ localization.country.name }} &middot; {{ localization.country.currency.iso_code }} {{ localization.country.currency.symbol }}
-                </span>
-                <select
-                  name="country_code"
-                  class="drawer-region-select"
-                  onchange="this.form.submit()"
-                  aria-label="Select region"
-                >
-                  {%- for country in localization.available_countries -%}
-                    <option
-                      value="{{ country.iso_code }}"
-                      {% if country.iso_code == localization.country.iso_code %}selected{% endif %}
-                    >{{ country.name }} &middot; {{ country.currency.iso_code }} {{ country.currency.symbol }}</option>
-                  {%- endfor -%}
-                </select>
-              </div>
-            {%- endform -%}
-          </li>
-        {%- endif -%}
-
       </nav>
       <div
         class="menu-drawer__utility-links menu-drawer__animated-element"
