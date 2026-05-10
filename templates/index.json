@@ -382,60 +382,6 @@
             "image": "shopify://shop_images/EPDM-Rubber-Granules-Crumb-Rubber-Infill-Material-for-Turf-Playground-Surfaces.jpg_300x300_ea1d0e4c-072c-4f5c-8a47-a74c9b1586a0.jpg"
           }
         },
-        "colourway_WyFiJx": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "AG",
-            "product": "nike-mercurial-vapor-16-elite-ag",
-            "bg_color": "#111111",
-            "name": ""
-          }
-        },
-        "colourway_rz4q3N": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "AG",
-            "product": "nike-mercurial-vapor-16-elite-ag-nikeid-231125",
-            "bg_color": "#111111",
-            "name": ""
-          }
-        },
-        "colourway_z7BQgF": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "AG",
-            "product": "nike-mercurial-vapor-16-elite-fg-nike-by-you-1",
-            "bg_color": "#111111",
-            "name": ""
-          }
-        },
-        "colourway_iiiJwC": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "AG",
-            "product": "nike-mercurial-vapor-16-elite-ag-nike-by-you",
-            "bg_color": "#111111",
-            "name": ""
-          }
-        },
-        "colourway_UQFwg6": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "SG",
-            "product": "nike-mercurial-vapor-16-elite-sg-pro-pro-020326",
-            "bg_color": "#111111",
-            "name": ""
-          }
-        },
-        "colourway_PKUiXx": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "SG",
-            "product": "nike-mercurial-vapor-16-elite-sg-pro-oly-011125",
-            "bg_color": "#111111",
-            "name": ""
-          }
-        },
         "colourway_jnnzkR": {
           "type": "colourway",
           "settings": {
@@ -531,6 +477,60 @@
           "settings": {
             "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg-olympics",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
+        "colourway_UQFwg6": {
+          "type": "colourway",
+          "settings": {
+            "soleplate": "SG",
+            "product": "nike-mercurial-vapor-16-elite-sg-pro-pro-020326",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
+        "colourway_PKUiXx": {
+          "type": "colourway",
+          "settings": {
+            "soleplate": "SG",
+            "product": "nike-mercurial-vapor-16-elite-sg-pro-oly-011125",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
+        "colourway_WyFiJx": {
+          "type": "colourway",
+          "settings": {
+            "soleplate": "AG",
+            "product": "nike-mercurial-vapor-16-elite-ag",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
+        "colourway_rz4q3N": {
+          "type": "colourway",
+          "settings": {
+            "soleplate": "AG",
+            "product": "nike-mercurial-vapor-16-elite-ag-nikeid-231125",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
+        "colourway_z7BQgF": {
+          "type": "colourway",
+          "settings": {
+            "soleplate": "AG",
+            "product": "nike-mercurial-vapor-16-elite-fg-nike-by-you-1",
+            "bg_color": "#111111",
+            "name": ""
+          }
+        },
+        "colourway_iiiJwC": {
+          "type": "colourway",
+          "settings": {
+            "soleplate": "AG",
+            "product": "nike-mercurial-vapor-16-elite-ag-nike-by-you",
             "bg_color": "#111111",
             "name": ""
           }
