@@ -4,7 +4,6 @@
 
   if first_block != blank
     assign first_product = first_block.settings.product
-    assign initial_bg = first_block.settings.bg_color | default: '#111111'
 
     if first_block.settings.image != blank
       assign first_hero = first_block.settings.image | image_url: width: 1200
@@ -25,8 +24,30 @@
   id="ps-outer-{{ section.id }}"
   data-ps
   data-buy-label="{{ section.settings.buy_label | default: 'Add to Cart' | escape }}"
-  style="background-color: {{ initial_bg | default: '#111' }}; {% render 'spacing-style', settings: section.settings %}"
+  style="{% render 'spacing-style', settings: section.settings %}"
 >
+
+  {%- if section.settings.bg_image_landscape != blank or section.settings.bg_image_portrait != blank -%}
+    <div class="ps__bg" aria-hidden="true">
+      <picture>
+        {%- if section.settings.bg_image_portrait != blank -%}
+          <source
+            media="(max-width: 749px)"
+            srcset="{{ section.settings.bg_image_portrait | image_url: width: 900 }}"
+          >
+        {%- endif -%}
+        <img
+          src="{{ section.settings.bg_image_landscape | default: section.settings.bg_image_portrait | image_url: width: 1800 }}"
+          alt=""
+          loading="lazy"
+          width="1800"
+          height="1200"
+        >
+      </picture>
+      <div class="ps__bg-overlay"></div>
+    </div>
+  {%- endif -%}
+
   <div class="ps-inner">
 
     <!-- ── Title spanning full width at top ── -->
@@ -103,7 +124,6 @@
               data-ps-thumb
               data-idx="{{ forloop.index0 }}"
               data-img="{{ cw_hero }}"
-              data-bg="{{ block.settings.bg_color | default: initial_bg }}"
               data-name="{{ cw_name | escape }}"
               data-soleplate="{{ cw_soleplate | escape }}"
               aria-label="{{ cw_name | escape }}"
@@ -214,19 +234,43 @@
 {% stylesheet %}
   /* ── Outer card shell ── */
   .ps-outer {
+    position: relative;
     margin-inline: 16px;
     margin-bottom: 32px;
     border-radius: 20px;
     overflow: hidden;
+    background: #111;
     box-shadow: 0 12px 48px rgba(0,0,0,0.28), 0 2px 10px rgba(0,0,0,0.14);
-    transition: background-color 0.45s ease;
   }
 
   @media screen and (min-width: 750px) {
     .ps-outer { margin-inline: 40px; }
   }
 
+  /* ── Background image + overlay ── */
+  .ps__bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .ps__bg picture,
+  .ps__bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .ps__bg-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.58);
+  }
+
   .ps-inner {
+    position: relative;
+    z-index: 1;
     padding-inline: 20px;
     padding-top: 24px;
     padding-bottom: 28px;
@@ -727,7 +771,6 @@
     function selectColourway(thumb, skipSizeReset) {
       var idx    = parseInt(thumb.dataset.idx);
       var newImg = thumb.dataset.img;
-      var newBg  = thumb.dataset.bg;
 
       thumbs.forEach(function (t) {
         t.classList.remove('ps__thumb--active');
@@ -745,8 +788,6 @@
           if (heroImg.complete) heroImg.classList.remove('ps-fade');
         }, 130);
       }
-
-      if (newBg) wrap.style.backgroundColor = newBg;
 
       updateBuyUrl();
     }
@@ -805,6 +846,22 @@
     },
     {
       "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "image_picker",
+      "id": "bg_image_landscape",
+      "label": "Background image — landscape (desktop)",
+      "info": "Recommended: wide crop, at least 1600px wide"
+    },
+    {
+      "type": "image_picker",
+      "id": "bg_image_portrait",
+      "label": "Background image — portrait (mobile)",
+      "info": "Recommended: tall crop, at least 900px wide"
+    },
+    {
+      "type": "header",
       "content": "Padding"
     },
     {
@@ -854,12 +911,6 @@
           "id": "product",
           "label": "Product",
           "info": "Sizes and buy URL are pulled automatically from this product's variants"
-        },
-        {
-          "type": "color",
-          "id": "bg_color",
-          "label": "Background colour",
-          "default": "#111111"
         },
         {
           "type": "image_picker",
