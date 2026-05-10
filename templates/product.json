@@ -177,7 +177,7 @@
               "type": "product-urgency-stock",
               "settings": {
                 "threshold": 5,
-                "dot_color": "red",
+                "dot_color": "orange",
                 "padding-block-start": 0,
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
