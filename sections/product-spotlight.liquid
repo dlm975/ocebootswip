@@ -531,7 +531,7 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      padding: 14px 14px 14px;
+      padding: 14px;
     }
 
     .ps__header {
@@ -542,42 +542,39 @@
     .ps__title { font-size: 1.1rem; margin-bottom: 2px; }
     .ps__subtitle { font-size: 0.7rem; }
 
+    /* Flatten .ps__right so its children become direct grid children */
+    .ps__right { display: contents; }
+
     .ps__layout {
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
       flex: 1;
       min-height: 0;
+      grid-template-columns: 1fr auto;
+      grid-template-rows: 1fr auto auto auto;
+      grid-template-areas:
+        "left    soleplate"
+        "sizes   sizes"
+        "thumbs  thumbs"
+        "buy     buy";
+      gap: 8px;
       align-items: stretch;
     }
 
-    /* Hero fills the full left column height */
-    .ps__left { min-height: 0; }
+    /* Place each child in its named area */
+    .ps__left          { grid-area: left; min-height: 0; }
+    .ps__soleplate-row { grid-area: soleplate; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .ps__size-row      { grid-area: sizes; gap: 4px; }
+    .ps__thumbs        { grid-area: thumbs; gap: 4px; }
+    .ps__cart-form     { grid-area: buy; }
 
-    .ps__hero-wrap {
-      aspect-ratio: unset;
-      height: 100%;
-      border-radius: 10px;
-    }
+    .ps__hero-wrap { aspect-ratio: unset; height: 100%; border-radius: 10px; }
 
-    /* Right column distributes controls top-to-bottom */
-    .ps__right {
-      gap: 0;
-      padding-top: 0;
-      justify-content: space-between;
-      min-height: 0;
-    }
+    .ps__soleplate-btns { flex-direction: column; flex-wrap: nowrap; gap: 5px; }
+    .ps__soleplate-label { font-size: 0.55rem; }
+    .ps__soleplate-btn { width: 36px; height: 36px; }
+    .ps__soleplate-btn__label { font-size: 0.48rem; }
 
-    .ps__soleplate-row { gap: 4px; }
-    .ps__soleplate-btns { gap: 5px; }
-    .ps__soleplate-label { font-size: 0.58rem; }
-    .ps__soleplate-btn { width: 38px; height: 38px; }
-    .ps__soleplate-btn__label { font-size: 0.5rem; }
-
-    .ps__thumbs { gap: 4px; }
-
-    .ps__size-row { gap: 4px; }
     .ps__size-label { font-size: 0.58rem; }
-    .ps__size-grid { grid-template-columns: repeat(3, 1fr); gap: 4px; }
+    .ps__size-grid { grid-template-columns: repeat(4, 1fr); gap: 4px; }
     .ps__size-btn { padding: 5px 2px; font-size: 0.6rem; border-radius: 6px; }
 
     .ps__buy-btn { padding: 11px 10px; font-size: 0.82rem; border-radius: 10px; gap: 6px; }
