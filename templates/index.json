@@ -387,7 +387,6 @@
           "settings": {
             "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg-blueprint-1",
-            "bg_color": "#111111",
             "name": ""
           }
         },
@@ -396,7 +395,6 @@
           "settings": {
             "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg",
-            "bg_color": "#111111",
             "name": ""
           }
         },
@@ -405,7 +403,6 @@
           "settings": {
             "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg-1",
-            "bg_color": "#111111",
             "name": ""
           }
         },
@@ -414,7 +411,6 @@
           "settings": {
             "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg-3",
-            "bg_color": "#111111",
             "name": ""
           }
         },
@@ -423,7 +419,6 @@
           "settings": {
             "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg-4",
-            "bg_color": "#111111",
             "name": ""
           }
         },
@@ -432,7 +427,6 @@
           "settings": {
             "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg-020326",
-            "bg_color": "#111111",
             "name": ""
           }
         },
@@ -441,7 +435,6 @@
           "settings": {
             "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg-km",
-            "bg_color": "#111111",
             "name": ""
           }
         },
@@ -450,7 +443,6 @@
           "settings": {
             "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg-lv8",
-            "bg_color": "#111111",
             "name": ""
           }
         },
@@ -459,7 +451,6 @@
           "settings": {
             "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg-vini-fly-070925",
-            "bg_color": "#111111",
             "name": ""
           }
         },
@@ -468,7 +459,6 @@
           "settings": {
             "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg-nike-by-you",
-            "bg_color": "#111111",
             "name": ""
           }
         },
@@ -477,7 +467,6 @@
           "settings": {
             "soleplate": "FG",
             "product": "nike-mercurial-vapor-16-elite-fg-olympics",
-            "bg_color": "#111111",
             "name": ""
           }
         },
@@ -486,7 +475,6 @@
           "settings": {
             "soleplate": "SG",
             "product": "nike-mercurial-vapor-16-elite-sg-pro-pro-020326",
-            "bg_color": "#111111",
             "name": ""
           }
         },
@@ -495,7 +483,6 @@
           "settings": {
             "soleplate": "SG",
             "product": "nike-mercurial-vapor-16-elite-sg-pro-oly-011125",
-            "bg_color": "#111111",
             "name": ""
           }
         },
@@ -504,7 +491,6 @@
           "settings": {
             "soleplate": "AG",
             "product": "nike-mercurial-vapor-16-elite-ag",
-            "bg_color": "#111111",
             "name": ""
           }
         },
@@ -513,7 +499,6 @@
           "settings": {
             "soleplate": "AG",
             "product": "nike-mercurial-vapor-16-elite-ag-nikeid-231125",
-            "bg_color": "#111111",
             "name": ""
           }
         },
@@ -522,7 +507,6 @@
           "settings": {
             "soleplate": "AG",
             "product": "nike-mercurial-vapor-16-elite-fg-nike-by-you-1",
-            "bg_color": "#111111",
             "name": ""
           }
         },
@@ -531,7 +515,6 @@
           "settings": {
             "soleplate": "AG",
             "product": "nike-mercurial-vapor-16-elite-ag-nike-by-you",
-            "bg_color": "#111111",
             "name": ""
           }
         }
@@ -564,6 +547,8 @@
         "subtitle": "",
         "size_label": "Size",
         "buy_label": "Add To Cart",
+        "bg_image_landscape": "shopify://shop_images/IMG_8004_c6f9b93e-3b43-465d-91bf-149470f3816a.jpg",
+        "bg_image_portrait": "shopify://shop_images/IMG_8004.jpg",
         "padding-block-start": 60,
         "padding-block-end": 60
       }
