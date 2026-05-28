@@ -1,0 +1,487 @@
+{%- liquid
+  assign heading    = section.settings.heading
+  assign subheading = section.settings.subheading
+  assign cols       = section.settings.columns | default: 3
+-%}
+
+<div
+  class="cc-section"
+  id="cc-{{ section.id }}"
+  style="{% render 'spacing-style', settings: section.settings %}"
+>
+
+  {%- if heading != blank or subheading != blank -%}
+    <div class="cc-header">
+      <div class="cc-header__text">
+        {%- if heading != blank -%}
+          <h2 class="cc-header__title">{{ heading }}</h2>
+        {%- endif -%}
+        {%- if subheading != blank -%}
+          <p class="cc-header__sub">{{ subheading }}</p>
+        {%- endif -%}
+      </div>
+      <div class="cc-header__nav" id="cc-nav-{{ section.id }}">
+        <button class="cc-arrow cc-arrow--prev" id="cc-prev-{{ section.id }}" aria-label="Previous" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="cc-arrow cc-arrow--next" id="cc-next-{{ section.id }}" aria-label="Next">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  {%- endif -%}
+
+  <div
+    class="cc-track"
+    id="cc-track-{{ section.id }}"
+    style="--cc-cols: {{ cols }}; --cc-aspect: {{ section.settings.card_aspect_ratio | default: '3/4' }};"
+  >
+    {%- for block in section.blocks -%}
+      {%- assign img      = block.settings.image -%}
+      {%- assign title    = block.settings.title -%}
+      {%- assign sub      = block.settings.subtitle -%}
+      {%- assign link     = block.settings.link -%}
+      {%- assign cta      = block.settings.cta_label -%}
+
+      <div class="cc-card" {{ block.shopify_attributes }}>
+        {%- if link != blank -%}
+          <a href="{{ link }}" class="cc-card__inner" aria-label="{{ title | escape }}">
+        {%- else -%}
+          <div class="cc-card__inner">
+        {%- endif -%}
+
+          <div class="cc-card__media">
+            {%- if img != blank -%}
+              <img
+                class="cc-card__img"
+                src="{{ img | image_url: width: 800 }}"
+                srcset="
+                  {{ img | image_url: width: 400 }} 400w,
+                  {{ img | image_url: width: 800 }} 800w,
+                  {{ img | image_url: width: 1200 }} 1200w
+                "
+                sizes="(max-width: 749px) 75vw, (max-width: 1199px) calc(100vw / {{ cols }}), calc(100vw / {{ cols }})"
+                alt="{{ title | escape }}"
+                loading="lazy"
+                width="800"
+                height="1067"
+              >
+            {%- else -%}
+              <div class="cc-card__placeholder">
+                {{ 'collection-1' | placeholder_svg_tag: 'cc-placeholder-svg' }}
+              </div>
+            {%- endif -%}
+            <div class="cc-card__overlay"></div>
+          </div>
+
+          {%- if title != blank or sub != blank or cta != blank -%}
+            <div class="cc-card__body">
+              {%- if title != blank -%}
+                <span class="cc-card__title">{{ title }}</span>
+              {%- endif -%}
+              {%- if sub != blank -%}
+                <span class="cc-card__sub">{{ sub }}</span>
+              {%- endif -%}
+              {%- if cta != blank -%}
+                <span class="cc-card__cta">{{ cta }}</span>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+
+        {%- if link != blank -%}
+          </a>
+        {%- else -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+    {%- else -%}
+      {%- comment -%} Placeholder cards in editor when no blocks added {%- endcomment -%}
+      {%- for i in (1..3) -%}
+        <div class="cc-card cc-card--empty">
+          <div class="cc-card__inner">
+            <div class="cc-card__media">
+              <div class="cc-card__placeholder">
+                {{ 'collection-1' | placeholder_svg_tag: 'cc-placeholder-svg' }}
+              </div>
+              <div class="cc-card__overlay"></div>
+            </div>
+            <div class="cc-card__body">
+              <span class="cc-card__title">Collection {{ i }}</span>
+            </div>
+          </div>
+        </div>
+      {%- endfor -%}
+    {%- endfor -%}
+  </div>
+
+</div>
+
+{% stylesheet %}
+  /* ── Section wrapper ── */
+  .cc-section {
+    padding-block: 48px;
+    overflow: hidden;
+  }
+
+  /* ── Header ── */
+  .cc-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    padding-inline: 20px;
+    margin-bottom: 20px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .cc-header {
+      padding-inline: 40px;
+      margin-bottom: 28px;
+    }
+  }
+
+  .cc-header__title {
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    font-weight: 800;
+    margin: 0 0 4px;
+    line-height: 1.1;
+  }
+
+  .cc-header__sub {
+    font-size: 0.9rem;
+    opacity: 0.55;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* Arrow buttons in header */
+  .cc-header__nav {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .cc-arrow {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0, 0, 0, 0.14);
+    background: #fff;
+    color: #111;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: background 0.15s, box-shadow 0.15s, transform 0.15s;
+    flex-shrink: 0;
+  }
+
+  .cc-arrow svg { width: 18px; height: 18px; pointer-events: none; }
+
+  .cc-arrow:hover:not(:disabled) {
+    background: #f2f2f2;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.13);
+    transform: scale(1.06);
+  }
+
+  .cc-arrow:disabled {
+    opacity: 0.3;
+    cursor: default;
+    box-shadow: none;
+  }
+
+  /* ── Scrollable track ── */
+  .cc-track {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding-inline: 20px;
+    /* allow last card shadow to be visible */
+    padding-bottom: 8px;
+  }
+
+  .cc-track::-webkit-scrollbar { display: none; }
+
+  @media screen and (min-width: 750px) {
+    .cc-track {
+      gap: 16px;
+      padding-inline: 40px;
+    }
+  }
+
+  /* ── Cards ── */
+  .cc-card {
+    flex: 0 0 clamp(220px, 72vw, 300px);
+    scroll-snap-align: start;
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  @media screen and (min-width: 750px) {
+    .cc-card {
+      /* fit exactly --cc-cols cards within the track content width */
+      flex: 0 0 calc((100vw - 80px - 16px * (var(--cc-cols, 3) - 1)) / var(--cc-cols, 3));
+      border-radius: 20px;
+    }
+  }
+
+  .cc-card__inner {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+  }
+
+  /* Media box — aspect ratio driven by CSS var */
+  .cc-card__media {
+    position: relative;
+    aspect-ratio: var(--cc-aspect, 3/4);
+    overflow: hidden;
+    background: #1c1c1c;
+  }
+
+  .cc-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .cc-card__inner:hover .cc-card__img {
+    transform: scale(1.05);
+  }
+
+  .cc-card__placeholder {
+    width: 100%;
+    height: 100%;
+    background: #e8e8e8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cc-placeholder-svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.25;
+  }
+
+  /* Gradient overlay */
+  .cc-card__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.78) 0%,
+      rgba(0, 0, 0, 0.3) 42%,
+      rgba(0, 0, 0, 0) 70%
+    );
+    pointer-events: none;
+  }
+
+  /* Text content pinned to card bottom */
+  .cc-card__body {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 22px 18px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    pointer-events: none;
+  }
+
+  .cc-card__title {
+    display: block;
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  .cc-card__sub {
+    display: block;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+
+  .cc-card__cta {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 7px 18px;
+    background: #fff;
+    color: #111;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    width: fit-content;
+    pointer-events: auto;
+  }
+{% endstylesheet %}
+
+<script>
+  (function () {
+    var sid   = {{ section.id | json }};
+    var track = document.getElementById('cc-track-' + sid);
+    var prev  = document.getElementById('cc-prev-' + sid);
+    var next  = document.getElementById('cc-next-' + sid);
+
+    if (!track) return;
+
+    function cardStep() {
+      var card = track.querySelector('.cc-card');
+      if (!card) return 300;
+      var gap = parseInt(getComputedStyle(track).gap) || 16;
+      return card.offsetWidth + gap;
+    }
+
+    function sync() {
+      if (!prev || !next) return;
+      var atStart = track.scrollLeft <= 2;
+      var atEnd   = track.scrollLeft >= track.scrollWidth - track.clientWidth - 2;
+      prev.disabled = atStart;
+      next.disabled = atEnd;
+    }
+
+    if (prev) prev.addEventListener('click', function () {
+      track.scrollBy({ left: -cardStep(), behavior: 'smooth' });
+    });
+
+    if (next) next.addEventListener('click', function () {
+      track.scrollBy({ left: cardStep(), behavior: 'smooth' });
+    });
+
+    track.addEventListener('scroll', sync, { passive: true });
+    window.addEventListener('resize', sync, { passive: true });
+    sync();
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Collection Carousel",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Title",
+      "default": "Shop by Collection"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "columns",
+      "label": "Cards visible (desktop)",
+      "options": [
+        { "value": "2", "label": "2" },
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" }
+      ],
+      "default": "3"
+    },
+    {
+      "type": "select",
+      "id": "card_aspect_ratio",
+      "label": "Card aspect ratio",
+      "options": [
+        { "value": "1/1",  "label": "Square (1:1)" },
+        { "value": "3/4",  "label": "Portrait (3:4)" },
+        { "value": "2/3",  "label": "Tall portrait (2:3)" },
+        { "value": "4/3",  "label": "Landscape (4:3)" }
+      ],
+      "default": "3/4"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Card",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Collection Name"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtitle",
+          "info": "Short description or tagline"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "Button label",
+          "info": "Leave blank to hide the button",
+          "default": "Shop Now"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection Carousel",
+      "blocks": [
+        { "type": "card" },
+        { "type": "card" },
+        { "type": "card" },
+        { "type": "card" }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  }
+}
+{% endschema %}
