@@ -1,0 +1,151 @@
+{%- liquid
+  assign banner_img    = section.settings.image
+  assign fallback_img  = collection.image
+  assign use_img       = banner_img | default: fallback_img
+  assign show_title    = section.settings.show_title
+  assign overlay_alpha = section.settings.overlay_opacity | times: 0.01
+  assign height        = section.settings.height | default: 380
+-%}
+
+<div
+  class="cpb-section"
+  style="--cpb-height: {{ height }}px;"
+>
+  <div class="cpb-media">
+    {%- if use_img != blank -%}
+      <img
+        class="cpb-img"
+        src="{{ use_img | image_url: width: 2000 }}"
+        srcset="
+          {{ use_img | image_url: width: 900  }} 900w,
+          {{ use_img | image_url: width: 1400 }} 1400w,
+          {{ use_img | image_url: width: 2000 }} 2000w
+        "
+        sizes="100vw"
+        alt="{{ collection.title | escape }}"
+        loading="eager"
+        fetchpriority="high"
+        width="2000"
+        height="800"
+      >
+    {%- else -%}
+      <div class="cpb-placeholder"></div>
+    {%- endif -%}
+    <div class="cpb-overlay" style="background: rgba(0,0,0,{{ overlay_alpha | round: 2 }});"></div>
+  </div>
+
+  {%- if show_title -%}
+    <div class="cpb-content">
+      <h1 class="cpb-title">{{ collection.title }}</h1>
+      {%- if collection.description != blank -%}
+        <p class="cpb-desc">{{ collection.description | strip_html | truncate: 180 }}</p>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+  .cpb-section {
+    position: relative;
+    height: var(--cpb-height, 380px);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cpb-media {
+    position: absolute;
+    inset: 0;
+  }
+
+  .cpb-img,
+  .cpb-placeholder {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .cpb-img { object-fit: cover; }
+  .cpb-placeholder { background: #1a1a1a; }
+
+  .cpb-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .cpb-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding-inline: 24px;
+    max-width: 760px;
+  }
+
+  .cpb-title {
+    color: #fff;
+    font-size: clamp(1.8rem, 5vw, 3.8rem);
+    font-weight: 800;
+    margin: 0 0 10px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.35);
+  }
+
+  .cpb-desc {
+    color: rgba(255,255,255,0.75);
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    margin: 0;
+    line-height: 1.55;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Collection Banner",
+  "tag": "section",
+  "enabled_on": {
+    "templates": ["collection"]
+  },
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Banner image",
+      "info": "Falls back to the collection's own image if blank"
+    },
+    {
+      "type": "range",
+      "id": "height",
+      "label": "Banner height",
+      "min": 160,
+      "max": 700,
+      "step": 10,
+      "unit": "px",
+      "default": 380
+    },
+    {
+      "type": "checkbox",
+      "id": "show_title",
+      "label": "Show collection title",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay darkness",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 35
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection Banner"
+    }
+  ]
+}
+{% endschema %}
