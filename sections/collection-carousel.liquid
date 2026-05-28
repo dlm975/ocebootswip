@@ -452,7 +452,7 @@
     /* Ignore non-primary mouse buttons and button/link targets
        so arrow clicks and card links are never swallowed */
     if (e.button !== 0 && e.pointerType === 'mouse') return;
-    if (e.target.closest('button, a')) return;
+    if (e.target.closest('button')) return;
 
     dragging   = true;
     wasDragged = false;
