@@ -562,7 +562,7 @@
             "image": "shopify://shop_images/8939b6d73f7ce255d6eb69a866906861.jpg",
             "title": "Neymar Jr",
             "subtitle": "",
-            "link": "",
+            "link": "shopify://collections/neymar-jr",
             "cta_label": "Shop Now"
           }
         },
@@ -572,7 +572,7 @@
             "image": "shopify://shop_images/SnapInsta.to_660307150_18721519762056421_301077248123342423_n.jpg",
             "title": "CR7",
             "subtitle": "",
-            "link": "",
+            "link": "shopify://collections/cr7",
             "cta_label": "Shop Now"
           }
         },
@@ -582,17 +582,7 @@
             "image": "shopify://shop_images/adidas-messi-f50-triunfo-dorado-boots_6.jpg",
             "title": "Messi",
             "subtitle": "",
-            "link": "",
-            "cta_label": "Shop Now"
-          }
-        },
-        "card_3HVjxU": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/images_voltaxMediaLibrary_mmsport_90min_en_international_web_01k4ajkbnh9t405hewvm.webp",
-            "title": "Pogba",
-            "subtitle": "",
-            "link": "",
+            "link": "shopify://collections/messi-1",
             "cta_label": "Shop Now"
           }
         },
@@ -602,7 +592,17 @@
             "image": "shopify://shop_images/SnapInsta.to_654969911_18568562623057038_5230344121947742236_n.jpg",
             "title": "Olise",
             "subtitle": "",
-            "link": "",
+            "link": "shopify://collections/olise",
+            "cta_label": "Shop Now"
+          }
+        },
+        "card_3HVjxU": {
+          "type": "card",
+          "settings": {
+            "image": "shopify://shop_images/images_voltaxMediaLibrary_mmsport_90min_en_international_web_01k4ajkbnh9t405hewvm.webp",
+            "title": "Pogba",
+            "subtitle": "",
+            "link": "shopify://collections/pogba",
             "cta_label": "Shop Now"
           }
         }
@@ -611,8 +611,8 @@
         "card_pDEAYF",
         "card_8At9nm",
         "card_774Te6",
-        "card_3HVjxU",
-        "card_KPqQN6"
+        "card_KPqQN6",
+        "card_3HVjxU"
       ],
       "name": "Collection Carousel",
       "settings": {
