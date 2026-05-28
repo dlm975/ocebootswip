@@ -102,6 +102,7 @@
     pointer-events: auto;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(14px) brightness(0.5);
+    touch-action: none;
   }
 
   .mkt-panel {
@@ -161,7 +162,8 @@
   .mkt-scroller {
     flex: 1;
     min-height: 0;
-    overflow-y: auto;
+    overflow-y: scroll;
+    touch-action: pan-y;
     padding: 12px 12px 16px;
     display: flex;
     flex-direction: column;
@@ -285,33 +287,15 @@
     var overlay    = document.getElementById('mkt-overlay');
     var closeBtn   = document.getElementById('mkt-close');
 
-    var savedScrollY = 0;
-
-    function lockScroll() {
-      savedScrollY = window.scrollY;
-      document.body.style.position = 'fixed';
-      document.body.style.top = '-' + savedScrollY + 'px';
-      document.body.style.width = '100%';
-    }
-
-    function unlockScroll() {
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      window.scrollTo(0, savedScrollY);
-    }
-
     function open() {
       overlay.classList.add('mkt-open');
       overlay.setAttribute('aria-hidden', 'false');
-      lockScroll();
     }
 
     function close() {
       localStorage.setItem(STORAGE_KEY, '1');
       overlay.classList.remove('mkt-open');
       overlay.setAttribute('aria-hidden', 'true');
-      unlockScroll();
     }
 
     /* Save confirmed state when any country row is clicked */
