@@ -1,7 +1,5 @@
 {%- liquid
-  assign banner_img    = section.settings.image
-  assign fallback_img  = collection.image
-  assign use_img       = banner_img | default: fallback_img
+  assign use_img       = collection.image | default: section.settings.image
   assign show_title    = section.settings.show_title
   assign overlay_alpha = section.settings.overlay_opacity | times: 0.01
   assign height        = section.settings.height | default: 380
@@ -112,8 +110,8 @@
     {
       "type": "image_picker",
       "id": "image",
-      "label": "Banner image",
-      "info": "Falls back to the collection's own image if blank"
+      "label": "Fallback banner image",
+      "info": "Used only when a collection has no image set. Set each collection's image in Shopify admin (Collections → [Collection] → Collection image)."
     },
     {
       "type": "range",
