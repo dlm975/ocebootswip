@@ -7,6 +7,7 @@
   assign show_title    = section.settings.show_title
 -%}
 
+<div class="cpb-outer">
 <div
   class="cpb-section"
   style="--cpb-height: {{ height }}px;"
@@ -49,8 +50,13 @@
     </div>
   {%- endif -%}
 </div>
+</div>
 
 {% stylesheet %}
+  .cpb-outer {
+    padding: 16px 16px 0;
+  }
+
   .cpb-section {
     position: relative;
     height: var(--cpb-height, 380px);
@@ -58,11 +64,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28), 0 2px 8px rgba(0, 0, 0, 0.16);
   }
 
   @media screen and (max-width: 749px) {
+    .cpb-outer {
+      padding: 10px 10px 0;
+    }
     .cpb-section {
       height: calc(var(--cpb-height, 380px) / 2);
+      border-radius: 12px;
     }
   }
 
