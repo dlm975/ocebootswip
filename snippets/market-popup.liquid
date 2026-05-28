@@ -288,15 +288,20 @@
     function open() {
       overlay.classList.add('mkt-open');
       overlay.setAttribute('aria-hidden', 'false');
-      document.body.style.overflow = 'hidden';
     }
 
     function close() {
       localStorage.setItem(STORAGE_KEY, '1');
       overlay.classList.remove('mkt-open');
       overlay.setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = '';
     }
+
+    /* Prevent background page scroll while popup is open without locking body,
+       which blocks fixed-element scroll on iOS Safari */
+    overlay.addEventListener('touchmove', function(e) {
+      if (!overlay.classList.contains('mkt-open')) return;
+      if (!e.target.closest('#mkt-scroller')) e.preventDefault();
+    }, { passive: false });
 
     /* Save confirmed state when any country row is clicked */
     overlay.querySelectorAll('.mkt-row').forEach(function (btn) {
