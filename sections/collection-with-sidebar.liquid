@@ -113,13 +113,14 @@
 </div>
 
 {% style %}
-  /* Force 2-column product grid regardless of card-size setting */
-  .product-grid--{{ section.id }}:is(.product-grid--grid):not([product-grid-view='zoom-out']) {
-    --product-grid-columns-desktop: repeat(2, 1fr) !important;
-  }
   @media screen and (max-width: 749px) {
     .product-grid--{{ section.id }}:not([product-grid-view='mobile-single']) {
       grid-template-columns: repeat(2, 1fr) !important;
+    }
+  }
+  @media screen and (min-width: 750px) {
+    .product-grid--{{ section.id }}:is(.product-grid--grid):not([product-grid-view='zoom-out']) {
+      --product-grid-columns-desktop: repeat(6, 1fr) !important;
     }
   }
 {% endstyle %}
