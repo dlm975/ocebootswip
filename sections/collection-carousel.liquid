@@ -1,7 +1,12 @@
 {%- liquid
   assign heading    = section.settings.heading
   assign subheading = section.settings.subheading
-  assign cols       = section.settings.columns | default: 3
+
+  assign ratio_str  = section.settings.card_aspect_ratio | default: '3/4'
+  assign rparts     = ratio_str | split: '/'
+  assign r_w        = rparts[0] | times: 1.0
+  assign r_h        = rparts[1] | times: 1.0
+  assign r_mult     = r_h | divided_by: r_w
 -%}
 
 <div
@@ -12,7 +17,7 @@
 
   {%- if heading != blank or subheading != blank -%}
     <div class="cc-header">
-      <div class="cc-header__text">
+      <div>
         {%- if heading != blank -%}
           <h2 class="cc-header__title">{{ heading }}</h2>
         {%- endif -%}
@@ -20,85 +25,26 @@
           <p class="cc-header__sub">{{ subheading }}</p>
         {%- endif -%}
       </div>
-      <div class="cc-header__nav" id="cc-nav-{{ section.id }}">
-        <button class="cc-arrow cc-arrow--prev" id="cc-prev-{{ section.id }}" aria-label="Previous" disabled>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>
-        <button class="cc-arrow cc-arrow--next" id="cc-next-{{ section.id }}" aria-label="Next">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-      </div>
     </div>
   {%- endif -%}
 
   <div
-    class="cc-track"
-    id="cc-track-{{ section.id }}"
-    style="--cc-cols: {{ cols }}; --cc-aspect: {{ section.settings.card_aspect_ratio | default: '3/4' }};"
+    class="cc-stage"
+    id="cc-stage-{{ section.id }}"
+    style="--cc-ratio: {{ r_mult | round: 4 }};"
   >
-    {%- for block in section.blocks -%}
-      {%- assign img      = block.settings.image -%}
-      {%- assign title    = block.settings.title -%}
-      {%- assign sub      = block.settings.subtitle -%}
-      {%- assign link     = block.settings.link -%}
-      {%- assign cta      = block.settings.cta_label -%}
+    <!-- Sentinel drives stage height without JS -->
+    <div class="cc-sentinel" aria-hidden="true"></div>
 
-      <div class="cc-card" {{ block.shopify_attributes }}>
-        {%- if link != blank -%}
-          <a href="{{ link }}" class="cc-card__inner" aria-label="{{ title | escape }}">
-        {%- else -%}
-          <div class="cc-card__inner">
-        {%- endif -%}
+    <!-- Cards -->
+    {%- assign blocks = section.blocks -%}
+    {%- if blocks.size == 0 -%}
+      {%- assign placeholder = true -%}
+    {%- endif -%}
 
-          <div class="cc-card__media">
-            {%- if img != blank -%}
-              <img
-                class="cc-card__img"
-                src="{{ img | image_url: width: 800 }}"
-                srcset="
-                  {{ img | image_url: width: 400 }} 400w,
-                  {{ img | image_url: width: 800 }} 800w,
-                  {{ img | image_url: width: 1200 }} 1200w
-                "
-                sizes="(max-width: 749px) 75vw, (max-width: 1199px) calc(100vw / {{ cols }}), calc(100vw / {{ cols }})"
-                alt="{{ title | escape }}"
-                loading="lazy"
-                width="800"
-                height="1067"
-              >
-            {%- else -%}
-              <div class="cc-card__placeholder">
-                {{ 'collection-1' | placeholder_svg_tag: 'cc-placeholder-svg' }}
-              </div>
-            {%- endif -%}
-            <div class="cc-card__overlay"></div>
-          </div>
-
-          {%- if title != blank or sub != blank or cta != blank -%}
-            <div class="cc-card__body">
-              {%- if title != blank -%}
-                <span class="cc-card__title">{{ title }}</span>
-              {%- endif -%}
-              {%- if sub != blank -%}
-                <span class="cc-card__sub">{{ sub }}</span>
-              {%- endif -%}
-              {%- if cta != blank -%}
-                <span class="cc-card__cta">{{ cta }}</span>
-              {%- endif -%}
-            </div>
-          {%- endif -%}
-
-        {%- if link != blank -%}
-          </a>
-        {%- else -%}
-          </div>
-        {%- endif -%}
-      </div>
-
-    {%- else -%}
-      {%- comment -%} Placeholder cards in editor when no blocks added {%- endcomment -%}
-      {%- for i in (1..3) -%}
-        <div class="cc-card cc-card--empty">
+    {%- if placeholder -%}
+      {%- for i in (1..5) -%}
+        <div class="cc-card{% if forloop.first %} cc-card--active{% endif %}" data-cc-idx="{{ forloop.index0 }}">
           <div class="cc-card__inner">
             <div class="cc-card__media">
               <div class="cc-card__placeholder">
@@ -108,17 +54,89 @@
             </div>
             <div class="cc-card__body">
               <span class="cc-card__title">Collection {{ i }}</span>
+              <span class="cc-card__cta">Shop Now</span>
             </div>
           </div>
         </div>
       {%- endfor -%}
-    {%- endfor -%}
+    {%- else -%}
+      {%- for block in blocks -%}
+        {%- assign img   = block.settings.image -%}
+        {%- assign title = block.settings.title -%}
+        {%- assign sub   = block.settings.subtitle -%}
+        {%- assign link  = block.settings.link -%}
+        {%- assign cta   = block.settings.cta_label -%}
+
+        <div
+          class="cc-card{% if forloop.first %} cc-card--active{% endif %}"
+          data-cc-idx="{{ forloop.index0 }}"
+          {{ block.shopify_attributes }}
+        >
+          {%- if link != blank -%}
+            <a href="{{ link }}" class="cc-card__inner" aria-label="{{ title | escape }}">
+          {%- else -%}
+            <div class="cc-card__inner">
+          {%- endif -%}
+
+            <div class="cc-card__media">
+              {%- if img != blank -%}
+                <img
+                  class="cc-card__img"
+                  src="{{ img | image_url: width: 800 }}"
+                  srcset="
+                    {{ img | image_url: width: 400 }} 400w,
+                    {{ img | image_url: width: 800 }} 800w,
+                    {{ img | image_url: width: 1200 }} 1200w
+                  "
+                  sizes="(max-width: 749px) 75vw, 30vw"
+                  alt="{{ title | escape }}"
+                  loading="lazy"
+                  width="800"
+                  height="1067"
+                >
+              {%- else -%}
+                <div class="cc-card__placeholder">
+                  {{ 'collection-1' | placeholder_svg_tag: 'cc-placeholder-svg' }}
+                </div>
+              {%- endif -%}
+              <div class="cc-card__overlay"></div>
+            </div>
+
+            {%- if title != blank or sub != blank or cta != blank -%}
+              <div class="cc-card__body">
+                {%- if title != blank -%}
+                  <span class="cc-card__title">{{ title }}</span>
+                {%- endif -%}
+                {%- if sub != blank -%}
+                  <span class="cc-card__sub">{{ sub }}</span>
+                {%- endif -%}
+                {%- if cta != blank -%}
+                  <span class="cc-card__cta">{{ cta }}</span>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+
+          {%- if link != blank -%}
+            </a>
+          {%- else -%}
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    {%- endif -%}
+
+    <!-- Navigation arrows -->
+    <button class="cc-nav cc-nav--prev" id="cc-prev-{{ section.id }}" aria-label="Previous">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <button class="cc-nav cc-nav--next" id="cc-next-{{ section.id }}" aria-label="Next">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
   </div>
 
 </div>
 
 {% stylesheet %}
-  /* ── Section wrapper ── */
   .cc-section {
     padding-block: 48px;
     overflow: hidden;
@@ -126,123 +144,88 @@
 
   /* ── Header ── */
   .cc-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 16px;
-    padding-inline: 20px;
-    margin-bottom: 20px;
-  }
-
-  @media screen and (min-width: 750px) {
-    .cc-header {
-      padding-inline: 40px;
-      margin-bottom: 28px;
-    }
+    padding-inline: 24px;
+    margin-bottom: 28px;
+    text-align: center;
   }
 
   .cc-header__title {
-    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    font-size: clamp(1.5rem, 4vw, 2.4rem);
     font-weight: 800;
-    margin: 0 0 4px;
+    margin: 0 0 6px;
     line-height: 1.1;
   }
 
   .cc-header__sub {
-    font-size: 0.9rem;
+    font-size: 0.92rem;
     opacity: 0.55;
     margin: 0;
-    line-height: 1.5;
   }
 
-  /* Arrow buttons in header */
-  .cc-header__nav {
-    display: flex;
-    gap: 8px;
-    flex-shrink: 0;
-  }
-
-  .cc-arrow {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    border: 1.5px solid rgba(0, 0, 0, 0.14);
-    background: #fff;
-    color: #111;
-    cursor: pointer;
+  /* ── Stage (perspective container) ── */
+  .cc-stage {
+    position: relative;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    transition: background 0.15s, box-shadow 0.15s, transform 0.15s;
+    perspective: 1200px;
+    /* extra vertical room so scaled-up center card doesn't clip */
+    padding-block: 24px;
+  }
+
+  /* Invisible sentinel sets intrinsic stage height via card dimensions */
+  .cc-sentinel {
+    --cc-card-w: clamp(220px, 70vw, 290px);
+    width: var(--cc-card-w);
+    aspect-ratio: calc(1 / var(--cc-ratio, 1.333));
+    visibility: hidden;
+    pointer-events: none;
     flex-shrink: 0;
   }
 
-  .cc-arrow svg { width: 18px; height: 18px; pointer-events: none; }
-
-  .cc-arrow:hover:not(:disabled) {
-    background: #f2f2f2;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.13);
-    transform: scale(1.06);
-  }
-
-  .cc-arrow:disabled {
-    opacity: 0.3;
-    cursor: default;
-    box-shadow: none;
-  }
-
-  /* ── Scrollable track ── */
-  .cc-track {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-    padding-inline: 20px;
-    /* allow last card shadow to be visible */
-    padding-bottom: 8px;
-  }
-
-  .cc-track::-webkit-scrollbar { display: none; }
-
   @media screen and (min-width: 750px) {
-    .cc-track {
-      gap: 16px;
-      padding-inline: 40px;
-    }
+    .cc-sentinel { --cc-card-w: clamp(260px, 26vw, 340px); }
   }
 
   /* ── Cards ── */
   .cc-card {
-    flex: 0 0 clamp(220px, 72vw, 300px);
-    scroll-snap-align: start;
-    border-radius: 16px;
+    --cc-card-w: clamp(220px, 70vw, 290px);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--cc-card-w);
+    border-radius: 18px;
     overflow: hidden;
-    position: relative;
+    cursor: pointer;
+    /* transform set entirely by JS; base is just the centering */
+    transform: translate(-50%, -50%);
+    transition:
+      transform 0.52s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      opacity   0.52s ease,
+      box-shadow 0.52s ease;
+    will-change: transform, opacity;
   }
 
   @media screen and (min-width: 750px) {
-    .cc-card {
-      /* fit exactly --cc-cols cards within the track content width */
-      flex: 0 0 calc((100vw - 80px - 16px * (var(--cc-cols, 3) - 1)) / var(--cc-cols, 3));
-      border-radius: 20px;
-    }
+    .cc-card { --cc-card-w: clamp(260px, 26vw, 340px); border-radius: 22px; }
   }
+
+  .cc-card--active { cursor: default; }
 
   .cc-card__inner {
     display: block;
     text-decoration: none;
     color: inherit;
     position: relative;
+    line-height: 0;
   }
 
-  /* Media box — aspect ratio driven by CSS var */
   .cc-card__media {
     position: relative;
-    aspect-ratio: var(--cc-aspect, 3/4);
+    aspect-ratio: calc(1 / var(--cc-ratio, 1.333));
     overflow: hidden;
-    background: #1c1c1c;
+    background: #1a1a1a;
   }
 
   .cc-card__img {
@@ -250,27 +233,22 @@
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    line-height: 0;
+    transition: transform 0.5s ease;
   }
 
-  .cc-card__inner:hover .cc-card__img {
-    transform: scale(1.05);
-  }
+  .cc-card--active .cc-card__img { transform: scale(1.03); }
 
   .cc-card__placeholder {
     width: 100%;
     height: 100%;
-    background: #e8e8e8;
+    background: #e0e0e0;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  .cc-placeholder-svg {
-    width: 60%;
-    height: 60%;
-    opacity: 0.25;
-  }
+  .cc-placeholder-svg { width: 55%; height: 55%; opacity: 0.2; }
 
   /* Gradient overlay */
   .cc-card__overlay {
@@ -278,30 +256,28 @@
     inset: 0;
     background: linear-gradient(
       to top,
-      rgba(0, 0, 0, 0.78) 0%,
-      rgba(0, 0, 0, 0.3) 42%,
-      rgba(0, 0, 0, 0) 70%
+      rgba(0,0,0,0.82) 0%,
+      rgba(0,0,0,0.28) 45%,
+      rgba(0,0,0,0) 70%
     );
     pointer-events: none;
   }
 
-  /* Text content pinned to card bottom */
+  /* Text body pinned to bottom */
   .cc-card__body {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 22px 18px 18px;
+    bottom: 0; left: 0; right: 0;
+    padding: 24px 18px 18px;
     display: flex;
     flex-direction: column;
-    gap: 3px;
-    pointer-events: none;
+    gap: 4px;
+    line-height: normal;
   }
 
   .cc-card__title {
     display: block;
     color: #fff;
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     font-weight: 700;
     line-height: 1.2;
     letter-spacing: -0.01em;
@@ -309,7 +285,7 @@
 
   .cc-card__sub {
     display: block;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255,255,255,0.7);
     font-size: 0.78rem;
     line-height: 1.4;
   }
@@ -317,55 +293,154 @@
   .cc-card__cta {
     display: inline-block;
     margin-top: 10px;
-    padding: 7px 18px;
+    padding: 8px 20px;
     background: #fff;
     color: #111;
     font-size: 0.72rem;
     font-weight: 700;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     border-radius: 999px;
     width: fit-content;
-    pointer-events: auto;
+    line-height: normal;
   }
+
+  /* ── Navigation arrows ── */
+  .cc-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: none;
+    background: #fff;
+    color: #111;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+
+  .cc-nav svg { width: 20px; height: 20px; pointer-events: none; }
+
+  .cc-nav--prev { left: 14px; }
+  .cc-nav--next { right: 14px; }
+
+  @media screen and (min-width: 750px) {
+    .cc-nav--prev { left: 32px; }
+    .cc-nav--next { right: 32px; }
+  }
+
+  .cc-nav:hover {
+    background: #f0f0f0;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.22);
+    transform: translateY(-50%) scale(1.08);
+  }
+
+  .cc-nav:disabled {
+    opacity: 0.35;
+    cursor: default;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .cc-nav:disabled:hover { transform: translateY(-50%); background: #fff; }
 {% endstylesheet %}
 
 <script>
-  (function () {
-    var sid   = {{ section.id | json }};
-    var track = document.getElementById('cc-track-' + sid);
-    var prev  = document.getElementById('cc-prev-' + sid);
-    var next  = document.getElementById('cc-next-' + sid);
+(function () {
+  var sid    = {{ section.id | json }};
+  var stage  = document.getElementById('cc-stage-' + sid);
+  if (!stage) return;
 
-    if (!track) return;
+  var cards  = Array.from(stage.querySelectorAll('.cc-card'));
+  var prev   = document.getElementById('cc-prev-' + sid);
+  var next   = document.getElementById('cc-next-' + sid);
+  var active = 0;
+  var total  = cards.length;
 
-    function cardStep() {
-      var card = track.querySelector('.cc-card');
-      if (!card) return 300;
-      var gap = parseInt(getComputedStyle(track).gap) || 16;
-      return card.offsetWidth + gap;
-    }
+  /* ── Per-step 3D parameters ─────────────────────────────── */
+  /* Index = abs(offset); sign of offset applied where needed  */
+  var TX_RATIO = [0, 0.60, 1.02, 1.38];  /* × cardWidth */
+  var TZ       = [0, -65, -115, -160];   /* px */
+  var RY       = [0, 10,   18,   24];    /* deg — leaning toward center */
+  var SCALE    = [1, 0.82, 0.66, 0.52];
+  var OPACITY  = [1, 0.88, 0.70, 0];
 
-    function sync() {
-      if (!prev || !next) return;
-      var atStart = track.scrollLeft <= 2;
-      var atEnd   = track.scrollLeft >= track.scrollWidth - track.clientWidth - 2;
-      prev.disabled = atStart;
-      next.disabled = atEnd;
-    }
+  function cardW() {
+    return cards[0] ? cards[0].offsetWidth : 280;
+  }
 
-    if (prev) prev.addEventListener('click', function () {
-      track.scrollBy({ left: -cardStep(), behavior: 'smooth' });
+  function applyTransforms() {
+    var w = cardW();
+    cards.forEach(function (card, i) {
+      var offset  = i - active;
+      var absOff  = Math.abs(offset);
+      var sign    = offset >= 0 ? 1 : -1;
+      var step    = Math.min(absOff, TX_RATIO.length - 1);
+
+      var tx      = sign * TX_RATIO[step] * w;
+      var tz      = TZ[step];
+      var ry      = -sign * RY[step];   /* face toward center */
+      var scale   = SCALE[step];
+      var opacity = OPACITY[step];
+      var zIndex  = 10 - absOff * 2;
+
+      card.style.transform = [
+        'translate(-50%, -50%)',
+        'translateX(' + tx + 'px)',
+        'translateZ(' + tz + 'px)',
+        'rotateY(' + ry + 'deg)',
+        'scale(' + scale + ')'
+      ].join(' ');
+
+      card.style.opacity    = opacity;
+      card.style.zIndex     = zIndex;
+      card.style.pointerEvents = absOff >= TX_RATIO.length ? 'none' : 'auto';
+      card.classList.toggle('cc-card--active', offset === 0);
+
+      /* shadow only on active card */
+      card.style.boxShadow = offset === 0
+        ? '0 24px 60px rgba(0,0,0,0.36), 0 6px 16px rgba(0,0,0,0.2)'
+        : 'none';
     });
 
-    if (next) next.addEventListener('click', function () {
-      track.scrollBy({ left: cardStep(), behavior: 'smooth' });
-    });
+    if (prev) prev.disabled = active === 0;
+    if (next) next.disabled = active === total - 1;
+  }
 
-    track.addEventListener('scroll', sync, { passive: true });
-    window.addEventListener('resize', sync, { passive: true });
-    sync();
-  })();
+  function goTo(idx) {
+    active = Math.max(0, Math.min(total - 1, idx));
+    applyTransforms();
+  }
+
+  /* Click on side card to bring it to front */
+  cards.forEach(function (card, i) {
+    card.addEventListener('click', function (e) {
+      if (i === active) return; /* let link/inner handle it */
+      e.preventDefault();
+      goTo(i);
+    });
+  });
+
+  if (prev) prev.addEventListener('click', function () { goTo(active - 1); });
+  if (next) next.addEventListener('click', function () { goTo(active + 1); });
+
+  /* Swipe support */
+  var swipeStartX = 0;
+  stage.addEventListener('pointerdown', function (e) { swipeStartX = e.clientX; }, { passive: true });
+  stage.addEventListener('pointerup', function (e) {
+    var dx = e.clientX - swipeStartX;
+    if (Math.abs(dx) > 48) dx < 0 ? goTo(active + 1) : goTo(active - 1);
+  }, { passive: true });
+
+  /* Init */
+  applyTransforms();
+  window.addEventListener('resize', applyTransforms, { passive: true });
+})();
 </script>
 
 {% schema %}
@@ -390,18 +465,7 @@
     },
     {
       "type": "header",
-      "content": "Layout"
-    },
-    {
-      "type": "select",
-      "id": "columns",
-      "label": "Cards visible (desktop)",
-      "options": [
-        { "value": "2", "label": "2" },
-        { "value": "3", "label": "3" },
-        { "value": "4", "label": "4" }
-      ],
-      "default": "3"
+      "content": "Cards"
     },
     {
       "type": "select",
@@ -451,8 +515,7 @@
         {
           "type": "text",
           "id": "subtitle",
-          "label": "Subtitle",
-          "info": "Short description or tagline"
+          "label": "Subtitle"
         },
         {
           "type": "url",
@@ -463,7 +526,6 @@
           "type": "text",
           "id": "cta_label",
           "label": "Button label",
-          "info": "Leave blank to hide the button",
           "default": "Shop Now"
         }
       ]
@@ -473,6 +535,7 @@
     {
       "name": "Collection Carousel",
       "blocks": [
+        { "type": "card" },
         { "type": "card" },
         { "type": "card" },
         { "type": "card" },
