@@ -1,12 +1,22 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "banner": {
       "type": "collection-page-banner",
       "settings": {
-        "image": "",
         "height": 380,
-        "show_title": true,
-        "overlay_opacity": 35
+        "overlay_opacity": 35,
+        "heading": "The Olise Collection.",
+        "subtext": "",
+        "show_title": true
       }
     },
     "main": {
@@ -114,11 +124,14 @@
               "blocks": {}
             }
           },
-          "block_order": ["card-gallery", "product_title", "price"]
+          "block_order": [
+            "card-gallery",
+            "product_title",
+            "price"
+          ]
         }
       },
       "settings": {
-        "sidebar_image": "",
         "sidebar_width": 90,
         "layout_type": "grid",
         "product_card_size": "medium",
@@ -127,13 +140,16 @@
         "full_width_on_mobile": true,
         "columns_gap_horizontal": 16,
         "columns_gap_vertical": 24,
-        "padding-inline-start": 0,
-        "padding-inline-end": 0,
         "color_scheme": "scheme-1",
         "padding-block-start": 0,
-        "padding-block-end": 32
+        "padding-block-end": 32,
+        "padding-inline-start": 0,
+        "padding-inline-end": 0
       }
     }
   },
-  "order": ["banner", "main"]
+  "order": [
+    "banner",
+    "main"
+  ]
 }
