@@ -172,6 +172,9 @@
     perspective: 1200px;
     /* extra vertical room so scaled-up center card doesn't clip */
     padding-block: 24px;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   /* Invisible sentinel sets intrinsic stage height via card dimensions */
@@ -352,94 +355,154 @@
 
 <script>
 (function () {
-  var sid    = {{ section.id | json }};
-  var stage  = document.getElementById('cc-stage-' + sid);
+  var sid   = {{ section.id | json }};
+  var stage = document.getElementById('cc-stage-' + sid);
   if (!stage) return;
 
-  var cards  = Array.from(stage.querySelectorAll('.cc-card'));
-  var prev   = document.getElementById('cc-prev-' + sid);
-  var next   = document.getElementById('cc-next-' + sid);
+  var cards = Array.from(stage.querySelectorAll('.cc-card'));
+  var prev  = document.getElementById('cc-prev-' + sid);
+  var next  = document.getElementById('cc-next-' + sid);
   var active = 1;
   var total  = cards.length;
 
-  /* ── Per-step 3D parameters ─────────────────────────────── */
-  /* Index = abs(offset); sign of offset applied where needed  */
-  var TX_RATIO = [0, 0.80, 1.42, 1.90];  /* × cardWidth */
-  var TZ       = [0, -50,  -90, -130];   /* px */
-  var RY       = [0,  8,   15,   20];    /* deg — leaning toward center */
+  /* ── Step lookup tables (index = abs integer offset) ── */
+  var TX_RATIO = [0, 0.80, 1.42, 1.90];
+  var TZ       = [0, -50,  -90, -130];
+  var RY       = [0,   8,   15,   20];
   var SCALE    = [1, 0.84, 0.70, 0.58];
   var OPACITY  = [1, 0.88, 0.72, 0.58];
 
-  function cardW() {
-    return cards[0] ? cards[0].offsetWidth : 280;
+  function cardW() { return cards[0] ? cards[0].offsetWidth : 280; }
+
+  /* Linearly interpolate a step table at a fractional abs-offset */
+  function lookup(arr, absOff) {
+    var lo = Math.min(Math.floor(absOff), arr.length - 2);
+    var t  = absOff - lo;
+    return arr[lo] + (arr[lo + 1] - arr[lo]) * Math.min(t, 1);
   }
 
-  function applyTransforms() {
+  /* Apply transforms for any (possibly fractional) center position */
+  function render(center) {
     var w = cardW();
     cards.forEach(function (card, i) {
-      var offset  = i - active;
-      var absOff  = Math.abs(offset);
-      var sign    = offset >= 0 ? 1 : -1;
-      var step    = Math.min(absOff, TX_RATIO.length - 1);
+      var off    = i - center;
+      var absOff = Math.abs(off);
+      var sign   = off >= 0 ? 1 : -1;
 
-      var tx      = sign * TX_RATIO[step] * w;
-      var tz      = TZ[step];
-      var ry      = -sign * RY[step];   /* face toward center */
-      var scale   = SCALE[step];
-      var opacity = OPACITY[step];
-      var zIndex  = 10 - absOff * 2;
+      var tx    = sign * lookup(TX_RATIO, absOff) * w;
+      var tz    = lookup(TZ,      absOff);
+      var ry    = -sign * lookup(RY,    absOff);
+      var sc    = lookup(SCALE,   absOff);
+      var op    = lookup(OPACITY, absOff);
 
-      card.style.transform = [
-        'translate(-50%, -50%)',
-        'translateX(' + tx + 'px)',
-        'translateZ(' + tz + 'px)',
-        'rotateY(' + ry + 'deg)',
-        'scale(' + scale + ')'
-      ].join(' ');
+      card.style.transform =
+        'translate(-50%,-50%) ' +
+        'translateX('  + tx.toFixed(1) + 'px) ' +
+        'translateZ('  + tz.toFixed(1) + 'px) ' +
+        'rotateY('     + ry.toFixed(2) + 'deg) ' +
+        'scale('       + sc.toFixed(4) + ')';
 
-      card.style.opacity    = opacity;
-      card.style.zIndex     = zIndex;
-      card.style.pointerEvents = 'auto';
-      card.classList.toggle('cc-card--active', offset === 0);
-
-      /* shadow only on active card */
-      card.style.boxShadow = offset === 0
+      card.style.opacity  = op.toFixed(3);
+      card.style.zIndex   = Math.round(20 - absOff * 4);
+      card.style.boxShadow = absOff < 0.5
         ? '0 24px 60px rgba(0,0,0,0.36), 0 6px 16px rgba(0,0,0,0.2)'
         : 'none';
+      card.classList.toggle('cc-card--active', i === Math.round(center));
     });
+    if (prev) prev.disabled = active <= 0;
+    if (next) next.disabled = active >= total - 1;
+  }
 
-    if (prev) prev.disabled = active === 0;
-    if (next) next.disabled = active === total - 1;
+  function setTransition(on) {
+    var t = on
+      ? 'transform 0.48s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.48s ease, box-shadow 0.48s ease'
+      : 'none';
+    cards.forEach(function (c) { c.style.transition = t; });
   }
 
   function goTo(idx) {
     active = Math.max(0, Math.min(total - 1, idx));
-    applyTransforms();
+    setTransition(true);
+    render(active);
   }
 
-  /* Click on side card to bring it to front */
+  /* ── Side-card tap ── */
+  var wasDragged = false;
   cards.forEach(function (card, i) {
     card.addEventListener('click', function (e) {
-      if (i === active) return; /* let link/inner handle it */
+      if (wasDragged) { e.preventDefault(); return; }
+      if (i === active) return;
       e.preventDefault();
       goTo(i);
     });
   });
 
+  /* ── Arrows ── */
   if (prev) prev.addEventListener('click', function () { goTo(active - 1); });
   if (next) next.addEventListener('click', function () { goTo(active + 1); });
 
-  /* Swipe support */
-  var swipeStartX = 0;
-  stage.addEventListener('pointerdown', function (e) { swipeStartX = e.clientX; }, { passive: true });
-  stage.addEventListener('pointerup', function (e) {
-    var dx = e.clientX - swipeStartX;
-    if (Math.abs(dx) > 48) dx < 0 ? goTo(active + 1) : goTo(active - 1);
+  /* ── Fluid drag / swipe ── */
+  var dragging   = false;
+  var startX     = 0;
+  var startT     = 0;
+  var liveCenter = active;
+
+  stage.addEventListener('pointerdown', function (e) {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    stage.setPointerCapture(e.pointerId);
+    dragging   = true;
+    wasDragged = false;
+    startX     = e.clientX;
+    startT     = Date.now();
+    liveCenter = active;
+    setTransition(false);
   }, { passive: true });
 
-  /* Init */
-  applyTransforms();
-  window.addEventListener('resize', applyTransforms, { passive: true });
+  stage.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    var dx = e.clientX - startX;
+    if (Math.abs(dx) > 5) wasDragged = true;
+
+    var raw = active - dx / cardW();
+
+    /* rubber-band resistance at boundaries */
+    if (raw < 0) {
+      raw = -Math.pow(-raw, 0.55);
+    } else if (raw > total - 1) {
+      raw = (total - 1) + Math.pow(raw - (total - 1), 0.55);
+    }
+
+    liveCenter = raw;
+    render(liveCenter);
+  }, { passive: true });
+
+  function onRelease(e) {
+    if (!dragging) return;
+    dragging = false;
+
+    var dx       = e.clientX - startX;
+    var velocity = dx / Math.max(Date.now() - startT, 1); /* px/ms */
+    var target;
+
+    if (Math.abs(velocity) > 0.28) {
+      /* flick — jump one card in flick direction */
+      target = active + (velocity < 0 ? 1 : -1);
+    } else {
+      target = Math.round(liveCenter);
+    }
+
+    goTo(target);
+  }
+
+  stage.addEventListener('pointerup',     onRelease, { passive: true });
+  stage.addEventListener('pointercancel', onRelease, { passive: true });
+
+  /* ── Init (instant placement, then enable transitions) ── */
+  setTransition(false);
+  render(active);
+  requestAnimationFrame(function () { setTransition(true); });
+
+  window.addEventListener('resize', function () { render(active); }, { passive: true });
 })();
 </script>
 
