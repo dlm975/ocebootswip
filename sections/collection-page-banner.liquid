@@ -1,8 +1,10 @@
 {%- liquid
   assign use_img       = collection.image | default: section.settings.image
-  assign show_title    = section.settings.show_title
   assign overlay_alpha = section.settings.overlay_opacity | times: 0.01
   assign height        = section.settings.height | default: 380
+  assign heading       = section.settings.heading
+  assign subtext       = section.settings.subtext
+  assign show_title    = section.settings.show_title
 -%}
 
 <div
@@ -32,10 +34,16 @@
     <div class="cpb-overlay" style="background: rgba(0,0,0,{{ overlay_alpha | round: 2 }});"></div>
   </div>
 
-  {%- if show_title -%}
+  {%- if show_title or heading != blank or subtext != blank -%}
     <div class="cpb-content">
-      <h1 class="cpb-title">{{ collection.title }}</h1>
-      {%- if collection.description != blank -%}
+      {%- if heading != blank -%}
+        <h1 class="cpb-title">{{ heading }}</h1>
+      {%- elsif show_title -%}
+        <h1 class="cpb-title">{{ collection.title }}</h1>
+      {%- endif -%}
+      {%- if subtext != blank -%}
+        <p class="cpb-desc">{{ subtext }}</p>
+      {%- elsif collection.description != blank and show_title -%}
         <p class="cpb-desc">{{ collection.description | strip_html | truncate: 180 }}</p>
       {%- endif -%}
     </div>
@@ -50,6 +58,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  @media screen and (max-width: 749px) {
+    .cpb-section {
+      height: calc(var(--cpb-height, 380px) / 2);
+    }
   }
 
   .cpb-media {
@@ -108,26 +122,24 @@
   },
   "settings": [
     {
+      "type": "header",
+      "content": "Image"
+    },
+    {
       "type": "image_picker",
       "id": "image",
       "label": "Fallback banner image",
-      "info": "Used only when a collection has no image set. Set each collection's image in Shopify admin (Collections → [Collection] → Collection image)."
+      "info": "Used only when a collection has no image set. Set each collection's image via Shopify admin → Collections → [Collection] → Collection image."
     },
     {
       "type": "range",
       "id": "height",
-      "label": "Banner height",
+      "label": "Banner height (desktop)",
       "min": 160,
       "max": 700,
       "step": 10,
       "unit": "px",
       "default": 380
-    },
-    {
-      "type": "checkbox",
-      "id": "show_title",
-      "label": "Show collection title",
-      "default": true
     },
     {
       "type": "range",
@@ -138,6 +150,28 @@
       "step": 5,
       "unit": "%",
       "default": 35
+    },
+    {
+      "type": "header",
+      "content": "Text overlay"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Leave blank to use the collection title instead"
+    },
+    {
+      "type": "textarea",
+      "id": "subtext",
+      "label": "Subtext",
+      "info": "Leave blank to use the collection description instead"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_title",
+      "label": "Show collection title / description when no custom text is set",
+      "default": true
     }
   ],
   "presets": [
