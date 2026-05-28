@@ -44,7 +44,7 @@
 
     {%- if placeholder -%}
       {%- for i in (1..5) -%}
-        <div class="cc-card{% if forloop.first %} cc-card--active{% endif %}" data-cc-idx="{{ forloop.index0 }}">
+        <div class="cc-card{% if forloop.index0 == 1 %} cc-card--active{% endif %}" data-cc-idx="{{ forloop.index0 }}">
           <div class="cc-card__inner">
             <div class="cc-card__media">
               <div class="cc-card__placeholder">
@@ -68,7 +68,7 @@
         {%- assign cta   = block.settings.cta_label -%}
 
         <div
-          class="cc-card{% if forloop.first %} cc-card--active{% endif %}"
+          class="cc-card{% if forloop.index0 == 1 %} cc-card--active{% endif %}"
           data-cc-idx="{{ forloop.index0 }}"
           {{ block.shopify_attributes }}
         >
@@ -359,7 +359,7 @@
   var cards  = Array.from(stage.querySelectorAll('.cc-card'));
   var prev   = document.getElementById('cc-prev-' + sid);
   var next   = document.getElementById('cc-next-' + sid);
-  var active = 0;
+  var active = 1;
   var total  = cards.length;
 
   /* ── Per-step 3D parameters ─────────────────────────────── */
@@ -368,7 +368,7 @@
   var TZ       = [0, -50,  -90, -130];   /* px */
   var RY       = [0,  8,   15,   20];    /* deg — leaning toward center */
   var SCALE    = [1, 0.84, 0.70, 0.58];
-  var OPACITY  = [1, 0.88, 0.70, 0];
+  var OPACITY  = [1, 0.88, 0.72, 0.58];
 
   function cardW() {
     return cards[0] ? cards[0].offsetWidth : 280;
@@ -399,7 +399,7 @@
 
       card.style.opacity    = opacity;
       card.style.zIndex     = zIndex;
-      card.style.pointerEvents = absOff >= TX_RATIO.length ? 'none' : 'auto';
+      card.style.pointerEvents = 'auto';
       card.classList.toggle('cc-card--active', offset === 0);
 
       /* shadow only on active card */
