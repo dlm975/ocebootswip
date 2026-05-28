@@ -443,59 +443,63 @@
 
   /* ── Fluid drag / swipe ── */
   var dragging   = false;
+  var dragId     = -1;
   var startX     = 0;
   var startT     = 0;
   var liveCenter = active;
 
   stage.addEventListener('pointerdown', function (e) {
+    /* Ignore non-primary mouse buttons and button/link targets
+       so arrow clicks and card links are never swallowed */
     if (e.button !== 0 && e.pointerType === 'mouse') return;
-    stage.setPointerCapture(e.pointerId);
+    if (e.target.closest('button, a')) return;
+
     dragging   = true;
     wasDragged = false;
+    dragId     = e.pointerId;
     startX     = e.clientX;
     startT     = Date.now();
     liveCenter = active;
     setTransition(false);
   }, { passive: true });
 
-  stage.addEventListener('pointermove', function (e) {
-    if (!dragging) return;
+  /* Listen on window so drag stays tracked if pointer leaves the stage */
+  window.addEventListener('pointermove', function (e) {
+    if (!dragging || e.pointerId !== dragId) return;
     var dx = e.clientX - startX;
-    if (Math.abs(dx) > 5) wasDragged = true;
+    if (Math.abs(dx) > 8) wasDragged = true;
+    if (!wasDragged) return;
 
     var raw = active - dx / cardW();
-
-    /* rubber-band resistance at boundaries */
     if (raw < 0) {
       raw = -Math.pow(-raw, 0.55);
     } else if (raw > total - 1) {
       raw = (total - 1) + Math.pow(raw - (total - 1), 0.55);
     }
-
     liveCenter = raw;
     render(liveCenter);
   }, { passive: true });
 
   function onRelease(e) {
-    if (!dragging) return;
+    if (!dragging || e.pointerId !== dragId) return;
     dragging = false;
+
+    /* Pure click (no real drag) — just restore and let click handlers run */
+    if (!wasDragged) {
+      setTransition(true);
+      render(active);
+      return;
+    }
 
     var dx       = e.clientX - startX;
     var velocity = dx / Math.max(Date.now() - startT, 1); /* px/ms */
-    var target;
-
-    if (Math.abs(velocity) > 0.28) {
-      /* flick — jump one card in flick direction */
-      target = active + (velocity < 0 ? 1 : -1);
-    } else {
-      target = Math.round(liveCenter);
-    }
-
-    goTo(target);
+    goTo(Math.abs(velocity) > 0.28
+      ? active + (velocity < 0 ? 1 : -1)
+      : Math.round(liveCenter));
   }
 
-  stage.addEventListener('pointerup',     onRelease, { passive: true });
-  stage.addEventListener('pointercancel', onRelease, { passive: true });
+  window.addEventListener('pointerup',     onRelease, { passive: true });
+  window.addEventListener('pointercancel', onRelease, { passive: true });
 
   /* ── Init (instant placement, then enable transitions) ── */
   setTransition(false);
