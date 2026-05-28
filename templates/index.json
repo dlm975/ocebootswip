@@ -552,6 +552,71 @@
         "padding-block-start": 60,
         "padding-block-end": 60
       }
+    },
+    "collection_carousel_xaqMa8": {
+      "type": "collection-carousel",
+      "blocks": {
+        "card_pDEAYF": {
+          "type": "card",
+          "settings": {
+            "title": "Neymar Jr",
+            "subtitle": "",
+            "link": "",
+            "cta_label": "Shop Now"
+          }
+        },
+        "card_8At9nm": {
+          "type": "card",
+          "settings": {
+            "title": "CR7",
+            "subtitle": "",
+            "link": "",
+            "cta_label": "Shop Now"
+          }
+        },
+        "card_774Te6": {
+          "type": "card",
+          "settings": {
+            "title": "Messi",
+            "subtitle": "",
+            "link": "",
+            "cta_label": "Shop Now"
+          }
+        },
+        "card_3HVjxU": {
+          "type": "card",
+          "settings": {
+            "title": "Pogba",
+            "subtitle": "",
+            "link": "",
+            "cta_label": "Shop Now"
+          }
+        },
+        "card_KPqQN6": {
+          "type": "card",
+          "settings": {
+            "title": "De Bruyne",
+            "subtitle": "",
+            "link": "",
+            "cta_label": "Shop Now"
+          }
+        }
+      },
+      "block_order": [
+        "card_pDEAYF",
+        "card_8At9nm",
+        "card_774Te6",
+        "card_3HVjxU",
+        "card_KPqQN6"
+      ],
+      "name": "Collection Carousel",
+      "settings": {
+        "heading": "Shop by Collection",
+        "subheading": "",
+        "card_aspect_ratio": "3/4",
+        "padding-block-start": 48,
+        "padding-block-end": 48
+      }
     }
   },
   "order": [
@@ -559,6 +624,7 @@
     "17706063529fca8395",
     "newly_listed_fc",
     "brand_tiles_main",
-    "product_spotlight_HMicki"
+    "product_spotlight_HMicki",
+    "collection_carousel_xaqMa8"
   ]
 }
