@@ -28,6 +28,8 @@
             class="igw-avatar-img"
             width="80"
             height="80"
+            loading="lazy"
+            decoding="async"
           >
         {%- else -%}
           <div class="igw-avatar-placeholder">O</div>
@@ -63,7 +65,7 @@
     <div class="igw-reels-grid" id="igw-reels">
       {%- if settings.instagram_video_1 != blank -%}
         <div class="igw-reel-cell">
-          <video class="igw-reel-video" autoplay muted loop playsinline>
+          <video class="igw-reel-video" muted loop playsinline preload="none">
             {%- for source in settings.instagram_video_1.sources -%}
               <source src="{{ source.url }}" type="{{ source.mime_type }}">
             {%- endfor -%}
@@ -72,7 +74,7 @@
       {%- endif -%}
       {%- if settings.instagram_video_2 != blank -%}
         <div class="igw-reel-cell">
-          <video class="igw-reel-video" autoplay muted loop playsinline>
+          <video class="igw-reel-video" muted loop playsinline preload="none">
             {%- for source in settings.instagram_video_2.sources -%}
               <source src="{{ source.url }}" type="{{ source.mime_type }}">
             {%- endfor -%}
@@ -81,7 +83,7 @@
       {%- endif -%}
       {%- if settings.instagram_video_3 != blank -%}
         <div class="igw-reel-cell">
-          <video class="igw-reel-video" autoplay muted loop playsinline>
+          <video class="igw-reel-video" muted loop playsinline preload="none">
             {%- for source in settings.instagram_video_3.sources -%}
               <source src="{{ source.url }}" type="{{ source.mime_type }}">
             {%- endfor -%}
@@ -105,27 +107,30 @@
   /* --- Floating trigger --- */
   #igw-trigger {
     position: fixed;
-    bottom: 24px;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
     right: 24px;
     z-index: 9000;
     width: 52px;
     height: 52px;
-    border-radius: 12px;
+    border-radius: 14px;
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     background: radial-gradient(circle at 30% 107%, #ffe000 0%, #ffcc00 5%, #ff2d00 45%, #cc0070 60%, #0040ff 90%);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.30);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.4);
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.2s ease;
     padding: 0;
   }
 
   #igw-trigger:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.38);
+    transform: scale(1.08);
+    box-shadow: 0 14px 34px -8px rgba(0, 0, 0, 0.48);
   }
+
+  #igw-trigger:active { transform: scale(0.93); }
 
   /* --- Overlay --- */
   #igw-overlay {
@@ -143,6 +148,9 @@
   #igw-overlay.igw-open {
     opacity: 1;
     pointer-events: all;
+    /* block background page scroll on touch without locking body
+       (body locks break inner scrolling on iOS Safari) */
+    touch-action: none;
   }
 
   .igw-backdrop {
@@ -156,19 +164,21 @@
     backdrop-filter: blur(18px) brightness(0.45);
   }
 
-  /* --- Panel (phone-width, IG profile look) --- */
+  /* --- Panel: phone-width IG profile on desktop, bottom sheet on mobile --- */
   .igw-panel {
     position: relative;
     z-index: 1;
     background: #000;
-    border-radius: 18px;
+    border-radius: 20px;
     width: min(430px, 94vw);
-    max-height: 92vh;
-    overflow-y: auto;
+    max-height: 92dvh;
+    overflow-y: scroll;
     overflow-x: hidden;
+    touch-action: pan-y;
+    overscroll-behavior: contain;
     scrollbar-width: none;
     transform: translateY(16px);
-    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
     box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7);
   }
 
@@ -178,6 +188,22 @@
 
   #igw-overlay.igw-open .igw-panel {
     transform: translateY(0);
+  }
+
+  @media screen and (max-width: 749px) {
+    #igw-overlay { align-items: flex-end; }
+
+    .igw-panel {
+      width: 100%;
+      max-height: 88dvh;
+      border-radius: 20px 20px 0 0;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      transform: translateY(100%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #igw-overlay, .igw-backdrop, .igw-panel { transition-duration: 0.01s; }
   }
 
   /* --- Close button --- */
@@ -301,6 +327,13 @@
     background: #1aa3ff;
   }
 
+  .igw-follow-btn,
+  .igw-close {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .igw-follow-btn:active { transform: scale(0.96); }
+
   /* --- Reels section header --- */
   .igw-reels-header {
     display: flex;
@@ -356,17 +389,23 @@
       return overlay.querySelectorAll('video');
     }
 
+    /* Videos use preload="none" so nothing downloads at page load;
+       kick off loading + playback only when the panel opens */
+    var videosLoaded = false;
+
     function openWidget() {
       overlay.classList.add('igw-open');
       overlay.setAttribute('aria-hidden', 'false');
-      document.body.style.overflow = 'hidden';
-      videos().forEach(function (v) { v.play(); });
+      videos().forEach(function (v) {
+        if (!videosLoaded) v.load();
+        v.play().catch(function () {});
+      });
+      videosLoaded = true;
     }
 
     function closeWidget() {
       overlay.classList.remove('igw-open');
       overlay.setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = '';
       videos().forEach(function (v) { v.pause(); });
     }
 
