@@ -1060,9 +1060,17 @@
     display: inline-flex;
     align-items: center;
     background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
     border-radius: 999px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-    padding: 6px 12px;
+    box-shadow: 0 6px 16px -4px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.06);
+    padding: 8px 14px;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.2s;
+  }
+
+  .drawer-region-wrapper:active {
+    transform: scale(0.96);
+    box-shadow: 0 3px 8px -2px rgba(0, 0, 0, 0.12);
   }
 
   .drawer-region-label {

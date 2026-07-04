@@ -40,6 +40,7 @@
           src="{{ section.settings.bg_image_landscape | default: section.settings.bg_image_portrait | image_url: width: 1800 }}"
           alt=""
           loading="lazy"
+          decoding="async"
           width="1800"
           height="1200"
         >
@@ -70,6 +71,7 @@
               src="{{ first_hero }}"
               alt="{{ display_title }}"
               loading="eager"
+              decoding="async"
               width="1200"
               height="1200"
             >
@@ -237,10 +239,10 @@
     position: relative;
     margin-inline: 16px;
     margin-bottom: 32px;
-    border-radius: 20px;
+    border-radius: 24px;
     overflow: hidden;
     background: #111;
-    box-shadow: 0 12px 48px rgba(0,0,0,0.28), 0 2px 10px rgba(0,0,0,0.14);
+    box-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.32), 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 
   @media screen and (min-width: 750px) {
@@ -314,7 +316,7 @@
 
   .ps__hero-wrap {
     aspect-ratio: 1 / 1;
-    border-radius: 14px;
+    border-radius: 16px;
     overflow: hidden;
     background: rgba(255,255,255,0.06);
   }
@@ -389,6 +391,7 @@
 
   .ps__soleplate-btn:hover { transform: scale(1.07); }
   .ps__soleplate-btn:hover::before { background: rgba(0,0,0,0.28); }
+  .ps__soleplate-btn:active { transform: scale(0.94); }
 
   .ps__soleplate-btn--active {
     border-color: #fff;
@@ -418,13 +421,14 @@
   .ps__thumb {
     width: 100%;
     aspect-ratio: 1 / 1;
-    border-radius: 10px;
+    border-radius: 12px;
     border: 2px solid transparent;
     overflow: hidden;
     cursor: pointer;
     padding: 0;
     background: rgba(255,255,255,0.08);
-    transition: border-color 0.2s, opacity 0.25s, transform 0.15s, box-shadow 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    transition: border-color 0.2s ease-out, opacity 0.25s, transform 0.2s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.2s;
   }
 
   @media screen and (min-width: 750px) {
@@ -460,32 +464,31 @@
   }
 
   .ps__size-btn {
-    padding: 7px 4px;
-    border-radius: 8px;
-    border: 1.5px solid rgba(255,255,255,0.25);
-    background: transparent;
-    color: rgba(255,255,255,0.8);
+    padding: 9px 4px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.85);
     font-size: 0.75rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.15s, border-color 0.15s, color 0.15s, opacity 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s ease-out, color 0.15s ease-out, transform 0.15s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s;
     line-height: 1;
     text-align: center;
     white-space: nowrap;
+    font-family: inherit;
   }
 
   @media screen and (min-width: 750px) {
-    .ps__size-btn { padding: 7px 13px; font-size: 0.8rem; }
+    .ps__size-btn { padding: 9px 14px; font-size: 0.8rem; }
   }
 
-  .ps__size-btn:hover {
-    background: rgba(255,255,255,0.12);
-    border-color: rgba(255,255,255,0.65);
-    color: #fff;
-  }
+  .ps__size-btn:hover { background: rgba(255, 255, 255, 0.2); color: #fff; }
+  .ps__size-btn:active { transform: scale(0.94); }
 
-  .ps__size-btn--active { background: #fff; color: #111; border-color: #fff; }
-  .ps__size-btn--sold-out { opacity: 0.3; text-decoration: line-through; cursor: not-allowed; }
+  .ps__size-btn--active { background: #fff; color: #111; }
+  .ps__size-btn--sold-out { opacity: 0.25; text-decoration: line-through; cursor: not-allowed; }
 
   /* ── Cart form + buy button ── */
   .ps__cart-form { width: 100%; }
@@ -496,22 +499,28 @@
     justify-content: center;
     gap: 10px;
     width: 100%;
-    padding: 17px 24px;
-    background: #16a34a;
-    color: #fff;
-    font-size: 1rem;
+    padding: 16px 24px;
+    background: #fff;
+    color: #111;
+    font-size: 0.95rem;
     font-weight: 800;
-    border-radius: 12px;
+    border-radius: 999px;
     border: none;
     cursor: pointer;
     letter-spacing: 0.01em;
-    transition: background 0.15s, transform 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.45);
+    transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.2s, opacity 0.2s;
     text-align: center;
     font-family: inherit;
   }
 
-  .ps__buy-btn:hover:not(:disabled) { background: #15803d; transform: translateY(-1px); }
-  .ps__buy-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+  .ps__buy-btn:hover:not(:disabled) {
+    transform: scale(1.015);
+    box-shadow: 0 14px 36px -8px rgba(0, 0, 0, 0.55);
+  }
+  .ps__buy-btn:active:not(:disabled) { transform: scale(0.97); }
+  .ps__buy-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
 
   .ps__buy-label { flex-shrink: 0; }
   .ps__buy-sep   { opacity: 0.55; font-weight: 400; flex-shrink: 0; }
@@ -566,7 +575,17 @@
     .ps__size-grid { grid-template-columns: repeat(4, 1fr); gap: 4px; }
     .ps__size-btn { padding: 5px 2px; font-size: 0.6rem; border-radius: 6px; }
 
-    .ps__buy-btn { padding: 11px 10px; font-size: 0.82rem; border-radius: 10px; gap: 6px; }
+    .ps__buy-btn { padding: 12px 10px; font-size: 0.82rem; gap: 6px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ps__hero-img,
+    .ps__thumb,
+    .ps__size-btn,
+    .ps__soleplate-btn,
+    .ps__buy-btn {
+      transition-duration: 0.01s;
+    }
   }
 {% endstylesheet %}
 
@@ -834,10 +853,18 @@
     renderSoleplates();   /* also calls renderAllSizes + filterBySoleplate */
     updateBuyUrl();
 
-    /* preload hero images */
-    thumbs.forEach(function (t) {
-      if (t.dataset.img) { var i = new Image(); i.src = t.dataset.img; }
-    });
+    /* preload hero images when the browser is idle, so they never
+       compete with initial page load */
+    function preloadHeroes() {
+      thumbs.forEach(function (t) {
+        if (t.dataset.img) { var i = new Image(); i.src = t.dataset.img; }
+      });
+    }
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(preloadHeroes, { timeout: 4000 });
+    } else {
+      setTimeout(preloadHeroes, 2500);
+    }
   })();
 </script>
 

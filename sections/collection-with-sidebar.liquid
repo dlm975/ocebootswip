@@ -42,6 +42,7 @@
         sizes="{{ sidebar_w }}px"
         alt=""
         loading="lazy"
+        decoding="async"
         width="{{ sidebar_w }}"
         height="1200"
       >
@@ -137,15 +138,18 @@
     align-items: flex-start;
   }
 
-  /* ── Left sidebar image rail ── */
+  /* ── Left sidebar image rail — floating inset card ── */
   .cwsb-sidebar {
     width: var(--cwsb-sidebar-w, 90px);
     flex-shrink: 0;
     position: sticky;
-    top: 0;
-    height: 100dvh;
+    top: 16px;
+    height: calc(100dvh - 32px);
+    margin: 16px 0 16px 16px;
     overflow: hidden;
     z-index: 1;
+    border-radius: 18px;
+    box-shadow: 0 20px 40px -16px rgba(0, 0, 0, 0.28), 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 
   .cwsb-sidebar__img {

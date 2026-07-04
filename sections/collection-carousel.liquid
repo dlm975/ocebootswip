@@ -32,6 +32,10 @@
     class="cc-stage"
     id="cc-stage-{{ section.id }}"
     style="--cc-ratio: {{ r_mult | round: 4 }};"
+    tabindex="0"
+    role="region"
+    aria-roledescription="carousel"
+    aria-label="{{ heading | default: 'Collections' | escape }}"
   >
     <!-- Sentinel drives stage height without JS -->
     <div class="cc-sentinel" aria-hidden="true"></div>
@@ -134,6 +138,8 @@
     </button>
   </div>
 
+  <div class="cc-dots" id="cc-dots-{{ section.id }}" role="tablist" aria-label="Carousel pagination"></div>
+
 </div>
 
 {% stylesheet %}
@@ -177,6 +183,13 @@
     -webkit-user-select: none;
   }
 
+  .cc-stage:focus { outline: none; }
+  .cc-stage:focus-visible {
+    outline: 2px solid rgba(0, 0, 0, 0.35);
+    outline-offset: -2px;
+    border-radius: 16px;
+  }
+
   /* Invisible sentinel sets intrinsic stage height via card dimensions */
   .cc-sentinel {
     --cc-card-w: clamp(220px, 70vw, 290px);
@@ -198,23 +211,31 @@
     top: 50%;
     left: 50%;
     width: var(--cc-card-w);
-    border-radius: 18px;
+    border-radius: 22px;
     overflow: hidden;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
     /* transform set entirely by JS; base is just the centering */
     transform: translate(-50%, -50%);
     transition:
-      transform 0.52s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-      opacity   0.52s ease,
-      box-shadow 0.52s ease;
-    will-change: transform, opacity;
+      transform 0.45s cubic-bezier(0.32, 0.72, 0, 1),
+      opacity   0.45s ease-out,
+      box-shadow 0.45s ease-out;
+    will-change: transform;
   }
 
   @media screen and (min-width: 750px) {
-    .cc-card { --cc-card-w: clamp(260px, 26vw, 340px); border-radius: 22px; }
+    .cc-card { --cc-card-w: clamp(260px, 26vw, 340px); border-radius: 26px; }
   }
 
-  .cc-card--active { cursor: default; }
+  .cc-card--active {
+    cursor: default;
+    box-shadow: 0 28px 60px -14px rgba(0, 0, 0, 0.35), 0 6px 16px rgba(0, 0, 0, 0.14);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cc-card { transition-duration: 0.01s; }
+  }
 
   .cc-card__inner {
     display: block;
@@ -308,24 +329,27 @@
     line-height: normal;
   }
 
-  /* ── Navigation arrows ── */
+  /* ── Navigation arrows — frosted glass, pointer devices only ── */
   .cc-nav {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
     z-index: 20;
-    width: 46px;
-    height: 46px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    border: none;
-    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: rgba(255, 255, 255, 0.78);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    backdrop-filter: blur(16px) saturate(180%);
     color: #111;
-    box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+    box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.18), 0 1px 3px rgba(0, 0, 0, 0.08);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.2s, background 0.2s, opacity 0.2s;
   }
 
   .cc-nav svg { width: 20px; height: 20px; pointer-events: none; }
@@ -338,19 +362,54 @@
     .cc-nav--next { right: 32px; }
   }
 
-  .cc-nav:hover {
-    background: #f0f0f0;
-    box-shadow: 0 6px 24px rgba(0,0,0,0.22);
-    transform: translateY(-50%) scale(1.08);
+  /* Swipe is the primary gesture on touch devices */
+  @media (hover: none) and (pointer: coarse) {
+    .cc-nav { display: none; }
   }
+
+  .cc-nav:hover {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 12px 32px -6px rgba(0, 0, 0, 0.22), 0 2px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-50%) scale(1.06);
+  }
+
+  .cc-nav:active { transform: translateY(-50%) scale(0.94); }
 
   .cc-nav:disabled {
-    opacity: 0.35;
+    opacity: 0.3;
     cursor: default;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: none;
   }
 
-  .cc-nav:disabled:hover { transform: translateY(-50%); background: #fff; }
+  .cc-nav:disabled:hover { transform: translateY(-50%); background: rgba(255, 255, 255, 0.78); }
+
+  /* ── Page dots — iOS page-control style ── */
+  .cc-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    margin-top: 18px;
+    min-height: 16px;
+  }
+
+  .cc-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    border: none;
+    padding: 0;
+    background: currentColor;
+    opacity: 0.22;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.25s ease, width 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .cc-dot--active {
+    opacity: 0.85;
+    width: 20px;
+  }
 {% endstylesheet %}
 
 <script>
@@ -362,8 +421,21 @@
   var cards = Array.from(stage.querySelectorAll('.cc-card'));
   var prev  = document.getElementById('cc-prev-' + sid);
   var next  = document.getElementById('cc-next-' + sid);
+  var dotsWrap = document.getElementById('cc-dots-' + sid);
   var active = 1;
   var total  = cards.length;
+
+  var dots = [];
+  if (dotsWrap) {
+    cards.forEach(function (_, i) {
+      var d = document.createElement('button');
+      d.className = 'cc-dot';
+      d.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+      d.addEventListener('click', function () { goTo(i); });
+      dotsWrap.appendChild(d);
+      dots.push(d);
+    });
+  }
 
   /* ── Step lookup tables (index = abs integer offset) ── */
   var TX_RATIO = [0, 0.80, 1.42, 1.90];
@@ -404,19 +476,19 @@
 
       card.style.opacity  = op.toFixed(3);
       card.style.zIndex   = Math.round(20 - absOff * 4);
-      card.style.boxShadow = absOff < 0.5
-        ? '0 24px 60px rgba(0,0,0,0.36), 0 6px 16px rgba(0,0,0,0.2)'
-        : 'none';
       card.classList.toggle('cc-card--active', i === Math.round(center));
+    });
+    var page = Math.round(center);
+    dots.forEach(function (d, i) {
+      d.classList.toggle('cc-dot--active', i === page);
     });
     if (prev) prev.disabled = active <= 0;
     if (next) next.disabled = active >= total - 1;
   }
 
   function setTransition(on) {
-    var t = on
-      ? 'transform 0.48s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.48s ease, box-shadow 0.48s ease'
-      : 'none';
+    /* '' restores the stylesheet transition (incl. reduced-motion override) */
+    var t = on ? '' : 'none';
     cards.forEach(function (c) { c.style.transition = t; });
   }
 
@@ -447,10 +519,12 @@
   var startX     = 0;
   var startT     = 0;
   var liveCenter = active;
+  var dragW      = 280;
+  var rafPending = false;
 
   stage.addEventListener('pointerdown', function (e) {
-    /* Ignore non-primary mouse buttons and button/link targets
-       so arrow clicks and card links are never swallowed */
+    /* Ignore non-primary mouse buttons and button targets
+       so arrow clicks are never swallowed */
     if (e.button !== 0 && e.pointerType === 'mouse') return;
     if (e.target.closest('button')) return;
 
@@ -460,6 +534,7 @@
     startX     = e.clientX;
     startT     = Date.now();
     liveCenter = active;
+    dragW      = cardW(); /* read layout once per drag, not per move */
     setTransition(false);
   }, { passive: true });
 
@@ -470,14 +545,20 @@
     if (Math.abs(dx) > 8) wasDragged = true;
     if (!wasDragged) return;
 
-    var raw = active - dx / cardW();
+    var raw = active - dx / dragW;
     if (raw < 0) {
       raw = -Math.pow(-raw, 0.55);
     } else if (raw > total - 1) {
       raw = (total - 1) + Math.pow(raw - (total - 1), 0.55);
     }
     liveCenter = raw;
-    render(liveCenter);
+    if (!rafPending) {
+      rafPending = true;
+      requestAnimationFrame(function () {
+        rafPending = false;
+        if (dragging) render(liveCenter);
+      });
+    }
   }, { passive: true });
 
   function onRelease(e) {
@@ -500,6 +581,12 @@
 
   window.addEventListener('pointerup',     onRelease, { passive: true });
   window.addEventListener('pointercancel', onRelease, { passive: true });
+
+  /* ── Keyboard ── */
+  stage.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); goTo(active - 1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); goTo(active + 1); }
+  });
 
   /* ── Init (instant placement, then enable transitions) ── */
   setTransition(false);
