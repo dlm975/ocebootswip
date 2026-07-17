@@ -1,0 +1,338 @@
+{%- liquid
+  assign heading    = section.settings.heading
+  assign subheading = section.settings.subheading
+  assign ratio      = section.settings.image_ratio | default: '3/4'
+-%}
+
+<div
+  class="ccg-section"
+  style="{% render 'spacing-style', settings: section.settings %}"
+>
+
+  {%- if heading != blank or subheading != blank -%}
+    <div class="ccg-header">
+      {%- if heading != blank -%}
+        <h2 class="ccg-header__title">{{ heading }}</h2>
+      {%- endif -%}
+      {%- if subheading != blank -%}
+        <p class="ccg-header__sub">{{ subheading }}</p>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  <div class="ccg-grid ccg-grid--cols-{{ section.settings.columns_desktop }}" style="--ccg-ratio: {{ ratio }};">
+    {%- if section.blocks.size == 0 -%}
+      {%- for i in (1..4) -%}
+        <div class="ccg-item">
+          <div class="ccg-cutout">
+            <div class="ccg-media">
+              {{ 'collection-1' | placeholder_svg_tag: 'ccg-placeholder-svg' }}
+            </div>
+          </div>
+          <span class="ccg-caption">Collection {{ i }}</span>
+        </div>
+      {%- endfor -%}
+    {%- else -%}
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign col   = block.settings.collection
+          assign img   = block.settings.image | default: col.image
+          assign title = block.settings.title | default: col.title
+          assign link  = block.settings.link | default: col.url
+        -%}
+
+        <div class="ccg-item" {{ block.shopify_attributes }}>
+          {%- if link != blank -%}
+            <a href="{{ link }}" class="ccg-link" aria-label="{{ title | escape }}">
+          {%- else -%}
+            <div class="ccg-link">
+          {%- endif -%}
+
+            <div class="ccg-cutout">
+              <div class="ccg-media">
+                {%- if img != blank -%}
+                  <img
+                    class="ccg-img"
+                    src="{{ img | image_url: width: 600 }}"
+                    srcset="
+                      {{ img | image_url: width: 300 }} 300w,
+                      {{ img | image_url: width: 600 }} 600w,
+                      {{ img | image_url: width: 900 }} 900w
+                    "
+                    sizes="(max-width: 749px) 46vw, {{ 92 | divided_by: section.settings.columns_desktop }}vw"
+                    alt="{{ title | escape }}"
+                    loading="lazy"
+                    decoding="async"
+                    width="600"
+                    height="800"
+                  >
+                {%- else -%}
+                  {{ 'collection-1' | placeholder_svg_tag: 'ccg-placeholder-svg' }}
+                {%- endif -%}
+              </div>
+            </div>
+            {%- if title != blank -%}
+              <span class="ccg-caption">{{ title }}</span>
+            {%- endif -%}
+
+          {%- if link != blank -%}
+            </a>
+          {%- else -%}
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    {%- endif -%}
+  </div>
+
+</div>
+
+{% stylesheet %}
+  .ccg-section {
+    padding-block: 48px;
+    overflow: hidden; /* tilted cutouts can poke past the edge */
+  }
+
+  .ccg-header {
+    padding-inline: 24px;
+    margin-bottom: 32px;
+    text-align: center;
+  }
+
+  .ccg-header__title {
+    font-size: clamp(1.5rem, 4vw, 2.4rem);
+    font-weight: 800;
+    margin: 0 0 6px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .ccg-header__sub {
+    font-size: 0.92rem;
+    opacity: 0.55;
+    margin: 0;
+  }
+
+  /* ── Grid ── */
+  .ccg-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px 20px;
+    padding-inline: 20px;
+    max-width: 1200px;
+    margin-inline: auto;
+  }
+
+  @media screen and (min-width: 750px) {
+    .ccg-grid { gap: 44px 32px; padding-inline: 40px; }
+    .ccg-grid--cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .ccg-grid--cols-4 { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  .ccg-item { min-width: 0; }
+
+  .ccg-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: inherit;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ── Paper cutout ── */
+  .ccg-cutout {
+    width: 100%;
+    background: #ffffff;
+    padding: 8px 8px 10px; /* the white paper mat */
+    border-radius: 4px;
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.1),
+      0 10px 22px -6px rgba(0, 0, 0, 0.22),
+      0 24px 40px -18px rgba(0, 0, 0, 0.18);
+    transform: rotate(var(--ccg-tilt, 0deg));
+    transition:
+      transform 0.35s cubic-bezier(0.32, 0.72, 0, 1),
+      box-shadow 0.35s ease-out;
+    will-change: transform;
+  }
+
+  @media screen and (min-width: 750px) {
+    .ccg-cutout { padding: 10px 10px 12px; border-radius: 5px; }
+  }
+
+  /* Every cutout lands on the page at its own angle */
+  .ccg-item:nth-child(6n + 1) .ccg-cutout { --ccg-tilt: -2.2deg; }
+  .ccg-item:nth-child(6n + 2) .ccg-cutout { --ccg-tilt:  1.7deg; }
+  .ccg-item:nth-child(6n + 3) .ccg-cutout { --ccg-tilt: -1.2deg; }
+  .ccg-item:nth-child(6n + 4) .ccg-cutout { --ccg-tilt:  2.3deg; }
+  .ccg-item:nth-child(6n + 5) .ccg-cutout { --ccg-tilt: -1.7deg; }
+  .ccg-item:nth-child(6n + 6) .ccg-cutout { --ccg-tilt:  1.2deg; }
+
+  /* Hover: the cutout straightens and lifts off the page */
+  @media (hover: hover) {
+    .ccg-link:hover .ccg-cutout {
+      transform: rotate(0deg) translateY(-8px) scale(1.03);
+      box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.08),
+        0 18px 32px -8px rgba(0, 0, 0, 0.26),
+        0 40px 64px -20px rgba(0, 0, 0, 0.24);
+    }
+  }
+
+  /* Touch: gentle press-down instead */
+  .ccg-link:active .ccg-cutout {
+    transform: rotate(var(--ccg-tilt, 0deg)) scale(0.97);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ccg-cutout { transition-duration: 0.01s; }
+    .ccg-link:hover .ccg-cutout { transform: rotate(var(--ccg-tilt, 0deg)); }
+  }
+
+  .ccg-media {
+    aspect-ratio: var(--ccg-ratio, 3/4);
+    overflow: hidden;
+    border-radius: 2px;
+    background: #ececec;
+  }
+
+  .ccg-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .ccg-placeholder-svg {
+    width: 100%;
+    height: 100%;
+    opacity: 0.25;
+  }
+
+  /* ── Caption under the cutout ── */
+  .ccg-caption {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    opacity: 0.75;
+    text-align: center;
+    transition: opacity 0.2s ease;
+  }
+
+  @media (hover: hover) {
+    .ccg-link:hover .ccg-caption { opacity: 1; }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Collection Cutout Grid",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Title",
+      "default": "Shop by Collection"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "header",
+      "content": "Grid"
+    },
+    {
+      "type": "select",
+      "id": "columns_desktop",
+      "label": "Columns (desktop)",
+      "options": [
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" }
+      ],
+      "default": "4",
+      "info": "Mobile always shows 2 columns"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        { "value": "1/1", "label": "Square (1:1)" },
+        { "value": "3/4", "label": "Portrait (3:4)" },
+        { "value": "4/3", "label": "Landscape (4:3)" }
+      ],
+      "default": "3/4"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48
+    }
+  ],
+  "blocks": [
+    {
+      "type": "cutout",
+      "name": "Collection",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection",
+          "info": "Image, title and link come from the collection unless overridden below"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Custom image"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Custom title"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Custom link"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "Collection Cutout Grid",
+      "blocks": [
+        { "type": "cutout" },
+        { "type": "cutout" },
+        { "type": "cutout" },
+        { "type": "cutout" }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  }
+}
+{% endschema %}
