@@ -141,25 +141,14 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* ── Paper cutout ── */
+  /* ── Paper cutout — die-cut sticker hugging the product silhouette.
+        Images are transparent-background PNGs; the white "paper" edge
+        and the page shadow both follow the alpha channel. ── */
   .ccg-cutout {
     width: 100%;
-    background: #ffffff;
-    padding: 8px 8px 10px; /* the white paper mat */
-    border-radius: 4px;
-    box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.1),
-      0 10px 22px -6px rgba(0, 0, 0, 0.22),
-      0 24px 40px -18px rgba(0, 0, 0, 0.18);
     transform: rotate(var(--ccg-tilt, 0deg));
-    transition:
-      transform 0.35s cubic-bezier(0.32, 0.72, 0, 1),
-      box-shadow 0.35s ease-out;
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
     will-change: transform;
-  }
-
-  @media screen and (min-width: 750px) {
-    .ccg-cutout { padding: 10px 10px 12px; border-radius: 5px; }
   }
 
   /* Every cutout lands on the page at its own angle */
@@ -173,11 +162,7 @@
   /* Hover: the cutout straightens and lifts off the page */
   @media (hover: hover) {
     .ccg-link:hover .ccg-cutout {
-      transform: rotate(0deg) translateY(-8px) scale(1.03);
-      box-shadow:
-        0 2px 4px rgba(0, 0, 0, 0.08),
-        0 18px 32px -8px rgba(0, 0, 0, 0.26),
-        0 40px 64px -20px rgba(0, 0, 0, 0.24);
+      transform: rotate(0deg) translateY(-8px) scale(1.04);
     }
   }
 
@@ -193,16 +178,49 @@
 
   .ccg-media {
     aspect-ratio: var(--ccg-ratio, 3/4);
-    overflow: hidden;
-    border-radius: 2px;
-    background: #ececec;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .ccg-img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     display: block;
+    /* White sticker edge hugging the silhouette (8 directions so
+       curves stay solid), then the lifted-paper shadow — all of it
+       follows the PNG alpha, not a rectangle. Static filter: it is
+       never transitioned, so it rasterises once and stays cheap. */
+    --ccg-edge: 3px;
+    --ccg-edge-d: 2.1px;
+    filter:
+      drop-shadow(var(--ccg-edge) 0 0 #fff)
+      drop-shadow(calc(var(--ccg-edge) * -1) 0 0 #fff)
+      drop-shadow(0 var(--ccg-edge) 0 #fff)
+      drop-shadow(0 calc(var(--ccg-edge) * -1) 0 #fff)
+      drop-shadow(var(--ccg-edge-d) var(--ccg-edge-d) 0 #fff)
+      drop-shadow(calc(var(--ccg-edge-d) * -1) var(--ccg-edge-d) 0 #fff)
+      drop-shadow(var(--ccg-edge-d) calc(var(--ccg-edge-d) * -1) 0 #fff)
+      drop-shadow(calc(var(--ccg-edge-d) * -1) calc(var(--ccg-edge-d) * -1) 0 #fff)
+      drop-shadow(0 16px 14px rgba(0, 0, 0, 0.28));
+  }
+
+  @media screen and (max-width: 749px) {
+    .ccg-img {
+      --ccg-edge: 2px;
+      --ccg-edge-d: 1.4px;
+      filter:
+        drop-shadow(var(--ccg-edge) 0 0 #fff)
+        drop-shadow(calc(var(--ccg-edge) * -1) 0 0 #fff)
+        drop-shadow(0 var(--ccg-edge) 0 #fff)
+        drop-shadow(0 calc(var(--ccg-edge) * -1) 0 #fff)
+        drop-shadow(var(--ccg-edge-d) var(--ccg-edge-d) 0 #fff)
+        drop-shadow(calc(var(--ccg-edge-d) * -1) var(--ccg-edge-d) 0 #fff)
+        drop-shadow(var(--ccg-edge-d) calc(var(--ccg-edge-d) * -1) 0 #fff)
+        drop-shadow(calc(var(--ccg-edge-d) * -1) calc(var(--ccg-edge-d) * -1) 0 #fff)
+        drop-shadow(0 10px 10px rgba(0, 0, 0, 0.26));
+    }
   }
 
   .ccg-placeholder-svg {
@@ -271,7 +289,8 @@
         { "value": "3/4", "label": "Portrait (3:4)" },
         { "value": "4/3", "label": "Landscape (4:3)" }
       ],
-      "default": "3/4"
+      "default": "1/1",
+      "info": "Sets the space each cutout occupies — the shoe itself keeps its own shape"
     },
     {
       "type": "header",
@@ -304,7 +323,8 @@
         {
           "type": "image_picker",
           "id": "image",
-          "label": "Custom image"
+          "label": "Custom image",
+          "info": "Use a PNG with the background removed — the paper edge traces the shoe's outline"
         },
         {
           "type": "text",
