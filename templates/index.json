@@ -142,6 +142,68 @@
         "padding-block-end": 0
       }
     },
+    "collection_cutout_grid_gidTf3": {
+      "type": "collection-cutout-grid",
+      "blocks": {
+        "cutout_xh7LUw": {
+          "type": "cutout",
+          "settings": {
+            "collection": "mercurial",
+            "image": "shopify://shop_images/IMG_2038.png",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_hNMp6r": {
+          "type": "cutout",
+          "settings": {
+            "collection": "",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_yiBwVc": {
+          "type": "cutout",
+          "settings": {
+            "collection": "",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_hEdGq4": {
+          "type": "cutout",
+          "settings": {
+            "collection": "",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_Gbz8K7": {
+          "type": "cutout",
+          "settings": {
+            "collection": "",
+            "title": "",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "cutout_xh7LUw",
+        "cutout_hNMp6r",
+        "cutout_yiBwVc",
+        "cutout_hEdGq4",
+        "cutout_Gbz8K7"
+      ],
+      "name": "Collection Cutout Grid",
+      "settings": {
+        "heading": "Shop by Collection",
+        "subheading": "",
+        "columns_desktop": "4",
+        "image_ratio": "1/1",
+        "padding-block-start": 48,
+        "padding-block-end": 48
+      }
+    },
     "newly_listed_fc": {
       "type": "product-list",
       "blocks": {
@@ -627,6 +689,7 @@
   "order": [
     "1770583639efe53d54",
     "17706063529fca8395",
+    "collection_cutout_grid_gidTf3",
     "newly_listed_fc",
     "brand_tiles_main",
     "product_spotlight_HMicki",
