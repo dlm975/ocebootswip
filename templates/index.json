@@ -92,7 +92,7 @@
             "label_size": 12,
             "label_color": "#111111",
             "section_background": "#ffffff",
-            "section_padding": 24,
+            "section_padding": 0,
             "bar_background": "#f7f7f7",
             "bar_border_color": "#e2e2e2",
             "bar_padding": 14,
@@ -196,12 +196,13 @@
       ],
       "name": "Collection Cutout Grid",
       "settings": {
-        "heading": "Shop by Collection",
+        "heading": "",
         "subheading": "",
-        "columns_desktop": "4",
+        "columns_desktop": "8",
+        "columns_mobile": "4",
         "image_ratio": "1/1",
-        "padding-block-start": 48,
-        "padding-block-end": 48
+        "padding-block-start": 0,
+        "padding-block-end": 0
       }
     },
     "newly_listed_fc": {
