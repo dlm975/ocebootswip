@@ -145,90 +145,11 @@
     "collection_cutout_grid_gidTf3": {
       "type": "collection-cutout-grid",
       "blocks": {
-        "cutout_ctbx3N": {
-          "type": "cutout",
-          "settings": {
-            "collection": "magista-1",
-            "title": "",
-            "link": ""
-          }
-        },
-        "cutout_xMrjUY": {
-          "type": "cutout",
-          "settings": {
-            "collection": "total-91",
-            "title": "",
-            "link": ""
-          }
-        },
-        "cutout_njgyG4": {
-          "type": "cutout",
-          "settings": {
-            "collection": "tiempo-1",
-            "title": "",
-            "link": ""
-          }
-        },
-        "cutout_XmarxX": {
-          "type": "cutout",
-          "settings": {
-            "collection": "nemeziz",
-            "title": "",
-            "link": ""
-          }
-        },
-        "cutout_X93mKe": {
-          "type": "cutout",
-          "settings": {
-            "collection": "x",
-            "title": "",
-            "link": ""
-          }
-        },
-        "cutout_gQUNwg": {
-          "type": "cutout",
-          "settings": {
-            "collection": "copa",
-            "title": "",
-            "link": ""
-          }
-        },
-        "cutout_yVq6wq": {
-          "type": "cutout",
-          "settings": {
-            "collection": "ctr360-1",
-            "title": "",
-            "link": ""
-          }
-        },
-        "cutout_4CcbHj": {
-          "type": "cutout",
-          "settings": {
-            "collection": "predator-1",
-            "title": "",
-            "link": ""
-          }
-        },
-        "cutout_KMkUpN": {
-          "type": "cutout",
-          "settings": {
-            "collection": "phantom-1",
-            "title": "",
-            "link": ""
-          }
-        },
-        "cutout_Nf8zeV": {
-          "type": "cutout",
-          "settings": {
-            "collection": "f50",
-            "title": "",
-            "link": ""
-          }
-        },
         "cutout_F3U4tR": {
           "type": "cutout",
           "settings": {
             "collection": "superfly-copy",
+            "image": "shopify://shop_images/IMG_2052-Photoroom.png",
             "title": "",
             "link": ""
           }
@@ -242,10 +163,101 @@
             "link": ""
           }
         },
+        "cutout_ctbx3N": {
+          "type": "cutout",
+          "settings": {
+            "collection": "magista-1",
+            "image": "shopify://shop_images/IMG-2072.png",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_njgyG4": {
+          "type": "cutout",
+          "settings": {
+            "collection": "tiempo-1",
+            "image": "shopify://shop_images/IMG_2043-Photoroom.png",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_X93mKe": {
+          "type": "cutout",
+          "settings": {
+            "collection": "x",
+            "image": "shopify://shop_images/IMG_2045-Photoroom.png",
+            "title": "",
+            "link": ""
+          }
+        },
         "cutout_hNMp6r": {
           "type": "cutout",
           "settings": {
             "collection": "hypervenom",
+            "image": "shopify://shop_images/IMG_2053-Photoroom.png",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_4CcbHj": {
+          "type": "cutout",
+          "settings": {
+            "collection": "predator-1",
+            "image": "shopify://shop_images/IMG_2048-Photoroom.png",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_XmarxX": {
+          "type": "cutout",
+          "settings": {
+            "collection": "nemeziz",
+            "image": "shopify://shop_images/IMG_2044-Photoroom.png",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_gQUNwg": {
+          "type": "cutout",
+          "settings": {
+            "collection": "copa",
+            "image": "shopify://shop_images/IMG_2046-Photoroom.png",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_yVq6wq": {
+          "type": "cutout",
+          "settings": {
+            "collection": "ctr360-1",
+            "image": "shopify://shop_images/IMG_2047-Photoroom.png",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_KMkUpN": {
+          "type": "cutout",
+          "settings": {
+            "collection": "phantom-1",
+            "image": "shopify://shop_images/IMG_2049-Photoroom.png",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_Nf8zeV": {
+          "type": "cutout",
+          "settings": {
+            "collection": "f50",
+            "image": "shopify://shop_images/IMG_2050-Photoroom.png",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_xMrjUY": {
+          "type": "cutout",
+          "settings": {
+            "collection": "total-91",
+            "image": "shopify://shop_images/IMG_2042-Photoroom.png",
             "title": "",
             "link": ""
           }
@@ -254,6 +266,7 @@
           "type": "cutout",
           "settings": {
             "collection": "puma-1",
+            "image": "shopify://shop_images/IMG_2054-Photoroom.png",
             "title": "",
             "link": ""
           }
@@ -262,6 +275,7 @@
           "type": "cutout",
           "settings": {
             "collection": "mizuno",
+            "image": "shopify://shop_images/IMG_2055-Photoroom.png",
             "title": "",
             "link": ""
           }
@@ -270,25 +284,26 @@
           "type": "cutout",
           "settings": {
             "collection": "11pro",
+            "image": "shopify://shop_images/IMG_2056-Photoroom.png",
             "title": "",
             "link": ""
           }
         }
       },
       "block_order": [
-        "cutout_ctbx3N",
-        "cutout_xMrjUY",
-        "cutout_njgyG4",
-        "cutout_XmarxX",
-        "cutout_X93mKe",
-        "cutout_gQUNwg",
-        "cutout_yVq6wq",
-        "cutout_4CcbHj",
-        "cutout_KMkUpN",
-        "cutout_Nf8zeV",
         "cutout_F3U4tR",
         "cutout_xh7LUw",
+        "cutout_ctbx3N",
+        "cutout_njgyG4",
+        "cutout_X93mKe",
         "cutout_hNMp6r",
+        "cutout_4CcbHj",
+        "cutout_XmarxX",
+        "cutout_gQUNwg",
+        "cutout_yVq6wq",
+        "cutout_KMkUpN",
+        "cutout_Nf8zeV",
+        "cutout_xMrjUY",
         "cutout_yiBwVc",
         "cutout_hEdGq4",
         "cutout_Gbz8K7"
