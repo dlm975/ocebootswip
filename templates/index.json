@@ -145,6 +145,94 @@
     "collection_cutout_grid_gidTf3": {
       "type": "collection-cutout-grid",
       "blocks": {
+        "cutout_ctbx3N": {
+          "type": "cutout",
+          "settings": {
+            "collection": "magista-1",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_xMrjUY": {
+          "type": "cutout",
+          "settings": {
+            "collection": "total-91",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_njgyG4": {
+          "type": "cutout",
+          "settings": {
+            "collection": "tiempo-1",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_XmarxX": {
+          "type": "cutout",
+          "settings": {
+            "collection": "nemeziz",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_X93mKe": {
+          "type": "cutout",
+          "settings": {
+            "collection": "x",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_gQUNwg": {
+          "type": "cutout",
+          "settings": {
+            "collection": "copa",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_yVq6wq": {
+          "type": "cutout",
+          "settings": {
+            "collection": "ctr360-1",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_4CcbHj": {
+          "type": "cutout",
+          "settings": {
+            "collection": "predator-1",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_KMkUpN": {
+          "type": "cutout",
+          "settings": {
+            "collection": "phantom-1",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_Nf8zeV": {
+          "type": "cutout",
+          "settings": {
+            "collection": "f50",
+            "title": "",
+            "link": ""
+          }
+        },
+        "cutout_F3U4tR": {
+          "type": "cutout",
+          "settings": {
+            "collection": "superfly-copy",
+            "title": "",
+            "link": ""
+          }
+        },
         "cutout_xh7LUw": {
           "type": "cutout",
           "settings": {
@@ -165,7 +253,7 @@
         "cutout_yiBwVc": {
           "type": "cutout",
           "settings": {
-            "collection": "",
+            "collection": "puma-1",
             "title": "",
             "link": ""
           }
@@ -173,7 +261,7 @@
         "cutout_hEdGq4": {
           "type": "cutout",
           "settings": {
-            "collection": "",
+            "collection": "mizuno",
             "title": "",
             "link": ""
           }
@@ -181,13 +269,24 @@
         "cutout_Gbz8K7": {
           "type": "cutout",
           "settings": {
-            "collection": "",
+            "collection": "11pro",
             "title": "",
             "link": ""
           }
         }
       },
       "block_order": [
+        "cutout_ctbx3N",
+        "cutout_xMrjUY",
+        "cutout_njgyG4",
+        "cutout_XmarxX",
+        "cutout_X93mKe",
+        "cutout_gQUNwg",
+        "cutout_yVq6wq",
+        "cutout_4CcbHj",
+        "cutout_KMkUpN",
+        "cutout_Nf8zeV",
+        "cutout_F3U4tR",
         "cutout_xh7LUw",
         "cutout_hNMp6r",
         "cutout_yiBwVc",
