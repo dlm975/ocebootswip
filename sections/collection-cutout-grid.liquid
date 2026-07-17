@@ -5,6 +5,20 @@
   assign cols_d     = section.settings.columns_desktop | plus: 0
   assign cols_m     = section.settings.columns_mobile | plus: 0
   assign img_span   = 92 | divided_by: cols_d
+
+  # Tighter gaps as column counts rise so dense grids don't starve the cards
+  if cols_d >= 7
+    assign gap_d = '20px 14px'
+  elsif cols_d >= 5
+    assign gap_d = '32px 22px'
+  else
+    assign gap_d = '44px 32px'
+  endif
+  if cols_m >= 3
+    assign gap_m = '18px 10px'
+  else
+    assign gap_m = '28px 20px'
+  endif
 -%}
 
 <div
@@ -30,10 +44,10 @@
   {%- endcomment -%}
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
     <filter id="ccg-edge-{{ section.id }}" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
-      <feMorphology in="SourceAlpha" operator="dilate" radius="5" result="border"/>
-      <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="3" seed="11" result="noise"/>
-      <feDisplacementMap in="border" in2="noise" scale="7" xChannelSelector="R" yChannelSelector="G" result="rough"/>
-      <feFlood flood-color="#f6f0e3" result="paper"/>
+      <feMorphology in="SourceAlpha" operator="dilate" radius="4" result="border"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="11" result="noise"/>
+      <feDisplacementMap in="border" in2="noise" scale="2.5" xChannelSelector="R" yChannelSelector="G" result="rough"/>
+      <feFlood flood-color="#fbfaf6" result="paper"/>
       <feComposite in="paper" in2="rough" operator="in" result="paper-edge"/>
       <feMerge>
         <feMergeNode in="paper-edge"/>
@@ -44,7 +58,7 @@
 
   <div
     class="ccg-grid"
-    style="--ccg-ratio: {{ ratio }}; --ccg-cols: {{ cols_d }}; --ccg-cols-m: {{ cols_m }}; --ccg-filter: url('#ccg-edge-{{ section.id }}');"
+    style="--ccg-ratio: {{ ratio }}; --ccg-cols: {{ cols_d }}; --ccg-cols-m: {{ cols_m }}; --ccg-gap: {{ gap_d }}; --ccg-gap-m: {{ gap_m }}; --ccg-filter: url('#ccg-edge-{{ section.id }}');"
   >
     {%- if section.blocks.size == 0 -%}
       {%- for i in (1..4) -%}
@@ -142,7 +156,7 @@
   .ccg-grid {
     display: grid;
     grid-template-columns: repeat(var(--ccg-cols-m, 2), 1fr);
-    gap: 28px 20px;
+    gap: var(--ccg-gap-m, 28px 20px);
     padding-inline: 20px;
     max-width: 1200px;
     margin-inline: auto;
@@ -151,7 +165,7 @@
   @media screen and (min-width: 750px) {
     .ccg-grid {
       grid-template-columns: repeat(var(--ccg-cols, 4), 1fr);
-      gap: 44px 32px;
+      gap: var(--ccg-gap, 44px 32px);
       padding-inline: 40px;
     }
   }
@@ -282,9 +296,11 @@
         { "value": "3", "label": "3" },
         { "value": "4", "label": "4" },
         { "value": "5", "label": "5" },
-        { "value": "6", "label": "6" }
+        { "value": "6", "label": "6" },
+        { "value": "7", "label": "7" },
+        { "value": "8", "label": "8" }
       ],
-      "default": "4"
+      "default": "8"
     },
     {
       "type": "select",
@@ -293,9 +309,10 @@
       "options": [
         { "value": "1", "label": "1" },
         { "value": "2", "label": "2" },
-        { "value": "3", "label": "3" }
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" }
       ],
-      "default": "2"
+      "default": "4"
     },
     {
       "type": "select",
@@ -356,7 +373,7 @@
       ]
     }
   ],
-  "max_blocks": 12,
+  "max_blocks": 16,
   "presets": [
     {
       "name": "Collection Cutout Grid",
