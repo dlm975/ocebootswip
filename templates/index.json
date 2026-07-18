@@ -193,7 +193,7 @@
         "cutout_hNMp6r": {
           "type": "cutout",
           "settings": {
-            "collection": "hypervenom",
+            "collection": "hypervenom-1",
             "image": "shopify://shop_images/IMG_2053-Photoroom.png",
             "title": "",
             "link": ""
