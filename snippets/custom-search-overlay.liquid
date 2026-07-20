@@ -353,7 +353,12 @@
     });
 
     form.addEventListener('submit', function (e) {
-      if (!input.value.trim()) { e.preventDefault(); }
+      var q = input.value.trim();
+      if (!q) { e.preventDefault(); return; }
+      /* Append a wildcard so Shopify prefix-matches the last term:
+         "pred" finds "predator". Skip if the user already used one
+         or is quoting an exact phrase. */
+      if (!/[*"]$/.test(q)) input.value = q + '*';
     });
 
     window.customSearchOpen  = openSearch;

@@ -61,6 +61,21 @@
 
     {% render 'search-modal' %}
     {% render 'custom-search-overlay' %}
+    {%- if template.name == 'product' -%}
+      <script>
+        /* Tidy Shopify search-analytics params (_pos/_sid/_ss/…) out of
+           the address bar. Runs after load, so the analytics request has
+           already been recorded server-side — this is cosmetic only. */
+        (function () {
+          var url = new URL(window.location.href);
+          var removed = false;
+          ['_pos', '_sid', '_ss', '_psq', '_fid'].forEach(function (p) {
+            if (url.searchParams.has(p)) { url.searchParams.delete(p); removed = true; }
+          });
+          if (removed) history.replaceState(history.state, '', url.toString());
+        })();
+      </script>
+    {%- endif -%}
     {% if template.name == 'index' or template.name == 'collection' %}
       {% render 'instagram-widget' %}
       {% render 'size-widget' %}
