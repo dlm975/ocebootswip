@@ -5,6 +5,26 @@
   if product_blocks.size == 0 and request.design_mode
     assign placeholder = true
   endif
+
+  assign n = product_blocks.size
+  if placeholder
+    assign n = 1
+  endif
+
+  # Column counts scale with how many products are shown
+  if n <= 1
+    assign cols_d = 1
+    assign cols_m = 1
+  elsif n == 2
+    assign cols_d = 2
+    assign cols_m = 2
+  elsif n == 3
+    assign cols_d = 3
+    assign cols_m = 2
+  else
+    assign cols_d = 4
+    assign cols_m = 2
+  endif
 -%}
 
 {%- if product_blocks.size > 0 or placeholder -%}
@@ -69,112 +89,117 @@
     <div class="rss-overlay__inner">
       <h2 class="rss-overlay__title">{{ title }}</h2>
 
-      <div class="rss-scroller" id="rss-scroller-{{ section.id }}">
-        {%- if placeholder -%}
-          <a class="rss-card" href="#" onclick="return false;">
-            <div class="rss-card__media">
-              {{ 'product-1' | placeholder_svg_tag: 'rss-card__svg' }}
-              <span class="rss-badge">Condition</span>
-            </div>
-            <p class="rss-card__name">Product Name</p>
-            <div class="rss-sizes">
-              <span class="rss-sizes__label">Sizes:</span>
-              <span class="rss-size-pill">US 10 - UK 9 - EU 44</span>
-              <span class="rss-size-pill">US 10.5 - UK 10 - EU 45</span>
-              <span class="rss-size-pill">US 11 - UK 10.5 - EU 46</span>
-            </div>
-          </a>
-        {%- else -%}
-          {%- for block in product_blocks -%}
-            {%- liquid
-              assign p = block.settings.product
-              if p == blank
-                continue
-              endif
-
-              assign cimg = block.settings.image | default: p.featured_image
-              assign condition = block.settings.condition | default: section.settings.condition_default
-
-              # Detect which option is the size option
-              assign size_opt = 1
-              for opt in p.options
-                assign opt_lower = opt | downcase
-                if opt_lower contains 'size'
-                  assign size_opt = forloop.index
-                  break
-                endif
-              endfor
-
-              # Collect unique, available size values
-              assign seen = '|'
-              assign size_list = ''
-              for variant in p.variants
-                if variant.available
-                  case size_opt
-                    when 1
-                      assign sv = variant.option1
-                    when 2
-                      assign sv = variant.option2
-                    when 3
-                      assign sv = variant.option3
-                  endcase
-                  assign key = '|' | append: sv | append: '|'
-                  unless seen contains key
-                    assign seen = seen | append: sv | append: '|'
-                    assign size_list = size_list | append: sv | append: '~~'
-                  endunless
-                endif
-              endfor
-              assign size_arr = size_list | split: '~~'
-            -%}
-
-            <a class="rss-card" href="{{ p.url }}" {{ block.shopify_attributes }}>
-              <div class="rss-card__media">
-                {%- if cimg != blank -%}
-                  <img
-                    class="rss-card__img"
-                    src="{{ cimg | image_url: width: 700 }}"
-                    srcset="{{ cimg | image_url: width: 400 }} 400w, {{ cimg | image_url: width: 700 }} 700w"
-                    sizes="(max-width: 749px) 82vw, 340px"
-                    alt="{{ p.title | escape }}"
-                    loading="lazy"
-                    decoding="async"
-                    width="700"
-                    height="525"
-                  >
-                {%- else -%}
+      <div class="rss-grid-wrap">
+        <div
+          class="rss-grid"
+          style="--rss-cols: {{ cols_d }}; --rss-cols-m: {{ cols_m }};"
+        >
+          {%- if placeholder -%}
+            <div class="rss-card">
+              <div class="rss-card__link">
+                <div class="rss-card__media">
                   {{ 'product-1' | placeholder_svg_tag: 'rss-card__svg' }}
-                {%- endif -%}
-                {%- if condition != blank -%}
-                  <span class="rss-badge">{{ condition }}</span>
+                  <span class="rss-badge">Condition</span>
+                </div>
+                <p class="rss-card__name">Product Name</p>
+              </div>
+              <div class="rss-sizes">
+                <span class="rss-sizes__label">Sizes:</span>
+                <div class="rss-sizes__grid">
+                  <span class="rss-size-pill">US 10 - UK 9 - EU 44</span>
+                  <span class="rss-size-pill">US 10.5 - UK 10 - EU 45</span>
+                  <span class="rss-size-pill">US 11 - UK 10.5 - EU 46</span>
+                  <span class="rss-size-pill">US 11.5 - UK 11 - EU 46.5</span>
+                </div>
+              </div>
+            </div>
+          {%- else -%}
+            {%- for block in product_blocks -%}
+              {%- liquid
+                assign p = block.settings.product
+                if p == blank
+                  continue
+                endif
+
+                assign cimg = block.settings.image | default: p.featured_image
+                assign condition = block.settings.condition | default: section.settings.condition_default
+
+                # Detect which option is the size option
+                assign size_opt = 1
+                for opt in p.options
+                  assign opt_lower = opt | downcase
+                  if opt_lower contains 'size'
+                    assign size_opt = forloop.index
+                    break
+                  endif
+                endfor
+
+                # Collect unique, available sizes with their variant id (for deep-linking)
+                assign seen = '|'
+                assign size_list = ''
+                for variant in p.variants
+                  if variant.available
+                    case size_opt
+                      when 1
+                        assign sv = variant.option1
+                      when 2
+                        assign sv = variant.option2
+                      when 3
+                        assign sv = variant.option3
+                    endcase
+                    assign key = '|' | append: sv | append: '|'
+                    unless seen contains key
+                      assign seen = seen | append: sv | append: '|'
+                      assign size_list = size_list | append: sv | append: '@@' | append: variant.id | append: '~~'
+                    endunless
+                  endif
+                endfor
+                assign size_arr = size_list | split: '~~'
+              -%}
+
+              <div class="rss-card" {{ block.shopify_attributes }}>
+                <a class="rss-card__link" href="{{ p.url }}">
+                  <div class="rss-card__media">
+                    {%- if cimg != blank -%}
+                      <img
+                        class="rss-card__img"
+                        src="{{ cimg | image_url: width: 700 }}"
+                        srcset="{{ cimg | image_url: width: 400 }} 400w, {{ cimg | image_url: width: 700 }} 700w"
+                        sizes="(max-width: 749px) 44vw, 300px"
+                        alt="{{ p.title | escape }}"
+                        loading="lazy"
+                        decoding="async"
+                        width="700"
+                        height="700"
+                      >
+                    {%- else -%}
+                      {{ 'product-1' | placeholder_svg_tag: 'rss-card__svg' }}
+                    {%- endif -%}
+                    {%- if condition != blank -%}
+                      <span class="rss-badge">{{ condition }}</span>
+                    {%- endif -%}
+                  </div>
+                  <p class="rss-card__name">{{ p.title }}</p>
+                </a>
+
+                {%- if size_arr.size > 0 -%}
+                  <div class="rss-sizes">
+                    <span class="rss-sizes__label">Sizes:</span>
+                    <div class="rss-sizes__grid">
+                      {%- for entry in size_arr -%}
+                        {%- if entry != blank -%}
+                          {%- assign parts = entry | split: '@@' -%}
+                          <a class="rss-size-pill" href="{{ p.url }}?variant={{ parts[1] }}">{{ parts[0] }}</a>
+                        {%- endif -%}
+                      {%- endfor -%}
+                    </div>
+                  </div>
                 {%- endif -%}
               </div>
-
-              <p class="rss-card__name">{{ p.title }}</p>
-
-              {%- if size_arr.size > 0 -%}
-                <div class="rss-sizes">
-                  <span class="rss-sizes__label">Sizes:</span>
-                  {%- for s in size_arr limit: 6 -%}
-                    {%- if s != blank -%}<span class="rss-size-pill">{{ s }}</span>{%- endif -%}
-                  {%- endfor -%}
-                  {%- if size_arr.size > 6 -%}
-                    <span class="rss-size-pill rss-size-pill--more">+{{ size_arr.size | minus: 6 }} more</span>
-                  {%- endif -%}
-                </div>
-              {%- endif -%}
-            </a>
-          {%- endfor -%}
-        {%- endif -%}
-      </div>
-
-      {%- if product_blocks.size > 1 -%}
-        <div class="rss-dots" id="rss-dots-{{ section.id }}" aria-hidden="true">
-          {%- for block in product_blocks -%}
-            <button type="button" class="rss-dot{% if forloop.first %} rss-dot--active{% endif %}" aria-label="Go to product {{ forloop.index }}"></button>
-          {%- endfor -%}
+            {%- endfor -%}
+          {%- endif -%}
         </div>
-      {%- endif -%}
+      </div>
     </div>
   </div>
 
@@ -228,7 +253,7 @@
   .rss-trigger__stack {
     display: flex;
     align-items: center;
-    padding-left: 12px; /* room for the overlap of the first thumb */
+    padding-left: 12px;
   }
 
   .rss-thumb {
@@ -286,7 +311,6 @@
   .rss-overlay.rss-open {
     opacity: 1;
     pointer-events: all;
-    /* block background page scroll on touch without locking body */
     touch-action: none;
   }
 
@@ -325,11 +349,12 @@
     position: relative;
     z-index: 1;
     width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: clamp(20px, 4vh, 40px);
-    padding-block: max(9vh, calc(28px + env(safe-area-inset-top, 0px))) calc(24px + env(safe-area-inset-bottom, 0px));
+    gap: clamp(16px, 3vh, 34px);
+    padding-block: max(8vh, calc(26px + env(safe-area-inset-top, 0px))) calc(20px + env(safe-area-inset-bottom, 0px));
     transform: translateY(24px) scale(0.98);
     transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
   }
@@ -343,10 +368,11 @@
   }
 
   .rss-overlay__title {
+    flex-shrink: 0;
     color: #fff;
     font-style: italic;
     font-weight: 800;
-    font-size: clamp(2rem, 8vw, 2.9rem);
+    font-size: clamp(1.8rem, 7vw, 2.9rem);
     letter-spacing: 0.01em;
     text-transform: uppercase;
     text-align: center;
@@ -355,47 +381,68 @@
     text-shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
   }
 
-  /* ── Card deck ── */
-  .rss-scroller {
-    --rss-card-w: min(340px, 82vw);
-    display: flex;
-    gap: 16px;
+  /* ── One-screen grid of cards ── */
+  .rss-grid-wrap {
+    flex: 1;
+    min-height: 0;
     width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-snap-type: x mandatory;
-    touch-action: pan-x;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;   /* graceful fallback if a very dense grid can't fit */
+    touch-action: pan-y;
     overscroll-behavior: contain;
-    scrollbar-width: none;
-    align-items: flex-start;
-    padding-inline: calc((100% - var(--rss-card-w)) / 2);
   }
 
-  .rss-scroller::-webkit-scrollbar { display: none; }
+  .rss-grid {
+    width: 100%;
+    max-width: 1100px;
+    margin-inline: auto;
+    padding-inline: clamp(14px, 3vw, 28px);
+    display: grid;
+    grid-template-columns: repeat(var(--rss-cols-m, 2), minmax(0, 1fr));
+    gap: clamp(10px, 2vw, 18px);
+    align-content: center;
+    justify-items: center;
+  }
 
+  @media screen and (min-width: 750px) {
+    .rss-grid {
+      grid-template-columns: repeat(var(--rss-cols, 4), minmax(0, 1fr));
+    }
+  }
+
+  /* ── Card (white) — container-query driven so type/pills scale with width ── */
   .rss-card {
-    flex: 0 0 var(--rss-card-w);
-    scroll-snap-align: center;
-    background: linear-gradient(180deg, #e9e9e9 0%, #d4d4d4 100%);
-    border-radius: 22px;
-    padding: 14px;
-    box-shadow: 0 28px 56px -18px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.2);
-    text-decoration: none;
-    color: #111;
+    container-type: inline-size;
+    width: 100%;
+    max-width: 320px;
+    background: #ffffff;
+    border-radius: clamp(14px, 4cqi, 20px);
+    padding: clamp(8px, 3.4cqi, 14px);
+    box-shadow: 0 24px 48px -18px rgba(0, 0, 0, 0.5), 0 3px 10px rgba(0, 0, 0, 0.18);
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: clamp(7px, 2.6cqi, 12px);
+  }
+
+  .rss-card__link {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(5px, 2cqi, 9px);
+    text-decoration: none;
+    color: inherit;
     -webkit-tap-highlight-color: transparent;
     transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1);
   }
 
-  .rss-card:active { transform: scale(0.98); }
+  .rss-card__link:active { transform: scale(0.98); }
 
   .rss-card__media {
     position: relative;
-    aspect-ratio: 4 / 3;
-    background: #ececec;
-    border-radius: 14px;
+    aspect-ratio: 1 / 1;
+    background: #f2f2f2;
+    border-radius: clamp(10px, 3cqi, 14px);
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -413,50 +460,57 @@
 
   .rss-badge {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: clamp(6px, 2.5cqi, 10px);
+    right: clamp(6px, 2.5cqi, 10px);
     background: #33a1ff;
     color: #fff;
     font-style: italic;
     font-weight: 800;
-    font-size: 0.62rem;
+    font-size: clamp(0.46rem, 3.8cqi, 0.62rem);
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    padding: 5px 13px;
+    padding: clamp(3px, 1.4cqi, 5px) clamp(8px, 3.4cqi, 13px);
     border-radius: 999px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    white-space: nowrap;
   }
 
   .rss-card__name {
-    margin: 2px 0 0;
-    padding-inline: 4px;
+    margin: 0;
+    padding-inline: clamp(2px, 1cqi, 4px);
     color: #1a1a1a;
     font-style: italic;
     font-weight: 800;
-    font-size: 1.1rem;
-    line-height: 1.15;
+    font-size: clamp(0.72rem, 7cqi, 1.1rem);
+    line-height: 1.12;
     letter-spacing: -0.01em;
     text-transform: uppercase;
   }
 
+  /* ── Sizes box (compact, 2-column pills) ── */
   .rss-sizes {
     background: #111;
-    border-radius: 14px;
-    padding: 12px 13px 14px;
+    border-radius: clamp(10px, 3cqi, 14px);
+    padding: clamp(7px, 2.6cqi, 11px);
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 7px;
+    gap: clamp(4px, 1.8cqi, 7px);
   }
 
   .rss-sizes__label {
     color: #fff;
     font-style: italic;
     font-weight: 800;
-    font-size: 0.72rem;
+    font-size: clamp(0.5rem, 4cqi, 0.7rem);
     letter-spacing: 0.05em;
     text-transform: uppercase;
     padding-left: 2px;
+  }
+
+  .rss-sizes__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(4px, 1.8cqi, 7px);
   }
 
   .rss-size-pill {
@@ -465,55 +519,32 @@
     border-radius: 999px;
     font-style: italic;
     font-weight: 700;
-    font-size: 0.68rem;
-    padding: 5px 15px;
-    letter-spacing: 0.02em;
+    font-size: clamp(0.48rem, 3.6cqi, 0.68rem);
+    line-height: 1.1;
+    padding: clamp(3px, 1.6cqi, 5px) clamp(6px, 3cqi, 12px);
+    letter-spacing: 0.01em;
+    text-align: center;
+    text-decoration: none;
     white-space: nowrap;
-  }
-
-  .rss-size-pill--more {
-    background: rgba(255, 255, 255, 0.18);
-    color: rgba(255, 255, 255, 0.9);
-  }
-
-  /* ── Page dots ── */
-  .rss-dots {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    min-height: 12px;
-  }
-
-  .rss-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 999px;
-    border: none;
-    padding: 0;
-    background: #fff;
-    opacity: 0.3;
-    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
     -webkit-tap-highlight-color: transparent;
-    transition: opacity 0.25s ease, width 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    transition: transform 0.15s cubic-bezier(0.32, 0.72, 0, 1), background 0.15s;
   }
 
-  .rss-dot--active { opacity: 0.95; width: 20px; }
+  .rss-size-pill:hover { background: #e9e9e9; }
+  .rss-size-pill:active { transform: scale(0.93); }
 {% endstylesheet %}
 
 <script>
   (function () {
     var sid      = {{ section.id | json }};
-    var root     = document.getElementById('rss-' + sid);
-    if (!root) return;
+    var overlay  = document.getElementById('rss-overlay-' + sid);
+    if (!overlay) return;
 
     var trigger  = document.getElementById('rss-open-' + sid);
-    var overlay  = document.getElementById('rss-overlay-' + sid);
     var backdrop = document.getElementById('rss-backdrop-' + sid);
     var closeBtn = document.getElementById('rss-close-' + sid);
-    var scroller = document.getElementById('rss-scroller-' + sid);
-    var dotsWrap = document.getElementById('rss-dots-' + sid);
-    var dots     = dotsWrap ? Array.prototype.slice.call(dotsWrap.querySelectorAll('.rss-dot')) : [];
 
     function open() {
       overlay.classList.add('rss-open');
@@ -525,50 +556,13 @@
       overlay.setAttribute('aria-hidden', 'true');
     }
 
-    trigger.addEventListener('click', open);
-    closeBtn.addEventListener('click', close);
-    backdrop.addEventListener('click', close);
+    if (trigger)  trigger.addEventListener('click', open);
+    if (closeBtn) closeBtn.addEventListener('click', close);
+    if (backdrop) backdrop.addEventListener('click', close);
 
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && overlay.classList.contains('rss-open')) close();
     });
-
-    /* ── Page-dot sync + tap-to-scroll ── */
-    if (dots.length && scroller) {
-      var cards = function () { return scroller.querySelectorAll('.rss-card'); };
-      var rafPending = false;
-
-      scroller.addEventListener('scroll', function () {
-        if (rafPending) return;
-        rafPending = true;
-        requestAnimationFrame(function () {
-          rafPending = false;
-          var cs = cards();
-          if (!cs.length) return;
-          var center = scroller.scrollLeft + scroller.clientWidth / 2;
-          var idx = 0, best = Infinity;
-          for (var i = 0; i < cs.length; i++) {
-            var cc = cs[i].offsetLeft + cs[i].offsetWidth / 2;
-            var d = Math.abs(cc - center);
-            if (d < best) { best = d; idx = i; }
-          }
-          for (var j = 0; j < dots.length; j++) {
-            dots[j].classList.toggle('rss-dot--active', j === idx);
-          }
-        });
-      }, { passive: true });
-
-      dots.forEach(function (dot, i) {
-        dot.addEventListener('click', function () {
-          var card = cards()[i];
-          if (!card) return;
-          scroller.scrollTo({
-            left: card.offsetLeft - (scroller.clientWidth - card.offsetWidth) / 2,
-            behavior: 'smooth'
-          });
-        });
-      });
-    }
   })();
 </script>
 
@@ -595,7 +589,7 @@
     },
     {
       "type": "paragraph",
-      "content": "Add a product block for each item. The floating tab shows their images stacked; tapping it opens the full cards. Sizes are pulled automatically from each product's available variants."
+      "content": "Add a product block for each item. The floating tab shows their images stacked; tapping it opens all cards on one screen. Sizes and their variant links are pulled automatically from each product's available variants."
     }
   ],
   "blocks": [
