@@ -1,0 +1,641 @@
+{%- liquid
+  assign product_blocks = section.blocks | where: 'type', 'product'
+  assign title = section.settings.title | default: 'RE-STOCKED'
+  assign placeholder = false
+  if product_blocks.size == 0 and request.design_mode
+    assign placeholder = true
+  endif
+-%}
+
+{%- if product_blocks.size > 0 or placeholder -%}
+<div class="rss" id="rss-{{ section.id }}">
+
+  {%- comment -%} ── Floating side trigger ── {%- endcomment -%}
+  <button
+    type="button"
+    class="rss-trigger"
+    id="rss-open-{{ section.id }}"
+    aria-haspopup="dialog"
+    aria-label="{{ title | escape }} — view restocked products"
+  >
+    <span class="rss-trigger__title">{{ title }}</span>
+    <span class="rss-trigger__stack" aria-hidden="true">
+      {%- if placeholder -%}
+        {%- for i in (1..3) -%}
+          <span class="rss-thumb rss-thumb--empty">{{ 'product-1' | placeholder_svg_tag: 'rss-thumb-svg' }}</span>
+        {%- endfor -%}
+      {%- else -%}
+        {%- for block in product_blocks limit: 4 -%}
+          {%- assign p = block.settings.product -%}
+          {%- assign timg = block.settings.image | default: p.featured_image -%}
+          {%- if timg != blank -%}
+            <img
+              class="rss-thumb"
+              src="{{ timg | image_url: width: 120 }}"
+              alt=""
+              loading="lazy"
+              decoding="async"
+              width="120"
+              height="120"
+            >
+          {%- else -%}
+            <span class="rss-thumb rss-thumb--empty">{{ 'product-1' | placeholder_svg_tag: 'rss-thumb-svg' }}</span>
+          {%- endif -%}
+        {%- endfor -%}
+        {%- if product_blocks.size > 4 -%}
+          <span class="rss-more">+{{ product_blocks.size | minus: 4 }}</span>
+        {%- endif -%}
+      {%- endif -%}
+    </span>
+  </button>
+
+  {%- comment -%} ── Overlay ── {%- endcomment -%}
+  <div
+    class="rss-overlay"
+    id="rss-overlay-{{ section.id }}"
+    role="dialog"
+    aria-modal="true"
+    aria-label="{{ title | escape }}"
+    aria-hidden="true"
+  >
+    <div class="rss-backdrop" id="rss-backdrop-{{ section.id }}"></div>
+
+    <button type="button" class="rss-close" id="rss-close-{{ section.id }}" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="18" height="18" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+
+    <div class="rss-overlay__inner">
+      <h2 class="rss-overlay__title">{{ title }}</h2>
+
+      <div class="rss-scroller" id="rss-scroller-{{ section.id }}">
+        {%- if placeholder -%}
+          <a class="rss-card" href="#" onclick="return false;">
+            <div class="rss-card__media">
+              {{ 'product-1' | placeholder_svg_tag: 'rss-card__svg' }}
+              <span class="rss-badge">Condition</span>
+            </div>
+            <p class="rss-card__name">Product Name</p>
+            <div class="rss-sizes">
+              <span class="rss-sizes__label">Sizes:</span>
+              <span class="rss-size-pill">US 10 - UK 9 - EU 44</span>
+              <span class="rss-size-pill">US 10.5 - UK 10 - EU 45</span>
+              <span class="rss-size-pill">US 11 - UK 10.5 - EU 46</span>
+            </div>
+          </a>
+        {%- else -%}
+          {%- for block in product_blocks -%}
+            {%- liquid
+              assign p = block.settings.product
+              if p == blank
+                continue
+              endif
+
+              assign cimg = block.settings.image | default: p.featured_image
+              assign condition = block.settings.condition | default: section.settings.condition_default
+
+              # Detect which option is the size option
+              assign size_opt = 1
+              for opt in p.options
+                assign opt_lower = opt | downcase
+                if opt_lower contains 'size'
+                  assign size_opt = forloop.index
+                  break
+                endif
+              endfor
+
+              # Collect unique, available size values
+              assign seen = '|'
+              assign size_list = ''
+              for variant in p.variants
+                if variant.available
+                  case size_opt
+                    when 1
+                      assign sv = variant.option1
+                    when 2
+                      assign sv = variant.option2
+                    when 3
+                      assign sv = variant.option3
+                  endcase
+                  assign key = '|' | append: sv | append: '|'
+                  unless seen contains key
+                    assign seen = seen | append: sv | append: '|'
+                    assign size_list = size_list | append: sv | append: '~~'
+                  endunless
+                endif
+              endfor
+              assign size_arr = size_list | split: '~~'
+            -%}
+
+            <a class="rss-card" href="{{ p.url }}" {{ block.shopify_attributes }}>
+              <div class="rss-card__media">
+                {%- if cimg != blank -%}
+                  <img
+                    class="rss-card__img"
+                    src="{{ cimg | image_url: width: 700 }}"
+                    srcset="{{ cimg | image_url: width: 400 }} 400w, {{ cimg | image_url: width: 700 }} 700w"
+                    sizes="(max-width: 749px) 82vw, 340px"
+                    alt="{{ p.title | escape }}"
+                    loading="lazy"
+                    decoding="async"
+                    width="700"
+                    height="525"
+                  >
+                {%- else -%}
+                  {{ 'product-1' | placeholder_svg_tag: 'rss-card__svg' }}
+                {%- endif -%}
+                {%- if condition != blank -%}
+                  <span class="rss-badge">{{ condition }}</span>
+                {%- endif -%}
+              </div>
+
+              <p class="rss-card__name">{{ p.title }}</p>
+
+              {%- if size_arr.size > 0 -%}
+                <div class="rss-sizes">
+                  <span class="rss-sizes__label">Sizes:</span>
+                  {%- for s in size_arr limit: 6 -%}
+                    {%- if s != blank -%}<span class="rss-size-pill">{{ s }}</span>{%- endif -%}
+                  {%- endfor -%}
+                  {%- if size_arr.size > 6 -%}
+                    <span class="rss-size-pill rss-size-pill--more">+{{ size_arr.size | minus: 6 }} more</span>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+            </a>
+          {%- endfor -%}
+        {%- endif -%}
+      </div>
+
+      {%- if product_blocks.size > 1 -%}
+        <div class="rss-dots" id="rss-dots-{{ section.id }}" aria-hidden="true">
+          {%- for block in product_blocks -%}
+            <button type="button" class="rss-dot{% if forloop.first %} rss-dot--active{% endif %}" aria-label="Go to product {{ forloop.index }}"></button>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+
+</div>
+{%- endif -%}
+
+{% stylesheet %}
+  .rss * { box-sizing: border-box; }
+
+  /* ── Floating side trigger ── */
+  .rss-trigger {
+    position: fixed;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    z-index: 9000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 12px 13px;
+    background: rgba(10, 10, 10, 0.82);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 18px;
+    box-shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.45);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.2s ease;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  .rss-trigger:hover {
+    transform: translateY(-50%) scale(1.04);
+    box-shadow: 0 14px 34px -8px rgba(0, 0, 0, 0.55);
+  }
+
+  .rss-trigger:active { transform: translateY(-50%) scale(0.96); }
+
+  .rss-trigger__title {
+    color: #fff;
+    font-style: italic;
+    font-weight: 800;
+    font-size: 0.58rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .rss-trigger__stack {
+    display: flex;
+    align-items: center;
+    padding-left: 12px; /* room for the overlap of the first thumb */
+  }
+
+  .rss-thumb {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    object-fit: cover;
+    border: 2px solid rgba(18, 18, 18, 0.95);
+    background: #2a2a2a;
+    margin-left: -12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .rss-thumb-svg { width: 70%; height: 70%; opacity: 0.4; }
+
+  .rss-more {
+    margin-left: 4px;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    .rss-trigger { right: 8px; padding: 9px 10px 11px; gap: 7px; }
+    .rss-thumb { width: 30px; height: 30px; }
+  }
+
+  /* ── Overlay ── */
+  .rss-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-out;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  .rss-overlay.rss-open {
+    opacity: 1;
+    pointer-events: all;
+    /* block background page scroll on touch without locking body */
+    touch-action: none;
+  }
+
+  .rss-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    backdrop-filter: blur(24px) saturate(160%);
+  }
+
+  .rss-close {
+    position: fixed;
+    top: max(18px, calc(12px + env(safe-area-inset-top, 0px)));
+    right: 18px;
+    z-index: 3;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s, transform 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .rss-close:hover { background: rgba(255, 255, 255, 0.2); color: #fff; }
+  .rss-close:active { transform: scale(0.92); }
+
+  .rss-overlay__inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(20px, 4vh, 40px);
+    padding-block: max(9vh, calc(28px + env(safe-area-inset-top, 0px))) calc(24px + env(safe-area-inset-bottom, 0px));
+    transform: translateY(24px) scale(0.98);
+    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .rss-overlay.rss-open .rss-overlay__inner {
+    transform: translateY(0) scale(1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rss-overlay, .rss-overlay__inner { transition-duration: 0.01s; }
+  }
+
+  .rss-overlay__title {
+    color: #fff;
+    font-style: italic;
+    font-weight: 800;
+    font-size: clamp(2rem, 8vw, 2.9rem);
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    text-align: center;
+    margin: 0;
+    padding-inline: 20px;
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
+  }
+
+  /* ── Card deck ── */
+  .rss-scroller {
+    --rss-card-w: min(340px, 82vw);
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    touch-action: pan-x;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    align-items: flex-start;
+    padding-inline: calc((100% - var(--rss-card-w)) / 2);
+  }
+
+  .rss-scroller::-webkit-scrollbar { display: none; }
+
+  .rss-card {
+    flex: 0 0 var(--rss-card-w);
+    scroll-snap-align: center;
+    background: linear-gradient(180deg, #e9e9e9 0%, #d4d4d4 100%);
+    border-radius: 22px;
+    padding: 14px;
+    box-shadow: 0 28px 56px -18px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.2);
+    text-decoration: none;
+    color: #111;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .rss-card:active { transform: scale(0.98); }
+
+  .rss-card__media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    background: #ececec;
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .rss-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .rss-card__svg { width: 70%; height: 70%; opacity: 0.3; }
+
+  .rss-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #33a1ff;
+    color: #fff;
+    font-style: italic;
+    font-weight: 800;
+    font-size: 0.62rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 5px 13px;
+    border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .rss-card__name {
+    margin: 2px 0 0;
+    padding-inline: 4px;
+    color: #1a1a1a;
+    font-style: italic;
+    font-weight: 800;
+    font-size: 1.1rem;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+
+  .rss-sizes {
+    background: #111;
+    border-radius: 14px;
+    padding: 12px 13px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+  }
+
+  .rss-sizes__label {
+    color: #fff;
+    font-style: italic;
+    font-weight: 800;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding-left: 2px;
+  }
+
+  .rss-size-pill {
+    background: #fff;
+    color: #111;
+    border-radius: 999px;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 0.68rem;
+    padding: 5px 15px;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  .rss-size-pill--more {
+    background: rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  /* ── Page dots ── */
+  .rss-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 12px;
+  }
+
+  .rss-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    border: none;
+    padding: 0;
+    background: #fff;
+    opacity: 0.3;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.25s ease, width 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .rss-dot--active { opacity: 0.95; width: 20px; }
+{% endstylesheet %}
+
+<script>
+  (function () {
+    var sid      = {{ section.id | json }};
+    var root     = document.getElementById('rss-' + sid);
+    if (!root) return;
+
+    var trigger  = document.getElementById('rss-open-' + sid);
+    var overlay  = document.getElementById('rss-overlay-' + sid);
+    var backdrop = document.getElementById('rss-backdrop-' + sid);
+    var closeBtn = document.getElementById('rss-close-' + sid);
+    var scroller = document.getElementById('rss-scroller-' + sid);
+    var dotsWrap = document.getElementById('rss-dots-' + sid);
+    var dots     = dotsWrap ? Array.prototype.slice.call(dotsWrap.querySelectorAll('.rss-dot')) : [];
+
+    function open() {
+      overlay.classList.add('rss-open');
+      overlay.setAttribute('aria-hidden', 'false');
+    }
+
+    function close() {
+      overlay.classList.remove('rss-open');
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+
+    trigger.addEventListener('click', open);
+    closeBtn.addEventListener('click', close);
+    backdrop.addEventListener('click', close);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && overlay.classList.contains('rss-open')) close();
+    });
+
+    /* ── Page-dot sync + tap-to-scroll ── */
+    if (dots.length && scroller) {
+      var cards = function () { return scroller.querySelectorAll('.rss-card'); };
+      var rafPending = false;
+
+      scroller.addEventListener('scroll', function () {
+        if (rafPending) return;
+        rafPending = true;
+        requestAnimationFrame(function () {
+          rafPending = false;
+          var cs = cards();
+          if (!cs.length) return;
+          var center = scroller.scrollLeft + scroller.clientWidth / 2;
+          var idx = 0, best = Infinity;
+          for (var i = 0; i < cs.length; i++) {
+            var cc = cs[i].offsetLeft + cs[i].offsetWidth / 2;
+            var d = Math.abs(cc - center);
+            if (d < best) { best = d; idx = i; }
+          }
+          for (var j = 0; j < dots.length; j++) {
+            dots[j].classList.toggle('rss-dot--active', j === idx);
+          }
+        });
+      }, { passive: true });
+
+      dots.forEach(function (dot, i) {
+        dot.addEventListener('click', function () {
+          var card = cards()[i];
+          if (!card) return;
+          scroller.scrollTo({
+            left: card.offsetLeft - (scroller.clientWidth - card.offsetWidth) / 2,
+            behavior: 'smooth'
+          });
+        });
+      });
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Re-stocked Showcase",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "RE-STOCKED"
+    },
+    {
+      "type": "text",
+      "id": "condition_default",
+      "label": "Default condition badge",
+      "info": "Shown on cards that don't set their own condition. Leave blank to hide the badge by default."
+    },
+    {
+      "type": "paragraph",
+      "content": "Add a product block for each item. The floating tab shows their images stacked; tapping it opens the full cards. Sizes are pulled automatically from each product's available variants."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Custom image",
+          "info": "Overrides the product's featured image"
+        },
+        {
+          "type": "text",
+          "id": "condition",
+          "label": "Condition badge",
+          "info": "e.g. New, Used - Excellent. Overrides the section default."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 8,
+  "presets": [
+    {
+      "name": "Re-stocked Showcase",
+      "blocks": [
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  }
+}
+{% endschema %}
