@@ -799,42 +799,6 @@
         "padding-block-start": 4,
         "padding-block-end": 8
       }
-    },
-    "restocked_showcase_MDyT7e": {
-      "type": "restocked-showcase",
-      "blocks": {
-        "product_7PUQKB": {
-          "type": "product",
-          "settings": {
-            "product": "adidas-11pro-elite-sg",
-            "condition": "LIGHTLY WORN"
-          }
-        },
-        "product_9htwQR": {
-          "type": "product",
-          "settings": {
-            "product": "adidas-f50-elite-fg-messi",
-            "condition": "NEW"
-          }
-        },
-        "product_PEMenf": {
-          "type": "product",
-          "settings": {
-            "product": "",
-            "condition": ""
-          }
-        }
-      },
-      "block_order": [
-        "product_7PUQKB",
-        "product_9htwQR",
-        "product_PEMenf"
-      ],
-      "name": "Re-stocked Showcase",
-      "settings": {
-        "title": "RE-STOCKED",
-        "condition_default": ""
-      }
     }
   },
   "order": [
@@ -844,7 +808,6 @@
     "newly_listed_fc",
     "brand_tiles_main",
     "product_spotlight_HMicki",
-    "collection_carousel_xaqMa8",
-    "restocked_showcase_MDyT7e"
+    "collection_carousel_xaqMa8"
   ]
 }
