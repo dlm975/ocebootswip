@@ -205,6 +205,20 @@
     }
   }
 
+  /* ── Full-width grid gutter, desktop ──
+     Full-width grids intentionally bleed edge-to-edge — the theme only
+     ever wires the section's Left/Right padding setting up for mobile
+     (see the .card-gallery bleed rules above), so on desktop this grid
+     had zero left/right gutter by design, not by bug. Give it one here,
+     floored at the page's standard side margin so it looks correct even
+     before the padding settings are touched in the editor. */
+  @media screen and (min-width: 750px) {
+    .cwsb-content .main-collection-grid.collection-wrapper--full-width {
+      padding-inline-start: max(var(--page-margin), var(--padding-inline-start));
+      padding-inline-end: max(var(--page-margin), var(--padding-inline-end));
+    }
+  }
+
   /* ── Outer wrapper ── */
   .cwsb-outer {
     display: block;
