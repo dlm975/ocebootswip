@@ -367,68 +367,53 @@
     const BASE_URL = {{ sbz_base_url | json }};
 
     /* ─────────────────────────────────────────────────────────────
-       Variant option values are exact-match, and the catalogue is
-       migrating from "US 7 - UK 6" to "US 7 - UK 6 - EU 40". Shopify
-       ORs multiple filter.v.option.size values and silently ignores
-       ones that match nothing, so every size sends BOTH formats:
-       correct results before, during, and after the rename. Once the
-       rename is complete, p() can be trimmed to return only the new
-       format (and the legacy GID filter-group fallbacks deleted).
+       Variant option values are exact-match against these strings.
+       This table was captured from the live catalogue's facet values
+       (post-rename, 2026-09-08) — the real data mixes plain EU sizes
+       ("EU 41"), adidas thirds ("EU 41 1/3"), a couple of entries
+       missing the "EU" prefix, and brand-dependent EU assignments,
+       so the strings are listed verbatim rather than generated.
 
-       To change the format again: edit p() and the tables below.
+       Shopify ORs multiple filter.v.option.size values and ignores
+       ones that match nothing, so extra values are harmless. If new
+       size strings are added to the catalogue, add them here too.
        ───────────────────────────────────────────────────────────── */
 
-    /* p('US 7','UK 6','EU 40') → new-format value + legacy fallback */
-    function p(us, uk, eu) {
-      return [us + ' - ' + uk + ' - ' + eu, us + ' - ' + uk];
-    }
-
-    /* Legacy Search & Discovery merged filter groups (admin-created,
-       used by the old URLs for US 8/9/9.5/10). Kept as fallbacks while
-       old-format variants exist; they go stale after the rename. */
-    const GID = {
-      us8:  'gid://shopify/FilterSettingGroup/48562487',
-      us9:  'gid://shopify/FilterSettingGroup/48595255',
-      us95: 'gid://shopify/FilterSettingGroup/48628023',
-      us10: 'gid://shopify/FilterSettingGroup/48529719'
-    };
-
-    /* Exact option values per US size button. Some sizes straddle two
-       UK mappings because brands convert differently. */
+    /* Exact option values per US size button. */
     const US_VALUES = {
-      '6.5':  [].concat(p('US 6.5', 'UK 5.5', 'EU 39'),   p('US 6.5', 'UK 6', 'EU 39')),
-      '7':    [].concat(p('US 7', 'UK 6', 'EU 40')),
-      '7.5':  [].concat(p('US 7.5', 'UK 6.5', 'EU 40.5'), p('US 7.5', 'UK 7', 'EU 40.5')),
-      '8':    [].concat(p('US 8', 'UK 7', 'EU 41'),       p('US 8', 'UK 7.5', 'EU 41'),   p('US 7.5', 'UK 7', 'EU 40.5'), [GID.us8]),
-      '8.5':  [].concat(p('US 8.5', 'UK 7.5', 'EU 42'),   p('US 8.5', 'UK 8', 'EU 42')),
-      '9':    [].concat(p('US 9', 'UK 8', 'EU 42.5'),     p('US 9', 'UK 8.5', 'EU 42.5'), [GID.us9]),
-      '9.5':  [].concat(p('US 9.5', 'UK 8.5', 'EU 43'),   p('US 9.5', 'UK 9', 'EU 43'),   [GID.us95]),
-      '10':   [].concat(p('US 10', 'UK 9', 'EU 44'),      p('US 10', 'UK 9.5', 'EU 44'),  [GID.us10]),
-      '10.5': [].concat(p('US 10.5', 'UK 9.5', 'EU 44.5'), p('US 10.5', 'UK 10', 'EU 44.5')),
-      '11':   [].concat(p('US 11', 'UK 10', 'EU 45'),     p('US 11', 'UK 10.5', 'EU 45')),
-      '11.5': [].concat(p('US 11.5', 'UK 10.5', 'EU 45.5'), p('US 11.5', 'UK 11', 'EU 45.5')),
-      '12':   [].concat(p('US 12', 'UK 11', 'EU 46'),     p('US 12', 'UK 11.5', 'EU 46')),
-      '12.5': [].concat(p('US 12.5', 'UK 11.5', 'EU 47')),
-      '13':   [].concat(p('US 13', 'UK 12', 'EU 47.5'),   p('US 13', 'UK 12.5', 'EU 47.5'))
+      '6.5':  ['US 6.5 - UK 6 - EU 39', 'US 6.5 - UK 5.5'],
+      '7':    ['US 7 - UK 6 - EU 40', 'US 7 - UK 6.5 - EU 40'],
+      '7.5':  ['US 7.5 - UK 6.5 - EU 40.5', 'US 7.5 - UK 7 - EU 40 2/3'],
+      '8':    ['US 8 - UK 7 - EU 41', 'US 8 - UK 7.5 - EU 41 1/3'],
+      '8.5':  ['US 8.5 - UK 7.5 - EU 41', 'US 8.5 - UK 7.5 - EU 42', 'US 8.5 - UK 8 - EU 42'],
+      '9':    ['US 9 - UK 8 - EU 42', 'US 9 - UK 8 - EU 42.5', 'US 9 - UK 8.5 - EU 42 2/3'],
+      '9.5':  ['US 9.5 - UK 8.5 - EU 43', 'US 9.5 - UK 9 - EU 43 1/3'],
+      '10':   ['US 10 - UK 9 - EU 43', 'US 10 - UK 9 - EU 44', 'US 10 - UK 9.5 - EU 44'],
+      '10.5': ['US 10.5 - UK 9.5 - EU 44', 'US 10.5 - UK 9.5 - EU 44.5', 'US 10.5 - UK 10 - EU 44 2/3'],
+      '11':   ['US 11 - UK 10 - EU 45', 'US 11 - UK 10.5 - EU 45 1/3'],
+      '11.5': ['US 11.5 - UK 10.5 - EU 45', 'US 11.5 - UK 10.5 - EU 45.5', 'US 11.5 - UK 11 - EU 46'],
+      '12':   ['US 12 - UK 11 - EU 46', 'US 12 - UK 11.5 - EU 46 2/3'],
+      '12.5': ['US 12.5 - UK 11.5 - EU 47'],
+      '13':   ['US 13 - UK 12 - 47.5', 'US 13 - UK 12.5 - 48']
     };
 
     /* UK buttons cut across US rows (a UK size can appear in two US
        sizes' mappings), so they get their own table. */
     const UK_VALUES = {
-      '5.5':  [].concat(p('US 6.5', 'UK 5.5', 'EU 39'),   p('US 6.5', 'UK 6', 'EU 39')),
-      '6':    [].concat(p('US 6.5', 'UK 6', 'EU 39'),     p('US 7', 'UK 6', 'EU 40')),
-      '6.5':  [].concat(p('US 7', 'UK 6.5', 'EU 40'),     p('US 7.5', 'UK 6.5', 'EU 40.5')),
-      '7':    [].concat(p('US 7.5', 'UK 7', 'EU 40.5'),   p('US 8', 'UK 7', 'EU 41'),     [GID.us8]),
-      '7.5':  [].concat(p('US 8', 'UK 7.5', 'EU 41'),     p('US 8.5', 'UK 7.5', 'EU 42'), [GID.us8]),
-      '8':    [].concat(p('US 8.5', 'UK 8', 'EU 42'),     p('US 9', 'UK 8', 'EU 42.5'),   [GID.us9]),
-      '8.5':  [].concat(p('US 9', 'UK 8.5', 'EU 42.5'),   p('US 9.5', 'UK 8.5', 'EU 43'), [GID.us9], [GID.us95]),
-      '9':    [].concat(p('US 9.5', 'UK 9', 'EU 43'),     p('US 10', 'UK 9', 'EU 44'),    [GID.us95], [GID.us10]),
-      '9.5':  [].concat(p('US 10', 'UK 9.5', 'EU 44'),    p('US 10.5', 'UK 9.5', 'EU 44.5'), [GID.us10]),
-      '10':   [].concat(p('US 10.5', 'UK 10', 'EU 44.5'), p('US 11', 'UK 10', 'EU 45')),
-      '10.5': [].concat(p('US 11', 'UK 10.5', 'EU 45'),   p('US 11.5', 'UK 10.5', 'EU 45.5')),
-      '11':   [].concat(p('US 11.5', 'UK 11', 'EU 45.5'), p('US 12', 'UK 11', 'EU 46')),
-      '11.5': [].concat(p('US 12', 'UK 11.5', 'EU 46'),   p('US 12.5', 'UK 11.5', 'EU 47')),
-      '12':   [].concat(p('US 13', 'UK 12', 'EU 47.5'))
+      '5.5':  ['US 6.5 - UK 5.5'],
+      '6':    ['US 6.5 - UK 6 - EU 39', 'US 7 - UK 6 - EU 40'],
+      '6.5':  ['US 7 - UK 6.5 - EU 40', 'US 7.5 - UK 6.5 - EU 40.5'],
+      '7':    ['US 7.5 - UK 7 - EU 40 2/3', 'US 8 - UK 7 - EU 41'],
+      '7.5':  ['US 8 - UK 7.5 - EU 41 1/3', 'US 8.5 - UK 7.5 - EU 41', 'US 8.5 - UK 7.5 - EU 42'],
+      '8':    ['US 8.5 - UK 8 - EU 42', 'US 9 - UK 8 - EU 42', 'US 9 - UK 8 - EU 42.5'],
+      '8.5':  ['US 9 - UK 8.5 - EU 42 2/3', 'US 9.5 - UK 8.5 - EU 43'],
+      '9':    ['US 9.5 - UK 9 - EU 43 1/3', 'US 10 - UK 9 - EU 43', 'US 10 - UK 9 - EU 44'],
+      '9.5':  ['US 10 - UK 9.5 - EU 44', 'US 10.5 - UK 9.5 - EU 44', 'US 10.5 - UK 9.5 - EU 44.5'],
+      '10':   ['US 10.5 - UK 10 - EU 44 2/3', 'US 11 - UK 10 - EU 45'],
+      '10.5': ['US 11 - UK 10.5 - EU 45 1/3', 'US 11.5 - UK 10.5 - EU 45', 'US 11.5 - UK 10.5 - EU 45.5'],
+      '11':   ['US 11.5 - UK 11 - EU 46', 'US 12 - UK 11 - EU 46'],
+      '11.5': ['US 12 - UK 11.5 - EU 46 2/3', 'US 12.5 - UK 11.5 - EU 47'],
+      '12':   ['US 13 - UK 12 - 47.5']
     };
 
     /* EU buttons share the corresponding US size's value set. */
