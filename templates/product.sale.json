@@ -324,6 +324,16 @@
                 "padding-inline-end": 0
               },
               "blocks": {}
+            },
+            "sale_image_badge_001": {
+              "type": "sale-image-badge",
+              "settings": {
+                "text": "ON SALE",
+                "show_percent": false,
+                "only_when_discounted": true,
+                "accent": "#e53e3e"
+              },
+              "blocks": {}
             }
           },
           "block_order": [
@@ -336,7 +346,8 @@
             "trust_bar_001",
             "desc_accordion_001",
             "testimonials_001",
-            "faq_accordion_001"
+            "faq_accordion_001",
+            "sale_image_badge_001"
           ]
         }
       },

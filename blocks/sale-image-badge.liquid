@@ -1,0 +1,136 @@
+{% liquid
+  assign variant = closest.product.selected_or_first_available_variant
+  assign on_sale = false
+  if variant.compare_at_price > variant.price
+    assign on_sale = true
+  endif
+
+  assign show = true
+  if block.settings.only_when_discounted and on_sale == false
+    assign show = false
+  endif
+
+  assign save_pct = 0
+  if on_sale
+    assign save_pct = variant.compare_at_price | minus: variant.price | times: 100 | divided_by: variant.compare_at_price
+  endif
+%}
+
+{% if show or request.design_mode or request.visual_preview_mode %}
+<div
+  id="sale-img-badge-{{ block.id }}"
+  class="sale-img-badge"
+  style="--sib-accent: {{ block.settings.accent | default: '#e53e3e' }};"
+  {{ block.shopify_attributes }}
+>
+  {{ block.settings.text | default: 'ON SALE' }}
+  {%- if block.settings.show_percent and save_pct > 0 %} &middot; -{{ save_pct }}%{% endif -%}
+</div>
+{% endif %}
+
+<style>
+  /* Lives over the product media gallery (relocated there by the
+     script below). Mobile: top-left. Desktop: top-right. */
+  media-gallery:has(> .sale-img-badge) {
+    position: relative;
+  }
+
+  .sale-img-badge {
+    display: none; /* revealed by the script once moved into the gallery */
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: auto;
+    z-index: 5;
+    pointer-events: none;
+    background: var(--sib-accent, #e53e3e);
+    color: #ffffff;
+    font-style: italic;
+    font-weight: 800;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1;
+    padding: 7px 14px;
+    border-radius: 999px;
+    box-shadow: 0 6px 16px -4px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.15);
+    white-space: nowrap;
+  }
+
+  @media screen and (min-width: 750px) {
+    .sale-img-badge {
+      top: 16px;
+      left: auto;
+      right: 16px;
+      font-size: 0.74rem;
+      padding: 8px 16px;
+    }
+  }
+
+</style>
+
+<script>
+  (function () {
+    var badge = document.getElementById('sale-img-badge-{{ block.id }}');
+    if (!badge) return;
+
+    function relocate() {
+      var section = badge.closest('.shopify-section') || document;
+      var gallery = section.querySelector('media-gallery') || document.querySelector('media-gallery');
+      if (gallery && badge.parentElement !== gallery) {
+        gallery.appendChild(badge);
+        badge.style.display = 'block';
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', relocate, { once: true });
+    } else {
+      relocate();
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Sale Image Badge",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "A pill badge overlaid on the product image — top-left on mobile, top-right on desktop."
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Badge text",
+      "default": "ON SALE"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_percent",
+      "label": "Append discount %",
+      "default": false,
+      "info": "Adds e.g. \"· -25%\" from the compare-at price"
+    },
+    {
+      "type": "checkbox",
+      "id": "only_when_discounted",
+      "label": "Only show when the product has a compare-at price",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "accent",
+      "label": "Badge colour",
+      "default": "#e53e3e"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Sale Image Badge",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}
