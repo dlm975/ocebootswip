@@ -1,0 +1,340 @@
+{% liquid
+  assign end_date = block.settings.end_date | strip
+  assign end_time = block.settings.end_time | strip
+  if end_time == blank
+    assign end_time = '23:59'
+  endif
+  assign tz = block.settings.tz_offset | default: '+12:00'
+
+  assign has_end = false
+  if end_date != blank
+    assign has_end = true
+  endif
+
+  assign variant = closest.product.selected_or_first_available_variant
+  assign save_pct = 0
+  if block.settings.show_savings and variant.compare_at_price > variant.price
+    assign save_pct = variant.compare_at_price | minus: variant.price | times: 100 | divided_by: variant.compare_at_price
+  endif
+%}
+
+{% if has_end or request.design_mode or request.visual_preview_mode %}
+<div
+  id="sale-cd-{{ block.id }}"
+  class="sale-cd"
+  style="--sale-cd-accent: {{ block.settings.accent | default: '#e53e3e' }}; {% render 'spacing-style', settings: block.settings %}"
+  {% if has_end %}data-end="{{ end_date }}T{{ end_time }}:00{{ tz }}"{% endif %}
+  data-expired-behavior="{{ block.settings.expired_behavior | default: 'hide' }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="sale-cd__top">
+    <span class="sale-cd__heading">
+      <span class="sale-cd__dot" aria-hidden="true"></span>
+      {{ block.settings.heading | default: 'SALE ENDS IN' }}
+    </span>
+    {% if save_pct > 0 or request.visual_preview_mode %}
+      <span class="sale-cd__save">SAVE {{ save_pct | at_least: 10 }}%</span>
+    {% endif %}
+  </div>
+
+  <div class="sale-cd__timer" role="timer" aria-label="Time remaining in sale">
+    <span class="sale-cd__seg" data-cd-seg="d">
+      <span class="sale-cd__num" data-cd="d">01</span>
+      <span class="sale-cd__lbl">Days</span>
+    </span>
+    <span class="sale-cd__colon" data-cd-seg="dc" aria-hidden="true">:</span>
+    <span class="sale-cd__seg">
+      <span class="sale-cd__num" data-cd="h">12</span>
+      <span class="sale-cd__lbl">Hrs</span>
+    </span>
+    <span class="sale-cd__colon" aria-hidden="true">:</span>
+    <span class="sale-cd__seg">
+      <span class="sale-cd__num" data-cd="m">45</span>
+      <span class="sale-cd__lbl">Min</span>
+    </span>
+    <span class="sale-cd__colon" aria-hidden="true">:</span>
+    <span class="sale-cd__seg">
+      <span class="sale-cd__num" data-cd="s">09</span>
+      <span class="sale-cd__lbl">Sec</span>
+    </span>
+  </div>
+
+  <p class="sale-cd__expired" hidden>{{ block.settings.expired_text | default: 'This sale has ended' }}</p>
+</div>
+{% endif %}
+
+<style>
+  .sale-cd {
+    background: #111111;
+    border-radius: 14px;
+    padding: 12px 16px 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    font-family: inherit;
+  }
+
+  .sale-cd__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .sale-cd__heading {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #ffffff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+
+  .sale-cd__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--sale-cd-accent);
+    flex-shrink: 0;
+    animation: sale-cd-pulse 1.6s ease-in-out infinite;
+  }
+
+  @keyframes sale-cd-pulse {
+    0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--sale-cd-accent) 50%, transparent); }
+    70%  { box-shadow: 0 0 0 6px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sale-cd__dot { animation: none; }
+  }
+
+  .sale-cd__save {
+    background: var(--sale-cd-accent);
+    color: #ffffff;
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    padding: 4px 11px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .sale-cd__timer {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .sale-cd__seg {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-width: 2.4ch;
+  }
+
+  .sale-cd__num {
+    color: #ffffff;
+    font-size: 1.35rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sale-cd__lbl {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .sale-cd__colon {
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 1.35rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .sale-cd__expired {
+    margin: 0;
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  .sale-cd[data-done] .sale-cd__timer,
+  .sale-cd[data-done] .sale-cd__top .sale-cd__save {
+    display: none;
+  }
+</style>
+
+<script>
+  (function () {
+    var root = document.getElementById('sale-cd-{{ block.id }}');
+    if (!root) return;
+
+    var end = Date.parse(root.dataset.end || '');
+    /* No/invalid end date: leave the static preview digits (editor) */
+    if (isNaN(end)) return;
+
+    var nums = {
+      d: root.querySelector('[data-cd="d"]'),
+      h: root.querySelector('[data-cd="h"]'),
+      m: root.querySelector('[data-cd="m"]'),
+      s: root.querySelector('[data-cd="s"]')
+    };
+    var daySeg   = root.querySelector('[data-cd-seg="d"]');
+    var dayColon = root.querySelector('[data-cd-seg="dc"]');
+    var expired  = root.querySelector('.sale-cd__expired');
+    var timerId;
+
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+    function finish() {
+      clearInterval(timerId);
+      if (root.dataset.expiredBehavior === 'message') {
+        root.setAttribute('data-done', '');
+        if (expired) expired.hidden = false;
+      } else {
+        root.hidden = true;
+      }
+    }
+
+    function tick() {
+      var diff = end - Date.now();
+      if (diff <= 0) { finish(); return; }
+
+      var d = Math.floor(diff / 86400000);
+      var h = Math.floor(diff % 86400000 / 3600000);
+      var m = Math.floor(diff % 3600000 / 60000);
+      var s = Math.floor(diff % 60000 / 1000);
+
+      /* Under 24h: drop the days segment — reads more urgent */
+      var hideDays = d === 0;
+      if (daySeg)   daySeg.hidden   = hideDays;
+      if (dayColon) dayColon.hidden = hideDays;
+
+      nums.d.textContent = pad(d);
+      nums.h.textContent = pad(h);
+      nums.m.textContent = pad(m);
+      nums.s.textContent = pad(s);
+    }
+
+    tick();
+    timerId = setInterval(tick, 1000);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Sale Countdown",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Counts down to a fixed end time. Hides itself (or shows a message) when the sale ends."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "SALE ENDS IN"
+    },
+    {
+      "type": "text",
+      "id": "end_date",
+      "label": "End date",
+      "info": "Format: YYYY-MM-DD, e.g. 2026-09-15. Leave blank to hide the timer."
+    },
+    {
+      "type": "text",
+      "id": "end_time",
+      "label": "End time (24h)",
+      "default": "23:59",
+      "info": "Format: HH:MM"
+    },
+    {
+      "type": "select",
+      "id": "tz_offset",
+      "label": "Timezone",
+      "options": [
+        { "value": "+12:00", "label": "NZST (UTC+12)" },
+        { "value": "+13:00", "label": "NZDT (UTC+13)" },
+        { "value": "+10:00", "label": "AEST (UTC+10)" },
+        { "value": "+11:00", "label": "AEDT (UTC+11)" },
+        { "value": "+00:00", "label": "UTC" }
+      ],
+      "default": "+12:00",
+      "info": "The end time is fixed worldwide — every shopper sees the same deadline."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_savings",
+      "label": "Show automatic SAVE % pill",
+      "default": true,
+      "info": "Calculated from the compare-at price. Hidden when the product isn't discounted."
+    },
+    {
+      "type": "select",
+      "id": "expired_behavior",
+      "label": "When the sale ends",
+      "options": [
+        { "value": "hide", "label": "Hide the timer" },
+        { "value": "message", "label": "Show a message" }
+      ],
+      "default": "hide"
+    },
+    {
+      "type": "text",
+      "id": "expired_text",
+      "label": "Ended message",
+      "default": "This sale has ended"
+    },
+    {
+      "type": "color",
+      "id": "accent",
+      "label": "Accent colour",
+      "default": "#e53e3e"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 4
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 4
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "Left",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "Right",
+      "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Sale Countdown",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}
