@@ -1,0 +1,380 @@
+{%- liquid
+  assign heading = section.settings.heading | default: collection.title
+  assign subtext = section.settings.subtext
+  assign img     = section.settings.image
+  assign overlay = section.settings.overlay_opacity | times: 0.01
+
+  assign end_date = section.settings.end_date | strip
+  assign end_time = section.settings.end_time | strip
+  if end_time == blank
+    assign end_time = '23:59'
+  endif
+  assign tz = section.settings.tz_offset | default: '+12:00'
+  assign has_end = false
+  if end_date != blank
+    assign has_end = true
+  endif
+-%}
+
+<div class="scs-outer">
+  <div
+    id="scs-{{ section.id }}"
+    class="scs"
+    style="--scs-accent: {{ section.settings.accent | default: '#e53e3e' }};"
+    {% if has_end %}data-end="{{ end_date }}T{{ end_time }}:00{{ tz }}"{% endif %}
+    data-expired-behavior="{{ section.settings.expired_behavior | default: 'message' }}"
+  >
+    {%- if img != blank -%}
+      <div class="scs__media" aria-hidden="true">
+        <img
+          src="{{ img | image_url: width: 2000 }}"
+          srcset="{{ img | image_url: width: 900 }} 900w, {{ img | image_url: width: 1400 }} 1400w, {{ img | image_url: width: 2000 }} 2000w"
+          sizes="100vw"
+          alt=""
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+          width="2000"
+          height="800"
+        >
+        <div class="scs__scrim" style="--scs-scrim: {{ overlay | round: 2 }};"></div>
+      </div>
+    {%- endif -%}
+
+    <div class="scs__content">
+      <span class="scs__label">
+        <span class="scs__dot" aria-hidden="true"></span>
+        {{ section.settings.label | default: 'LIMITED TIME' }}
+      </span>
+
+      <h1 class="scs__title">{{ heading }}</h1>
+
+      {%- if subtext != blank -%}
+        <p class="scs__sub">{{ subtext }}</p>
+      {%- endif -%}
+
+      {%- if has_end or request.design_mode -%}
+        <div class="scs__timer" role="timer" aria-label="Time remaining in sale">
+          <span class="scs__seg" data-cd-seg="d">
+            <span class="scs__num" data-cd="d">01</span>
+            <span class="scs__lbl">Days</span>
+          </span>
+          <span class="scs__seg">
+            <span class="scs__num" data-cd="h">12</span>
+            <span class="scs__lbl">Hrs</span>
+          </span>
+          <span class="scs__seg">
+            <span class="scs__num" data-cd="m">45</span>
+            <span class="scs__lbl">Min</span>
+          </span>
+          <span class="scs__seg">
+            <span class="scs__num" data-cd="s">09</span>
+            <span class="scs__lbl">Sec</span>
+          </span>
+        </div>
+      {%- endif -%}
+
+      <p class="scs__expired" hidden>{{ section.settings.expired_text | default: 'This sale has ended' }}</p>
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .scs-outer {
+    padding: 16px 16px 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    .scs-outer { padding: 10px 10px 0; }
+  }
+
+  .scs {
+    position: relative;
+    overflow: hidden;
+    background: #111111;
+    border-radius: 24px;
+    box-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  @media screen and (max-width: 749px) {
+    .scs { border-radius: 18px; }
+  }
+
+  .scs__media {
+    position: absolute;
+    inset: 0;
+  }
+
+  .scs__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .scs__scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, var(--scs-scrim, 0.55));
+  }
+
+  .scs__content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    padding: clamp(28px, 6vw, 52px) 24px clamp(26px, 5vw, 46px);
+  }
+
+  .scs__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--scs-accent);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .scs__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--scs-accent);
+    animation: scs-pulse 1.6s ease-in-out infinite;
+  }
+
+  @keyframes scs-pulse {
+    0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--scs-accent) 50%, transparent); }
+    70%  { box-shadow: 0 0 0 7px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scs__dot { animation: none; }
+  }
+
+  .scs__title {
+    color: #ffffff;
+    font-style: italic;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 6vw, 3.4rem);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .scs__sub {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    line-height: 1.5;
+    margin: 0;
+    max-width: 56ch;
+  }
+
+  .scs__timer {
+    display: flex;
+    gap: clamp(8px, 2vw, 14px);
+    margin-top: 8px;
+  }
+
+  .scs__seg {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: clamp(58px, 14vw, 76px);
+    padding: clamp(10px, 2vw, 14px) 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+  }
+
+  .scs__num {
+    color: #ffffff;
+    font-size: clamp(1.5rem, 5vw, 2.1rem);
+    font-weight: 800;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .scs__lbl {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+
+  .scs__expired {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 4px 0 0;
+  }
+
+  .scs[data-done] .scs__timer { display: none; }
+{% endstylesheet %}
+
+<script>
+  (function () {
+    var root = document.getElementById('scs-{{ section.id }}');
+    if (!root) return;
+
+    var end = Date.parse(root.dataset.end || '');
+    if (isNaN(end)) return; /* no end set: leave static preview (editor) */
+
+    var nums = {
+      d: root.querySelector('[data-cd="d"]'),
+      h: root.querySelector('[data-cd="h"]'),
+      m: root.querySelector('[data-cd="m"]'),
+      s: root.querySelector('[data-cd="s"]')
+    };
+    var daySeg  = root.querySelector('[data-cd-seg="d"]');
+    var expired = root.querySelector('.scs__expired');
+    var timerId;
+
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+    function finish() {
+      clearInterval(timerId);
+      root.setAttribute('data-done', '');
+      if (root.dataset.expiredBehavior === 'message' && expired) {
+        expired.hidden = false;
+      }
+    }
+
+    function tick() {
+      var diff = end - Date.now();
+      if (diff <= 0) { finish(); return; }
+
+      var d = Math.floor(diff / 86400000);
+      if (daySeg) daySeg.hidden = d === 0;
+
+      nums.d.textContent = pad(d);
+      nums.h.textContent = pad(Math.floor(diff % 86400000 / 3600000));
+      nums.m.textContent = pad(Math.floor(diff % 3600000 / 60000));
+      nums.s.textContent = pad(Math.floor(diff % 60000 / 1000));
+    }
+
+    tick();
+    timerId = setInterval(tick, 1000);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Sale Collection Hero",
+  "tag": "section",
+  "enabled_on": {
+    "templates": ["collection"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Small label",
+      "default": "LIMITED TIME"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Leave blank to use the collection title"
+    },
+    {
+      "type": "textarea",
+      "id": "subtext",
+      "label": "Subtext"
+    },
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Background image",
+      "info": "Optional — solid dark background when blank"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Image darkness",
+      "min": 0,
+      "max": 90,
+      "step": 5,
+      "unit": "%",
+      "default": 55
+    },
+    {
+      "type": "header",
+      "content": "Countdown"
+    },
+    {
+      "type": "text",
+      "id": "end_date",
+      "label": "End date",
+      "info": "Format: YYYY-MM-DD. Leave blank to hide the timer."
+    },
+    {
+      "type": "text",
+      "id": "end_time",
+      "label": "End time (24h)",
+      "default": "23:59",
+      "info": "Format: HH:MM"
+    },
+    {
+      "type": "select",
+      "id": "tz_offset",
+      "label": "Timezone",
+      "options": [
+        { "value": "+12:00", "label": "NZST (UTC+12)" },
+        { "value": "+13:00", "label": "NZDT (UTC+13)" },
+        { "value": "+10:00", "label": "AEST (UTC+10)" },
+        { "value": "+11:00", "label": "AEDT (UTC+11)" },
+        { "value": "+00:00", "label": "UTC" }
+      ],
+      "default": "+12:00",
+      "info": "The end time is fixed worldwide — every shopper sees the same deadline."
+    },
+    {
+      "type": "select",
+      "id": "expired_behavior",
+      "label": "When the sale ends",
+      "options": [
+        { "value": "message", "label": "Show a message" },
+        { "value": "hide", "label": "Hide the timer" }
+      ],
+      "default": "message"
+    },
+    {
+      "type": "text",
+      "id": "expired_text",
+      "label": "Ended message",
+      "default": "This sale has ended"
+    },
+    {
+      "type": "color",
+      "id": "accent",
+      "label": "Accent colour",
+      "default": "#e53e3e"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Sale Collection Hero"
+    }
+  ]
+}
+{% endschema %}
