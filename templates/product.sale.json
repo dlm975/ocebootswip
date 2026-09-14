@@ -334,6 +334,18 @@
                 "accent": "#e53e3e"
               },
               "blocks": {}
+            },
+            "payment_icons_001": {
+              "type": "payment-icons",
+              "settings": {
+                "horizontal_alignment": "center",
+                "gap": 8,
+                "padding-block-start": 4,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
             }
           },
           "block_order": [
@@ -342,6 +354,7 @@
             "urgency_stock_001",
             "sale_countdown_001",
             "buy_buttons_pKHp9V",
+            "payment_icons_001",
             "essential_upsell_app_block_zgTHkC",
             "trust_bar_001",
             "desc_accordion_001",
