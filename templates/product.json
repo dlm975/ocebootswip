@@ -228,6 +228,7 @@
               "settings": {
                 "horizontal_alignment": "center",
                 "gap": 8,
+                "single_line": true,
                 "padding-block-start": 4,
                 "padding-block-end": 0,
                 "padding-inline-start": 0,

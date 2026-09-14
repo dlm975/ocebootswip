@@ -4,6 +4,7 @@
   class="
     payment-icons
     spacing-style
+    {%- if block.settings.single_line %} payment-icons--single-line{% endif %}
   "
   style="
     {% render 'spacing-padding', settings: block.settings %}
@@ -43,6 +44,32 @@
   .payment-icons__item {
     display: flex;
     align-items: center;
+  }
+
+  /* Single-line mode: icons shrink to fit the row instead of wrapping.
+     Each item takes an equal share of the available width, capped at the
+     icon's intrinsic 38px so it never scales up on wide columns. */
+  .payment-icons--single-line .payment-icons__list {
+    flex-wrap: nowrap;
+  }
+
+  .payment-icons--single-line .payment-icons__item {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 38px;
+  }
+
+  .payment-icons--single-line .payment-icons__item svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* Tighten the gap on narrow screens so the icons keep more width */
+  @media screen and (max-width: 749px) {
+    .payment-icons--single-line .payment-icons__list {
+      gap: clamp(3px, 1.2vw, var(--icon-gap));
+    }
   }
 {% endstylesheet %}
 
@@ -84,6 +111,13 @@
       "step": 1,
       "unit": "px",
       "default": 10
+    },
+    {
+      "type": "checkbox",
+      "id": "single_line",
+      "label": "Keep on one line",
+      "default": false,
+      "info": "Icons shrink to fit the row instead of wrapping. Useful under the add-to-cart button on mobile."
     },
     {
       "type": "header",
