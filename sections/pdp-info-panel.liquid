@@ -1,0 +1,241 @@
+{%- liquid
+  assign p = product
+  if p == blank
+    assign p = closest.product
+  endif
+  if p == blank and request.visual_preview_mode
+    assign p = collections.all.products.first
+  endif
+
+  assign desc = p.description
+  assign show_desc = false
+  if section.settings.show_description and desc != blank
+    assign show_desc = true
+  endif
+
+  assign has_faq = false
+  for i in (1..8)
+    assign q_key = 'q' | append: i
+    assign a_key = 'a' | append: i
+    if section.settings[q_key] != blank and section.settings[a_key] != blank
+      assign has_faq = true
+      break
+    endif
+  endfor
+-%}
+
+{%- if show_desc or has_faq -%}
+  <div
+    class="pip"
+    style="{% render 'spacing-style', settings: section.settings %}"
+  >
+    <div class="pip__inner{% if show_desc and has_faq %} pip__inner--split{% endif %}">
+      {%- if show_desc -%}
+        <section class="pip__col">
+          <h2 class="pip__title">{{ section.settings.description_heading | default: 'Details' }}</h2>
+          <div class="pip__desc rte">{{ desc }}</div>
+        </section>
+      {%- endif -%}
+
+      {%- if has_faq -%}
+        <section class="pip__col">
+          <h2 class="pip__title">{{ section.settings.faq_heading | default: 'FAQ' }}</h2>
+          <div class="pip__faq">
+            {%- for i in (1..8) -%}
+              {%- assign q_key = 'q' | append: i -%}
+              {%- assign a_key = 'a' | append: i -%}
+              {%- assign q_text = section.settings[q_key] -%}
+              {%- assign a_text = section.settings[a_key] -%}
+              {%- if q_text != blank and a_text != blank -%}
+                <details class="pip__item"{% if forloop.first and section.settings.open_first %} open{% endif %}>
+                  <summary class="pip__q">
+                    <span>{{ q_text }}</span>
+                    <svg class="pip__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" width="15" height="15" aria-hidden="true">
+                      <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                  </summary>
+                  <div class="pip__a">{{ a_text }}</div>
+                </details>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        </section>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .pip {
+    width: 100%;
+  }
+
+  .pip__inner {
+    max-width: var(--page-width, 1400px);
+    margin-inline: auto;
+    padding-inline: var(--page-margin, 16px);
+    display: grid;
+    gap: clamp(24px, 4vw, 48px);
+  }
+
+  @media screen and (min-width: 750px) {
+    .pip__inner--split {
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+  }
+
+  .pip__title {
+    font-size: clamp(1.1rem, 2.4vw, 1.5rem);
+    font-weight: 800;
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    margin: 0 0 14px;
+  }
+
+  .pip__desc {
+    font-size: 0.9rem;
+    line-height: 1.65;
+    opacity: 0.85;
+  }
+
+  .pip__desc :first-child {
+    margin-top: 0;
+  }
+
+  .pip__desc :last-child {
+    margin-bottom: 0;
+  }
+
+  /* ── FAQ ── */
+  .pip__item {
+    border-top: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
+  }
+
+  .pip__item:last-child {
+    border-bottom: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
+  }
+
+  .pip__q {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 15px 0;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    list-style: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .pip__q::-webkit-details-marker {
+    display: none;
+  }
+
+  .pip__chev {
+    flex-shrink: 0;
+    transition: transform 0.24s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .pip__item[open] .pip__chev {
+    transform: rotate(180deg);
+  }
+
+  .pip__a {
+    padding-bottom: 16px;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    opacity: 0.7;
+    max-width: 62ch;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pip__chev {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Product Details & FAQ",
+  "tag": "section",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Description"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Show the product description",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "description_heading",
+      "label": "Description heading",
+      "default": "Details"
+    },
+    {
+      "type": "header",
+      "content": "FAQ"
+    },
+    {
+      "type": "text",
+      "id": "faq_heading",
+      "label": "FAQ heading",
+      "default": "FAQ"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_first",
+      "label": "Open the first question by default",
+      "default": false
+    },
+    { "type": "text", "id": "q1", "label": "Question 1" },
+    { "type": "textarea", "id": "a1", "label": "Answer 1" },
+    { "type": "text", "id": "q2", "label": "Question 2" },
+    { "type": "textarea", "id": "a2", "label": "Answer 2" },
+    { "type": "text", "id": "q3", "label": "Question 3" },
+    { "type": "textarea", "id": "a3", "label": "Answer 3" },
+    { "type": "text", "id": "q4", "label": "Question 4" },
+    { "type": "textarea", "id": "a4", "label": "Answer 4" },
+    { "type": "text", "id": "q5", "label": "Question 5" },
+    { "type": "textarea", "id": "a5", "label": "Answer 5" },
+    { "type": "text", "id": "q6", "label": "Question 6" },
+    { "type": "textarea", "id": "a6", "label": "Answer 6" },
+    { "type": "text", "id": "q7", "label": "Question 7" },
+    { "type": "textarea", "id": "a7", "label": "Answer 7" },
+    { "type": "text", "id": "q8", "label": "Question 8" },
+    { "type": "textarea", "id": "a8", "label": "Answer 8" },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0, "max": 120, "step": 4, "unit": "px", "default": 32
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0, "max": 120, "step": 4, "unit": "px", "default": 32
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Details & FAQ"
+    }
+  ]
+}
+{% endschema %}

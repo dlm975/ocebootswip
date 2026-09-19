@@ -1,0 +1,282 @@
+{%- liquid
+  assign img = section.settings.image
+  assign has_text = false
+  if section.settings.heading != blank or section.settings.body != blank
+    assign has_text = true
+  endif
+-%}
+
+{%- if img != blank or has_text or request.design_mode -%}
+  <div
+    class="pab"
+    style="
+      --pab-radius: {{ section.settings.corner_radius }}px;
+      --pab-bg: {{ section.settings.tile_background }};
+      --pab-fg: {{ section.settings.text_color }};
+      {% render 'spacing-style', settings: section.settings %}
+    "
+  >
+    <div class="pab__inner{% if section.settings.image_position == 'right' %} pab__inner--flip{% endif %}">
+      <div class="pab__tile pab__tile--media">
+        {%- if img != blank -%}
+          <img
+            class="pab__img"
+            src="{{ img | image_url: width: 1200 }}"
+            srcset="{{ img | image_url: width: 600 }} 600w, {{ img | image_url: width: 900 }} 900w, {{ img | image_url: width: 1400 }} 1400w"
+            sizes="(max-width: 749px) 100vw, 50vw"
+            alt="{{ img.alt | escape }}"
+            loading="lazy"
+            decoding="async"
+            width="1200"
+            height="900"
+          >
+        {%- else -%}
+          {{ 'lifestyle-1' | placeholder_svg_tag: 'pab__placeholder' }}
+        {%- endif -%}
+      </div>
+
+      <div class="pab__tile pab__tile--text">
+        {%- if section.settings.eyebrow != blank -%}
+          <span class="pab__eyebrow">{{ section.settings.eyebrow }}</span>
+        {%- endif -%}
+
+        {%- if section.settings.heading != blank -%}
+          <h2 class="pab__heading">{{ section.settings.heading }}</h2>
+        {%- endif -%}
+
+        {%- if section.settings.body != blank -%}
+          <div class="pab__body rte">{{ section.settings.body }}</div>
+        {%- endif -%}
+
+        {%- if section.settings.button_label != blank and section.settings.button_link != blank -%}
+          <a class="pab__button" href="{{ section.settings.button_link }}">
+            {{ section.settings.button_label }}
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .pab {
+    width: 100%;
+  }
+
+  .pab__inner {
+    max-width: var(--page-width, 1400px);
+    margin-inline: auto;
+    padding-inline: var(--page-margin, 16px);
+    display: grid;
+    gap: clamp(12px, 2vw, 20px);
+  }
+
+  .pab__tile {
+    border-radius: var(--pab-radius, 20px);
+    overflow: hidden;
+  }
+
+  .pab__tile--media {
+    background: rgba(0, 0, 0, 0.04);
+    aspect-ratio: 4 / 3;
+  }
+
+  .pab__img,
+  .pab__placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .pab__tile--text {
+    background: var(--pab-bg, #f5f5f5);
+    color: var(--pab-fg, #111111);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 12px;
+    padding: clamp(24px, 4vw, 44px);
+  }
+
+  .pab__eyebrow {
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.55;
+  }
+
+  .pab__heading {
+    font-size: clamp(1.3rem, 3vw, 2.1rem);
+    font-weight: 800;
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 1.08;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .pab__body {
+    font-size: 0.9rem;
+    line-height: 1.65;
+    opacity: 0.78;
+  }
+
+  .pab__body :first-child { margin-top: 0; }
+  .pab__body :last-child { margin-bottom: 0; }
+
+  .pab__button {
+    margin-top: 4px;
+    display: inline-flex;
+    align-items: center;
+    height: 42px;
+    padding: 0 22px;
+    border-radius: 999px;
+    background: var(--pab-fg, #111111);
+    color: var(--pab-bg, #ffffff);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s ease;
+  }
+
+  .pab__button:hover {
+    opacity: 0.88;
+  }
+
+  .pab__button:active {
+    transform: scale(0.97);
+  }
+
+  @media screen and (min-width: 750px) {
+    .pab__inner {
+      grid-template-columns: 1fr 1fr;
+      align-items: stretch;
+    }
+
+    .pab__tile--media {
+      aspect-ratio: auto;
+      min-height: 340px;
+    }
+
+    .pab__inner--flip .pab__tile--media {
+      order: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pab__button {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "About Tiles",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Image tile"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "Image position (desktop)",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Text tile"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Small label",
+      "default": "ABOUT US"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Built for the boot obsessed"
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Text"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "color",
+      "id": "tile_background",
+      "label": "Text tile background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text colour",
+      "default": "#111111"
+    },
+    {
+      "type": "range",
+      "id": "corner_radius",
+      "label": "Corner radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0, "max": 120, "step": 4, "unit": "px", "default": 32
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0, "max": 120, "step": 4, "unit": "px", "default": 32
+    }
+  ],
+  "presets": [
+    {
+      "name": "About Tiles"
+    }
+  ]
+}
+{% endschema %}

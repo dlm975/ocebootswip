@@ -1,0 +1,706 @@
+{%- liquid
+  assign p = product
+  if p == blank
+    assign p = closest.product
+  endif
+  if p == blank and request.visual_preview_mode
+    assign p = collections.all.products.first
+  endif
+
+  comment
+    Find the option that holds the size so the pill can show just "US 7 …"
+    instead of the whole variant title. Falls back to the variant title when
+    the product isn't sized (accessories, gift cards).
+  endcomment
+  assign size_pos = 0
+  assign size_name = ''
+  for opt in p.options_with_values
+    assign lower_name = opt.name | downcase
+    if lower_name contains 'size'
+      assign size_pos = forloop.index
+      assign size_name = opt.name
+      break
+    endif
+  endfor
+
+  assign current = p.selected_or_first_available_variant
+  assign show_sizes = false
+  if p.variants.size > 1
+    assign show_sizes = true
+  endif
+
+  assign form_id = 'psb-form-' | append: section.id
+  assign atc_id = 'psb-atc-' | append: section.id
+-%}
+
+{%- if p != blank -%}
+  <div
+    class="psb"
+    id="psb-{{ section.id }}"
+    data-size-option="{{ size_name | escape }}"
+    style="--psb-accent: {{ section.settings.button_color }}; --psb-accent-text: {{ section.settings.button_text_color }};"
+  >
+    {%- comment -%} Dims the page behind the size sheet on mobile {%- endcomment -%}
+    <div class="psb__scrim" data-psb-scrim hidden></div>
+
+    <div class="psb__bar">
+      <div class="psb__info">
+        <span class="psb__title">{{ p.title }}</span>
+        <span class="psb__price" data-psb-price>
+          {{- current.price | money_with_currency -}}
+        </span>
+      </div>
+
+      {%- if show_sizes -%}
+        <button
+          type="button"
+          class="psb__pill"
+          data-psb-trigger
+          aria-haspopup="listbox"
+          aria-expanded="false"
+        >
+          <span class="psb__pill-label" data-psb-label>
+            {%- liquid
+              case size_pos
+                when 1
+                  echo current.option1
+                when 2
+                  echo current.option2
+                when 3
+                  echo current.option3
+                else
+                  echo current.title
+              endcase
+            -%}
+          </span>
+          <svg class="psb__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="13" height="13" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+      {%- endif -%}
+
+      <product-form-component
+        class="psb__form"
+        data-section-id="{{ section.id }}"
+        data-product-id="{{ p.id }}"
+        data-product-url="{{ p.url }}"
+        on:submit="/handleSubmit"
+        data-quantity-default="1"
+      >
+        <div class="visually-hidden" aria-live="assertive" role="status" aria-atomic="true" ref="liveRegion"></div>
+
+        {%- form 'product', p, id: form_id, novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
+          <input type="hidden" name="id" ref="variantId" value="{{ current.id }}">
+          <input type="hidden" name="quantity" value="1">
+
+          {% render 'add-to-cart-button',
+            id: atc_id,
+            class: 'psb__atc',
+            can_add_to_cart: current.available,
+            product: p,
+            add_to_cart_text: section.settings.button_text
+          %}
+
+          <span class="product-form-text__error hidden" ref="addToCartTextError">
+            <span class="svg-wrapper product-form-icon--error">
+              {{- 'icon-error.svg' | inline_asset_content -}}
+            </span>
+          </span>
+        {%- endform -%}
+      </product-form-component>
+    </div>
+
+    {%- if show_sizes -%}
+      <div class="psb__sheet" data-psb-sheet hidden>
+        <div class="psb__sheet-grip" aria-hidden="true"></div>
+
+        <div class="psb__sheet-head">
+          <span>{{ section.settings.sheet_heading | default: 'Select size' }}</span>
+          <button type="button" class="psb__sheet-close" data-psb-close aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="16" height="16" aria-hidden="true">
+              <line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="psb__opts" role="listbox" aria-label="{{ section.settings.sheet_heading | default: 'Select size' | escape }}">
+          {%- for v in p.variants -%}
+            {%- liquid
+              case size_pos
+                when 1
+                  assign v_label = v.option1
+                when 2
+                  assign v_label = v.option2
+                when 3
+                  assign v_label = v.option3
+                else
+                  assign v_label = v.title
+              endcase
+            -%}
+            <button
+              type="button"
+              class="psb__opt"
+              role="option"
+              data-psb-opt
+              data-variant-id="{{ v.id }}"
+              data-label="{{ v_label | escape }}"
+              data-price="{{ v.price | money_with_currency | escape }}"
+              aria-selected="{% if v.id == current.id %}true{% else %}false{% endif %}"
+              {% unless v.available %}disabled aria-disabled="true"{% endunless %}
+            >
+              <span class="psb__opt-label">{{ v_label }}</span>
+              <span class="psb__opt-meta">
+                {%- if v.available -%}
+                  {{ v.price | money_with_currency }}
+                {%- else -%}
+                  {{ 'products.product.sold_out' | t | default: 'Sold out' }}
+                {%- endif -%}
+              </span>
+            </button>
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  /* ── Floating buy bar ──
+     Mobile: pinned full-width to the bottom edge.
+     Desktop: a card floating in the bottom-right corner. */
+  .psb {
+    --psb-ease: cubic-bezier(0.32, 0.72, 0, 1);
+
+    position: fixed;
+    z-index: 40;
+    inset: auto 0 0 0;
+    pointer-events: none;
+  }
+
+  .psb__bar {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+    background: rgba(255, 255, 255, 0.86);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 -8px 24px -12px rgba(0, 0, 0, 0.18);
+  }
+
+  .psb__info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .psb__title {
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #111;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .psb__price {
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #111;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Size pill ── */
+  .psb__pill {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    max-width: 38vw;
+    height: 38px;
+    padding: 0 12px;
+    border: 1.5px solid rgba(0, 0, 0, 0.16);
+    border-radius: 999px;
+    background: #fff;
+    color: #111;
+    font-size: 0.74rem;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.2s var(--psb-ease), border-color 0.2s var(--psb-ease);
+  }
+
+  .psb__pill:active {
+    transform: scale(0.96);
+  }
+
+  .psb__pill[aria-expanded='true'] {
+    border-color: #111;
+  }
+
+  .psb__pill-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .psb__chev {
+    flex-shrink: 0;
+    transition: transform 0.24s var(--psb-ease);
+  }
+
+  .psb__pill[aria-expanded='true'] .psb__chev {
+    transform: rotate(180deg);
+  }
+
+  /* ── Add to cart ── */
+  .psb__form {
+    flex: 0 0 auto;
+    display: block;
+  }
+
+  .psb__form form {
+    display: flex;
+    align-items: center;
+  }
+
+  .psb .psb__atc {
+    height: 38px;
+    min-height: 38px;
+    padding: 0 18px;
+    border-radius: 999px;
+    background: var(--psb-accent, #111);
+    color: var(--psb-accent-text, #fff);
+    border: none;
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+    position: relative;
+    transition: transform 0.2s var(--psb-ease), opacity 0.2s var(--psb-ease);
+  }
+
+  .psb .psb__atc:active:not([disabled]) {
+    transform: scale(0.96);
+  }
+
+  .psb .psb__atc[disabled] {
+    opacity: 0.45;
+  }
+
+  /* The theme's cart icon inside the button is noise at this size */
+  .psb .psb__atc .add-to-cart-icon {
+    display: none;
+  }
+
+  .psb .product-form-text__error {
+    display: none;
+  }
+
+  /* ── Size sheet ── */
+  .psb__scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.28);
+    opacity: 0;
+    pointer-events: auto;
+    transition: opacity 0.3s var(--psb-ease);
+    /* iOS: block page scroll behind the sheet without locking the body,
+       which would break scrolling inside the sheet itself. */
+    touch-action: none;
+  }
+
+  .psb[data-open] .psb__scrim {
+    opacity: 1;
+  }
+
+  .psb__sheet {
+    pointer-events: auto;
+    position: fixed;
+    inset: auto 0 0 0;
+    display: flex;
+    flex-direction: column;
+    max-height: min(70vh, 560px);
+    background: #fff;
+    border-radius: 22px 22px 0 0;
+    box-shadow: 0 -12px 40px -8px rgba(0, 0, 0, 0.28);
+    transform: translateY(100%);
+    transition: transform 0.38s var(--psb-ease);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .psb[data-open] .psb__sheet {
+    transform: translateY(0);
+  }
+
+  .psb__sheet[hidden] {
+    display: none;
+  }
+
+  .psb__sheet-grip {
+    width: 38px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.16);
+    margin: 8px auto 2px;
+    flex-shrink: 0;
+  }
+
+  .psb__sheet-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 18px 10px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #111;
+    flex-shrink: 0;
+  }
+
+  .psb__sheet-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.06);
+    color: #111;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* min-height:0 lets this flex child actually scroll */
+  .psb__opts {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    min-height: 0;
+    padding: 0 12px 14px;
+    touch-action: pan-y;
+  }
+
+  .psb__opt {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 13px 14px;
+    border: none;
+    border-radius: 12px;
+    background: transparent;
+    color: #111;
+    font-size: 0.85rem;
+    text-align: left;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.18s var(--psb-ease);
+  }
+
+  .psb__opt + .psb__opt {
+    box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.06);
+  }
+
+  .psb__opt:active:not([disabled]) {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .psb__opt[aria-selected='true'] {
+    background: rgba(0, 0, 0, 0.06);
+    font-weight: 700;
+  }
+
+  .psb__opt[disabled] {
+    opacity: 0.38;
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+
+  .psb__opt-label {
+    font-weight: inherit;
+  }
+
+  .psb__opt-meta {
+    font-size: 0.74rem;
+    opacity: 0.6;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Keep page content clear of the bar */
+  body:has(.psb) {
+    padding-bottom: 72px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .psb__sheet,
+    .psb__scrim,
+    .psb__chev,
+    .psb__pill,
+    .psb .psb__atc {
+      transition: none;
+    }
+  }
+
+  /* ── Desktop: floating card, bottom-right ── */
+  @media screen and (min-width: 750px) {
+    .psb {
+      inset: auto 24px 24px auto;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+    }
+
+    .psb__bar {
+      width: min(420px, calc(100vw - 48px));
+      padding: 12px 14px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 18px;
+      box-shadow: 0 20px 44px -16px rgba(0, 0, 0, 0.3), 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .psb__title {
+      font-size: 0.78rem;
+    }
+
+    .psb__price {
+      font-size: 0.88rem;
+    }
+
+    .psb__pill {
+      max-width: 150px;
+    }
+
+    /* Anchor the sheet to the card instead of the screen edge */
+    .psb__scrim {
+      background: transparent;
+    }
+
+    /* Sits in flow above the card, so the stack grows upward off the
+       bottom-right corner instead of relying on offset arithmetic. */
+    .psb__sheet {
+      position: relative;
+      inset: auto;
+      order: -1;
+      width: min(420px, calc(100vw - 48px));
+      max-height: min(60vh, 460px);
+      border-radius: 18px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      transform: translateY(8px) scale(0.98);
+      opacity: 0;
+      transform-origin: bottom right;
+      transition: transform 0.28s var(--psb-ease), opacity 0.2s var(--psb-ease);
+      padding-bottom: 0;
+    }
+
+    .psb[data-open] .psb__sheet {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    .psb__sheet-grip {
+      display: none;
+    }
+
+    body:has(.psb) {
+      padding-bottom: 0;
+    }
+  }
+{% endstylesheet %}
+
+<script>
+  (function () {
+    var root = document.getElementById('psb-{{ section.id }}');
+    if (!root) return;
+
+    var trigger = root.querySelector('[data-psb-trigger]');
+    var sheet = root.querySelector('[data-psb-sheet]');
+    var scrim = root.querySelector('[data-psb-scrim]');
+    var label = root.querySelector('[data-psb-label]');
+    var priceEl = root.querySelector('[data-psb-price]');
+    var variantInput = root.querySelector('input[name="id"]');
+    var atc = root.querySelector('.psb__atc');
+    var opts = [].slice.call(root.querySelectorAll('[data-psb-opt]'));
+
+    /* ── Sheet open/close ── */
+    function open() {
+      if (!sheet) return;
+      sheet.hidden = false;
+      if (scrim) scrim.hidden = false;
+      /* next frame so the transition runs from the closed state */
+      requestAnimationFrame(function () {
+        root.setAttribute('data-open', '');
+      });
+      if (trigger) trigger.setAttribute('aria-expanded', 'true');
+
+      var selected = root.querySelector('[data-psb-opt][aria-selected="true"]:not([disabled])');
+      var target = selected || root.querySelector('[data-psb-opt]:not([disabled])');
+      if (target) target.focus({ preventScroll: true });
+    }
+
+    function close() {
+      if (!sheet) return;
+      root.removeAttribute('data-open');
+      if (trigger) {
+        trigger.setAttribute('aria-expanded', 'false');
+        trigger.focus({ preventScroll: true });
+      }
+      /* wait out the slide-down before removing from the a11y tree */
+      setTimeout(function () {
+        if (root.hasAttribute('data-open')) return;
+        sheet.hidden = true;
+        if (scrim) scrim.hidden = true;
+      }, 380);
+    }
+
+    if (trigger) {
+      trigger.addEventListener('click', function () {
+        if (root.hasAttribute('data-open')) close();
+        else open();
+      });
+    }
+
+    if (scrim) scrim.addEventListener('click', close);
+
+    var closeBtn = root.querySelector('[data-psb-close]');
+    if (closeBtn) closeBtn.addEventListener('click', close);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && root.hasAttribute('data-open')) close();
+    });
+
+    /* ── Selection ──
+       Prefer driving the main variant picker: it re-renders the gallery,
+       price and buy button, and fires variant:update which syncs this bar
+       back. Only fall back to setting our own input when there's no picker
+       on the page (or its option value has since changed). */
+    function applyLocally(id, text, price) {
+      if (variantInput) variantInput.value = id;
+      if (label && text) label.textContent = text;
+      if (priceEl && price) priceEl.textContent = price;
+
+      opts.forEach(function (o) {
+        o.setAttribute('aria-selected', o.dataset.variantId === String(id) ? 'true' : 'false');
+      });
+    }
+
+    function syncMainPicker(text) {
+      var optionName = root.dataset.sizeOption;
+      if (!optionName || !text) return false;
+
+      var select = document.querySelector('select[name="options[' + optionName.replace(/"/g, '\\"') + ']"]');
+      if (select) {
+        var matched = false;
+        for (var i = 0; i < select.options.length; i++) {
+          if (select.options[i].value === text) {
+            select.selectedIndex = i;
+            matched = true;
+            break;
+          }
+        }
+        if (!matched) return false;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+        return true;
+      }
+
+      /* Button style picker renders radios instead of a select */
+      var radios = document.querySelectorAll('input[type="radio"][value]');
+      for (var j = 0; j < radios.length; j++) {
+        if (radios[j].value === text && radios[j].closest('[data-option-name], fieldset')) {
+          radios[j].click();
+          return true;
+        }
+      }
+      return false;
+    }
+
+    opts.forEach(function (opt) {
+      opt.addEventListener('click', function () {
+        if (opt.hasAttribute('disabled')) return;
+
+        var id = opt.dataset.variantId;
+        var text = opt.dataset.label;
+        var price = opt.dataset.price;
+
+        applyLocally(id, text, price);
+        syncMainPicker(text);
+        close();
+      });
+    });
+
+    /* ── Keep in step with the main picker ── */
+    document.addEventListener('variant:update', function (e) {
+      var resource = e.detail && e.detail.resource;
+      if (!resource || !resource.id) return;
+
+      var match = opts.filter(function (o) {
+        return o.dataset.variantId === String(resource.id);
+      })[0];
+
+      if (match) {
+        applyLocally(resource.id, match.dataset.label, match.dataset.price);
+      } else if (variantInput) {
+        variantInput.value = resource.id;
+      }
+
+      if (atc) {
+        if (resource.available === false) atc.setAttribute('disabled', 'disabled');
+        else atc.removeAttribute('disabled');
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Floating Buy Bar",
+  "tag": "section",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "A floating add-to-cart bar — full width along the bottom on mobile, a card in the bottom-right corner on desktop. It shows the product name, the selected size and the price with currency."
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Add to cart"
+    },
+    {
+      "type": "text",
+      "id": "sheet_heading",
+      "label": "Size picker heading",
+      "default": "Select size"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Button colour",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text colour",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Floating Buy Bar"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,165 @@
+{%- comment -%}
+  Styling for the product media gallery on this template.
+
+  Section-scoped CSS only loads on pages where the section is present, which
+  is what makes this per-template rather than theme-wide. The gallery itself
+  is the stock `_product-media-gallery` block — set it to Grid / two columns
+  / full-width first image and the desktop layout (large main image, two-up
+  secondary grid below) comes from the theme. This section restyles the
+  mobile carousel pagination into an underline bar and tunes the grid.
+{%- endcomment -%}
+
+<div class="pgs-flag" aria-hidden="true" hidden></div>
+
+{% stylesheet %}
+  .pgs-flag {
+    display: none;
+  }
+
+  /* ── Mobile pagination as an underline ──
+     The stock dots float over the image with mix-blend-mode so they stay
+     visible on any photo. Pull them out of that overlay and sit them
+     below the image as rounded bars, with the active slide filled black. */
+  .pdp-gallery-v2 media-gallery slideshow-controls:has(.slideshow-controls__dots) {
+    mix-blend-mode: normal;
+  }
+
+  .pdp-gallery-v2 media-gallery slideshow-controls[controls-on-media] {
+    position: static;
+    min-height: 0;
+    padding-block: 12px 2px;
+    --color-foreground: var(--pgs-active, #111111);
+  }
+
+  .pdp-gallery-v2 media-gallery .slideshow-controls__dots {
+    gap: 6px;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .pdp-gallery-v2 media-gallery .slideshow-controls__dots button {
+    width: auto;
+    height: 20px;
+    margin: 0;
+    padding: 0 2px;
+    border-radius: 0;
+  }
+
+  .pdp-gallery-v2 media-gallery .slideshow-controls__dots button::after {
+    width: var(--pgs-bar-width, 20px);
+    height: var(--pgs-bar-height, 3px);
+    border-radius: 999px;
+    background-color: var(--pgs-idle, rgba(17, 17, 17, 0.2));
+    transition: width 0.28s cubic-bezier(0.32, 0.72, 0, 1), background-color 0.2s ease;
+  }
+
+  .pdp-gallery-v2 media-gallery .slideshow-controls__dots button[aria-selected='true']::after {
+    width: calc(var(--pgs-bar-width, 20px) * 1.6);
+    background-color: var(--pgs-active, #111111);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pdp-gallery-v2 media-gallery .slideshow-controls__dots button::after {
+      transition: none;
+    }
+  }
+
+  /* ── Desktop secondary grid ── */
+  @media screen and (min-width: 750px) {
+    .pdp-gallery-v2 media-gallery .media-gallery__grid {
+      gap: var(--pgs-grid-gap, 8px);
+    }
+
+    .pdp-gallery-v2 media-gallery .media-gallery__grid .product-media-container {
+      border-radius: var(--pgs-radius, 8px);
+      overflow: hidden;
+    }
+  }
+{% endstylesheet %}
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    root.classList.add('pdp-gallery-v2');
+    root.style.setProperty('--pgs-bar-width', '{{ section.settings.bar_width }}px');
+    root.style.setProperty('--pgs-bar-height', '{{ section.settings.bar_height }}px');
+    root.style.setProperty('--pgs-active', '{{ section.settings.bar_color }}');
+    root.style.setProperty('--pgs-grid-gap', '{{ section.settings.grid_gap }}px');
+    root.style.setProperty('--pgs-radius', '{{ section.settings.corner_radius }}px');
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Product Gallery Style",
+  "tag": "section",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Styles the product gallery on this template. Set the Product media block to Grid, two columns, with a full-width first image — that gives the large main image with a two-up secondary grid below it on desktop, and a full-width swipeable carousel on mobile."
+    },
+    {
+      "type": "header",
+      "content": "Mobile pagination"
+    },
+    {
+      "type": "range",
+      "id": "bar_width",
+      "label": "Underline width",
+      "min": 10,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "bar_height",
+      "label": "Underline thickness",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "unit": "px",
+      "default": 3
+    },
+    {
+      "type": "color",
+      "id": "bar_color",
+      "label": "Selected colour",
+      "default": "#111111"
+    },
+    {
+      "type": "header",
+      "content": "Secondary image grid"
+    },
+    {
+      "type": "range",
+      "id": "grid_gap",
+      "label": "Gap",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "corner_radius",
+      "label": "Corner radius",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Gallery Style"
+    }
+  ]
+}
+{% endschema %}
