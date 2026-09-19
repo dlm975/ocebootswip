@@ -9,10 +9,14 @@
     Scatter is driven by repeating factor lists rather than random values
     so the layout is identical on every render — a random tilt would
     reshuffle on each page load and look broken rather than casual.
+
+    The tilt list cycles every 8 and the shape list every 5, so the two
+    only line up again after 40 photos — a shared cycle length would make
+    the second row an obvious copy of the first.
   endcomment
   assign tilt = '-0.9,0.6,-0.35,1,-0.7,0.45,-1,0.75' | split: ','
   assign drift = '-0.2,0.6,-0.5,0.25,-0.15,1,-0.7,0.35' | split: ','
-  assign ratios = '4/5,1/1,3/4,1/1,5/4,4/5,1/1,3/4' | split: ','
+  assign ratios = '4/5,1/1,3/4,5/4,1/1' | split: ','
 -%}
 
 {%- if photos.size > 0 or placeholder -%}
@@ -36,9 +40,10 @@
         {%- if placeholder -%}
           {%- for i in (1..8) -%}
             {%- assign n = forloop.index0 | modulo: 8 -%}
+            {%- assign r = forloop.index0 | modulo: 5 -%}
             <div
               class="ccg__item"
-              style="--rot: {{ tilt[n] }}; --dy: {{ drift[n] }}; --ratio: {{ ratios[n] }}; z-index: {{ forloop.index0 | modulo: 3 }};"
+              style="--rot: {{ tilt[n] }}; --dy: {{ drift[n] }}; --ratio: {{ ratios[r] }}; z-index: {{ forloop.index0 | modulo: 3 }};"
             >
               <div class="ccg__photo">
                 {{ 'lifestyle-1' | placeholder_svg_tag: 'ccg__svg' }}
@@ -49,7 +54,7 @@
           {%- for block in photos -%}
             {%- liquid
               assign n = forloop.index0 | modulo: 8
-              assign r = forloop.index0 | modulo: 8
+              assign r = forloop.index0 | modulo: 5
             -%}
             <div
               class="ccg__item"
@@ -376,7 +381,7 @@
       ]
     }
   ],
-  "max_blocks": 16,
+  "max_blocks": 40,
   "presets": [
     {
       "name": "Customer Collage",

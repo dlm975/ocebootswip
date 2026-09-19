@@ -77,19 +77,6 @@
             "padding-inline-end": 0
           },
           "blocks": {
-            "ig_handle_001": {
-              "type": "pdp-instagram-handle",
-              "settings": {
-                "handle": "@oceboots",
-                "show_logo": true,
-                "verified": true,
-                "alignment_mobile": "center",
-                "alignment_desktop": "center",
-                "badge_color": "#3897f0",
-                "link": ""
-              },
-              "blocks": {}
-            },
             "group_icgrde": {
               "type": "group",
               "name": "Header",
@@ -279,7 +266,6 @@
             }
           },
           "block_order": [
-            "ig_handle_001",
             "group_icgrde",
             "free_shipping_pill_001",
             "variant_picker_KALzja",
@@ -438,6 +424,111 @@
         "padding-block-end": 24
       }
     },
+    "customer_collage": {
+      "type": "customer-collage",
+      "blocks": {
+        "photo_1": {
+          "type": "photo",
+          "settings": {}
+        },
+        "photo_2": {
+          "type": "photo",
+          "settings": {}
+        },
+        "photo_3": {
+          "type": "photo",
+          "settings": {}
+        },
+        "photo_4": {
+          "type": "photo",
+          "settings": {}
+        },
+        "photo_5": {
+          "type": "photo",
+          "settings": {}
+        },
+        "photo_6": {
+          "type": "photo",
+          "settings": {}
+        },
+        "photo_7": {
+          "type": "photo",
+          "settings": {}
+        },
+        "photo_8": {
+          "type": "photo",
+          "settings": {}
+        },
+        "photo_9": {
+          "type": "photo",
+          "settings": {}
+        },
+        "photo_10": {
+          "type": "photo",
+          "settings": {}
+        },
+        "photo_11": {
+          "type": "photo",
+          "settings": {}
+        },
+        "photo_12": {
+          "type": "photo",
+          "settings": {}
+        },
+        "photo_13": {
+          "type": "photo",
+          "settings": {}
+        },
+        "photo_14": {
+          "type": "photo",
+          "settings": {}
+        },
+        "photo_15": {
+          "type": "photo",
+          "settings": {}
+        },
+        "photo_16": {
+          "type": "photo",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "photo_1",
+        "photo_2",
+        "photo_3",
+        "photo_4",
+        "photo_5",
+        "photo_6",
+        "photo_7",
+        "photo_8",
+        "photo_9",
+        "photo_10",
+        "photo_11",
+        "photo_12",
+        "photo_13",
+        "photo_14",
+        "photo_15",
+        "photo_16"
+      ],
+      "settings": {
+        "heading": "WORN BY YOU",
+        "subtext": "",
+        "handle": "@oceboots",
+        "show_verified": true,
+        "badge_color": "#3897f0",
+        "columns_mobile": 3,
+        "columns_desktop": 5,
+        "overlap": 12,
+        "max_rotation": 5,
+        "max_drift": 14,
+        "frame_width": 6,
+        "corner_radius": 4,
+        "title_color": "#111111",
+        "plate_color": "rgba(255,255,255,0.82)",
+        "padding-block-start": 40,
+        "padding-block-end": 40
+      }
+    },
     "pdp_about": {
       "type": "pdp-about",
       "settings": {
@@ -445,7 +536,7 @@
         "image_position": "left",
         "eyebrow": "ABOUT US",
         "heading": "Built for the boot obsessed",
-        "body": "<p>We have spent 20+ years around football boots — chasing releases, hunting down retros and knowing a fake on sight. Every pair we list is checked by hand before it ships.</p>",
+        "body": "<p>We have spent 20+ years around football boots \u2014 chasing releases, hunting down retros and knowing a fake on sight. Every pair we list is checked by hand before it ships.</p>",
         "button_label": "",
         "button_link": "",
         "tile_background": "#f5f5f5",
@@ -517,6 +608,7 @@
     "pro_player_wall",
     "pdp_info_panel",
     "pdp_trust_bar",
+    "customer_collage",
     "pdp_about",
     "pdp_sticky_buy",
     "product_recommendations_qggXJq"
