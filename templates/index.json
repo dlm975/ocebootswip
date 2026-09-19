@@ -325,7 +325,7 @@
         "player_mDfxBi": {
           "type": "player",
           "settings": {
-            "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_02_33_PM.png",
+            "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_20_42_PM.png",
             "name": "CAMERON ARCHER",
             "club": "Southampton F.C.",
             "club_badge": "shopify://shop_images/FC_Southampton.svg",
@@ -337,27 +337,36 @@
         "player_YGwxeH": {
           "type": "player",
           "settings": {
-            "name": "",
-            "club": "",
-            "boot_name": "",
+            "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_19_21_PM.png",
+            "name": "Bryan Lasme",
+            "club": "FC Schalke 04",
+            "club_badge": "shopify://shop_images/FC_Schalke_04_Logo.svg",
+            "flag": "shopify://shop_images/Flag_of_France_svg.webp",
+            "boot_name": "HYPERVENOM PHANTOM 3",
             "link": ""
           }
         },
         "player_Nr4hyn": {
           "type": "player",
           "settings": {
-            "name": "",
-            "club": "",
-            "boot_name": "",
+            "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_15_51_PM.png",
+            "name": "NICHOLAS PIERINI",
+            "club": "US SASSUOLO",
+            "club_badge": "shopify://shop_images/US_Sassuolo_Calcio_logo.svg",
+            "flag": "shopify://shop_images/Flag_of_Italy.svg",
+            "boot_name": "MERCURIAL VAPOR 8 'CLASH'",
             "link": ""
           }
         },
         "player_GFgXXb": {
           "type": "player",
           "settings": {
-            "name": "",
-            "club": "",
-            "boot_name": "",
+            "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_24_21_PM.png",
+            "name": "LOIS OPENDA",
+            "club": "OLYMPIQUE LYONNAIS",
+            "club_badge": "shopify://shop_images/Olympique_Lyonnais_logo.svg",
+            "flag": "shopify://shop_images/Flag_of_Belgium.svg",
+            "boot_name": "PREDATOR LZ INSTINCT",
             "link": ""
           }
         },
