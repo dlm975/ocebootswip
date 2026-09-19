@@ -319,6 +319,89 @@
         "padding-block-end": 0
       }
     },
+    "pro_player_wall_hhtJ4x": {
+      "type": "pro-player-wall",
+      "blocks": {
+        "player_mDfxBi": {
+          "type": "player",
+          "settings": {
+            "image": "shopify://shop_images/0bb8d3c0-20c4-4d54-9d95-7deb1180583d.png",
+            "name": "CAMERON ARCHER",
+            "club": "Southampton F.C.",
+            "club_badge": "shopify://shop_images/FC_Southampton.svg",
+            "flag": "shopify://shop_images/Flag_of_England.svg",
+            "boot_name": "F50 Adizero 2014",
+            "link": ""
+          }
+        },
+        "player_YGwxeH": {
+          "type": "player",
+          "settings": {
+            "name": "",
+            "club": "",
+            "boot_name": "",
+            "link": ""
+          }
+        },
+        "player_Nr4hyn": {
+          "type": "player",
+          "settings": {
+            "name": "",
+            "club": "",
+            "boot_name": "",
+            "link": ""
+          }
+        },
+        "player_GFgXXb": {
+          "type": "player",
+          "settings": {
+            "name": "",
+            "club": "",
+            "boot_name": "",
+            "link": ""
+          }
+        },
+        "player_nfExFK": {
+          "type": "player",
+          "settings": {
+            "name": "",
+            "club": "",
+            "boot_name": "",
+            "link": ""
+          }
+        },
+        "player_Mk4T4B": {
+          "type": "player",
+          "settings": {
+            "name": "",
+            "club": "",
+            "boot_name": "",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "player_mDfxBi",
+        "player_YGwxeH",
+        "player_Nr4hyn",
+        "player_GFgXXb",
+        "player_nfExFK",
+        "player_Mk4T4B"
+      ],
+      "name": "Pro Player Wall",
+      "settings": {
+        "heading": "",
+        "cards_mobile": 3,
+        "cards_desktop": 6,
+        "gap_mobile": 8,
+        "gap_desktop": 12,
+        "corner_radius": 16,
+        "cross_seconds": 40,
+        "pause_on_hover": true,
+        "padding-block-start": 40,
+        "padding-block-end": 40
+      }
+    },
     "newly_listed_fc": {
       "type": "product-list",
       "blocks": {
@@ -805,6 +888,7 @@
     "1770583639efe53d54",
     "17706063529fca8395",
     "collection_cutout_grid_gidTf3",
+    "pro_player_wall_hhtJ4x",
     "newly_listed_fc",
     "brand_tiles_main",
     "product_spotlight_HMicki",
