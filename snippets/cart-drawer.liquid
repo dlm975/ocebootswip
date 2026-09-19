@@ -72,7 +72,7 @@
           >
             <span class="cart-drawer__heading h3">
               {{ 'content.cart_title' | t }}
-              {%- if cart.item_count > 0 %} &middot; {{ cart.item_count }}{% endif -%}
+              {% render 'cart-bubble' %}
             </span>
 
             <button
@@ -87,8 +87,6 @@
             </button>
           </div>
 
-          {% render 'cart-reassurance', part: 'strip' %}
-
           <div
             class="cart-drawer__content motion-reduce"
             aria-label="{{ 'accessibility.cart' | t }}"
@@ -98,7 +96,6 @@
               class="cart-drawer__items"
             >
               {% render 'cart-products' %}
-              {% render 'cart-reassurance', part: 'blocks' %}
             </scroll-hint>
 
             <div
@@ -114,106 +111,6 @@
 </cart-drawer-component>
 
 {% stylesheet %}
-  /* ── Rounded floating drawer ── */
-  .cart-drawer__dialog {
-    border-left: none !important;
-    border-radius: 32px 0 0 32px !important;
-    overflow: hidden !important;
-    box-shadow: -12px 0 40px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.05);
-    margin-block: 25px !important;
-    height: calc(100dvh - 50px) !important;
-  }
-
-  .cart-drawer__dialog:modal {
-    max-height: calc(100dvh - 50px) !important;
-  }
-
-  @media screen and (min-width: 750px) {
-    .cart-drawer__dialog {
-      border-radius: 32px !important;
-    }
-  }
-
-  /* ── Compact summary panel ── */
-  .cart-drawer__summary {
-    gap: 6px;
-    padding: 10px var(--padding-xl) 12px;
-    mask-image: none;
-  }
-
-  .cart-drawer__summary .cart__summary-totals {
-    gap: 4px;
-    margin-top: 0;
-    border-top: 1px solid var(--color-border);
-    padding-top: 8px;
-  }
-
-  .cart-drawer__summary .cart__summary-totals:not(:has(.cart__original-total-container:empty)) {
-    border-top: 1px solid var(--color-border);
-    padding-top: 8px;
-  }
-
-  .cart-drawer__summary .cart__total {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .cart-drawer__summary .cart__total-label {
-    font-size: 0.75rem;
-  }
-
-  .cart-drawer__summary .cart__total-value {
-    font-size: 1rem;
-  }
-
-  .cart-drawer__summary .tax-note,
-  .cart-drawer__summary .cart__installments {
-    display: none;
-  }
-
-  /* Checkout is the only button now, so it takes the full width */
-  .cart-drawer__summary .cart__ctas {
-    gap: 8px;
-    grid-template-columns: 1fr;
-  }
-
-  .cart-drawer__summary .cart__checkout-button {
-    height: 36px;
-    min-height: 36px;
-    font-size: 0.85rem;
-    padding-block: 0;
-    padding-inline: 0;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    border-radius: var(--style-border-radius-buttons-primary);
-  }
-
-  .cart-drawer__summary .cart__checkout-button {
-    background: #16a34a;
-    color: #fff;
-    border: none;
-    box-shadow: none;
-  }
-
-  .cart-drawer__summary .cart__checkout-button:hover {
-    background: #15803d;
-  }
-
-  .cart-drawer__summary .additional-checkout-buttons {
-    display: none;
-  }
-
-  .cart-drawer__summary .cart-actions {
-    padding-block: 6px;
-    gap: 4px;
-  }
-
-  /* ── Existing component styles ── */
   .cart-items-component {
     width: 100%;
     height: 100%;
@@ -221,25 +118,26 @@
     flex-direction: column;
   }
 
-  .cart-drawer__close-button {
-    position: absolute;
-    inset-inline-end: var(--padding-xl, 20px);
-    top: 50%;
-    transform: translateY(-50%);
+  .cart-drawer__heading .cart-bubble {
+    width: fit-content;
+    border-radius: var(--style-border-radius-buttons-primary);
+    aspect-ratio: auto;
+    padding: var(--cart-padding);
   }
 
-  /* Title centred with the close button pinned out of flow, so the title
-     stays optically centred in the drawer rather than centred in the space
-     the button leaves behind. */
+  .cart-drawer__heading .cart-bubble[data-maintain-ratio] {
+    aspect-ratio: 1;
+    min-width: 26px;
+  }
+
   .cart-drawer__header {
     background-color: var(--color-background);
     display: flex;
     align-items: center;
-    justify-content: center;
-    position: relative;
-    border-bottom: 1px solid var(--color-border);
+    justify-content: space-between;
     width: 100%;
     padding: var(--cart-drawer-padding);
+    border-bottom: var(--style-border-width) solid none;
     position: sticky;
     top: 0;
     z-index: 1;

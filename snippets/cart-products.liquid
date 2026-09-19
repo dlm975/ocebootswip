@@ -94,16 +94,7 @@
           </thead>
 
           <tbody role="rowgroup">
-            {%- comment -%}
-              Shipping protection is presented as a switch above the total,
-              so it would read as a duplicate if it also appeared here as a
-              normal line the shopper could change the quantity of.
-            {%- endcomment -%}
-            {%- assign protection_variant_id = settings.cart_protection_product.variants.first.id -%}
             {% for item in cart.items %}
-              {%- if settings.cart_protection_show and protection_variant_id and item.variant_id == protection_variant_id -%}
-                {% continue %}
-              {%- endif -%}
               <tr
                 role="row"
                 class="cart-items__table-row{% if item.parent_relationship.parent != null %} cart-items__nested-line{% endif %}"
@@ -156,12 +147,6 @@
                       {{- item.product.title -}}
                     </a>
                   </p>
-
-                  {%- comment -%}
-                    Title spans the row; everything else sits in a two-up
-                    below it, variants on the left and price on the right.
-                  {%- endcomment -%}
-                  <div class="cart-items__meta">
                   {% if item.product.vendor and block.settings.vendor %}
                     <p>
                       {{ item.product.vendor }}
@@ -231,54 +216,32 @@
                     </ul>
                   {% endif %}
 
-                  <div class="cart-item-stock" aria-label="Only 1 left in stock">
-                    <span class="cart-item-stock__dot" aria-hidden="true"></span>
-                    <span>1 left in stock</span>
-                  </div>
-
-                  {%- comment -%}
-                    The unit price used to sit here, repeating the line total
-                    shown on the right. Only the compare-at survives, since
-                    that is the one piece the line total doesn't carry.
-                  {%- endcomment -%}
-                  {%- if item.variant.compare_at_price > item.original_price -%}
-                    <div class="cart-items__was">
+                  <div>
+                    {% if item.original_price != item.final_price %}
+                      <span class="visually-hidden">{{ 'content.price_sale' | t }}</span>
+                      <span>{{ item.final_price | money }}</span>
                       <span class="visually-hidden">{{ 'content.price_regular' | t }}</span>
-                      <s class="compare-at-price">{{ item.variant.compare_at_price | money }}</s>
-                    </div>
-                  {%- endif -%}
-                  </div>
-
-                  {%- liquid
-                    if settings.currency_code_enabled_cart_items
-                      assign price = item.final_line_price | money_with_currency
-                      assign unit_price = item.unit_price | money_with_currency
-                    else
-                      assign price = item.final_line_price | money
-                      assign unit_price = item.unit_price | money
-                    endif
-                  -%}
-                  <div class="cart-items__pricecol cart-secondary-typography">
-                    <text-component value="{{ price | strip_html }}">{{ price }}</text-component>
-                    {%- if item.unit_price_measurement -%}
-                      <div class="cart-items__price-unit cart-secondary-typography">
-                        {% render 'unit-price', price: unit_price, measurement: item.unit_price_measurement %}
-                      </div>
-                    {%- endif -%}
-
-                    <button
-                      class="button button--tertiary cart-items__remove"
-                      type="button"
-                      aria-label="{{ 'accessibility.remove_item' | t: title: item.title | escape }}"
-                      on:click="/onLineItemRemove/{{ item.index | plus: 1 }}"
-                      {% assign can_remove = item.instructions.can_remove | default: true, allow_false: true %}
-                      {% if can_remove == false %}
-                        hidden
+                      <s class="compare-at-price">
+                        {% if item.variant.compare_at_price > item.original_price %}
+                          {{ item.variant.compare_at_price | money }}
+                        {% else %}
+                          {{ item.original_price | money }}
+                        {% endif %}
+                      </s>
+                    {% else %}
+                      {% if item.variant.compare_at_price > item.original_price %}
+                        <span class="visually-hidden">{{ 'content.price_sale' | t }}</span>
+                      {% else %}
+                        <span class="visually-hidden">{{ 'content.price' | t }}</span>
                       {% endif %}
-                    >
-                      {{- 'icon-delete.svg' | inline_asset_content -}}
-                      <span class="visually-hidden">Remove</span>
-                    </button>
+
+                      <span>{{ item.original_price | money }}</span>
+
+                      {% if item.variant.compare_at_price > item.original_price %}
+                        <span class="visually-hidden">{{ 'content.price_regular' | t }}</span>
+                        <s class="compare-at-price">{{ item.variant.compare_at_price | money }}</s>
+                      {% endif %}
+                    {% endif %}
                   </div>
                 </td>
                 <td
@@ -286,11 +249,32 @@
                   role="cell"
                   headers="quantity"
                 >
-                  {%- comment -%}
-                    Quantity stepper removed and the remove button moved under
-                    the line total. This cell is kept so the table keeps its
-                    column count, and hidden in CSS.
-                  {%- endcomment -%}
+                  {% # Here I want to pass some arguments to the quantity block so it knows which value should the input be set to. Though quantity block could be a snippet instead %}
+                  {% assign can_update_quantity = item.instructions.can_update_quantity
+                    | default: true, allow_false: true
+                  %}
+                  {% render 'quantity-selector',
+                    product: item.product,
+                    in_cart_quantity: item.quantity,
+                    line_index: item.index,
+                    min: 0,
+                    class: 'cart-primary-typography',
+                    can_update_quantity: can_update_quantity
+                  %}
+
+                  <button
+                    class="button button--tertiary cart-items__remove"
+                    type="button"
+                    aria-label="{{ 'accessibility.remove_item' | t: title: item.title | escape }}"
+                    on:click="/onLineItemRemove/{{ item.index | plus: 1 }}"
+                    {% assign can_remove = item.instructions.can_remove | default: true, allow_false: true %}
+                    {% if can_remove == false %}
+                      hidden
+                    {% endif %}
+                  >
+                    {{- 'icon-delete.svg' | inline_asset_content -}}
+                    <span class="visually-hidden">Remove</span>
+                  </button>
                 </td>
                 <td
                   class="cart-items__error hidden"
@@ -316,11 +300,21 @@
                   role="cell"
                   headers="productTotal"
                 >
-                  {%- comment -%}
-                    Price and remove moved into the details cell so they can
-                    sit beside the variant text. Cell kept and hidden so the
-                    table keeps its column count.
-                  {%- endcomment -%}
+                  {%- liquid
+                    if settings.currency_code_enabled_cart_items
+                      assign price = item.final_line_price | money_with_currency
+                      assign unit_price = item.unit_price | money_with_currency
+                    else
+                      assign price = item.final_line_price | money
+                      assign unit_price = item.unit_price | money
+                    endif
+                  -%}
+                  <text-component value="{{ price | strip_html }}">{{ price }}</text-component>
+                  {%- if item.unit_price_measurement -%}
+                    <div class="cart-items__price-unit cart-secondary-typography">
+                      {% render 'unit-price', price: unit_price, measurement: item.unit_price_measurement %}
+                    </div>
+                  {%- endif -%}
                 </td>
               </tr>
             {% endfor %}
@@ -357,10 +351,11 @@
     --cart-item-price-width: 6rem;
 
     display: grid;
-    grid-template-columns: clamp(2.5rem, 15cqi, 7.5rem) minmax(0, 1fr);
+    grid-template-columns: clamp(2.5rem, 15cqi, 7.5rem) minmax(0, 1fr) minmax(var(--cart-item-price-width), auto);
     grid-template-areas:
-      'media details'
-      'media error';
+      'media details price'
+      'media quantity price'
+      'media error error';
     column-gap: var(--gap-md);
     align-items: start;
     padding-bottom: var(--cart-items-gap);
@@ -444,55 +439,21 @@
     display: inline-block;
   }
 
-  /* Small enough to sit on one line in practice, but never clipped — a
-     shopper has to be able to read the size they are buying, so this wraps
-     rather than truncating if a variant name is unusually long. */
-  .cart-items__variants {
-    display: block;
-    font-size: 0.68rem;
-    line-height: 1.35;
-    overflow-wrap: anywhere;
-  }
-
-  .cart-items__was {
-    font-size: 0.72rem;
-    opacity: 0.6;
-  }
-
-  /* Title and price share the top line; the variant text sits under the
-     title and the remove button under the price, so the price column spans
-     both rows. */
-  .cart-items__details {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    column-gap: 12px;
-    align-items: start;
-    grid-template-areas:
-      'title price'
-      'meta  price';
-  }
-
-  .cart-items__details > p:first-child {
-    grid-area: title;
-  }
-
-  .cart-items__meta {
-    grid-area: meta;
-    min-width: 0;
-  }
-
-  .cart-items__pricecol {
-    grid-area: price;
+  .cart-items__quantity {
+    grid-area: quantity;
+    margin-block-start: var(--margin-xs);
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 10px;
-    white-space: nowrap;
-    font-weight: 600;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--gap-xs);
+    width: fit-content;
   }
 
-  .cart-items__details > p:first-child {
-    margin-block-start: 0;
+  .cart-items__quantity .quantity-selector {
+    display: inline-flex;
+    flex: 0 1 var(--quantity-selector-width);
+    font-size: var(--cart-font-size--sm);
+    height: auto;
   }
 
   .cart-items__remove {
@@ -510,17 +471,17 @@
     padding: 0;
   }
 
-  .cart-items__price-unit {
-    font-size: var(--cart-font-size--xs);
+  .cart-items__price {
+    grid-area: price;
+    min-height: unset;
+    min-width: var(--cart-item-price-width);
+    text-align: end;
+    display: block;
+    font-size: var(--cart-font-size--md);
   }
 
-  /* The remove button now sits under the line total */
-  .cart-items__pricecol .cart-items__remove {
-    display: inline-flex;
-    width: auto;
-    height: auto;
-    min-height: 0;
-    padding: 2px;
+  .cart-items__price-unit {
+    font-size: var(--cart-font-size--xs);
   }
 
   .cart-items__media-container {
@@ -591,6 +552,22 @@
         'media details error error';
     }
 
+    .cart-items__quantity,
+    .cart-items__price {
+      grid-area: initial;
+    }
+
+    .cart-items__quantity {
+      margin-top: 0;
+    }
+
+    .cart-items__price {
+      min-height: var(--minimum-touch-target);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: center;
+    }
   }
 
   .cart__original-total-container,
@@ -770,47 +747,5 @@
   .cart-items__properties dt,
   .cart-items__properties dd {
     display: inline;
-  }
-
-  .cart-item-stock {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 0.72rem;
-    font-weight: 500;
-    color: var(--color-lowstock, #EE9441);
-    margin-block-start: var(--margin-2xs);
-  }
-
-  .cart-item-stock__dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--color-lowstock, #EE9441);
-    flex-shrink: 0;
-    animation: stock-blink 1.4s ease-in-out infinite;
-  }
-
-  @keyframes stock-blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.15; }
-  }
-
-  /* Both cells are empty now. Hidden unconditionally and last, so no
-     earlier rule can re-display them — an empty cell that is still shown
-     gets auto-placed into a column of its own, which is what was leaving
-     a band of dead space down the right of every line. */
-  .cart-items__quantity,
-  .cart-items__price {
-    display: none;
-  }
-
-  @container cart-items (min-width: 720px) {
-    .cart-items__table-row {
-      grid-template-columns: 7.5rem minmax(0, 1fr);
-      grid-template-areas:
-        'media details'
-        'media error';
-    }
   }
 {% endstylesheet %}
