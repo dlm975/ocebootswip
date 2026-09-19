@@ -459,13 +459,6 @@
     opacity: 0.6;
   }
 
-  /* Both emptied — quantity when the stepper went, price when it moved into
-     the details cell. Kept so the table keeps its column count. */
-  .cart-items__quantity,
-  .cart-items__price {
-    display: none;
-  }
-
   /* Title across the top, variants and price two-up beneath it */
   .cart-items__details {
     display: grid;
@@ -510,24 +503,17 @@
     padding: 0;
   }
 
-  .cart-items__price {
-    grid-area: price;
-    min-height: unset;
-    min-width: var(--cart-item-price-width);
-    text-align: end;
-    display: block;
-    font-size: var(--cart-font-size--md);
-  }
-
   .cart-items__price-unit {
     font-size: var(--cart-font-size--xs);
   }
 
-  /* The remove button now lives in this cell, under the line total */
-  .cart-items__price .cart-items__remove {
+  /* The remove button now sits under the line total */
+  .cart-items__pricecol .cart-items__remove {
     display: inline-flex;
-    margin-top: 6px;
-    margin-inline-start: auto;
+    width: auto;
+    height: auto;
+    min-height: 0;
+    padding: 2px;
   }
 
   .cart-items__media-container {
@@ -598,22 +584,6 @@
         'media details error error';
     }
 
-    .cart-items__quantity,
-    .cart-items__price {
-      grid-area: initial;
-    }
-
-    .cart-items__quantity {
-      margin-top: 0;
-    }
-
-    .cart-items__price {
-      min-height: var(--minimum-touch-target);
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      justify-content: center;
-    }
   }
 
   .cart__original-total-container,
@@ -819,20 +789,21 @@
     50% { opacity: 0.15; }
   }
 
-  /* Quantity and price cells are both empty now, so the row is just image
-     and details at every width. This has to come after the theme's own
-     container query, which re-displays .cart-items__price. */
+  /* Both cells are empty now. Hidden unconditionally and last, so no
+     earlier rule can re-display them — an empty cell that is still shown
+     gets auto-placed into a column of its own, which is what was leaving
+     a band of dead space down the right of every line. */
+  .cart-items__quantity,
+  .cart-items__price {
+    display: none;
+  }
+
   @container cart-items (min-width: 720px) {
     .cart-items__table-row {
       grid-template-columns: 7.5rem minmax(0, 1fr);
       grid-template-areas:
         'media details'
         'media error';
-    }
-
-    .cart-items__quantity,
-    .cart-items__price {
-      display: none;
     }
   }
 {% endstylesheet %}
