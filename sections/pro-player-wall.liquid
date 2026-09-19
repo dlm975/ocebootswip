@@ -1,7 +1,28 @@
 {%- liquid
   assign players = section.blocks | where: 'type', 'player'
+
+  comment
+    Two possible sources. The shared roster lives in theme settings so every
+    wall on the site reads the same list — sections can't read each other's
+    blocks, so a per-section roster has to be re-entered everywhere it's used.
+  endcomment
+  assign shared_slots = 10
+  assign shared_count = 0
+  for i in (1..shared_slots)
+    assign k_name = 'ppw_player_' | append: i | append: '_name'
+    assign k_image = 'ppw_player_' | append: i | append: '_image'
+    if settings[k_name] != blank or settings[k_image] != blank
+      assign shared_count = shared_count | plus: 1
+    endif
+  endfor
+
+  assign use_shared = false
+  if section.settings.roster_source == 'shared' and shared_count > 0
+    assign use_shared = true
+  endif
+
   assign placeholder = false
-  if players.size == 0 and request.design_mode
+  if use_shared == false and players.size == 0 and request.design_mode
     assign placeholder = true
   endif
 
@@ -30,7 +51,7 @@
   assign sizes_d = 100 | divided_by: section.settings.cards_desktop | plus: 2 | round
 -%}
 
-{%- if players.size > 0 or placeholder -%}
+{%- if players.size > 0 or use_shared or placeholder -%}
 <div
   class="ppw spacing-style"
   id="ppw-{{ section.id }}"
@@ -91,6 +112,34 @@
               </div>
             </div>
           {%- endfor -%}
+        {%- elsif use_shared -%}
+          {%- for i in (1..shared_slots) -%}
+            {%- liquid
+              assign k = 'ppw_player_' | append: i
+              assign k_image = k | append: '_image'
+              assign k_name = k | append: '_name'
+              assign k_club = k | append: '_club'
+              assign k_badge = k | append: '_badge'
+              assign k_flag = k | append: '_flag'
+              assign k_boot = k | append: '_boot'
+              assign k_link = k | append: '_link'
+            -%}
+            {%- if settings[k_name] != blank or settings[k_image] != blank -%}
+              {%- render 'ppw-card',
+                image: settings[k_image],
+                name: settings[k_name],
+                club: settings[k_club],
+                crest: settings[k_badge],
+                flag: settings[k_flag],
+                boot: settings[k_boot],
+                link: settings[k_link],
+                sizes_m: sizes_m,
+                sizes_d: sizes_d,
+                img_w: img_w,
+                img_h: img_h
+              -%}
+            {%- endif -%}
+          {%- endfor -%}
         {%- else -%}
           {%- for block in players -%}
             {%- liquid
@@ -103,53 +152,20 @@
               assign link  = block.settings.link
             -%}
 
-            {%- comment -%}
-              Captured so each branch below emits a complete element —
-              splitting a tag across two {% if %}s reads as broken HTML to
-              the static parser the theme editor validates with.
-            {%- endcomment -%}
-            {%- capture card_inner -%}
-              <div class="ppw__media">
-                {%- if img != blank -%}
-                  <img
-                    class="ppw__img"
-                    src="{{ img | image_url: width: 600 }}"
-                    srcset="{{ img | image_url: width: 300 }} 300w, {{ img | image_url: width: 600 }} 600w, {{ img | image_url: width: 900 }} 900w"
-                    sizes="(max-width: 749px) {{ sizes_m }}vw, {{ sizes_d }}vw"
-                    alt="{{ name | escape }}"
-                    loading="lazy"
-                    decoding="async"
-                    width="{{ img_w }}"
-                    height="{{ img_h }}"
-                  >
-                {%- else -%}
-                  {{ 'product-1' | placeholder_svg_tag: 'ppw__svg' }}
-                {%- endif -%}
-              </div>
-
-              <div class="ppw__panel">
-                {%- if crest != blank or flag != blank -%}
-                  <div class="ppw__crest">
-                    {%- if crest != blank -%}
-                      <img class="ppw__badge" src="{{ crest | image_url: width: 80 }}" alt="" loading="lazy" decoding="async" width="80" height="80">
-                    {%- endif -%}
-                    {%- if flag != blank -%}
-                      <img class="ppw__flag" src="{{ flag | image_url: width: 80 }}" alt="" loading="lazy" decoding="async" width="80" height="60">
-                    {%- endif -%}
-                  </div>
-                {%- endif -%}
-
-                {%- if name != blank -%}<span class="ppw__name">{{ name }}</span>{%- endif -%}
-                {%- if club != blank -%}<span class="ppw__club">{{ club }}</span>{%- endif -%}
-                {%- if boot != blank -%}<span class="ppw__boot">{{ boot }}</span>{%- endif -%}
-              </div>
-            {%- endcapture -%}
-
-            {%- if link != blank -%}
-              <a class="ppw__card" href="{{ link }}" aria-label="{{ name | escape }}{% if boot != blank %} — {{ boot | escape }}{% endif %}" {{ block.shopify_attributes }}>{{ card_inner }}</a>
-            {%- else -%}
-              <div class="ppw__card" {{ block.shopify_attributes }}>{{ card_inner }}</div>
-            {%- endif -%}
+            {%- render 'ppw-card',
+              image: img,
+              name: name,
+              club: club,
+              crest: crest,
+              flag: flag,
+              boot: boot,
+              link: link,
+              sizes_m: sizes_m,
+              sizes_d: sizes_d,
+              img_w: img_w,
+              img_h: img_h,
+              attrs: block.shopify_attributes
+            -%}
           {%- endfor -%}
         {%- endif -%}
       </div>
@@ -538,6 +554,17 @@
   "name": "Pro Player Wall",
   "tag": "section",
   "settings": [
+    {
+      "type": "select",
+      "id": "roster_source",
+      "label": "Players",
+      "options": [
+        { "value": "shared", "label": "Shared roster (Theme settings)" },
+        { "value": "blocks", "label": "This section's own players" }
+      ],
+      "default": "shared",
+      "info": "The shared roster is edited once under Theme settings → Pro player wall and used by every wall on the site. Falls back to this section's own players when the shared roster is empty."
+    },
     {
       "type": "text",
       "id": "heading",

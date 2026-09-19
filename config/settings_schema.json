@@ -2356,5 +2356,404 @@
         "label": "Reel 3"
       }
     ]
+  },
+  {
+    "name": "Pro player wall",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "The roster shown by every Pro Player Wall on the site. Sections cannot read each other's content, so keeping the list here means editing it once instead of per page. Leave a slot blank to skip it."
+      },
+      {
+        "type": "header",
+        "content": "Player 1"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_1_image",
+        "label": "Photo"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_1_name",
+        "label": "Player name"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_1_club",
+        "label": "Club"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_1_badge",
+        "label": "Club badge"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_1_flag",
+        "label": "Country flag"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_1_boot",
+        "label": "Boot name"
+      },
+      {
+        "type": "url",
+        "id": "ppw_player_1_link",
+        "label": "Link to boot"
+      },
+      {
+        "type": "header",
+        "content": "Player 2"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_2_image",
+        "label": "Photo"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_2_name",
+        "label": "Player name"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_2_club",
+        "label": "Club"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_2_badge",
+        "label": "Club badge"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_2_flag",
+        "label": "Country flag"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_2_boot",
+        "label": "Boot name"
+      },
+      {
+        "type": "url",
+        "id": "ppw_player_2_link",
+        "label": "Link to boot"
+      },
+      {
+        "type": "header",
+        "content": "Player 3"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_3_image",
+        "label": "Photo"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_3_name",
+        "label": "Player name"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_3_club",
+        "label": "Club"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_3_badge",
+        "label": "Club badge"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_3_flag",
+        "label": "Country flag"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_3_boot",
+        "label": "Boot name"
+      },
+      {
+        "type": "url",
+        "id": "ppw_player_3_link",
+        "label": "Link to boot"
+      },
+      {
+        "type": "header",
+        "content": "Player 4"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_4_image",
+        "label": "Photo"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_4_name",
+        "label": "Player name"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_4_club",
+        "label": "Club"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_4_badge",
+        "label": "Club badge"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_4_flag",
+        "label": "Country flag"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_4_boot",
+        "label": "Boot name"
+      },
+      {
+        "type": "url",
+        "id": "ppw_player_4_link",
+        "label": "Link to boot"
+      },
+      {
+        "type": "header",
+        "content": "Player 5"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_5_image",
+        "label": "Photo"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_5_name",
+        "label": "Player name"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_5_club",
+        "label": "Club"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_5_badge",
+        "label": "Club badge"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_5_flag",
+        "label": "Country flag"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_5_boot",
+        "label": "Boot name"
+      },
+      {
+        "type": "url",
+        "id": "ppw_player_5_link",
+        "label": "Link to boot"
+      },
+      {
+        "type": "header",
+        "content": "Player 6"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_6_image",
+        "label": "Photo"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_6_name",
+        "label": "Player name"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_6_club",
+        "label": "Club"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_6_badge",
+        "label": "Club badge"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_6_flag",
+        "label": "Country flag"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_6_boot",
+        "label": "Boot name"
+      },
+      {
+        "type": "url",
+        "id": "ppw_player_6_link",
+        "label": "Link to boot"
+      },
+      {
+        "type": "header",
+        "content": "Player 7"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_7_image",
+        "label": "Photo"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_7_name",
+        "label": "Player name"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_7_club",
+        "label": "Club"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_7_badge",
+        "label": "Club badge"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_7_flag",
+        "label": "Country flag"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_7_boot",
+        "label": "Boot name"
+      },
+      {
+        "type": "url",
+        "id": "ppw_player_7_link",
+        "label": "Link to boot"
+      },
+      {
+        "type": "header",
+        "content": "Player 8"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_8_image",
+        "label": "Photo"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_8_name",
+        "label": "Player name"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_8_club",
+        "label": "Club"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_8_badge",
+        "label": "Club badge"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_8_flag",
+        "label": "Country flag"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_8_boot",
+        "label": "Boot name"
+      },
+      {
+        "type": "url",
+        "id": "ppw_player_8_link",
+        "label": "Link to boot"
+      },
+      {
+        "type": "header",
+        "content": "Player 9"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_9_image",
+        "label": "Photo"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_9_name",
+        "label": "Player name"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_9_club",
+        "label": "Club"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_9_badge",
+        "label": "Club badge"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_9_flag",
+        "label": "Country flag"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_9_boot",
+        "label": "Boot name"
+      },
+      {
+        "type": "url",
+        "id": "ppw_player_9_link",
+        "label": "Link to boot"
+      },
+      {
+        "type": "header",
+        "content": "Player 10"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_10_image",
+        "label": "Photo"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_10_name",
+        "label": "Player name"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_10_club",
+        "label": "Club"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_10_badge",
+        "label": "Club badge"
+      },
+      {
+        "type": "image_picker",
+        "id": "ppw_player_10_flag",
+        "label": "Country flag"
+      },
+      {
+        "type": "text",
+        "id": "ppw_player_10_boot",
+        "label": "Boot name"
+      },
+      {
+        "type": "url",
+        "id": "ppw_player_10_link",
+        "label": "Link to boot"
+      }
+    ]
   }
 ]

@@ -1,0 +1,65 @@
+{%- doc -%}
+  Renders one pro player card. Shared by the two roster sources — the
+  section's own blocks and the shared roster in theme settings — so both
+  produce identical markup.
+
+  @param {image} [image] - Player photo
+  @param {string} [name] - Player name
+  @param {string} [club] - Club name
+  @param {image} [crest] - Club badge
+  @param {image} [flag] - Country flag
+  @param {string} [boot] - Boot name
+  @param {string} [link] - Optional URL making the whole card clickable
+  @param {string} [sizes_m] - Card width in vw on mobile
+  @param {string} [sizes_d] - Card width in vw on desktop
+  @param {number} [img_w] - Intrinsic width hint
+  @param {number} [img_h] - Intrinsic height hint
+  @param {string} [attrs] - Theme editor attributes, when the source is a block
+{%- enddoc -%}
+
+{%- comment -%}
+  Captured so each branch below emits a complete element — splitting a tag
+  across two {% if %}s reads as broken HTML to a static parser.
+{%- endcomment -%}
+{%- capture card_inner -%}
+  <div class="ppw__media">
+    {%- if image != blank -%}
+      <img
+        class="ppw__img"
+        src="{{ image | image_url: width: 600 }}"
+        srcset="{{ image | image_url: width: 300 }} 300w, {{ image | image_url: width: 600 }} 600w, {{ image | image_url: width: 900 }} 900w"
+        sizes="(max-width: 749px) {{ sizes_m }}vw, {{ sizes_d }}vw"
+        alt="{{ name | escape }}"
+        loading="lazy"
+        decoding="async"
+        width="{{ img_w }}"
+        height="{{ img_h }}"
+      >
+    {%- else -%}
+      {{ 'product-1' | placeholder_svg_tag: 'ppw__svg' }}
+    {%- endif -%}
+  </div>
+
+  <div class="ppw__panel">
+    {%- if crest != blank or flag != blank -%}
+      <div class="ppw__crest">
+        {%- if crest != blank -%}
+          <img class="ppw__badge" src="{{ crest | image_url: width: 80 }}" alt="" loading="lazy" decoding="async" width="80" height="80">
+        {%- endif -%}
+        {%- if flag != blank -%}
+          <img class="ppw__flag" src="{{ flag | image_url: width: 80 }}" alt="" loading="lazy" decoding="async" width="80" height="60">
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if name != blank -%}<span class="ppw__name">{{ name }}</span>{%- endif -%}
+    {%- if club != blank -%}<span class="ppw__club">{{ club }}</span>{%- endif -%}
+    {%- if boot != blank -%}<span class="ppw__boot">{{ boot }}</span>{%- endif -%}
+  </div>
+{%- endcapture -%}
+
+{%- if link != blank -%}
+  <a class="ppw__card" href="{{ link }}" aria-label="{{ name | escape }}{% if boot != blank %} — {{ boot | escape }}{% endif %}" {{ attrs }}>{{ card_inner }}</a>
+{%- else -%}
+  <div class="ppw__card" {{ attrs }}>{{ card_inner }}</div>
+{%- endif -%}
