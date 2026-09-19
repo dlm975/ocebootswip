@@ -1,0 +1,167 @@
+{%- doc -%}
+  Cart-only styling driven by Theme settings → Cart.
+
+  Two rules this file sticks to:
+
+  1. Every selector is scoped under .cart-drawer or .cart-page, so nothing
+     here can reach the rest of the theme.
+  2. Every block is emitted only when its setting has been changed from the
+     default, so turning these on later cannot silently restyle the cart.
+
+  It lives in a {% style %} block rather than {% stylesheet %} because
+  stylesheet blocks do not process Liquid, and all of this is conditional.
+{%- enddoc -%}
+
+{%- liquid
+  assign fs = settings.cart_text_font_family | default: 'default'
+  assign ps = settings.cart_price_font_family | default: 'default'
+-%}
+
+{% style %}
+  /* The theme defines the cart font scale on .cart-drawer only, so on the
+     cart page those sizes resolved to nothing and the text fell back to
+     whatever it inherited. Mirroring the scale here makes the cart page
+     match the drawer and lets the settings below work in both. */
+  .cart-page {
+    --cart-font-size--2xs: var(--font-size--2xs);
+    --cart-font-size--xs: var(--font-size--xs);
+    --cart-font-size--sm: var(--font-size--sm);
+    --cart-font-size--md: var(--font-size--md);
+    --cart-font-size--2xl: var(--font-size--2xl);
+  }
+
+  {%- if fs != 'default' %}
+    .cart-drawer .cart-primary-typography,
+    .cart-page .cart-primary-typography {
+      font-family: var(--font-{{ fs }}--family);
+      font-style: var(--font-{{ fs }}--style);
+      font-weight: var(--font-{{ fs }}--weight);
+    }
+  {%- endif %}
+
+  {%- if ps != 'default' %}
+    .cart-drawer .cart-secondary-typography,
+    .cart-page .cart-secondary-typography {
+      font-family: var(--font-{{ ps }}--family);
+      font-style: var(--font-{{ ps }}--style);
+      font-weight: var(--font-{{ ps }}--weight);
+    }
+  {%- endif %}
+
+  {%- if settings.cart_heading_size > 0 %}
+    .cart-drawer .cart-drawer__heading,
+    .cart-page .cart-page__title {
+      font-size: {{ settings.cart_heading_size }}px;
+    }
+  {%- endif %}
+
+  {%- if settings.cart_title_size > 0 %}
+    .cart-drawer .cart-items__title,
+    .cart-page .cart-items__title {
+      font-size: {{ settings.cart_title_size }}px;
+    }
+  {%- endif %}
+
+  {%- if settings.cart_title_weight != 'default' %}
+    .cart-drawer .cart-items__title,
+    .cart-page .cart-items__title {
+      font-weight: {{ settings.cart_title_weight }};
+    }
+  {%- endif %}
+
+  {%- if settings.cart_details_size > 0 %}
+    .cart-drawer .cart-items__details *,
+    .cart-page .cart-items__details * {
+      font-size: {{ settings.cart_details_size }}px;
+    }
+
+    {%- if settings.cart_title_size > 0 %}
+      /* The rule above also catches the title, so restate it */
+      .cart-drawer .cart-items__title,
+      .cart-page .cart-items__title {
+        font-size: {{ settings.cart_title_size }}px;
+      }
+    {%- endif %}
+  {%- endif %}
+
+  {%- if settings.cart_price_size > 0 %}
+    .cart-drawer .cart-items__price,
+    .cart-page .cart-items__price {
+      font-size: {{ settings.cart_price_size }}px;
+    }
+  {%- endif %}
+
+  {%- if settings.cart_total_label_size > 0 %}
+    .cart-drawer .cart__total-label,
+    .cart-page .cart__total-label {
+      font-size: {{ settings.cart_total_label_size }}px;
+    }
+  {%- endif %}
+
+  {%- if settings.cart_total_size > 0 %}
+    .cart-drawer .cart__total-value,
+    .cart-page .cart__total-value {
+      font-size: {{ settings.cart_total_size }}px;
+    }
+  {%- endif %}
+
+  {%- if settings.cart_drawer_width > 0 %}
+    .cart-drawer .cart-drawer__dialog {
+      width: {{ settings.cart_drawer_width }}px;
+      max-width: 95vw;
+    }
+  {%- endif %}
+
+  {%- if settings.cart_drawer_padding > 0 %}
+    .cart-drawer {
+      --cart-drawer-padding: {{ settings.cart_drawer_padding }}px;
+      --cart-drawer-padding-desktop: {{ settings.cart_drawer_padding }}px;
+    }
+  {%- endif %}
+
+  {%- if settings.cart_image_width > 0 %}
+    /* The image is the row's first grid track, so the whole template has to
+       be restated — once for the stacked layout and once for the wide one. */
+    .cart-drawer .cart-items__table-row,
+    .cart-page .cart-items__table-row {
+      grid-template-columns: {{ settings.cart_image_width }}px minmax(0, 1fr) minmax(var(--cart-item-price-width), auto);
+    }
+
+    @container cart-items (min-width: 720px) {
+      .cart-drawer .cart-items__table-row,
+      .cart-page .cart-items__table-row {
+        grid-template-columns: {{ settings.cart_image_width }}px 1fr 1fr minmax(var(--cart-item-price-width), auto);
+      }
+    }
+  {%- endif %}
+
+  {%- if settings.cart_row_gap > 0 %}
+    .cart-drawer .cart-items__table-row,
+    .cart-page .cart-items__table-row {
+      margin-bottom: {{ settings.cart_row_gap }}px;
+    }
+  {%- endif %}
+
+  {%- if settings.cart_checkout_custom %}
+    .cart-drawer .cart__checkout-button,
+    .cart-page .cart__checkout-button {
+      background: {{ settings.cart_checkout_background }};
+      color: {{ settings.cart_checkout_text_color }};
+      border-color: {{ settings.cart_checkout_background }};
+      text-transform: {{ settings.cart_checkout_case }};
+
+      {%- if settings.cart_checkout_height > 0 %}
+        height: {{ settings.cart_checkout_height }}px;
+        min-height: {{ settings.cart_checkout_height }}px;
+        padding-block: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      {%- endif %}
+
+      {%- if settings.cart_checkout_radius >= 0 %}
+        border-radius: {{ settings.cart_checkout_radius }}px;
+      {%- endif %}
+    }
+  {%- endif %}
+{% endstyle %}

@@ -1848,6 +1848,266 @@
         "step": 1,
         "unit": "px",
         "default": 0
+      },
+      {
+        "type": "header",
+        "content": "Cart typography"
+      },
+      {
+        "type": "paragraph",
+        "content": "Applies to the cart drawer and the cart page only. Leave a size at 0 to keep the theme's own."
+      },
+      {
+        "type": "select",
+        "id": "cart_text_font_family",
+        "label": "Text font",
+        "options": [
+          {
+            "value": "default",
+            "label": "Theme default"
+          },
+          {
+            "value": "body",
+            "label": "Body"
+          },
+          {
+            "value": "subheading",
+            "label": "Subheading"
+          },
+          {
+            "value": "heading",
+            "label": "Heading"
+          },
+          {
+            "value": "accent",
+            "label": "Accent"
+          }
+        ],
+        "default": "default"
+      },
+      {
+        "type": "select",
+        "id": "cart_price_font_family",
+        "label": "Price font",
+        "options": [
+          {
+            "value": "default",
+            "label": "Theme default"
+          },
+          {
+            "value": "body",
+            "label": "Body"
+          },
+          {
+            "value": "subheading",
+            "label": "Subheading"
+          },
+          {
+            "value": "heading",
+            "label": "Heading"
+          },
+          {
+            "value": "accent",
+            "label": "Accent"
+          }
+        ],
+        "default": "default"
+      },
+      {
+        "type": "range",
+        "id": "cart_heading_size",
+        "label": "Cart heading",
+        "min": 0,
+        "max": 48,
+        "step": 1,
+        "unit": "px",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "cart_title_size",
+        "label": "Product title",
+        "min": 0,
+        "max": 32,
+        "step": 1,
+        "unit": "px",
+        "default": 0
+      },
+      {
+        "type": "select",
+        "id": "cart_title_weight",
+        "label": "Product title weight",
+        "options": [
+          {
+            "value": "default",
+            "label": "Theme default"
+          },
+          {
+            "value": "400",
+            "label": "Regular"
+          },
+          {
+            "value": "500",
+            "label": "Medium"
+          },
+          {
+            "value": "600",
+            "label": "Semibold"
+          },
+          {
+            "value": "700",
+            "label": "Bold"
+          },
+          {
+            "value": "800",
+            "label": "Extra bold"
+          }
+        ],
+        "default": "default"
+      },
+      {
+        "type": "range",
+        "id": "cart_details_size",
+        "label": "Variant & details text",
+        "min": 0,
+        "max": 24,
+        "step": 1,
+        "unit": "px",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "cart_price_size",
+        "label": "Line price",
+        "min": 0,
+        "max": 32,
+        "step": 1,
+        "unit": "px",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "cart_total_label_size",
+        "label": "Total label",
+        "min": 0,
+        "max": 28,
+        "step": 1,
+        "unit": "px",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "cart_total_size",
+        "label": "Total amount",
+        "min": 0,
+        "max": 48,
+        "step": 1,
+        "unit": "px",
+        "default": 0
+      },
+      {
+        "type": "header",
+        "content": "Cart layout"
+      },
+      {
+        "type": "range",
+        "id": "cart_drawer_width",
+        "label": "Drawer width",
+        "min": 0,
+        "max": 720,
+        "step": 10,
+        "unit": "px",
+        "default": 0,
+        "info": "0 uses the theme's sidebar width. Never exceeds 95% of the screen."
+      },
+      {
+        "type": "range",
+        "id": "cart_drawer_padding",
+        "label": "Drawer padding",
+        "min": 0,
+        "max": 48,
+        "step": 1,
+        "unit": "px",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "cart_image_width",
+        "label": "Product image width",
+        "min": 0,
+        "max": 200,
+        "step": 4,
+        "unit": "px",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "cart_row_gap",
+        "label": "Space between items",
+        "min": 0,
+        "max": 64,
+        "step": 1,
+        "unit": "px",
+        "default": 0
+      },
+      {
+        "type": "header",
+        "content": "Checkout button"
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_checkout_custom",
+        "label": "Customise the checkout button",
+        "default": false,
+        "info": "Off leaves the button exactly as the theme styles it."
+      },
+      {
+        "type": "color",
+        "id": "cart_checkout_background",
+        "label": "Background",
+        "default": "#16a34a"
+      },
+      {
+        "type": "color",
+        "id": "cart_checkout_text_color",
+        "label": "Text colour",
+        "default": "#ffffff"
+      },
+      {
+        "type": "range",
+        "id": "cart_checkout_height",
+        "label": "Height",
+        "min": 0,
+        "max": 80,
+        "step": 1,
+        "unit": "px",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "cart_checkout_radius",
+        "label": "Corner radius",
+        "min": 0,
+        "max": 40,
+        "step": 1,
+        "unit": "px",
+        "default": 8
+      },
+      {
+        "type": "select",
+        "id": "cart_checkout_case",
+        "label": "Text case",
+        "options": [
+          {
+            "value": "none",
+            "label": "As typed"
+          },
+          {
+            "value": "uppercase",
+            "label": "Uppercase"
+          }
+        ],
+        "default": "none"
       }
     ]
   },
