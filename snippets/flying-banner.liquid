@@ -96,7 +96,7 @@
   </div>
 {%- endif -%}
 
-<style>
+{% stylesheet %}
   /* Above the sticky header (8) so it crosses the bar, but below the menu
      overlay (16) and modals (20) so it never flies over an open menu. The
      cart drawer is a <dialog>, which sits in the top layer regardless. */
@@ -245,7 +245,7 @@
       display: none;
     }
   }
-</style>
+{% endstylesheet %}
 
 <script>
   (function () {

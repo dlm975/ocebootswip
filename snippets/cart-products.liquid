@@ -230,65 +230,28 @@
                     <span>1 left in stock</span>
                   </div>
 
-                  <div>
-                    {% if item.original_price != item.final_price %}
-                      <span class="visually-hidden">{{ 'content.price_sale' | t }}</span>
-                      <span>{{ item.final_price | money }}</span>
+                  {%- comment -%}
+                    The unit price used to sit here, repeating the line total
+                    shown on the right. Only the compare-at survives, since
+                    that is the one piece the line total doesn't carry.
+                  {%- endcomment -%}
+                  {%- if item.variant.compare_at_price > item.original_price -%}
+                    <div class="cart-items__was">
                       <span class="visually-hidden">{{ 'content.price_regular' | t }}</span>
-                      <s class="compare-at-price">
-                        {% if item.variant.compare_at_price > item.original_price %}
-                          {{ item.variant.compare_at_price | money }}
-                        {% else %}
-                          {{ item.original_price | money }}
-                        {% endif %}
-                      </s>
-                    {% else %}
-                      {% if item.variant.compare_at_price > item.original_price %}
-                        <span class="visually-hidden">{{ 'content.price_sale' | t }}</span>
-                      {% else %}
-                        <span class="visually-hidden">{{ 'content.price' | t }}</span>
-                      {% endif %}
-
-                      <span>{{ item.original_price | money }}</span>
-
-                      {% if item.variant.compare_at_price > item.original_price %}
-                        <span class="visually-hidden">{{ 'content.price_regular' | t }}</span>
-                        <s class="compare-at-price">{{ item.variant.compare_at_price | money }}</s>
-                      {% endif %}
-                    {% endif %}
-                  </div>
+                      <s class="compare-at-price">{{ item.variant.compare_at_price | money }}</s>
+                    </div>
+                  {%- endif -%}
                 </td>
                 <td
                   class="cart-items__quantity"
                   role="cell"
                   headers="quantity"
                 >
-                  {% # Here I want to pass some arguments to the quantity block so it knows which value should the input be set to. Though quantity block could be a snippet instead %}
-                  {% assign can_update_quantity = item.instructions.can_update_quantity
-                    | default: true, allow_false: true
-                  %}
-                  {% render 'quantity-selector',
-                    product: item.product,
-                    in_cart_quantity: item.quantity,
-                    line_index: item.index,
-                    min: 0,
-                    class: 'cart-primary-typography',
-                    can_update_quantity: can_update_quantity
-                  %}
-
-                  <button
-                    class="button button--tertiary cart-items__remove"
-                    type="button"
-                    aria-label="{{ 'accessibility.remove_item' | t: title: item.title | escape }}"
-                    on:click="/onLineItemRemove/{{ item.index | plus: 1 }}"
-                    {% assign can_remove = item.instructions.can_remove | default: true, allow_false: true %}
-                    {% if can_remove == false %}
-                      hidden
-                    {% endif %}
-                  >
-                    {{- 'icon-delete.svg' | inline_asset_content -}}
-                    <span class="visually-hidden">Remove</span>
-                  </button>
+                  {%- comment -%}
+                    Quantity stepper removed and the remove button moved under
+                    the line total. This cell is kept so the table keeps its
+                    column count, and hidden in CSS.
+                  {%- endcomment -%}
                 </td>
                 <td
                   class="cart-items__error hidden"
@@ -329,6 +292,20 @@
                       {% render 'unit-price', price: unit_price, measurement: item.unit_price_measurement %}
                     </div>
                   {%- endif -%}
+
+                  <button
+                    class="button button--tertiary cart-items__remove"
+                    type="button"
+                    aria-label="{{ 'accessibility.remove_item' | t: title: item.title | escape }}"
+                    on:click="/onLineItemRemove/{{ item.index | plus: 1 }}"
+                    {% assign can_remove = item.instructions.can_remove | default: true, allow_false: true %}
+                    {% if can_remove == false %}
+                      hidden
+                    {% endif %}
+                  >
+                    {{- 'icon-delete.svg' | inline_asset_content -}}
+                    <span class="visually-hidden">Remove</span>
+                  </button>
                 </td>
               </tr>
             {% endfor %}
@@ -453,21 +430,27 @@
     display: inline-block;
   }
 
-  .cart-items__quantity {
-    grid-area: quantity;
-    margin-block-start: var(--margin-xs);
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: var(--gap-xs);
-    width: fit-content;
+  /* Size and condition on one line. Ellipsis only ever bites if a variant
+     name is unusually long — nowrap alone would push the cell wider and
+     squeeze the price column. */
+  .cart-items__variants {
+    display: block;
+    font-size: 0.68rem;
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .cart-items__quantity .quantity-selector {
-    display: inline-flex;
-    flex: 0 1 var(--quantity-selector-width);
-    font-size: var(--cart-font-size--sm);
-    height: auto;
+  .cart-items__was {
+    font-size: 0.72rem;
+    opacity: 0.6;
+  }
+
+  /* Emptied when the quantity stepper was removed; kept so the table keeps
+     its column count. */
+  .cart-items__quantity {
+    display: none;
   }
 
   .cart-items__remove {
@@ -496,6 +479,13 @@
 
   .cart-items__price-unit {
     font-size: var(--cart-font-size--xs);
+  }
+
+  /* The remove button now lives in this cell, under the line total */
+  .cart-items__price .cart-items__remove {
+    display: inline-flex;
+    margin-top: 6px;
+    margin-inline-start: auto;
   }
 
   .cart-items__media-container {
@@ -785,5 +775,17 @@
   @keyframes stock-blink {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.15; }
+  }
+
+  /* The quantity column is gone, so collapse its track on wide layouts.
+     The narrow layout puts quantity on its own row, which simply
+     disappears, but here it would leave a 1fr gap beside the details. */
+  @container cart-items (min-width: 720px) {
+    .cart-items__table-row {
+      grid-template-columns: 7.5rem minmax(0, 1fr) minmax(var(--cart-item-price-width), auto);
+      grid-template-areas:
+        'media details price'
+        'media error error';
+    }
   }
 {% endstylesheet %}
