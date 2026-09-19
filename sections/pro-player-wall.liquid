@@ -1,0 +1,510 @@
+{%- liquid
+  assign players = section.blocks | where: 'type', 'player'
+  assign placeholder = false
+  if players.size == 0 and request.design_mode
+    assign placeholder = true
+  endif
+-%}
+
+{%- if players.size > 0 or placeholder -%}
+<div
+  class="ppw"
+  id="ppw-{{ section.id }}"
+  style="
+    --ppw-cols-m: {{ section.settings.cards_mobile }};
+    --ppw-cols-d: {{ section.settings.cards_desktop }};
+    --ppw-gap-m: {{ section.settings.gap_mobile }}px;
+    --ppw-gap-d: {{ section.settings.gap_desktop }}px;
+    --ppw-radius: {{ section.settings.corner_radius }}px;
+    {% render 'spacing-style', settings: section.settings %}
+  "
+  data-cross-seconds="{{ section.settings.cross_seconds }}"
+  data-pause-hover="{{ section.settings.pause_on_hover }}"
+>
+  {%- if section.settings.heading != blank -%}
+    <h2 class="ppw__heading">{{ section.settings.heading }}</h2>
+  {%- endif -%}
+
+  <div class="ppw__viewport" data-ppw-viewport>
+    <div class="ppw__track" data-ppw-track>
+      <div class="ppw__set" data-ppw-set>
+        {%- if placeholder -%}
+          {%- for i in (1..6) -%}
+            <div class="ppw__card">
+              <div class="ppw__media">
+                {{ 'product-1' | placeholder_svg_tag: 'ppw__svg' }}
+              </div>
+              <div class="ppw__panel">
+                <div class="ppw__crest" aria-hidden="true">
+                  <span class="ppw__badge ppw__badge--empty"></span>
+                  <span class="ppw__flag ppw__flag--empty"></span>
+                </div>
+                <span class="ppw__name">Player Name</span>
+                <span class="ppw__club">Club Name</span>
+                <span class="ppw__boot">Boot Name</span>
+              </div>
+            </div>
+          {%- endfor -%}
+        {%- else -%}
+          {%- for block in players -%}
+            {%- liquid
+              assign img   = block.settings.image
+              assign name  = block.settings.name
+              assign club  = block.settings.club
+              assign crest = block.settings.club_badge
+              assign flag  = block.settings.flag
+              assign boot  = block.settings.boot_name
+              assign link  = block.settings.link
+            -%}
+
+            {%- if link != blank -%}
+              <a class="ppw__card" href="{{ link }}" aria-label="{{ name | escape }}{% if boot != blank %} — {{ boot | escape }}{% endif %}" {{ block.shopify_attributes }}>
+            {%- else -%}
+              <div class="ppw__card" {{ block.shopify_attributes }}>
+            {%- endif -%}
+
+              <div class="ppw__media">
+                {%- if img != blank -%}
+                  <img
+                    class="ppw__img"
+                    src="{{ img | image_url: width: 600 }}"
+                    srcset="{{ img | image_url: width: 300 }} 300w, {{ img | image_url: width: 600 }} 600w, {{ img | image_url: width: 900 }} 900w"
+                    sizes="(max-width: 749px) 33vw, 20vw"
+                    alt="{{ name | escape }}"
+                    loading="lazy"
+                    decoding="async"
+                    width="900"
+                    height="1600"
+                  >
+                {%- else -%}
+                  {{ 'product-1' | placeholder_svg_tag: 'ppw__svg' }}
+                {%- endif -%}
+              </div>
+
+              <div class="ppw__panel">
+                {%- if crest != blank or flag != blank -%}
+                  <div class="ppw__crest">
+                    {%- if crest != blank -%}
+                      <img class="ppw__badge" src="{{ crest | image_url: width: 80 }}" alt="" loading="lazy" decoding="async" width="80" height="80">
+                    {%- endif -%}
+                    {%- if flag != blank -%}
+                      <img class="ppw__flag" src="{{ flag | image_url: width: 80 }}" alt="" loading="lazy" decoding="async" width="80" height="60">
+                    {%- endif -%}
+                  </div>
+                {%- endif -%}
+
+                {%- if name != blank -%}<span class="ppw__name">{{ name }}</span>{%- endif -%}
+                {%- if club != blank -%}<span class="ppw__club">{{ club }}</span>{%- endif -%}
+                {%- if boot != blank -%}<span class="ppw__boot">{{ boot }}</span>{%- endif -%}
+              </div>
+
+            {%- if link != blank -%}
+              </a>
+            {%- else -%}
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</div>
+{%- endif -%}
+
+{% stylesheet %}
+  .ppw {
+    width: 100%;
+  }
+
+  .ppw__heading {
+    font-size: clamp(1.3rem, 3.5vw, 2rem);
+    font-weight: 800;
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    text-align: center;
+    margin: 0 0 clamp(14px, 3vw, 24px);
+    padding-inline: 20px;
+  }
+
+  /* Viewport is the container: card widths resolve against it, so the
+     same section works full-width or inside a narrow column. */
+  .ppw__viewport {
+    container-type: inline-size;
+    overflow: hidden;
+    /* soften the edges instead of hard-clipping cards */
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
+  }
+
+  .ppw__track {
+    display: flex;
+    width: max-content;
+    animation: ppw-scroll linear infinite;
+    animation-duration: var(--ppw-duration, 60s);
+    will-change: transform;
+  }
+
+  .ppw__set {
+    display: flex;
+    gap: var(--ppw-gap-m);
+    padding-right: var(--ppw-gap-m);
+  }
+
+  @keyframes ppw-scroll {
+    to { transform: translateX(calc(-1 * var(--ppw-set-w, 0px))); }
+  }
+
+  .ppw[data-paused] .ppw__track,
+  .ppw__viewport:hover .ppw__track {
+    animation-play-state: paused;
+  }
+
+  .ppw[data-no-pause] .ppw__viewport:hover .ppw__track {
+    animation-play-state: running;
+  }
+
+  /* ── Card ── */
+  .ppw__card {
+    container-type: inline-size;
+    position: relative;
+    flex: 0 0 auto;
+    width: calc((100cqw - (var(--ppw-cols-m) - 1) * var(--ppw-gap-m)) / var(--ppw-cols-m));
+    aspect-ratio: 9 / 16;
+    border-radius: var(--ppw-radius, 16px);
+    overflow: hidden;
+    background: #111;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 18px 36px -14px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.14);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ppw__media {
+    position: absolute;
+    inset: 0;
+  }
+
+  .ppw__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .ppw__svg {
+    width: 100%;
+    height: 100%;
+    opacity: 0.25;
+  }
+
+  /* ── Frosted text panel over the lower image ── */
+  .ppw__panel {
+    position: absolute;
+    inset: auto 0 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2cqi;
+    padding: 5cqi 4cqi 6cqi;
+    text-align: center;
+    background: rgba(10, 10, 10, 0.42);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+    backdrop-filter: blur(14px) saturate(150%);
+    color: #fff;
+  }
+
+  .ppw__crest {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3cqi;
+    margin-bottom: 1cqi;
+  }
+
+  .ppw__badge,
+  .ppw__flag {
+    display: block;
+    width: auto;
+    height: clamp(11px, 9cqi, 26px);
+    object-fit: contain;
+  }
+
+  .ppw__flag {
+    border-radius: 2px;
+  }
+
+  .ppw__badge--empty,
+  .ppw__flag--empty {
+    width: clamp(11px, 9cqi, 26px);
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 3px;
+  }
+
+  .ppw__name {
+    font-weight: 800;
+    font-style: italic;
+    text-transform: uppercase;
+    line-height: 1.1;
+    letter-spacing: 0.01em;
+    font-size: clamp(0.56rem, 8.5cqi, 1.05rem);
+    text-wrap: balance;
+  }
+
+  .ppw__club {
+    font-style: italic;
+    line-height: 1.15;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: clamp(0.48rem, 6.5cqi, 0.82rem);
+    text-wrap: balance;
+  }
+
+  .ppw__boot {
+    margin-top: 1cqi;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.92);
+    font-size: clamp(0.44rem, 5.4cqi, 0.7rem);
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    padding-top: 2.5cqi;
+  }
+
+  /* ── Desktop ── */
+  @media screen and (min-width: 750px) {
+    .ppw__set {
+      gap: var(--ppw-gap-d);
+      padding-right: var(--ppw-gap-d);
+    }
+
+    .ppw__card {
+      width: calc((100cqw - (var(--ppw-cols-d) - 1) * var(--ppw-gap-d)) / var(--ppw-cols-d));
+    }
+  }
+
+  /* ── Motion preferences: no auto-scroll, manual swipe instead ── */
+  @media (prefers-reduced-motion: reduce) {
+    .ppw__track { animation: none; }
+
+    .ppw__viewport {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .ppw__viewport::-webkit-scrollbar { display: none; }
+  }
+{% endstylesheet %}
+
+<script>
+  (function () {
+    var root = document.getElementById('ppw-{{ section.id }}');
+    if (!root) return;
+
+    var viewport = root.querySelector('[data-ppw-viewport]');
+    var track    = root.querySelector('[data-ppw-track]');
+    var firstSet = root.querySelector('[data-ppw-set]');
+    if (!viewport || !track || !firstSet) return;
+
+    if (root.dataset.pauseHover !== 'true') root.setAttribute('data-no-pause', '');
+
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    function layout() {
+      /* Remove previous clones so a resize recalculates cleanly */
+      var clones = track.querySelectorAll('[data-ppw-clone]');
+      for (var i = 0; i < clones.length; i++) clones[i].remove();
+
+      var setW = firstSet.scrollWidth;
+      var vw   = viewport.clientWidth;
+      if (!setW || !vw) return;
+
+      /* Clone the roster until the track is at least twice the viewport,
+         so the loop never shows a gap regardless of roster size. */
+      var needed = Math.max(1, Math.ceil((vw * 2) / setW));
+      for (var c = 0; c < needed; c++) {
+        var clone = firstSet.cloneNode(true);
+        clone.setAttribute('data-ppw-clone', '');
+        clone.setAttribute('aria-hidden', 'true');
+        /* strip editor attributes + ids from clones */
+        var dupes = clone.querySelectorAll('[id]');
+        for (var d = 0; d < dupes.length; d++) dupes[d].removeAttribute('id');
+        track.appendChild(clone);
+      }
+
+      /* Speed: the merchant sets how long a card takes to cross the
+         viewport, so px/second scales with the available width. */
+      var cross = parseFloat(root.dataset.crossSeconds) || 40;
+      var pxPerSecond = vw / cross;
+      track.style.setProperty('--ppw-set-w', setW + 'px');
+      track.style.setProperty('--ppw-duration', (setW / pxPerSecond) + 's');
+    }
+
+    layout();
+
+    /* Recalculate once images have real dimensions */
+    window.addEventListener('load', layout);
+
+    var resizeTimer;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(layout, 200);
+    }, { passive: true });
+
+    /* Don't animate off-screen — saves work on long pages */
+    if ('IntersectionObserver' in window && !reduced.matches) {
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) root.removeAttribute('data-paused');
+          else root.setAttribute('data-paused', '');
+        });
+      }, { rootMargin: '150px' }).observe(root);
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Pro Player Wall",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Leave blank for no heading"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "cards_mobile",
+      "label": "Cards across (mobile)",
+      "min": 2, "max": 4, "step": 1, "default": 3
+    },
+    {
+      "type": "range",
+      "id": "cards_desktop",
+      "label": "Cards across (desktop)",
+      "min": 3, "max": 8, "step": 1, "default": 6
+    },
+    {
+      "type": "range",
+      "id": "gap_mobile",
+      "label": "Gap (mobile)",
+      "min": 0, "max": 24, "step": 1, "unit": "px", "default": 8
+    },
+    {
+      "type": "range",
+      "id": "gap_desktop",
+      "label": "Gap (desktop)",
+      "min": 0, "max": 40, "step": 1, "unit": "px", "default": 12
+    },
+    {
+      "type": "range",
+      "id": "corner_radius",
+      "label": "Corner radius",
+      "min": 0, "max": 32, "step": 1, "unit": "px", "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Motion"
+    },
+    {
+      "type": "range",
+      "id": "cross_seconds",
+      "label": "Seconds to cross the screen",
+      "min": 10, "max": 120, "step": 5, "unit": "s", "default": 40,
+      "info": "How long one card takes to travel the full width. Higher is slower."
+    },
+    {
+      "type": "checkbox",
+      "id": "pause_on_hover",
+      "label": "Pause on hover",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0, "max": 120, "step": 4, "unit": "px", "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0, "max": 120, "step": 4, "unit": "px", "default": 40
+    }
+  ],
+  "blocks": [
+    {
+      "type": "player",
+      "name": "Player",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Photo",
+          "info": "9:16 portrait. Leave ~25% clear space below the feet so the text panel doesn't cover the boots."
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Player name"
+        },
+        {
+          "type": "text",
+          "id": "club",
+          "label": "Club name"
+        },
+        {
+          "type": "image_picker",
+          "id": "club_badge",
+          "label": "Club badge",
+          "info": "Square PNG with transparent background"
+        },
+        {
+          "type": "image_picker",
+          "id": "flag",
+          "label": "Country flag"
+        },
+        {
+          "type": "text",
+          "id": "boot_name",
+          "label": "Boot name"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link to boot",
+          "info": "Makes the whole card clickable"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 30,
+  "presets": [
+    {
+      "name": "Pro Player Wall",
+      "blocks": [
+        { "type": "player" },
+        { "type": "player" },
+        { "type": "player" },
+        { "type": "player" },
+        { "type": "player" },
+        { "type": "player" }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  }
+}
+{% endschema %}
