@@ -59,7 +59,7 @@
     "cart_price_font": "tertiary",
     "show_cart_note": false,
     "show_add_discount_code": false,
-    "drawer_color_scheme": "scheme-5",
+    "drawer_color_scheme": "scheme-1",
     "drawer_drop_shadow": true,
     "icon_stroke": "default",
     "input_border_width": 1,

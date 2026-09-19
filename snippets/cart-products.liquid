@@ -430,16 +430,14 @@
     display: inline-block;
   }
 
-  /* Size and condition on one line. Ellipsis only ever bites if a variant
-     name is unusually long — nowrap alone would push the cell wider and
-     squeeze the price column. */
+  /* Small enough to sit on one line in practice, but never clipped — a
+     shopper has to be able to read the size they are buying, so this wraps
+     rather than truncating if a variant name is unusually long. */
   .cart-items__variants {
     display: block;
     font-size: 0.68rem;
     line-height: 1.35;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow-wrap: anywhere;
   }
 
   .cart-items__was {
