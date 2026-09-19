@@ -325,7 +325,7 @@
         "player_mDfxBi": {
           "type": "player",
           "settings": {
-            "image": "shopify://shop_images/0bb8d3c0-20c4-4d54-9d95-7deb1180583d.png",
+            "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_02_33_PM.png",
             "name": "CAMERON ARCHER",
             "club": "Southampton F.C.",
             "club_badge": "shopify://shop_images/FC_Southampton.svg",
@@ -391,16 +391,19 @@
       "name": "Pro Player Wall",
       "settings": {
         "heading": "",
+        "aspect_ratio": "3 / 4",
         "cards_mobile": 3,
         "cards_desktop": 6,
         "gap_mobile": 8,
         "gap_desktop": 12,
         "corner_radius": 16,
+        "attach_to": "none",
+        "blur_strength": 16,
+        "tint_opacity": 30,
         "cross_seconds": 40,
         "pause_on_hover": true,
         "padding-block-start": 40,
-        "padding-block-end": 40,
-        "attach_to": "none"
+        "padding-block-end": 40
       }
     },
     "newly_listed_fc": {
