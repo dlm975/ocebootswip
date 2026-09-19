@@ -55,19 +55,26 @@
     display: none;
     align-items: center;
     gap: 5px;
-    padding: 4px 10px;
+    padding: 3px 8px;
     border-radius: 999px;
     background: var(--fsp-bg, #e7f6ee);
     color: var(--fsp-fg, #15803d);
     font-size: 0.68rem;
     font-weight: 700;
-    line-height: 1.2;
+    line-height: 1.25;
     letter-spacing: 0.01em;
     white-space: nowrap;
+    box-sizing: border-box;
   }
 
+  /* Hug the text: inline-flex plus fit-content so it never stretches to
+     the column, and flex: 0 0 auto so it never grows beside the price. */
   .fsp--placed {
     display: inline-flex;
+    flex: 0 0 auto;
+    width: fit-content;
+    max-width: 100%;
+    align-self: center;
   }
 
   .fsp__icon {
@@ -85,12 +92,24 @@
   }
 
   /* The price element survives variant changes — only its inner container
-     is swapped — so the pill can sit inside it without being wiped. */
+     is swapped — so the pill can sit inside it without being wiped.
+     product-price is a custom element with no default layout, so make it a
+     row; the price container is a plain div and would otherwise take the
+     full line and push the pill underneath. Wrapping stays on as a safety
+     valve for very narrow screens. */
   product-price:has(> .fsp) {
     display: flex;
-    align-items: center;
+    flex-direction: row;
     flex-wrap: wrap;
-    gap: 10px;
+    align-items: center;
+    column-gap: 8px;
+    row-gap: 4px;
+  }
+
+  product-price:has(> .fsp) > [ref='priceContainer'] {
+    flex: 0 1 auto;
+    width: auto;
+    min-width: 0;
   }
 </style>
 
@@ -99,13 +118,16 @@
     var pill = document.getElementById('fsp-{{ block.id }}');
     if (!pill) return;
 
-    function place() {
-      var scope = document.querySelector('.product-details') || document;
-      var price = scope.querySelector('product-price');
+    function findPrice() {
+      var scope = document.querySelector('.product-details');
+      return (scope && scope.querySelector('product-price')) || document.querySelector('product-price');
+    }
 
-      if (price && pill.parentElement !== price) {
-        price.appendChild(pill);
-      }
+    function place() {
+      var price = findPrice();
+      if (price && pill.parentElement !== price) price.appendChild(pill);
+      /* Revealed either way — if the price block isn't on the template the
+         pill still shows where the merchant put it rather than vanishing. */
       pill.classList.add('fsp--placed');
     }
 
@@ -114,6 +136,11 @@
     } else {
       place();
     }
+
+    /* Belt and braces: re-run once everything has settled, and after a
+       variant change in case the price block is re-rendered wholesale. */
+    window.addEventListener('load', place);
+    document.addEventListener('variant:update', place);
   })();
 </script>
 
