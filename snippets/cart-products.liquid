@@ -459,14 +459,16 @@
     opacity: 0.6;
   }
 
-  /* Title across the top, variants and price two-up beneath it */
+  /* Title and price share the top line; the variant text sits under the
+     title and the remove button under the price, so the price column spans
+     both rows. */
   .cart-items__details {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     column-gap: 12px;
     align-items: start;
     grid-template-areas:
-      'title title'
+      'title price'
       'meta  price';
   }
 
@@ -484,8 +486,13 @@
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 4px;
+    gap: 10px;
     white-space: nowrap;
+    font-weight: 600;
+  }
+
+  .cart-items__details > p:first-child {
+    margin-block-start: 0;
   }
 
   .cart-items__remove {

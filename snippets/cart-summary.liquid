@@ -99,7 +99,8 @@
     </button>
   {%- else -%}
     <a href="{{ routes.cart_url }}/checkout" id="checkout" class="cart__checkout-button button">
-      {{ 'content.checkout' | t }}
+      <span>{{ 'content.checkout' | t }}</span>
+      <span class="cart__checkout-total">&middot; {{ total_price }}</span>
     </a>
   {%- endif -%}
 
@@ -109,6 +110,10 @@
     </div>
   {% endif %}
 
+  {%- if settings.cart_secure_text != blank -%}
+    <div class="cart__secure">{{ settings.cart_secure_text }}</div>
+  {%- endif -%}
+
   {%- if settings.cart_show_payment_icons and shop.enabled_payment_types.size > 0 -%}
     <ul class="cart__payment-icons list-unstyled" role="list">
       <li class="visually-hidden">{{ 'blocks.payment_methods' | t }}</li>
@@ -116,6 +121,12 @@
         <li>{{ type | payment_type_svg_tag: class: 'icon icon--full-color' }}</li>
       {%- endfor -%}
     </ul>
+  {%- endif -%}
+
+  {%- if settings.cart_back_text != blank -%}
+    <a class="cart__back" href="{{ routes.all_products_collection_url }}">
+      {{ settings.cart_back_text }}
+    </a>
   {%- endif -%}
 </div>
 
@@ -137,6 +148,40 @@
 
   .cart__installments {
     color: var(--color-foreground);
+  }
+
+  .cart__checkout-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .cart__checkout-total {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cart__secure {
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.05);
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .cart__back {
+    display: block;
+    margin-top: 8px;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: inherit;
   }
 
   /* Icons shrink to share the row rather than wrapping onto a second line */

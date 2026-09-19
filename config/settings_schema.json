@@ -3040,10 +3040,24 @@
         "content": "Checkout"
       },
       {
+        "type": "text",
+        "id": "cart_secure_text",
+        "label": "Reassurance bar above the payment icons",
+        "default": "100% Secure Payment",
+        "info": "Leave blank to hide."
+      },
+      {
         "type": "checkbox",
         "id": "cart_show_payment_icons",
         "label": "Show payment icons below checkout",
         "default": true
+      },
+      {
+        "type": "text",
+        "id": "cart_back_text",
+        "label": "Back to shopping link",
+        "default": "Back to shopping",
+        "info": "Leave blank to hide."
       }
     ]
   }

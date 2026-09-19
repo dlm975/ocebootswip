@@ -72,7 +72,7 @@
           >
             <span class="cart-drawer__heading h3">
               {{ 'content.cart_title' | t }}
-              {% render 'cart-bubble' %}
+              {%- if cart.item_count > 0 %} &middot; {{ cart.item_count }}{% endif -%}
             </span>
 
             <button
@@ -221,26 +221,25 @@
     flex-direction: column;
   }
 
-  .cart-drawer__heading .cart-bubble {
-    width: fit-content;
-    border-radius: var(--style-border-radius-buttons-primary);
-    aspect-ratio: auto;
-    padding: var(--cart-padding);
+  .cart-drawer__close-button {
+    position: absolute;
+    inset-inline-end: var(--padding-xl, 20px);
+    top: 50%;
+    transform: translateY(-50%);
   }
 
-  .cart-drawer__heading .cart-bubble[data-maintain-ratio] {
-    aspect-ratio: 1;
-    min-width: 26px;
-  }
-
+  /* Title centred with the close button pinned out of flow, so the title
+     stays optically centred in the drawer rather than centred in the space
+     the button leaves behind. */
   .cart-drawer__header {
     background-color: var(--color-background);
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    position: relative;
+    border-bottom: 1px solid var(--color-border);
     width: 100%;
     padding: var(--cart-drawer-padding);
-    border-bottom: var(--style-border-width) solid none;
     position: sticky;
     top: 0;
     z-index: 1;

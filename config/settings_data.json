@@ -458,7 +458,11 @@
         }
       }
     },
-    "currency_code_enabled_cart_total": true
+    "currency_code_enabled_cart_total": true,
+    "cart_thumbnail_border": "solid",
+    "cart_thumbnail_border_width": 1,
+    "cart_thumbnail_border_opacity": 15,
+    "cart_thumbnail_border_radius": 8
   },
   "presets": {
     "Horizon": {
