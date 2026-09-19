@@ -429,67 +429,105 @@
       "blocks": {
         "photo_1": {
           "type": "photo",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/IMG_5200_f35a66d2-3ff3-4aa4-966f-86e0accf906c.jpg"
+          }
         },
         "photo_2": {
           "type": "photo",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/IMG_5198_3e9e2414-b5af-4958-a71d-a24eb46cad60.jpg"
+          }
         },
         "photo_3": {
           "type": "photo",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/IMG_5195.jpg"
+          }
         },
         "photo_4": {
           "type": "photo",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/IMG_5188.jpg"
+          }
         },
         "photo_5": {
           "type": "photo",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/IMG_5185_8c3bcd6d-e182-42e4-9d2d-024fc57fab37.jpg"
+          }
         },
         "photo_6": {
           "type": "photo",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/IMG_5194_8e2b2eb2-6bd0-4c91-b7b8-82b052ee0bd1.jpg"
+          }
+        },
+        "photo_9cyMCR": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/IMG_5197_7ab42136-c43f-4473-9c12-8f7f055df50e.jpg"
+          }
         },
         "photo_7": {
           "type": "photo",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/IMG_5192_b03ddbc3-1218-4444-ac4e-a7f528da6090.jpg"
+          }
         },
         "photo_8": {
           "type": "photo",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/IMG_5189.jpg"
+          }
         },
         "photo_9": {
           "type": "photo",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/IMG_5193_b3056abe-b857-49da-ad19-1dfa35c6737c.jpg"
+          }
         },
         "photo_10": {
           "type": "photo",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/IMG_5187.jpg"
+          }
         },
         "photo_11": {
           "type": "photo",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/IMG_5196_f588a09a-ee26-40e1-a0fb-4968904534ba.jpg"
+          }
         },
         "photo_12": {
           "type": "photo",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/IMG_5193_b3056abe-b857-49da-ad19-1dfa35c6737c.jpg"
+          }
         },
         "photo_13": {
           "type": "photo",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/IMG_5186_abba120a-52a8-423d-b44d-fabc8c01dc2b.jpg"
+          }
         },
         "photo_14": {
           "type": "photo",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/IMG_5199_9ea7e20f-c461-41d9-8168-9a54f13e30c5.jpg"
+          }
         },
         "photo_15": {
           "type": "photo",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/IMG_5191_65ed734a-de10-40c5-a644-06796561d14f.jpg"
+          }
         },
         "photo_16": {
           "type": "photo",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/IMG_5172_7fee9973-3219-4499-aa91-6959a1619093.jpg"
+          }
         }
       },
       "block_order": [
@@ -499,6 +537,7 @@
         "photo_4",
         "photo_5",
         "photo_6",
+        "photo_9cyMCR",
         "photo_7",
         "photo_8",
         "photo_9",
@@ -519,6 +558,7 @@
         "columns_mobile": 4,
         "columns_desktop": 7,
         "overlap": 16,
+        "row_overlap": 8,
         "max_rotation": 5,
         "max_drift": 10,
         "frame_width": 4,
@@ -526,8 +566,7 @@
         "title_color": "#111111",
         "plate_color": "rgba(255,255,255,0.82)",
         "padding-block-start": 40,
-        "padding-block-end": 40,
-        "row_overlap": 8
+        "padding-block-end": 40
       }
     },
     "pdp_about": {
@@ -537,7 +576,7 @@
         "image_position": "left",
         "eyebrow": "ABOUT US",
         "heading": "Built for the boot obsessed",
-        "body": "<p>We have spent 20+ years around football boots \u2014 chasing releases, hunting down retros and knowing a fake on sight. Every pair we list is checked by hand before it ships.</p>",
+        "body": "<p>We have spent 20+ years around football boots — chasing releases, hunting down retros and knowing a fake on sight. Every pair we list is checked by hand before it ships.</p>",
         "button_label": "",
         "button_link": "",
         "tile_background": "#f5f5f5",
