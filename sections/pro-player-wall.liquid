@@ -21,6 +21,7 @@
     {% render 'spacing-style', settings: section.settings %}
   "
   data-cross-seconds="{{ section.settings.cross_seconds }}"
+  data-attach-media="{{ section.settings.attach_to_media }}"
   data-pause-hover="{{ section.settings.pause_on_hover }}"
 >
   {%- if section.settings.heading != blank -%}
@@ -370,6 +371,41 @@
       track.style.setProperty('--ppw-duration', (setW / pxPerSecond) + 's');
     }
 
+    /* ── Placement ──
+       On a product page the media column lives inside the
+       product-information grid, which sections cannot render into, so
+       move this one there at runtime. Desktop only: on mobile the
+       columns stack and this would sit between the gallery and the
+       buy button. */
+    var homeMarker = null;
+
+    function sectionEl() {
+      return root.closest('.shopify-section') || root;
+    }
+
+    function syncPlacement() {
+      if (root.dataset.attachMedia !== 'true') return;
+
+      var media = document.querySelector('.product-information__media');
+      if (!media) return; /* not a product page */
+
+      var el = sectionEl();
+      var isDesktop = window.matchMedia('(min-width: 750px)').matches;
+
+      if (isDesktop) {
+        if (el.parentElement === media) return;
+        if (!homeMarker) {
+          homeMarker = document.createComment('pro-player-wall-home');
+          el.parentElement.insertBefore(homeMarker, el);
+        }
+        media.appendChild(el);
+      } else {
+        if (!homeMarker || el.parentElement === homeMarker.parentElement) return;
+        homeMarker.parentElement.insertBefore(el, homeMarker);
+      }
+    }
+
+    syncPlacement();
     layout();
 
     /* Recalculate once images have real dimensions */
@@ -378,7 +414,10 @@
     var resizeTimer;
     window.addEventListener('resize', function () {
       clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(layout, 200);
+      resizeTimer = setTimeout(function () {
+        syncPlacement();
+        layout();
+      }, 200);
     }, { passive: true });
 
     /* Don't animate off-screen — saves work on long pages */
@@ -437,6 +476,13 @@
       "id": "corner_radius",
       "label": "Corner radius",
       "min": 0, "max": 32, "step": 1, "unit": "px", "default": 16
+    },
+    {
+      "type": "checkbox",
+      "id": "attach_to_media",
+      "label": "Sit under the product images (product pages)",
+      "default": true,
+      "info": "Desktop only — moves the wall into the product image column. On mobile it stays where the section sits in the template. No effect on other pages."
     },
     {
       "type": "header",
