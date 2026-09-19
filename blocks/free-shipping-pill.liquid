@@ -1,0 +1,182 @@
+{%- liquid
+  assign p = closest.product
+  if p == blank and request.visual_preview_mode
+    assign p = collections.all.products.first
+  endif
+
+  comment
+    Merchants pick the products that should NOT carry the pill, so the
+    default for a new product is to show it.
+  endcomment
+  assign excluded = false
+  for item in block.settings.excluded_products
+    if item.id == p.id
+      assign excluded = true
+      break
+    endif
+  endfor
+
+  assign tag = block.settings.excluded_tag | strip
+  if tag != blank and p.tags contains tag
+    assign excluded = true
+  endif
+
+  assign show = true
+  if excluded and request.design_mode == false
+    assign show = false
+  endif
+-%}
+
+{%- if show and block.settings.text != blank -%}
+  <span
+    id="fsp-{{ block.id }}"
+    class="fsp{% if excluded %} fsp--excluded{% endif %}"
+    style="--fsp-bg: {{ block.settings.background }}; --fsp-fg: {{ block.settings.text_color }};"
+    {{ block.shopify_attributes }}
+  >
+    {%- if block.settings.show_icon -%}
+      <svg class="fsp__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true">
+        <path d="M1 3h13v13H1z"/>
+        <path d="M14 8h4l3 3v5h-7z"/>
+        <circle cx="5.5" cy="18.5" r="2"/>
+        <circle cx="17.5" cy="18.5" r="2"/>
+      </svg>
+    {%- endif -%}
+    <span class="fsp__text">{{ block.settings.text }}</span>
+    {%- if excluded -%}
+      <span class="fsp__note"> (hidden on this product)</span>
+    {%- endif -%}
+  </span>
+{%- endif -%}
+
+<style>
+  /* Hidden until the script lifts it alongside the price — see below. */
+  .fsp {
+    display: none;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--fsp-bg, #e7f6ee);
+    color: var(--fsp-fg, #15803d);
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+
+  .fsp--placed {
+    display: inline-flex;
+  }
+
+  .fsp__icon {
+    flex-shrink: 0;
+  }
+
+  /* Only rendered in the theme editor, so a merchant can see the block is
+     present but deliberately suppressed on the product being previewed. */
+  .fsp--excluded {
+    opacity: 0.5;
+  }
+
+  .fsp__note {
+    font-weight: 500;
+  }
+
+  /* The price element survives variant changes — only its inner container
+     is swapped — so the pill can sit inside it without being wiped. */
+  product-price:has(> .fsp) {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+</style>
+
+<script>
+  (function () {
+    var pill = document.getElementById('fsp-{{ block.id }}');
+    if (!pill) return;
+
+    function place() {
+      var scope = document.querySelector('.product-details') || document;
+      var price = scope.querySelector('product-price');
+
+      if (price && pill.parentElement !== price) {
+        price.appendChild(pill);
+      }
+      pill.classList.add('fsp--placed');
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', place, { once: true });
+    } else {
+      place();
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Free Shipping Pill",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "A pill shown beside the product price. Add it anywhere in the product details column — it moves itself next to the price."
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Text",
+      "default": "Qualified for free shipping"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_icon",
+      "label": "Show icon",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Hide on certain products"
+    },
+    {
+      "type": "product_list",
+      "id": "excluded_products",
+      "label": "Products to hide it on",
+      "limit": 50,
+      "info": "The pill shows on every product except these."
+    },
+    {
+      "type": "text",
+      "id": "excluded_tag",
+      "label": "Or hide on products with this tag",
+      "info": "Optional — useful when more than 50 products need excluding. Case sensitive."
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background",
+      "default": "#e7f6ee"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text colour",
+      "default": "#15803d"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Free Shipping Pill",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}
