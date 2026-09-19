@@ -1,0 +1,133 @@
+{%- doc -%}
+  Cart reassurance content. Rendered in two places, so it takes a `part`.
+
+  @param {string} part - 'strip' for the bar under the cart title,
+                         'blocks' for the delivery estimate and trust row.
+{%- enddoc -%}
+
+{%- if part == 'strip' -%}
+  {%- if settings.cart_strip_show and settings.cart_strip_text != blank -%}
+    <div
+      class="crs-strip"
+      style="--crs-strip-bg: {{ settings.cart_strip_background }}; --crs-strip-fg: {{ settings.cart_strip_text_color }};"
+    >
+      {{ settings.cart_strip_text }}
+    </div>
+  {%- endif -%}
+{%- endif -%}
+
+{%- if part == 'blocks' -%}
+  {%- if settings.cart_delivery_show and settings.cart_delivery_text != blank -%}
+    <div class="crs-eta">
+      {%- if settings.cart_delivery_emoji != blank -%}
+        <span class="crs-eta__icon" aria-hidden="true">{{ settings.cart_delivery_emoji }}</span>
+      {%- endif -%}
+      <span class="crs-eta__text">{{ settings.cart_delivery_text }}</span>
+    </div>
+  {%- endif -%}
+
+  {%- if settings.cart_trust_show -%}
+    {%- liquid
+      assign any_trust = false
+      for i in (1..3)
+        assign k = 'cart_trust_' | append: i | append: '_label'
+        if settings[k] != blank
+          assign any_trust = true
+          break
+        endif
+      endfor
+    -%}
+    {%- if any_trust -%}
+      <div class="crs-trust">
+        {%- for i in (1..3) -%}
+          {%- liquid
+            assign label_key = 'cart_trust_' | append: i | append: '_label'
+            assign emoji_key = 'cart_trust_' | append: i | append: '_emoji'
+            assign label = settings[label_key]
+            assign emoji = settings[emoji_key]
+          -%}
+          {%- if label != blank -%}
+            <div class="crs-trust__item">
+              {%- if emoji != blank -%}
+                <span class="crs-trust__icon" aria-hidden="true">{{ emoji }}</span>
+              {%- endif -%}
+              <span class="crs-trust__label">{{ label }}</span>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  {%- endif -%}
+{%- endif -%}
+
+<style>
+  /* ── Strip under the cart title ── */
+  .crs-strip {
+    background: var(--crs-strip-bg, #16a34a);
+    color: var(--crs-strip-fg, #ffffff);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-align: center;
+    padding: 8px 14px;
+    line-height: 1.3;
+  }
+
+  /* ── Delivery estimate ── */
+  .crs-eta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 14px 14px 0;
+    padding: 11px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
+    background: rgba(0, 0, 0, 0.03);
+    font-size: 0.74rem;
+    font-weight: 600;
+    line-height: 1.3;
+    text-align: center;
+  }
+
+  .crs-eta__icon {
+    flex-shrink: 0;
+    font-size: 0.95rem;
+    line-height: 1;
+  }
+
+  /* ── Three trust blocks ── */
+  .crs-trust {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 8px 14px 4px;
+  }
+
+  .crs-trust__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    text-align: center;
+    padding: 10px 6px;
+    border-radius: 10px;
+    border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
+    background: rgba(0, 0, 0, 0.02);
+    min-width: 0;
+  }
+
+  .crs-trust__icon {
+    font-size: 1.05rem;
+    line-height: 1;
+  }
+
+  .crs-trust__label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: 0.01em;
+    text-wrap: balance;
+  }
+</style>

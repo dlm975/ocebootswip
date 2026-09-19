@@ -54,6 +54,8 @@
     endif
   -%}
 
+  {% render 'cart-shipping-protection' %}
+
   <div class="cart__total-container">
     <span
       class="cart__summary-item cart__total"
@@ -84,9 +86,6 @@
 </div>
 
 <div class="cart__ctas">
-  <a href="{{ routes.cart_url }}" class="cart__view-cart-button button">
-    View Cart
-  </a>
   <button
     type="submit"
     id="checkout"
@@ -105,6 +104,15 @@
       {{ content_for_additional_checkout_buttons }}
     </div>
   {% endif %}
+
+  {%- if settings.cart_show_payment_icons and shop.enabled_payment_types.size > 0 -%}
+    <ul class="cart__payment-icons list-unstyled" role="list">
+      <li class="visually-hidden">{{ 'blocks.payment_methods' | t }}</li>
+      {%- for type in shop.enabled_payment_types -%}
+        <li>{{ type | payment_type_svg_tag: class: 'icon icon--full-color' }}</li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
 </div>
 
 {% stylesheet %}
@@ -125,5 +133,29 @@
 
   .cart__installments {
     color: var(--color-foreground);
+  }
+
+  /* Icons shrink to share the row rather than wrapping onto a second line */
+  .cart__payment-icons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: clamp(3px, 1.2vw, 8px);
+    margin: 8px 0 0;
+    padding: 0;
+  }
+
+  .cart__payment-icons li:not(.visually-hidden) {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 34px;
+    display: flex;
+  }
+
+  .cart__payment-icons svg {
+    width: 100%;
+    height: auto;
+    display: block;
   }
 {% endstylesheet %}

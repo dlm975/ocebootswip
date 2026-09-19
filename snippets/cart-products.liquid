@@ -94,7 +94,16 @@
           </thead>
 
           <tbody role="rowgroup">
+            {%- comment -%}
+              Shipping protection is presented as a switch above the total,
+              so it would read as a duplicate if it also appeared here as a
+              normal line the shopper could change the quantity of.
+            {%- endcomment -%}
+            {%- assign protection_variant_id = settings.cart_protection_product.variants.first.id -%}
             {% for item in cart.items %}
+              {%- if settings.cart_protection_show and protection_variant_id and item.variant_id == protection_variant_id -%}
+                {% continue %}
+              {%- endif -%}
               <tr
                 role="row"
                 class="cart-items__table-row{% if item.parent_relationship.parent != null %} cart-items__nested-line{% endif %}"
