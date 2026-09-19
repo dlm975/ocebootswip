@@ -81,6 +81,9 @@
       {% render 'size-widget' %}
     {% endif %}
 
+    {%- comment -%} Every page, so it lives in the layout rather than a section {%- endcomment -%}
+    {% render 'flying-banner' %}
+
 
     {% if settings.quick_add or settings.mobile_quick_add %}
       {% render 'quick-add-modal' %}

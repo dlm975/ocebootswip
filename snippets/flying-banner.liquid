@@ -1,0 +1,245 @@
+{%- doc -%}
+  A plane towing a banner across the header, a few seconds after the page
+  finishes loading. Rendered from layout/theme.liquid so it runs on every
+  page. Purely decorative — the message must also exist in real content
+  (the price pill, for instance) for anyone who never sees it.
+{%- enddoc -%}
+
+{%- liquid
+  assign text = settings.fb_text | strip
+  assign on = settings.fb_enabled
+  if text == blank
+    assign on = false
+  endif
+-%}
+
+{%- if on -%}
+  <div
+    id="flying-banner"
+    class="fbn fbn--{{ settings.fb_direction }}"
+    aria-hidden="true"
+    data-delay="{{ settings.fb_delay }}"
+    data-cross="{{ settings.fb_cross_seconds }}"
+    data-frequency="{{ settings.fb_frequency }}"
+    style="
+      --fbn-top: {{ settings.fb_offset }}px;
+      --fbn-bg: {{ settings.fb_banner_background }};
+      --fbn-fg: {{ settings.fb_banner_text }};
+      --fbn-scale: {{ settings.fb_scale | divided_by: 100.0 }};
+    "
+  >
+    <div class="fbn__rig">
+      <span class="fbn__plane">
+        {%- if settings.fb_plane_image != blank -%}
+          <img src="{{ settings.fb_plane_image | image_url: width: 240 }}" alt="" width="120" height="75" decoding="async">
+        {%- else -%}
+          <svg viewBox="0 0 64 40" fill="currentColor" width="120" height="75">
+            <path d="M63 20c0-1.3-1-2.3-2.3-2.4L44 16.4 32.6 3.5c-.4-.5-1-.8-1.7-.8h-4.2c-1 0-1.7.9-1.5 1.9L28 16l-11.6-1-3.2-4.3c-.3-.4-.8-.7-1.4-.7H9c-1 0-1.7.9-1.5 1.8L9 20l-1.5 6.2c-.2 1 .5 1.8 1.5 1.8h2.8c.6 0 1.1-.3 1.4-.7l3.2-4.3 11.6-1-2.8 11.4c-.2 1 .5 1.9 1.5 1.9h4.2c.7 0 1.3-.3 1.7-.8L44 23.6l16.7-1.2c1.3-.1 2.3-1.1 2.3-2.4z"/>
+          </svg>
+        {%- endif -%}
+      </span>
+
+      <span class="fbn__rope"></span>
+
+      <span class="fbn__sign">{{ text }}</span>
+    </div>
+  </div>
+{%- endif -%}
+
+<style>
+  /* Above the sticky header (8) so it crosses the bar, but below the menu
+     overlay (16) and modals (20) so it never flies over an open menu. The
+     cart drawer is a <dialog>, which sits in the top layer regardless. */
+  .fbn {
+    position: fixed;
+    top: calc(var(--header-height, 60px) / 2 + var(--fbn-top, 0px));
+    left: 0;
+    z-index: 12;
+    width: max-content;
+    pointer-events: none;
+    visibility: hidden;
+    transform: translateX(-100%);
+  }
+
+  .fbn--flying {
+    visibility: visible;
+    will-change: transform;
+    animation-name: fbn-ltr;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+    animation-duration: var(--fbn-duration, 9s);
+  }
+
+  .fbn--rtl.fbn--flying {
+    animation-name: fbn-rtl;
+  }
+
+  /* Only transform is animated, so the flight stays on the compositor and
+     never triggers layout or paint on the rest of the page. */
+  @keyframes fbn-ltr {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(100vw); }
+  }
+
+  @keyframes fbn-rtl {
+    from { transform: translateX(100vw); }
+    to   { transform: translateX(-100%); }
+  }
+
+  .fbn__rig {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    transform: scale(var(--fbn-scale, 1)) translateY(-50%);
+    transform-origin: left center;
+  }
+
+  /* Plane leads, banner trails. Left-to-right means the plane is at the
+     right-hand end of the rig. */
+  .fbn--ltr .fbn__rig {
+    flex-direction: row-reverse;
+    transform-origin: right center;
+  }
+
+  .fbn__plane {
+    display: block;
+    flex-shrink: 0;
+    color: var(--fbn-plane, #2b2b2b);
+    animation: fbn-bob 2.4s ease-in-out infinite;
+  }
+
+  .fbn__plane svg,
+  .fbn__plane img {
+    display: block;
+    width: 120px;
+    height: auto;
+  }
+
+  /* The built-in silhouette points right; flip it when flying the other way. */
+  .fbn--rtl .fbn__plane {
+    transform: scaleX(-1);
+  }
+
+  .fbn__rope {
+    display: block;
+    flex-shrink: 0;
+    width: 28px;
+    height: 2px;
+    background: rgba(0, 0, 0, 0.25);
+  }
+
+  .fbn__sign {
+    display: block;
+    flex-shrink: 0;
+    padding: 12px 22px;
+    border-radius: 4px;
+    background: var(--fbn-bg, #e53e3e);
+    color: var(--fbn-fg, #ffffff);
+    font-size: 1rem;
+    font-weight: 800;
+    font-style: italic;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.4);
+    animation: fbn-flutter 1.8s ease-in-out infinite;
+  }
+
+  @keyframes fbn-bob {
+    0%, 100% { translate: 0 0; }
+    50%      { translate: 0 -5px; }
+  }
+
+  /* Skew rather than rotate so the banner stays level while the cloth
+     ripples — rotating the whole sign reads as the plane banking. */
+  @keyframes fbn-flutter {
+    0%, 100% { transform: skewY(-0.9deg); }
+    50%      { transform: skewY(0.9deg); }
+  }
+
+  @media screen and (max-width: 749px) {
+    .fbn__plane svg,
+    .fbn__plane img {
+      width: 74px;
+    }
+
+    .fbn__rope {
+      width: 18px;
+    }
+
+    .fbn__sign {
+      padding: 8px 14px;
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+    }
+  }
+
+  /* Decorative only — no flight, and nothing left on screen. */
+  @media (prefers-reduced-motion: reduce) {
+    .fbn {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    var el = document.getElementById('flying-banner');
+    if (!el) return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      el.remove();
+      return;
+    }
+
+    /* Storage can throw (private mode, blocked site data) and must never
+       take the page down with it. */
+    function seen(key) {
+      try { return window.sessionStorage.getItem(key); } catch (e) { return null; }
+    }
+    function mark(key, value) {
+      try { window.sessionStorage.setItem(key, value); } catch (e) { /* no-op */ }
+    }
+
+    var frequency = el.dataset.frequency;
+    if (frequency === 'session' && seen('fbn-flown')) { el.remove(); return; }
+    if (frequency === 'daily') {
+      var today = new Date().toDateString();
+      if (seen('fbn-day') === today) { el.remove(); return; }
+    }
+
+    function fly() {
+      var rig = el.querySelector('.fbn__rig');
+      var width = rig ? rig.getBoundingClientRect().width : 320;
+      var viewport = window.innerWidth;
+
+      /* Constant speed across breakpoints: the merchant sets how long a
+         crossing of the screen takes, so a wide desktop doesn't make the
+         plane appear to rocket past. */
+      var cross = parseFloat(el.dataset.cross) || 9;
+      var pxPerSecond = viewport / cross;
+      var distance = viewport + width;
+      el.style.setProperty('--fbn-duration', (distance / pxPerSecond) + 's');
+
+      el.classList.add('fbn--flying');
+
+      if (frequency === 'session') mark('fbn-flown', '1');
+      if (frequency === 'daily') mark('fbn-day', new Date().toDateString());
+
+      el.addEventListener('animationend', function () {
+        el.remove();
+      }, { once: true });
+    }
+
+    var delay = (parseFloat(el.dataset.delay) || 3) * 1000;
+
+    function start() {
+      setTimeout(fly, delay);
+    }
+
+    /* "After full load" — wait for images and fonts so the flight doesn't
+       compete with the page still painting. */
+    if (document.readyState === 'complete') start();
+    else window.addEventListener('load', start, { once: true });
+  })();
+</script>

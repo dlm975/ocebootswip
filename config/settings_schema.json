@@ -2755,5 +2755,135 @@
         "label": "Link to boot"
       }
     ]
+  },
+  {
+    "name": "Flying banner",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "A plane tows a banner across the header a few seconds after each page finishes loading. It is decorative and cannot be clicked, so keep the message somewhere in real content too."
+      },
+      {
+        "type": "checkbox",
+        "id": "fb_enabled",
+        "label": "Enable",
+        "default": false
+      },
+      {
+        "type": "text",
+        "id": "fb_text",
+        "label": "Banner text",
+        "default": "FREE WORLDWIDE SHIPPING"
+      },
+      {
+        "type": "header",
+        "content": "Timing"
+      },
+      {
+        "type": "range",
+        "id": "fb_delay",
+        "label": "Delay after page load",
+        "min": 0,
+        "max": 15,
+        "step": 1,
+        "unit": "s",
+        "default": 3
+      },
+      {
+        "type": "range",
+        "id": "fb_cross_seconds",
+        "label": "Seconds to cross the screen",
+        "min": 3,
+        "max": 30,
+        "step": 1,
+        "unit": "s",
+        "default": 9,
+        "info": "Speed is worked out from the screen width, so the plane travels at the same pace on a phone and a desktop."
+      },
+      {
+        "type": "select",
+        "id": "fb_frequency",
+        "label": "How often it flies",
+        "options": [
+          {
+            "value": "always",
+            "label": "Every page load"
+          },
+          {
+            "value": "session",
+            "label": "Once per visit"
+          },
+          {
+            "value": "daily",
+            "label": "Once per day"
+          }
+        ],
+        "default": "always",
+        "info": "Every page load means it flies again on each product and collection page a shopper opens."
+      },
+      {
+        "type": "header",
+        "content": "Flight"
+      },
+      {
+        "type": "select",
+        "id": "fb_direction",
+        "label": "Direction",
+        "options": [
+          {
+            "value": "ltr",
+            "label": "Left to right"
+          },
+          {
+            "value": "rtl",
+            "label": "Right to left"
+          }
+        ],
+        "default": "ltr"
+      },
+      {
+        "type": "range",
+        "id": "fb_offset",
+        "label": "Vertical nudge",
+        "min": -60,
+        "max": 120,
+        "step": 2,
+        "unit": "px",
+        "default": 0,
+        "info": "0 centres it on the header bar. Positive moves it down the page."
+      },
+      {
+        "type": "range",
+        "id": "fb_scale",
+        "label": "Size",
+        "min": 50,
+        "max": 150,
+        "step": 5,
+        "unit": "%",
+        "default": 100
+      },
+      {
+        "type": "header",
+        "content": "Appearance"
+      },
+      {
+        "type": "image_picker",
+        "id": "fb_plane_image",
+        "label": "Plane image",
+        "info": "Optional — a transparent PNG facing right. Leave blank for the built-in silhouette."
+      },
+      {
+        "type": "color",
+        "id": "fb_banner_background",
+        "label": "Banner background",
+        "default": "#e53e3e"
+      },
+      {
+        "type": "color",
+        "id": "fb_banner_text",
+        "label": "Banner text colour",
+        "default": "#ffffff"
+      }
+    ]
   }
 ]
