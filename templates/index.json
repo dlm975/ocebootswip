@@ -373,9 +373,12 @@
         "player_nfExFK": {
           "type": "player",
           "settings": {
-            "name": "",
-            "club": "",
-            "boot_name": "",
+            "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_30_25_PM.png",
+            "name": "GARANG KUOL",
+            "club": "SPARTA PRAGUE",
+            "club_badge": "shopify://shop_images/AC-Sparta-LOGO2021.svg",
+            "flag": "shopify://shop_images/Flag_of_Australia__converted.svg",
+            "boot_name": "PHANTOM GT SG-PRO",
             "link": ""
           }
         },
