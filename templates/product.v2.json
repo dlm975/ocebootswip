@@ -356,7 +356,8 @@
       ],
       "name": "Pro Player Wall",
       "settings": {
-        "heading": "",
+        "roster_source": "shared",
+        "heading": "TRUSTED BY THE PRO'S",
         "subheading": "",
         "show_stars": true,
         "star_color": "#00b67a",
