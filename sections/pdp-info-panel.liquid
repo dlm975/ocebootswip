@@ -177,7 +177,10 @@
     }
 
     function sync() {
-      var column = document.querySelector('.product-details');
+      /* .product-details is a flex ROW holding one group block, so appending
+         there puts this beside the product info instead of under it. The
+         vertical stack is the group block's content wrapper. */
+      var column = document.querySelector('.product-details > .group-block > .group-block-content');
       if (!column) return;
 
       var el = sectionEl();

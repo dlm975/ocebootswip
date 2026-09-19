@@ -256,7 +256,9 @@
                 "handle": "@oceboots",
                 "verified": true,
                 "badge_color": "#3897f0",
-                "link": ""
+                "link": "",
+                "alignment_mobile": "center",
+                "alignment_desktop": "center"
               },
               "blocks": {}
             }
@@ -355,8 +357,8 @@
       "name": "Pro Player Wall",
       "settings": {
         "heading": "",
-        "cards_mobile": 3,
-        "cards_desktop": 3,
+        "cards_mobile": 6,
+        "cards_desktop": 6,
         "gap_mobile": 8,
         "gap_desktop": 12,
         "corner_radius": 16,
@@ -429,7 +431,7 @@
       "settings": {
         "content_direction": "column",
         "section_width": "page-width",
-        "padding-block-start": 0,
+        "padding-block-start": 40,
         "padding-block-end": 48
       }
     },

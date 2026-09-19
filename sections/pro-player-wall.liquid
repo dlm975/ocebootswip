@@ -407,7 +407,10 @@
     function attachTarget() {
       var mode = root.dataset.attachTo;
       if (mode === 'media') return document.querySelector('.product-information__media');
-      if (mode === 'details') return document.querySelector('.product-details');
+      /* .product-details is a flex ROW holding one group block; appending to
+         it lands beside the details rather than under them. The vertical
+         stack is the group block's content wrapper. */
+      if (mode === 'details') return document.querySelector('.product-details > .group-block > .group-block-content');
       return null;
     }
 
@@ -477,13 +480,14 @@
       "type": "range",
       "id": "cards_mobile",
       "label": "Cards across (mobile)",
-      "min": 2, "max": 4, "step": 1, "default": 3
+      "min": 2, "max": 8, "step": 1, "default": 3,
+      "info": "More cards across means smaller cards. The name and club text scales with the card, so past about 6 it gets hard to read."
     },
     {
       "type": "range",
       "id": "cards_desktop",
       "label": "Cards across (desktop)",
-      "min": 3, "max": 8, "step": 1, "default": 6
+      "min": 3, "max": 12, "step": 1, "default": 6
     },
     {
       "type": "range",
