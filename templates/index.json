@@ -87,8 +87,6 @@
           "type": "trusted-logos-bar",
           "settings": {
             "heading_text": "Trusted by the Best",
-            "star_color": "#00b67a",
-            "star_size": 22,
             "label_size": 12,
             "label_color": "#111111",
             "section_background": "#ffffff",
@@ -405,7 +403,8 @@
       ],
       "name": "Pro Player Wall",
       "settings": {
-        "heading": "",
+        "heading": "TRUSTED BY THE BEST",
+        "subheading": "",
         "aspect_ratio": "4 / 5",
         "cards_mobile": 3,
         "cards_desktop": 6,
