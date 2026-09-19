@@ -13,12 +13,12 @@
     style="--ig-align-m: {{ block.settings.alignment_mobile }}; --ig-align-d: {{ block.settings.alignment_desktop }};"
     {{ block.shopify_attributes }}
   >
-    {%- if block.settings.link != blank -%}
-      <a class="pdp-ig__inner" href="{{ block.settings.link }}" target="_blank" rel="noopener">
-    {%- else -%}
-      <span class="pdp-ig__inner">
-    {%- endif -%}
-
+    {%- comment -%}
+      Captured so each branch below emits a complete element. Splitting the
+      opening and closing tags across two {% if %}s reads as broken HTML to
+      a static parser, which is what the theme editor validates with.
+    {%- endcomment -%}
+    {%- capture ig_inner -%}
       {%- if block.settings.avatar != blank -%}
         <img
           class="pdp-ig__avatar"
@@ -50,11 +50,12 @@
           <path fill="#fff" d="M10.6 16.2l-3.3-3.3 1.5-1.5 1.8 1.8 4.6-4.6 1.5 1.5z"/>
         </svg>
       {%- endif -%}
+    {%- endcapture -%}
 
     {%- if block.settings.link != blank -%}
-      </a>
+      <a class="pdp-ig__inner" href="{{ block.settings.link }}" target="_blank" rel="noopener">{{ ig_inner }}</a>
     {%- else -%}
-      </span>
+      <span class="pdp-ig__inner">{{ ig_inner }}</span>
     {%- endif -%}
   </div>
 {%- endif -%}

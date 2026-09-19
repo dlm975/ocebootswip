@@ -103,12 +103,12 @@
               assign link  = block.settings.link
             -%}
 
-            {%- if link != blank -%}
-              <a class="ppw__card" href="{{ link }}" aria-label="{{ name | escape }}{% if boot != blank %} — {{ boot | escape }}{% endif %}" {{ block.shopify_attributes }}>
-            {%- else -%}
-              <div class="ppw__card" {{ block.shopify_attributes }}>
-            {%- endif -%}
-
+            {%- comment -%}
+              Captured so each branch below emits a complete element —
+              splitting a tag across two {% if %}s reads as broken HTML to
+              the static parser the theme editor validates with.
+            {%- endcomment -%}
+            {%- capture card_inner -%}
               <div class="ppw__media">
                 {%- if img != blank -%}
                   <img
@@ -143,11 +143,12 @@
                 {%- if club != blank -%}<span class="ppw__club">{{ club }}</span>{%- endif -%}
                 {%- if boot != blank -%}<span class="ppw__boot">{{ boot }}</span>{%- endif -%}
               </div>
+            {%- endcapture -%}
 
             {%- if link != blank -%}
-              </a>
+              <a class="ppw__card" href="{{ link }}" aria-label="{{ name | escape }}{% if boot != blank %} — {{ boot | escape }}{% endif %}" {{ block.shopify_attributes }}>{{ card_inner }}</a>
             {%- else -%}
-              </div>
+              <div class="ppw__card" {{ block.shopify_attributes }}>{{ card_inner }}</div>
             {%- endif -%}
           {%- endfor -%}
         {%- endif -%}
