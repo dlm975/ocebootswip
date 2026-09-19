@@ -86,9 +86,10 @@
         "trusted_logos_001": {
           "type": "trusted-logos-bar",
           "settings": {
-            "heading_text": "Trusted by the Best",
+            "heading_text": "AS WORN IN LEAGUES",
             "label_size": 12,
             "label_color": "#111111",
+            "header_gap": 6,
             "section_background": "#ffffff",
             "section_padding": 0,
             "bar_background": "#f7f7f7",
@@ -405,6 +406,9 @@
       "settings": {
         "heading": "TRUSTED BY THE BEST",
         "subheading": "",
+        "show_stars": true,
+        "star_color": "#00b67a",
+        "star_size": 20,
         "aspect_ratio": "4 / 5",
         "cards_mobile": 3,
         "cards_desktop": 6,
