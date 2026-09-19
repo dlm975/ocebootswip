@@ -357,6 +357,10 @@
       "name": "Pro Player Wall",
       "settings": {
         "heading": "",
+        "subheading": "",
+        "show_stars": true,
+        "star_color": "#00b67a",
+        "star_size": 20,
         "aspect_ratio": "3 / 4",
         "cards_mobile": 2.5,
         "cards_desktop": 4,
@@ -420,6 +424,7 @@
     "pdp_about": {
       "type": "pdp-about",
       "settings": {
+        "image": "shopify://shop_images/IMG_4090_cc0a355e-a54e-47a4-94a2-75934174628e.jpg",
         "image_position": "left",
         "eyebrow": "ABOUT US",
         "heading": "Built for the boot obsessed",
