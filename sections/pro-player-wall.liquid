@@ -4,6 +4,30 @@
   if players.size == 0 and request.design_mode
     assign placeholder = true
   endif
+
+  assign ratio = section.settings.aspect_ratio | default: '3 / 4'
+  case ratio
+    when '9 / 16'
+      assign img_w = 900
+      assign img_h = 1600
+    when '4 / 5'
+      assign img_w = 900
+      assign img_h = 1125
+    when '1 / 1'
+      assign img_w = 900
+      assign img_h = 900
+    else
+      assign img_w = 900
+      assign img_h = 1200
+  endcase
+
+  comment
+    Cards are sized by column count, so the widest a card gets is roughly
+    the viewport divided by the number across. Rounding up covers the
+    narrower product-page column without ever under-requesting.
+  endcomment
+  assign sizes_m = 100 | divided_by: section.settings.cards_mobile | plus: 2
+  assign sizes_d = 100 | divided_by: section.settings.cards_desktop | plus: 2
 -%}
 
 {%- if players.size > 0 or placeholder -%}
@@ -16,6 +40,7 @@
     --ppw-gap-m: {{ section.settings.gap_mobile }}px;
     --ppw-gap-d: {{ section.settings.gap_desktop }}px;
     --ppw-radius: {{ section.settings.corner_radius }}px;
+    --ppw-ratio: {{ ratio }};
     --ppw-blur: {{ section.settings.blur_strength }}px;
     --ppw-tint: {{ section.settings.tint_opacity | divided_by: 100.0 }};
     {% render 'spacing-style', settings: section.settings %}
@@ -72,12 +97,12 @@
                     class="ppw__img"
                     src="{{ img | image_url: width: 600 }}"
                     srcset="{{ img | image_url: width: 300 }} 300w, {{ img | image_url: width: 600 }} 600w, {{ img | image_url: width: 900 }} 900w"
-                    sizes="(max-width: 749px) 33vw, 20vw"
+                    sizes="(max-width: 749px) {{ sizes_m }}vw, {{ sizes_d }}vw"
                     alt="{{ name | escape }}"
                     loading="lazy"
                     decoding="async"
-                    width="900"
-                    height="1600"
+                    width="{{ img_w }}"
+                    height="{{ img_h }}"
                   >
                 {%- else -%}
                   {{ 'product-1' | placeholder_svg_tag: 'ppw__svg' }}
@@ -173,7 +198,7 @@
     position: relative;
     flex: 0 0 auto;
     width: calc((100cqw - (var(--ppw-cols-m) - 1) * var(--ppw-gap-m)) / var(--ppw-cols-m));
-    aspect-ratio: 9 / 16;
+    aspect-ratio: var(--ppw-ratio, 3 / 4);
     border-radius: var(--ppw-radius, 16px);
     overflow: hidden;
     background: #111;
@@ -211,7 +236,7 @@
     flex-direction: column;
     align-items: center;
     gap: 2cqi;
-    padding: 18cqi 4cqi 6cqi;
+    padding: 13cqi 4cqi 6cqi;
     text-align: center;
     color: #fff;
     isolation: isolate;
@@ -477,6 +502,19 @@
       "content": "Layout"
     },
     {
+      "type": "select",
+      "id": "aspect_ratio",
+      "label": "Card shape",
+      "options": [
+        { "value": "3 / 4", "label": "Portrait 3:4 (waist up)" },
+        { "value": "4 / 5", "label": "Portrait 4:5" },
+        { "value": "1 / 1", "label": "Square" },
+        { "value": "9 / 16", "label": "Tall 9:16 (full body)" }
+      ],
+      "default": "3 / 4",
+      "info": "Match this to how your photos are cropped."
+    },
+    {
       "type": "range",
       "id": "cards_mobile",
       "label": "Cards across (mobile)",
@@ -579,7 +617,7 @@
           "type": "image_picker",
           "id": "image",
           "label": "Photo",
-          "info": "9:16 portrait. Leave ~25% clear space below the feet so the text panel doesn't cover the boots."
+          "info": "Crop to the card shape set above. The name and club sit over the bottom of the photo, so leave the lower third fairly clear."
         },
         {
           "type": "text",

@@ -368,7 +368,8 @@
         "padding-block-end": 56,
         "blur_strength": 16,
         "tint_opacity": 30,
-        "attach_to": "details"
+        "attach_to": "details",
+        "aspect_ratio": "3 / 4"
       }
     },
     "pdp_info_panel": {
@@ -389,6 +390,23 @@
         "open_description": false
       }
     },
+    "pdp_trust_bar": {
+      "type": "pdp-trust-bar",
+      "settings": {
+        "attach_to_details": true,
+        "icon_1": "shopify://shop_images/Twitter_Verified_Badge.svg",
+        "text_1": "Verified Boots",
+        "icon_2": "shopify://shop_images/Noto_Emoji_v2.034_2708.svg",
+        "text_2": "Express Shipping",
+        "icon_3": "shopify://shop_images/RecyclingSymbolGreen.png",
+        "text_3": "Accept Returns",
+        "background": "#f8f8f8",
+        "text_color": "#333333",
+        "corner_radius": 10,
+        "padding-block-start": 8,
+        "padding-block-end": 8
+      }
+    },
     "pdp_about": {
       "type": "pdp-about",
       "settings": {
@@ -405,42 +423,12 @@
         "padding-block-end": 56
       }
     },
-    "pdp_trust_bar": {
-      "type": "section",
-      "blocks": {
-        "trust_bar_001": {
-          "type": "product-trust-bar",
-          "settings": {
-            "icon_1": "shopify://shop_images/Twitter_Verified_Badge.svg",
-            "text_1": "Verified Boots",
-            "icon_2": "shopify://shop_images/Noto_Emoji_v2.034_2708.svg",
-            "text_2": "Express Shipping",
-            "icon_3": "shopify://shop_images/RecyclingSymbolGreen.png",
-            "text_3": "Accept Returns",
-            "padding-block-start": 0,
-            "padding-block-end": 0,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
-          },
-          "blocks": {}
-        }
-      },
-      "block_order": [
-        "trust_bar_001"
-      ],
-      "settings": {
-        "content_direction": "column",
-        "section_width": "page-width",
-        "padding-block-start": 40,
-        "padding-block-end": 48
-      }
-    },
     "pdp_sticky_buy": {
       "type": "pdp-sticky-buy",
       "settings": {
         "button_text": "Add to cart",
         "sheet_heading": "Select size",
-        "button_color": "#111111",
+        "button_color": "#16a34a",
         "button_text_color": "#ffffff"
       }
     },
@@ -495,8 +483,8 @@
     "main",
     "pro_player_wall",
     "pdp_info_panel",
-    "pdp_about",
     "pdp_trust_bar",
+    "pdp_about",
     "pdp_sticky_buy",
     "product_recommendations_qggXJq"
   ]

@@ -1,0 +1,240 @@
+{%- liquid
+  assign items = 0
+  for i in (1..3)
+    assign t_key = 'text_' | append: i
+    if section.settings[t_key] != blank
+      assign items = items | plus: 1
+    endif
+  endfor
+-%}
+
+{%- if items > 0 -%}
+  <div
+    class="ptb"
+    id="ptb-{{ section.id }}"
+    data-attach-details="{{ section.settings.attach_to_details }}"
+    style="
+      --ptb-bg: {{ section.settings.background }};
+      --ptb-fg: {{ section.settings.text_color }};
+      --ptb-radius: {{ section.settings.corner_radius }}px;
+      {% render 'spacing-style', settings: section.settings %}
+    "
+  >
+    <div class="ptb__inner">
+      <div class="ptb__bar">
+        {%- for i in (1..3) -%}
+          {%- liquid
+            assign icon_key = 'icon_' | append: i
+            assign text_key = 'text_' | append: i
+            assign icon = section.settings[icon_key]
+            assign text = section.settings[text_key]
+          -%}
+          {%- if text != blank -%}
+            {%- unless forloop.first -%}
+              <span class="ptb__divider" aria-hidden="true"></span>
+            {%- endunless -%}
+            <div class="ptb__item">
+              {%- if icon != blank -%}
+                <span class="ptb__icon" aria-hidden="true">
+                  <img src="{{ icon | image_url: width: 80 }}" alt="" width="28" height="28" loading="lazy" decoding="async">
+                </span>
+              {%- endif -%}
+              <span class="ptb__text">{{ text }}</span>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .ptb {
+    width: 100%;
+  }
+
+  .ptb__inner {
+    max-width: var(--page-width, 1400px);
+    margin-inline: auto;
+    padding-inline: var(--page-margin, 16px);
+  }
+
+  .ptb__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--ptb-bg, #f8f8f8);
+    border-radius: var(--ptb-radius, 10px);
+    box-sizing: border-box;
+  }
+
+  .ptb__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    flex: 1;
+    text-align: center;
+  }
+
+  .ptb__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+  }
+
+  .ptb__icon img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+  }
+
+  .ptb__text {
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--ptb-fg, #333333);
+  }
+
+  .ptb__divider {
+    width: 1px;
+    height: 34px;
+    background: rgba(0, 0, 0, 0.12);
+    flex-shrink: 0;
+  }
+
+  /* Inside the product details column the section already has the
+     column's padding, and the column is the width constraint. */
+  .product-details .ptb__inner {
+    padding-inline: 0;
+    max-width: none;
+  }
+{% endstylesheet %}
+
+<script>
+  (function () {
+    var root = document.getElementById('ptb-{{ section.id }}');
+    if (!root) return;
+    if (root.dataset.attachDetails !== 'true') return;
+
+    /* Desktop only. .product-details is a flex row wrapping one group
+       block, so the vertical stack is that block's content wrapper. */
+    var homeMarker = null;
+
+    function sectionEl() {
+      return root.closest('.shopify-section') || root;
+    }
+
+    function sync() {
+      var column = document.querySelector('.product-details > .group-block > .group-block-content');
+      if (!column) return;
+
+      var el = sectionEl();
+
+      if (window.matchMedia('(min-width: 750px)').matches) {
+        if (el.parentElement === column) return;
+        if (!homeMarker) {
+          homeMarker = document.createComment('pdp-trust-bar-home');
+          el.parentElement.insertBefore(homeMarker, el);
+        }
+        column.appendChild(el);
+      } else {
+        if (!homeMarker || el.parentElement === homeMarker.parentElement) return;
+        homeMarker.parentElement.insertBefore(el, homeMarker);
+      }
+    }
+
+    sync();
+
+    var timer;
+    window.addEventListener('resize', function () {
+      clearTimeout(timer);
+      timer = setTimeout(sync, 200);
+    }, { passive: true });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Product Trust Bar",
+  "tag": "section",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "attach_to_details",
+      "label": "Sit in the buy button column (desktop)",
+      "default": true,
+      "info": "Desktop only — moves this section into the product details column on the right, below anything already added there. On mobile it stays where the section sits in the template."
+    },
+    {
+      "type": "header",
+      "content": "Item 1"
+    },
+    { "type": "image_picker", "id": "icon_1", "label": "Icon" },
+    { "type": "text", "id": "text_1", "label": "Text", "default": "Verified Boots" },
+    {
+      "type": "header",
+      "content": "Item 2"
+    },
+    { "type": "image_picker", "id": "icon_2", "label": "Icon" },
+    { "type": "text", "id": "text_2", "label": "Text", "default": "Express Shipping" },
+    {
+      "type": "header",
+      "content": "Item 3"
+    },
+    { "type": "image_picker", "id": "icon_3", "label": "Icon" },
+    { "type": "text", "id": "text_3", "label": "Text", "default": "Accept Returns" },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background",
+      "default": "#f8f8f8"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text colour",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "corner_radius",
+      "label": "Corner radius",
+      "min": 0, "max": 24, "step": 1, "unit": "px", "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0, "max": 120, "step": 4, "unit": "px", "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0, "max": 120, "step": 4, "unit": "px", "default": 8
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Trust Bar"
+    }
+  ]
+}
+{% endschema %}
