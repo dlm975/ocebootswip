@@ -156,6 +156,12 @@
                       {{- item.product.title -}}
                     </a>
                   </p>
+
+                  {%- comment -%}
+                    Title spans the row; everything else sits in a two-up
+                    below it, variants on the left and price on the right.
+                  {%- endcomment -%}
+                  <div class="cart-items__meta">
                   {% if item.product.vendor and block.settings.vendor %}
                     <p>
                       {{ item.product.vendor }}
@@ -241,6 +247,39 @@
                       <s class="compare-at-price">{{ item.variant.compare_at_price | money }}</s>
                     </div>
                   {%- endif -%}
+                  </div>
+
+                  {%- liquid
+                    if settings.currency_code_enabled_cart_items
+                      assign price = item.final_line_price | money_with_currency
+                      assign unit_price = item.unit_price | money_with_currency
+                    else
+                      assign price = item.final_line_price | money
+                      assign unit_price = item.unit_price | money
+                    endif
+                  -%}
+                  <div class="cart-items__pricecol cart-secondary-typography">
+                    <text-component value="{{ price | strip_html }}">{{ price }}</text-component>
+                    {%- if item.unit_price_measurement -%}
+                      <div class="cart-items__price-unit cart-secondary-typography">
+                        {% render 'unit-price', price: unit_price, measurement: item.unit_price_measurement %}
+                      </div>
+                    {%- endif -%}
+
+                    <button
+                      class="button button--tertiary cart-items__remove"
+                      type="button"
+                      aria-label="{{ 'accessibility.remove_item' | t: title: item.title | escape }}"
+                      on:click="/onLineItemRemove/{{ item.index | plus: 1 }}"
+                      {% assign can_remove = item.instructions.can_remove | default: true, allow_false: true %}
+                      {% if can_remove == false %}
+                        hidden
+                      {% endif %}
+                    >
+                      {{- 'icon-delete.svg' | inline_asset_content -}}
+                      <span class="visually-hidden">Remove</span>
+                    </button>
+                  </div>
                 </td>
                 <td
                   class="cart-items__quantity"
@@ -277,35 +316,11 @@
                   role="cell"
                   headers="productTotal"
                 >
-                  {%- liquid
-                    if settings.currency_code_enabled_cart_items
-                      assign price = item.final_line_price | money_with_currency
-                      assign unit_price = item.unit_price | money_with_currency
-                    else
-                      assign price = item.final_line_price | money
-                      assign unit_price = item.unit_price | money
-                    endif
-                  -%}
-                  <text-component value="{{ price | strip_html }}">{{ price }}</text-component>
-                  {%- if item.unit_price_measurement -%}
-                    <div class="cart-items__price-unit cart-secondary-typography">
-                      {% render 'unit-price', price: unit_price, measurement: item.unit_price_measurement %}
-                    </div>
-                  {%- endif -%}
-
-                  <button
-                    class="button button--tertiary cart-items__remove"
-                    type="button"
-                    aria-label="{{ 'accessibility.remove_item' | t: title: item.title | escape }}"
-                    on:click="/onLineItemRemove/{{ item.index | plus: 1 }}"
-                    {% assign can_remove = item.instructions.can_remove | default: true, allow_false: true %}
-                    {% if can_remove == false %}
-                      hidden
-                    {% endif %}
-                  >
-                    {{- 'icon-delete.svg' | inline_asset_content -}}
-                    <span class="visually-hidden">Remove</span>
-                  </button>
+                  {%- comment -%}
+                    Price and remove moved into the details cell so they can
+                    sit beside the variant text. Cell kept and hidden so the
+                    table keeps its column count.
+                  {%- endcomment -%}
                 </td>
               </tr>
             {% endfor %}
@@ -342,11 +357,10 @@
     --cart-item-price-width: 6rem;
 
     display: grid;
-    grid-template-columns: clamp(2.5rem, 15cqi, 7.5rem) minmax(0, 1fr) minmax(var(--cart-item-price-width), auto);
+    grid-template-columns: clamp(2.5rem, 15cqi, 7.5rem) minmax(0, 1fr);
     grid-template-areas:
-      'media details price'
-      'media quantity price'
-      'media error error';
+      'media details'
+      'media error';
     column-gap: var(--gap-md);
     align-items: start;
     padding-bottom: var(--cart-items-gap);
@@ -445,10 +459,40 @@
     opacity: 0.6;
   }
 
-  /* Emptied when the quantity stepper was removed; kept so the table keeps
-     its column count. */
-  .cart-items__quantity {
+  /* Both emptied — quantity when the stepper went, price when it moved into
+     the details cell. Kept so the table keeps its column count. */
+  .cart-items__quantity,
+  .cart-items__price {
     display: none;
+  }
+
+  /* Title across the top, variants and price two-up beneath it */
+  .cart-items__details {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 12px;
+    align-items: start;
+    grid-template-areas:
+      'title title'
+      'meta  price';
+  }
+
+  .cart-items__details > p:first-child {
+    grid-area: title;
+  }
+
+  .cart-items__meta {
+    grid-area: meta;
+    min-width: 0;
+  }
+
+  .cart-items__pricecol {
+    grid-area: price;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    white-space: nowrap;
   }
 
   .cart-items__remove {
@@ -775,15 +819,20 @@
     50% { opacity: 0.15; }
   }
 
-  /* The quantity column is gone, so collapse its track on wide layouts.
-     The narrow layout puts quantity on its own row, which simply
-     disappears, but here it would leave a 1fr gap beside the details. */
+  /* Quantity and price cells are both empty now, so the row is just image
+     and details at every width. This has to come after the theme's own
+     container query, which re-displays .cart-items__price. */
   @container cart-items (min-width: 720px) {
     .cart-items__table-row {
-      grid-template-columns: 7.5rem minmax(0, 1fr) minmax(var(--cart-item-price-width), auto);
+      grid-template-columns: 7.5rem minmax(0, 1fr);
       grid-template-areas:
-        'media details price'
-        'media error error';
+        'media details'
+        'media error';
+    }
+
+    .cart-items__quantity,
+    .cart-items__price {
+      display: none;
     }
   }
 {% endstylesheet %}

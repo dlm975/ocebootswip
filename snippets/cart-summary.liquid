@@ -86,18 +86,22 @@
 </div>
 
 <div class="cart__ctas">
-  <button
-    type="submit"
-    id="checkout"
-    class="cart__checkout-button button"
-    name="checkout"
-    {% if cart == empty %}
-      disabled
-    {% endif %}
-    form="cart-form"
-  >
-    {{ 'content.checkout' | t }}
-  </button>
+  {%- comment -%}
+    Goes straight to checkout rather than submitting #cart-form. That form
+    holds no inputs now the quantity steppers are gone, so posting it to
+    /cart gave Shopify nothing to act on and the button did nothing. Notes
+    and discount codes are saved over AJAX as they are entered, so there is
+    nothing left that needs submitting first.
+  {%- endcomment -%}
+  {%- if cart == empty -%}
+    <button type="button" id="checkout" class="cart__checkout-button button" disabled>
+      {{ 'content.checkout' | t }}
+    </button>
+  {%- else -%}
+    <a href="{{ routes.cart_url }}/checkout" id="checkout" class="cart__checkout-button button">
+      {{ 'content.checkout' | t }}
+    </a>
+  {%- endif -%}
 
   {% if additional_checkout_buttons and settings.show_accelerated_checkout_buttons %}
     <div class="additional-checkout-buttons additional-checkout-buttons--vertical">
