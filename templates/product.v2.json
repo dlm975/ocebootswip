@@ -357,8 +357,8 @@
       "name": "Pro Player Wall",
       "settings": {
         "heading": "",
-        "cards_mobile": 6,
-        "cards_desktop": 6,
+        "cards_mobile": 2.5,
+        "cards_desktop": 4,
         "gap_mobile": 8,
         "gap_desktop": 12,
         "corner_radius": 16,

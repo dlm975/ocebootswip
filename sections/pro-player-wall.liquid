@@ -26,8 +26,8 @@
     the viewport divided by the number across. Rounding up covers the
     narrower product-page column without ever under-requesting.
   endcomment
-  assign sizes_m = 100 | divided_by: section.settings.cards_mobile | plus: 2
-  assign sizes_d = 100 | divided_by: section.settings.cards_desktop | plus: 2
+  assign sizes_m = 100 | divided_by: section.settings.cards_mobile | plus: 2 | round
+  assign sizes_d = 100 | divided_by: section.settings.cards_desktop | plus: 2 | round
 -%}
 
 {%- if players.size > 0 or placeholder -%}
@@ -518,14 +518,14 @@
       "type": "range",
       "id": "cards_mobile",
       "label": "Cards across (mobile)",
-      "min": 2, "max": 8, "step": 1, "default": 3,
-      "info": "More cards across means smaller cards. The name and club text scales with the card, so past about 6 it gets hard to read."
+      "min": 2, "max": 8, "step": 0.5, "default": 3,
+      "info": "More cards across means smaller cards. A half value leaves part of the next card showing at the edge, which hints that the wall scrolls. The name and club text scales with the card, so past about 6 it gets hard to read."
     },
     {
       "type": "range",
       "id": "cards_desktop",
       "label": "Cards across (desktop)",
-      "min": 3, "max": 12, "step": 1, "default": 6
+      "min": 3, "max": 12, "step": 0.5, "default": 6
     },
     {
       "type": "range",
