@@ -77,6 +77,19 @@
             "padding-inline-end": 0
           },
           "blocks": {
+            "ig_handle_001": {
+              "type": "pdp-instagram-handle",
+              "settings": {
+                "handle": "@oceboots",
+                "show_logo": true,
+                "verified": true,
+                "alignment_mobile": "center",
+                "alignment_desktop": "center",
+                "badge_color": "#3897f0",
+                "link": ""
+              },
+              "blocks": {}
+            },
             "group_icgrde": {
               "type": "group",
               "name": "Header",
@@ -225,7 +238,6 @@
                 },
                 "accelerated-checkout": {
                   "type": "accelerated-checkout",
-                  "disabled": true,
                   "static": true,
                   "settings": {},
                   "blocks": {}
@@ -249,18 +261,6 @@
             "essential_upsell_app_block_zgTHkC": {
               "type": "shopify://apps/essential-upsell/blocks/app-block/50627fd9-24fd-4250-8614-accc12826d80",
               "settings": {}
-            },
-            "ig_handle_001": {
-              "type": "pdp-instagram-handle",
-              "settings": {
-                "handle": "@oceboots",
-                "verified": true,
-                "badge_color": "#3897f0",
-                "link": "",
-                "alignment_mobile": "center",
-                "alignment_desktop": "center"
-              },
-              "blocks": {}
             }
           },
           "block_order": [
@@ -357,37 +357,47 @@
       "name": "Pro Player Wall",
       "settings": {
         "heading": "",
+        "aspect_ratio": "3 / 4",
         "cards_mobile": 2.5,
         "cards_desktop": 4,
         "gap_mobile": 8,
         "gap_desktop": 12,
         "corner_radius": 16,
-        "cross_seconds": 40,
-        "pause_on_hover": true,
-        "padding-block-start": 40,
-        "padding-block-end": 56,
+        "attach_to": "details",
         "blur_strength": 16,
         "tint_opacity": 30,
-        "attach_to": "details",
-        "aspect_ratio": "3 / 4"
+        "cross_seconds": 40,
+        "pause_on_hover": true,
+        "padding-block-start": 8,
+        "padding-block-end": 20
       }
     },
     "pdp_info_panel": {
       "type": "pdp-info-panel",
       "settings": {
+        "attach_to_details": true,
+        "heading": "",
         "show_description": true,
         "description_heading": "Details",
+        "open_description": false,
         "q1": "Are these boots legit?",
         "a1": "Yes. We have 20+ years of experience with football boots. This means we can spot a fake from a mile away.",
         "q2": "How long will shipping take?",
         "a2": "We have both Express and Economy options available at checkout. Express - 3-5 Business Days. Economy - 10-14 Business Days.",
         "q3": "Can I return them if they don't fit?",
         "a3": "Yes. We offer returns within 7 days of your boots arriving. They must be in unworn condition.",
+        "q4": "",
+        "a4": "",
+        "q5": "",
+        "a5": "",
+        "q6": "",
+        "a6": "",
+        "q7": "",
+        "a7": "",
+        "q8": "",
+        "a8": "",
         "padding-block-start": 32,
-        "padding-block-end": 32,
-        "attach_to_details": true,
-        "heading": "",
-        "open_description": false
+        "padding-block-end": 32
       }
     },
     "pdp_trust_bar": {
@@ -413,7 +423,7 @@
         "image_position": "left",
         "eyebrow": "ABOUT US",
         "heading": "Built for the boot obsessed",
-        "body": "<p>We have spent 20+ years around football boots \u2014 chasing releases, hunting down retros and knowing a fake on sight. Every pair we list is checked by hand before it ships.</p>",
+        "body": "<p>We have spent 20+ years around football boots — chasing releases, hunting down retros and knowing a fake on sight. Every pair we list is checked by hand before it ships.</p>",
         "button_label": "",
         "button_link": "",
         "tile_background": "#f5f5f5",
@@ -426,6 +436,7 @@
     "pdp_sticky_buy": {
       "type": "pdp-sticky-buy",
       "settings": {
+        "reveal_mode": "after_button",
         "button_text": "Add to cart",
         "sheet_heading": "Select size",
         "button_color": "#16a34a",
