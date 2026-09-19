@@ -26,6 +26,8 @@
       --fbn-bg: {{ settings.fb_banner_background }};
       --fbn-fg: {{ settings.fb_banner_text }};
       --fbn-scale: {{ settings.fb_scale | divided_by: 100.0 }};
+      --fbn-body: {{ settings.fb_plane_body }};
+      --fbn-trim: {{ settings.fb_plane_trim }};
     "
   >
     <div class="fbn__rig">
@@ -33,8 +35,56 @@
         {%- if settings.fb_plane_image != blank -%}
           <img src="{{ settings.fb_plane_image | image_url: width: 240 }}" alt="" width="120" height="75" decoding="async">
         {%- else -%}
-          <svg viewBox="0 0 64 40" fill="currentColor" width="120" height="75">
-            <path d="M63 20c0-1.3-1-2.3-2.3-2.4L44 16.4 32.6 3.5c-.4-.5-1-.8-1.7-.8h-4.2c-1 0-1.7.9-1.5 1.9L28 16l-11.6-1-3.2-4.3c-.3-.4-.8-.7-1.4-.7H9c-1 0-1.7.9-1.5 1.8L9 20l-1.5 6.2c-.2 1 .5 1.8 1.5 1.8h2.8c.6 0 1.1-.3 1.4-.7l3.2-4.3 11.6-1-2.8 11.4c-.2 1 .5 1.9 1.5 1.9h4.2c.7 0 1.3-.3 1.7-.8L44 23.6l16.7-1.2c1.3-.1 2.3-1.1 2.3-2.4z"/>
+          {%- comment -%}
+            A light single-engine aircraft, which is what actually tows
+            advertising banners — a jet silhouette reads wrong for this.
+            Side view, nose to the right.
+          {%- endcomment -%}
+          <svg class="fbn__svg" viewBox="0 0 200 100" width="140" height="70">
+            <g
+              fill="var(--fbn-body, #eef1f4)"
+              stroke="var(--fbn-trim, #27333d)"
+              stroke-width="2.6"
+              stroke-linejoin="round"
+            stroke-linecap="round"
+            >
+              <!-- tailplane, then fin, drawn behind the fuselage -->
+              <path d="M36 52 L8 55 L8 61 L38 59 Z"/>
+              <path d="M42 51 L27 17 L41 16 L56 49 Z"/>
+              <!-- fuselage: deeper at the cabin, tapering to the tail boom -->
+              <path d="M34 50 L70 44 L110 42 L140 44 C160 47 176 51 176 57 C176 63 160 65 140 67 L100 69 L60 65 L34 58 Z"/>
+              <!-- high wing sitting on the cabin roof -->
+              <path d="M84 39 L152 37 L154 45 L86 47 Z"/>
+            </g>
+
+            <!-- cabin glazing -->
+            <g fill="var(--fbn-glass, #5b7a8c)">
+              <rect x="97" y="50" width="13" height="9" rx="3"/>
+              <rect x="115" y="50" width="12" height="9" rx="3"/>
+              <path d="M133 51 L148 55 L148 59 L133 59 Z"/>
+            </g>
+
+            <!-- wing strut and undercarriage -->
+            <g stroke="var(--fbn-trim, #27333d)" stroke-width="2.6" stroke-linecap="round" fill="none">
+              <path d="M90 47 L78 65"/>
+              <path d="M104 68 L100 77"/>
+              <path d="M152 66 L152 76"/>
+            </g>
+            <g fill="var(--fbn-trim, #27333d)">
+              <circle cx="100" cy="81" r="5.5"/>
+              <circle cx="152" cy="80" r="4.5"/>
+            </g>
+
+            <!-- spinner, then the propeller disc -->
+            <path
+              d="M176 50 C183 52 183 62 176 64 Z"
+              fill="var(--fbn-trim, #27333d)"
+            />
+            <ellipse
+              class="fbn__prop"
+              cx="180" cy="57" rx="3.5" ry="26"
+              fill="var(--fbn-trim, #27333d)"
+            />
           </svg>
         {%- endif -%}
       </span>
@@ -104,15 +154,30 @@
   .fbn__plane {
     display: block;
     flex-shrink: 0;
-    color: var(--fbn-plane, #2b2b2b);
     animation: fbn-bob 2.4s ease-in-out infinite;
   }
 
   .fbn__plane svg,
   .fbn__plane img {
     display: block;
-    width: 120px;
+    width: 140px;
     height: auto;
+    overflow: visible;
+  }
+
+  /* A spinning prop reads as a translucent disc, not blades. Flickering
+     the width and opacity sells the rotation without drawing blades that
+     would strobe against the animation frame rate. */
+  .fbn__prop {
+    opacity: 0.3;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: fbn-prop 0.16s linear infinite;
+  }
+
+  @keyframes fbn-prop {
+    0%, 100% { opacity: 0.32; transform: scaleX(1); }
+    50%      { opacity: 0.16; transform: scaleX(0.55); }
   }
 
   /* The built-in silhouette points right; flip it when flying the other way. */

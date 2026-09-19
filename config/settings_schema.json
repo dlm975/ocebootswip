@@ -2870,7 +2870,19 @@
         "type": "image_picker",
         "id": "fb_plane_image",
         "label": "Plane image",
-        "info": "Optional — a transparent PNG facing right. Leave blank for the built-in silhouette."
+        "info": "Optional — a transparent PNG facing right. Leave blank for the built-in aircraft, which the two colours below control."
+      },
+      {
+        "type": "color",
+        "id": "fb_plane_body",
+        "label": "Plane body",
+        "default": "#eef1f4"
+      },
+      {
+        "type": "color",
+        "id": "fb_plane_trim",
+        "label": "Plane outline & detail",
+        "default": "#27333d"
       },
       {
         "type": "color",
