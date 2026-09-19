@@ -313,6 +313,20 @@
     }
   }
 
+  /* ── Inside the product media column ──
+     The gallery above carries .sticky-content (position: sticky), so it
+     pins to the top while its container scrolls — which means this wall
+     slides underneath the product images. Release the gallery so the
+     whole media column scrolls as one. Scoped by :has() so it only
+     applies on pages where this section is actually attached. */
+  .product-information__media:has(.ppw) media-gallery.sticky-content {
+    position: static;
+  }
+
+  .product-information__media .ppw {
+    margin-top: clamp(12px, 2vw, 24px);
+  }
+
   /* ── Motion preferences: no auto-scroll, manual swipe instead ── */
   @media (prefers-reduced-motion: reduce) {
     .ppw__track { animation: none; }
