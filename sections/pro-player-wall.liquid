@@ -16,6 +16,8 @@
     --ppw-gap-m: {{ section.settings.gap_mobile }}px;
     --ppw-gap-d: {{ section.settings.gap_desktop }}px;
     --ppw-radius: {{ section.settings.corner_radius }}px;
+    --ppw-blur: {{ section.settings.blur_strength }}px;
+    --ppw-tint: {{ section.settings.tint_opacity | divided_by: 100.0 }};
     {% render 'spacing-style', settings: section.settings %}
   "
   data-cross-seconds="{{ section.settings.cross_seconds }}"
@@ -198,7 +200,9 @@
     opacity: 0.25;
   }
 
-  /* ── Frosted text panel over the lower image ── */
+  /* ── Frosted text panel over the lower image ──
+     Extra top padding gives the blur room to ramp off before it
+     reaches the text. */
   .ppw__panel {
     position: absolute;
     inset: auto 0 0 0;
@@ -206,12 +210,31 @@
     flex-direction: column;
     align-items: center;
     gap: 2cqi;
-    padding: 5cqi 4cqi 6cqi;
+    padding: 18cqi 4cqi 6cqi;
     text-align: center;
-    background: rgba(10, 10, 10, 0.42);
-    -webkit-backdrop-filter: blur(14px) saturate(150%);
-    backdrop-filter: blur(14px) saturate(150%);
     color: #fff;
+    isolation: isolate;
+  }
+
+  /* Blur and tint sit on their own layer so a gradient mask can fade
+     the blur itself into the untouched image. Masking the panel
+     instead would fade the text along with it. */
+  .ppw__panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(
+      to top,
+      rgba(8, 8, 8, var(--ppw-tint)) 0%,
+      rgba(8, 8, 8, calc(var(--ppw-tint) * 0.55)) 48%,
+      rgba(8, 8, 8, 0) 100%
+    );
+    -webkit-backdrop-filter: blur(var(--ppw-blur)) saturate(140%);
+    backdrop-filter: blur(var(--ppw-blur)) saturate(140%);
+    -webkit-mask-image: linear-gradient(to top, #000 0%, #000 30%, rgba(0, 0, 0, 0.5) 60%, transparent 100%);
+    mask-image: linear-gradient(to top, #000 0%, #000 30%, rgba(0, 0, 0, 0.5) 60%, transparent 100%);
   }
 
   .ppw__crest {
@@ -239,6 +262,12 @@
     width: clamp(11px, 9cqi, 26px);
     background: rgba(255, 255, 255, 0.25);
     border-radius: 3px;
+  }
+
+  .ppw__name,
+  .ppw__club,
+  .ppw__boot {
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);
   }
 
   .ppw__name {
@@ -408,6 +437,23 @@
       "id": "corner_radius",
       "label": "Corner radius",
       "min": 0, "max": 32, "step": 1, "unit": "px", "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Text panel"
+    },
+    {
+      "type": "range",
+      "id": "blur_strength",
+      "label": "Blur strength",
+      "min": 0, "max": 30, "step": 1, "unit": "px", "default": 16
+    },
+    {
+      "type": "range",
+      "id": "tint_opacity",
+      "label": "Darkening",
+      "min": 0, "max": 60, "step": 2, "unit": "%", "default": 30,
+      "info": "Lower is more transparent. Keep enough for the text to stay readable."
     },
     {
       "type": "header",
