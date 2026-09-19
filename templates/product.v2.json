@@ -516,17 +516,18 @@
         "handle": "@oceboots",
         "show_verified": true,
         "badge_color": "#3897f0",
-        "columns_mobile": 3,
-        "columns_desktop": 5,
-        "overlap": 12,
+        "columns_mobile": 4,
+        "columns_desktop": 7,
+        "overlap": 16,
         "max_rotation": 5,
-        "max_drift": 14,
-        "frame_width": 6,
+        "max_drift": 10,
+        "frame_width": 4,
         "corner_radius": 4,
         "title_color": "#111111",
         "plate_color": "rgba(255,255,255,0.82)",
         "padding-block-start": 40,
-        "padding-block-end": 40
+        "padding-block-end": 40,
+        "row_overlap": 8
       }
     },
     "pdp_about": {

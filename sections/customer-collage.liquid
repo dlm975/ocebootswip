@@ -26,6 +26,7 @@
       --ccg-cols-m: {{ section.settings.columns_mobile }};
       --ccg-cols-d: {{ section.settings.columns_desktop }};
       --ccg-overlap: {{ section.settings.overlap }}px;
+      --ccg-row-overlap: {{ section.settings.row_overlap }}px;
       --ccg-spread: {{ section.settings.max_rotation }};
       --ccg-drift: {{ section.settings.max_drift }}px;
       --ccg-radius: {{ section.settings.corner_radius }}px;
@@ -137,14 +138,19 @@
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    padding-block: calc(var(--ccg-drift) + 10px);
+    padding-block: calc(var(--ccg-drift) + 4px);
   }
 
+  /* Spacing is pure negative margin — no padding. Padding was only ever
+     creating the gap, and it also shrank each photo inside its slot, so
+     removing it lets the photos fill the width they are given. Rows and
+     columns tuck independently, because row pitch is what drives the
+     section's height. */
   .ccg__item {
     position: relative;
     width: calc(100% / var(--ccg-cols-m));
-    margin: calc(var(--ccg-overlap) * -1);
-    padding: var(--ccg-overlap);
+    margin-inline: calc(var(--ccg-overlap) * -1);
+    margin-block: calc(var(--ccg-row-overlap) * -1);
     transform: rotate(calc(var(--ccg-spread) * var(--rot) * 1deg))
       translateY(calc(var(--ccg-drift) * var(--dy)));
     transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
@@ -295,20 +301,27 @@
       "type": "range",
       "id": "columns_mobile",
       "label": "Photos across (mobile)",
-      "min": 2, "max": 4, "step": 1, "default": 3
+      "min": 2, "max": 6, "step": 1, "default": 4
     },
     {
       "type": "range",
       "id": "columns_desktop",
       "label": "Photos across (desktop)",
-      "min": 3, "max": 8, "step": 1, "default": 5
+      "min": 3, "max": 10, "step": 1, "default": 7
     },
     {
       "type": "range",
       "id": "overlap",
-      "label": "Overlap",
-      "min": 0, "max": 40, "step": 2, "unit": "px", "default": 12,
-      "info": "How far the photos tuck under each other."
+      "label": "Side overlap",
+      "min": 0, "max": 40, "step": 2, "unit": "px", "default": 16,
+      "info": "How far photos tuck under the ones beside them."
+    },
+    {
+      "type": "range",
+      "id": "row_overlap",
+      "label": "Row overlap",
+      "min": 0, "max": 60, "step": 2, "unit": "px", "default": 18,
+      "info": "How far rows tuck into each other. This is what controls the section's height."
     },
     {
       "type": "range",
@@ -320,13 +333,14 @@
       "type": "range",
       "id": "max_drift",
       "label": "Vertical scatter",
-      "min": 0, "max": 40, "step": 2, "unit": "px", "default": 14
+      "min": 0, "max": 40, "step": 2, "unit": "px", "default": 8,
+      "info": "Adds to the section's height, so keep it low if space is tight."
     },
     {
       "type": "range",
       "id": "frame_width",
       "label": "White border",
-      "min": 0, "max": 14, "step": 1, "unit": "px", "default": 6
+      "min": 0, "max": 14, "step": 1, "unit": "px", "default": 4
     },
     {
       "type": "range",
