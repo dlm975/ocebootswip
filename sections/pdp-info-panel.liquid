@@ -27,40 +27,46 @@
 {%- if show_desc or has_faq -%}
   <div
     class="pip"
+    id="pip-{{ section.id }}"
+    data-attach-details="{{ section.settings.attach_to_details }}"
     style="{% render 'spacing-style', settings: section.settings %}"
   >
-    <div class="pip__inner{% if show_desc and has_faq %} pip__inner--split{% endif %}">
-      {%- if show_desc -%}
-        <section class="pip__col">
-          <h2 class="pip__title">{{ section.settings.description_heading | default: 'Details' }}</h2>
-          <div class="pip__desc rte">{{ desc }}</div>
-        </section>
+    <div class="pip__inner">
+      {%- if section.settings.heading != blank -%}
+        <h2 class="pip__title">{{ section.settings.heading }}</h2>
       {%- endif -%}
 
-      {%- if has_faq -%}
-        <section class="pip__col">
-          <h2 class="pip__title">{{ section.settings.faq_heading | default: 'FAQ' }}</h2>
-          <div class="pip__faq">
-            {%- for i in (1..8) -%}
-              {%- assign q_key = 'q' | append: i -%}
-              {%- assign a_key = 'a' | append: i -%}
-              {%- assign q_text = section.settings[q_key] -%}
-              {%- assign a_text = section.settings[a_key] -%}
-              {%- if q_text != blank and a_text != blank -%}
-                <details class="pip__item"{% if forloop.first and section.settings.open_first %} open{% endif %}>
-                  <summary class="pip__q">
-                    <span>{{ q_text }}</span>
-                    <svg class="pip__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" width="15" height="15" aria-hidden="true">
-                      <polyline points="6 9 12 15 18 9"/>
-                    </svg>
-                  </summary>
-                  <div class="pip__a">{{ a_text }}</div>
-                </details>
-              {%- endif -%}
-            {%- endfor -%}
-          </div>
-        </section>
-      {%- endif -%}
+      <div class="pip__list">
+        {%- if show_desc -%}
+          <details class="pip__item"{% if section.settings.open_description %} open{% endif %}>
+            <summary class="pip__q">
+              <span>{{ section.settings.description_heading | default: 'Details' }}</span>
+              <svg class="pip__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" width="15" height="15" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </summary>
+            <div class="pip__a pip__a--rte rte">{{ desc }}</div>
+          </details>
+        {%- endif -%}
+
+        {%- for i in (1..8) -%}
+          {%- assign q_key = 'q' | append: i -%}
+          {%- assign a_key = 'a' | append: i -%}
+          {%- assign q_text = section.settings[q_key] -%}
+          {%- assign a_text = section.settings[a_key] -%}
+          {%- if q_text != blank and a_text != blank -%}
+            <details class="pip__item">
+              <summary class="pip__q">
+                <span>{{ q_text }}</span>
+                <svg class="pip__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" width="15" height="15" aria-hidden="true">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </summary>
+              <div class="pip__a">{{ a_text }}</div>
+            </details>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
     </div>
   </div>
 {%- endif -%}
@@ -74,15 +80,6 @@
     max-width: var(--page-width, 1400px);
     margin-inline: auto;
     padding-inline: var(--page-margin, 16px);
-    display: grid;
-    gap: clamp(24px, 4vw, 48px);
-  }
-
-  @media screen and (min-width: 750px) {
-    .pip__inner--split {
-      grid-template-columns: 1fr 1fr;
-      align-items: start;
-    }
   }
 
   .pip__title {
@@ -91,24 +88,9 @@
     font-style: italic;
     text-transform: uppercase;
     letter-spacing: -0.01em;
-    margin: 0 0 14px;
+    margin: 0 0 10px;
   }
 
-  .pip__desc {
-    font-size: 0.9rem;
-    line-height: 1.65;
-    opacity: 0.85;
-  }
-
-  .pip__desc :first-child {
-    margin-top: 0;
-  }
-
-  .pip__desc :last-child {
-    margin-bottom: 0;
-  }
-
-  /* ── FAQ ── */
   .pip__item {
     border-top: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
   }
@@ -152,12 +134,76 @@
     max-width: 62ch;
   }
 
+  .pip__a--rte :first-child {
+    margin-top: 0;
+  }
+
+  .pip__a--rte :last-child {
+    margin-bottom: 0;
+  }
+
+  /* ── Inside the product details column ──
+     Moved there at runtime on desktop. The column carries
+     .sticky-content--desktop, which pins it while the page scrolls — with
+     this much content added it would pin and then clip, so release it. */
+  .product-details:has(.pip) {
+    position: static;
+  }
+
+  .product-details .pip__inner {
+    padding-inline: 0;
+    max-width: none;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .pip__chev {
       transition: none;
     }
   }
 {% endstylesheet %}
+
+<script>
+  (function () {
+    var root = document.getElementById('pip-{{ section.id }}');
+    if (!root) return;
+    if (root.dataset.attachDetails !== 'true') return;
+
+    /* Desktop only: on mobile the columns stack, so leaving it where the
+       template puts it already reads in the right order. */
+    var homeMarker = null;
+
+    function sectionEl() {
+      return root.closest('.shopify-section') || root;
+    }
+
+    function sync() {
+      var column = document.querySelector('.product-details');
+      if (!column) return;
+
+      var el = sectionEl();
+
+      if (window.matchMedia('(min-width: 750px)').matches) {
+        if (el.parentElement === column) return;
+        if (!homeMarker) {
+          homeMarker = document.createComment('pdp-info-panel-home');
+          el.parentElement.insertBefore(homeMarker, el);
+        }
+        column.appendChild(el);
+      } else {
+        if (!homeMarker || el.parentElement === homeMarker.parentElement) return;
+        homeMarker.parentElement.insertBefore(el, homeMarker);
+      }
+    }
+
+    sync();
+
+    var timer;
+    window.addEventListener('resize', function () {
+      clearTimeout(timer);
+      timer = setTimeout(sync, 200);
+    }, { passive: true });
+  })();
+</script>
 
 {% schema %}
 {
@@ -167,6 +213,19 @@
     "templates": ["product"]
   },
   "settings": [
+    {
+      "type": "checkbox",
+      "id": "attach_to_details",
+      "label": "Sit in the buy button column (desktop)",
+      "default": true,
+      "info": "Desktop only — moves this section into the product details column on the right. On mobile it stays where the section sits in the template."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Optional"
+    },
     {
       "type": "header",
       "content": "Description"
@@ -180,24 +239,18 @@
     {
       "type": "text",
       "id": "description_heading",
-      "label": "Description heading",
+      "label": "Description row label",
       "default": "Details"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_description",
+      "label": "Open the description by default",
+      "default": false
     },
     {
       "type": "header",
       "content": "FAQ"
-    },
-    {
-      "type": "text",
-      "id": "faq_heading",
-      "label": "FAQ heading",
-      "default": "FAQ"
-    },
-    {
-      "type": "checkbox",
-      "id": "open_first",
-      "label": "Open the first question by default",
-      "default": false
     },
     { "type": "text", "id": "q1", "label": "Question 1" },
     { "type": "textarea", "id": "a1", "label": "Answer 1" },

@@ -356,17 +356,17 @@
       "settings": {
         "heading": "",
         "cards_mobile": 3,
-        "cards_desktop": 5,
+        "cards_desktop": 3,
         "gap_mobile": 8,
         "gap_desktop": 12,
         "corner_radius": 16,
         "cross_seconds": 40,
         "pause_on_hover": true,
         "padding-block-start": 40,
-        "padding-block-end": 24,
-        "attach_to_media": false,
+        "padding-block-end": 56,
         "blur_strength": 16,
-        "tint_opacity": 30
+        "tint_opacity": 30,
+        "attach_to": "details"
       }
     },
     "pdp_info_panel": {
@@ -374,8 +374,6 @@
       "settings": {
         "show_description": true,
         "description_heading": "Details",
-        "faq_heading": "FAQ",
-        "open_first": false,
         "q1": "Are these boots legit?",
         "a1": "Yes. We have 20+ years of experience with football boots. This means we can spot a fake from a mile away.",
         "q2": "How long will shipping take?",
@@ -383,7 +381,10 @@
         "q3": "Can I return them if they don't fit?",
         "a3": "Yes. We offer returns within 7 days of your boots arriving. They must be in unworn condition.",
         "padding-block-start": 32,
-        "padding-block-end": 32
+        "padding-block-end": 32,
+        "attach_to_details": true,
+        "heading": "",
+        "open_description": false
       }
     },
     "pdp_about": {
@@ -399,7 +400,7 @@
         "text_color": "#111111",
         "corner_radius": 20,
         "padding-block-start": 32,
-        "padding-block-end": 24
+        "padding-block-end": 56
       }
     },
     "pdp_trust_bar": {

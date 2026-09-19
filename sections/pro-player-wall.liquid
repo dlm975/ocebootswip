@@ -21,7 +21,7 @@
     {% render 'spacing-style', settings: section.settings %}
   "
   data-cross-seconds="{{ section.settings.cross_seconds }}"
-  data-attach-media="{{ section.settings.attach_to_media }}"
+  data-attach-to="{{ section.settings.attach_to }}"
   data-pause-hover="{{ section.settings.pause_on_hover }}"
 >
   {%- if section.settings.heading != blank -%}
@@ -327,6 +327,13 @@
     margin-top: clamp(12px, 2vw, 24px);
   }
 
+  /* ── Inside the buy button column ──
+     Same problem, different column: .product-details carries
+     .sticky-content--desktop, so release it once the wall is added. */
+  .product-details:has(.ppw) {
+    position: static;
+  }
+
   /* ── Motion preferences: no auto-scroll, manual swipe instead ── */
   @media (prefers-reduced-motion: reduce) {
     .ppw__track { animation: none; }
@@ -397,22 +404,27 @@
       return root.closest('.shopify-section') || root;
     }
 
-    function syncPlacement() {
-      if (root.dataset.attachMedia !== 'true') return;
+    function attachTarget() {
+      var mode = root.dataset.attachTo;
+      if (mode === 'media') return document.querySelector('.product-information__media');
+      if (mode === 'details') return document.querySelector('.product-details');
+      return null;
+    }
 
-      var media = document.querySelector('.product-information__media');
-      if (!media) return; /* not a product page */
+    function syncPlacement() {
+      var target = attachTarget();
+      if (!target) return; /* not a product page, or placement is "none" */
 
       var el = sectionEl();
       var isDesktop = window.matchMedia('(min-width: 750px)').matches;
 
       if (isDesktop) {
-        if (el.parentElement === media) return;
+        if (el.parentElement === target) return;
         if (!homeMarker) {
           homeMarker = document.createComment('pro-player-wall-home');
           el.parentElement.insertBefore(homeMarker, el);
         }
-        media.appendChild(el);
+        target.appendChild(el);
       } else {
         if (!homeMarker || el.parentElement === homeMarker.parentElement) return;
         homeMarker.parentElement.insertBefore(el, homeMarker);
@@ -492,11 +504,16 @@
       "min": 0, "max": 32, "step": 1, "unit": "px", "default": 16
     },
     {
-      "type": "checkbox",
-      "id": "attach_to_media",
-      "label": "Sit under the product images (product pages)",
-      "default": true,
-      "info": "Desktop only — moves the wall into the product image column. On mobile it stays where the section sits in the template. No effect on other pages."
+      "type": "select",
+      "id": "attach_to",
+      "label": "Placement on product pages",
+      "options": [
+        { "value": "none", "label": "Where the section sits" },
+        { "value": "media", "label": "Under the product images" },
+        { "value": "details", "label": "In the buy button column" }
+      ],
+      "default": "media",
+      "info": "Desktop only — moves the wall into one of the product page columns. On mobile it stays where the section sits in the template. No effect on other pages."
     },
     {
       "type": "header",

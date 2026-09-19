@@ -10,6 +10,7 @@
   <div
     id="pdp-ig-{{ block.id }}"
     class="pdp-ig"
+    style="--ig-align-m: {{ block.settings.alignment_mobile }}; --ig-align-d: {{ block.settings.alignment_desktop }};"
     {{ block.shopify_attributes }}
   >
     {%- if block.settings.link != blank -%}
@@ -28,6 +29,14 @@
           loading="lazy"
           decoding="async"
         >
+      {%- endif -%}
+
+      {%- if block.settings.show_logo -%}
+        <svg class="pdp-ig__logo" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+          <rect x="2.6" y="2.6" width="18.8" height="18.8" rx="5.4"/>
+          <circle cx="12" cy="12" r="4.1"/>
+          <circle cx="17.5" cy="6.5" r="1.15" fill="currentColor" stroke="none"/>
+        </svg>
       {%- endif -%}
 
       <span class="pdp-ig__handle">
@@ -61,7 +70,8 @@
   }
 
   .pdp-ig--placed {
-    display: block;
+    display: flex;
+    justify-content: var(--ig-align-d, flex-start);
   }
 
   .pdp-ig__inner {
@@ -96,9 +106,14 @@
     letter-spacing: -0.01em;
   }
 
-  .pdp-ig__badge {
+  .pdp-ig__badge,
+  .pdp-ig__logo {
     flex-shrink: 0;
     display: block;
+  }
+
+  .pdp-ig__logo {
+    opacity: 0.9;
   }
 
   @media screen and (max-width: 749px) {
@@ -106,6 +121,10 @@
       /* the gallery goes edge-to-edge on mobile, so re-inset just this row */
       padding-inline: var(--page-margin, 16px);
       margin-bottom: 8px;
+    }
+
+    .pdp-ig--placed {
+      justify-content: var(--ig-align-m, center);
     }
   }
 </style>
@@ -153,9 +172,37 @@
     },
     {
       "type": "checkbox",
+      "id": "show_logo",
+      "label": "Show Instagram logo",
+      "default": true
+    },
+    {
+      "type": "checkbox",
       "id": "verified",
       "label": "Show verified badge",
       "default": true
+    },
+    {
+      "type": "select",
+      "id": "alignment_mobile",
+      "label": "Alignment (mobile)",
+      "options": [
+        { "value": "center", "label": "Center" },
+        { "value": "flex-start", "label": "Left" },
+        { "value": "flex-end", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "alignment_desktop",
+      "label": "Alignment (desktop)",
+      "options": [
+        { "value": "flex-start", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "flex-end", "label": "Right" }
+      ],
+      "default": "flex-start"
     },
     {
       "type": "color",

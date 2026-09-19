@@ -399,7 +399,8 @@
         "cross_seconds": 40,
         "pause_on_hover": true,
         "padding-block-start": 40,
-        "padding-block-end": 40
+        "padding-block-end": 40,
+        "attach_to": "none"
       }
     },
     "newly_listed_fc": {

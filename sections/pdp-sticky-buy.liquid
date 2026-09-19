@@ -31,6 +31,11 @@
 
   assign form_id = 'psb-form-' | append: section.id
   assign atc_id = 'psb-atc-' | append: section.id
+
+  assign thumb = current.featured_media.preview_image
+  if thumb == blank
+    assign thumb = p.featured_image
+  endif
 -%}
 
 {%- if p != blank -%}
@@ -38,12 +43,27 @@
     class="psb"
     id="psb-{{ section.id }}"
     data-size-option="{{ size_name | escape }}"
+    data-reveal="{{ section.settings.reveal_mode }}"
+    {% if section.settings.reveal_mode == 'after_button' %}data-hidden{% endif %}
     style="--psb-accent: {{ section.settings.button_color }}; --psb-accent-text: {{ section.settings.button_text_color }};"
   >
     {%- comment -%} Dims the page behind the size sheet on mobile {%- endcomment -%}
     <div class="psb__scrim" data-psb-scrim hidden></div>
 
     <div class="psb__bar">
+      {%- if thumb != blank -%}
+        <img
+          class="psb__thumb"
+          data-psb-thumb
+          src="{{ thumb | image_url: width: 120 }}"
+          alt=""
+          width="40"
+          height="40"
+          loading="lazy"
+          decoding="async"
+        >
+      {%- endif -%}
+
       <div class="psb__info">
         <span class="psb__title">{{ p.title }}</span>
         <span class="psb__price" data-psb-price>
@@ -188,6 +208,24 @@
     backdrop-filter: blur(20px) saturate(180%);
     border-top: 1px solid rgba(0, 0, 0, 0.08);
     box-shadow: 0 -8px 24px -12px rgba(0, 0, 0, 0.18);
+    transition: transform 0.38s var(--psb-ease), opacity 0.26s var(--psb-ease);
+  }
+
+  /* Held out of the way until the in-page add-to-cart button scrolls off */
+  .psb[data-hidden] .psb__bar {
+    transform: translateY(calc(100% + 32px));
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .psb__thumb {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    object-fit: contain;
+    background: rgba(0, 0, 0, 0.04);
+    display: block;
   }
 
   .psb__info {
@@ -441,6 +479,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .psb__bar,
     .psb__sheet,
     .psb__scrim,
     .psb__chev,
@@ -530,6 +569,26 @@
     var variantInput = root.querySelector('input[name="id"]');
     var atc = root.querySelector('.psb__atc');
     var opts = [].slice.call(root.querySelectorAll('[data-psb-opt]'));
+    var thumb = root.querySelector('[data-psb-thumb]');
+
+    /* ── Reveal ──
+       Showing a floating buy bar while the real add-to-cart button is still
+       on screen just duplicates it, so track that button and slide in only
+       once it has scrolled away. */
+    if (root.dataset.reveal === 'after_button') {
+      var mainBtn = document.querySelector('.buy-buttons-block button[name="add"]');
+
+      if (!mainBtn || !('IntersectionObserver' in window)) {
+        root.removeAttribute('data-hidden');
+      } else {
+        new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) root.setAttribute('data-hidden', '');
+            else root.removeAttribute('data-hidden');
+          });
+        }).observe(mainBtn);
+      }
+    }
 
     /* ── Sheet open/close ── */
     function open() {
@@ -656,6 +715,9 @@
         if (resource.available === false) atc.setAttribute('disabled', 'disabled');
         else atc.removeAttribute('disabled');
       }
+
+      var media = resource.featured_media && resource.featured_media.preview_image;
+      if (thumb && media && media.src) thumb.src = media.src + '&width=120';
     });
   })();
 </script>
@@ -671,6 +733,16 @@
     {
       "type": "paragraph",
       "content": "A floating add-to-cart bar — full width along the bottom on mobile, a card in the bottom-right corner on desktop. It shows the product name, the selected size and the price with currency."
+    },
+    {
+      "type": "select",
+      "id": "reveal_mode",
+      "label": "When to show the bar",
+      "options": [
+        { "value": "after_button", "label": "After the main button scrolls out of view" },
+        { "value": "always", "label": "Always" }
+      ],
+      "default": "after_button"
     },
     {
       "type": "text",
