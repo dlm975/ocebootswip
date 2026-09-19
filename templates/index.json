@@ -406,7 +406,7 @@
       "name": "Pro Player Wall",
       "settings": {
         "heading": "",
-        "aspect_ratio": "3 / 4",
+        "aspect_ratio": "4 / 5",
         "cards_mobile": 3,
         "cards_desktop": 6,
         "gap_mobile": 8,
@@ -415,7 +415,7 @@
         "attach_to": "none",
         "blur_strength": 16,
         "tint_opacity": 30,
-        "cross_seconds": 40,
+        "cross_seconds": 30,
         "pause_on_hover": true,
         "padding-block-start": 40,
         "padding-block-end": 40
