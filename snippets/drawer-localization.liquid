@@ -59,8 +59,12 @@
                   "
                 ></span>
               {%- endif -%}
+              {%- comment -%}
+                Presentment currency, not the selected country's own — see
+                the note in dropdown-localization.
+              {%- endcomment -%}
               <span class="currency-code">
-                {{- localization.country.currency.iso_code -}}
+                {{- cart.currency.iso_code | default: localization.country.currency.iso_code -}}
               </span>
             </div>
           {%- endif -%}

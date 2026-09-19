@@ -56,8 +56,15 @@
             "
           ></span>
         {% endif %}
+        {%- comment -%}
+          cart.currency is the presentment currency prices are actually
+          rendered in. localization.country.currency is the selected
+          country's own currency, which differs whenever a market serves
+          several countries in one currency — that mismatch is why this
+          showed the shop's home currency while prices were in another.
+        {%- endcomment -%}
         <span class="currency-code">
-          {{- localization.country.currency.iso_code -}}
+          {{- cart.currency.iso_code | default: localization.country.currency.iso_code -}}
         </span>
       {% endif %}
 
