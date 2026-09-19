@@ -49,8 +49,15 @@
   data-attach-to="{{ section.settings.attach_to }}"
   data-pause-hover="{{ section.settings.pause_on_hover }}"
 >
-  {%- if section.settings.heading != blank -%}
-    <h2 class="ppw__heading">{{ section.settings.heading }}</h2>
+  {%- if section.settings.heading != blank or section.settings.subheading != blank -%}
+    <div class="ppw__intro">
+      {%- if section.settings.heading != blank -%}
+        <h2 class="ppw__heading">{{ section.settings.heading }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="ppw__sub">{{ section.settings.subheading }}</p>
+      {%- endif -%}
+    </div>
   {%- endif -%}
 
   <div class="ppw__viewport" data-ppw-viewport>
@@ -144,15 +151,29 @@
     width: 100%;
   }
 
+  .ppw__intro {
+    text-align: center;
+    margin: 0 0 clamp(14px, 3vw, 24px);
+    padding-inline: 20px;
+  }
+
   .ppw__heading {
     font-size: clamp(1.3rem, 3.5vw, 2rem);
     font-weight: 800;
     font-style: italic;
     text-transform: uppercase;
     letter-spacing: -0.01em;
-    text-align: center;
-    margin: 0 0 clamp(14px, 3vw, 24px);
-    padding-inline: 20px;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .ppw__sub {
+    font-size: clamp(0.8rem, 1.8vw, 0.95rem);
+    line-height: 1.5;
+    opacity: 0.7;
+    max-width: 60ch;
+    margin: 6px auto 0;
+    text-wrap: pretty;
   }
 
   /* Viewport is the container: card widths resolve against it, so the
@@ -495,7 +516,13 @@
       "type": "text",
       "id": "heading",
       "label": "Heading",
-      "info": "Leave blank for no heading"
+      "info": "Sits above the cards. Leave blank for no heading."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Text",
+      "info": "A supporting line under the heading, also above the cards. Leave blank to hide."
     },
     {
       "type": "header",
