@@ -41,6 +41,8 @@
     --ppw-gap-d: {{ section.settings.gap_desktop }}px;
     --ppw-radius: {{ section.settings.corner_radius }}px;
     --ppw-ratio: {{ ratio }};
+    --ppw-star-color: {{ section.settings.star_color }};
+    --ppw-star-size: {{ section.settings.star_size }}px;
     --ppw-blur: {{ section.settings.blur_strength }}px;
     --ppw-tint: {{ section.settings.tint_opacity | divided_by: 100.0 }};
     {% render 'spacing-style', settings: section.settings %}
@@ -49,13 +51,22 @@
   data-attach-to="{{ section.settings.attach_to }}"
   data-pause-hover="{{ section.settings.pause_on_hover }}"
 >
-  {%- if section.settings.heading != blank or section.settings.subheading != blank -%}
+  {%- if section.settings.heading != blank or section.settings.subheading != blank or section.settings.show_stars -%}
     <div class="ppw__intro">
       {%- if section.settings.heading != blank -%}
         <h2 class="ppw__heading">{{ section.settings.heading }}</h2>
       {%- endif -%}
       {%- if section.settings.subheading != blank -%}
         <p class="ppw__sub">{{ section.settings.subheading }}</p>
+      {%- endif -%}
+      {%- if section.settings.show_stars -%}
+        <div class="ppw__stars" aria-hidden="true">
+          {%- for i in (1..5) -%}
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          {%- endfor -%}
+        </div>
       {%- endif -%}
     </div>
   {%- endif -%}
@@ -174,6 +185,20 @@
     max-width: 60ch;
     margin: 6px auto 0;
     text-wrap: pretty;
+  }
+
+  .ppw__stars {
+    display: flex;
+    justify-content: center;
+    gap: 3px;
+    margin-top: 8px;
+  }
+
+  .ppw__stars svg {
+    width: var(--ppw-star-size, 20px);
+    height: var(--ppw-star-size, 20px);
+    fill: var(--ppw-star-color, #00b67a);
+    display: block;
   }
 
   /* Viewport is the container: card widths resolve against it, so the
@@ -523,6 +548,25 @@
       "id": "subheading",
       "label": "Text",
       "info": "A supporting line under the heading, also above the cards. Leave blank to hide."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_stars",
+      "label": "Show star rating",
+      "default": true,
+      "info": "Five stars below the text, above the cards."
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star colour",
+      "default": "#00b67a"
+    },
+    {
+      "type": "range",
+      "id": "star_size",
+      "label": "Star size",
+      "min": 12, "max": 40, "step": 2, "unit": "px", "default": 20
     },
     {
       "type": "header",
