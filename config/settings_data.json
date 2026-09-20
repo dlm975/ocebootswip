@@ -65,6 +65,25 @@
     "show_accelerated_checkout_buttons": false,
     "cart_thumbnail_border": "none",
     "cart_thumbnail_border_radius": 3,
+    "cart_image_box": true,
+    "cart_image_box_background": "#ffffff",
+    "cart_image_box_radius": 10,
+    "cart_image_box_padding": 6,
+    "cart_image_box_shadow": 6,
+    "cart_recs_show": true,
+    "cart_recs_heading": "You might also like",
+    "cart_recs_products": [
+      "fg-ag-studs-for-nike",
+      "fg-ag-studs-for-adidas"
+    ],
+    "cart_recs_max": 2,
+    "cart_recs_button_label": "Add",
+    "cart_recs_choose_label": "Choose",
+    "cart_recs_background": "#f5f5f5",
+    "cart_recs_text_color": "#111111",
+    "cart_recs_radius": 16,
+    "cart_recs_button_background": "#111111",
+    "cart_recs_button_text": "#ffffff",
     "cart_notice_show": true,
     "cart_notice_text": "Buy Now to secure FREE Shipping",
     "cart_notice_blinker": true,
@@ -507,22 +526,7 @@
           "selected_variant_hover_border_color": "#1a1a1a"
         }
       }
-    },
-    "cart_image_box": true,
-    "cart_image_box_background": "#ffffff",
-    "cart_image_box_radius": 10,
-    "cart_image_box_padding": 6,
-    "cart_image_box_shadow": 6,
-    "cart_recs_show": true,
-    "cart_recs_heading": "You might also like",
-    "cart_recs_max": 4,
-    "cart_recs_background": "#f5f5f5",
-    "cart_recs_text_color": "#111111",
-    "cart_recs_radius": 16,
-    "cart_recs_button_background": "#111111",
-    "cart_recs_button_text": "#ffffff",
-    "cart_recs_button_label": "Add",
-    "cart_recs_choose_label": "Choose"
+    }
   },
   "presets": {
     "Horizon": {
