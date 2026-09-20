@@ -16,22 +16,11 @@
   comment
     Values fall back in Liquid, not just in the schema. A setting that
     exists only as a schema default reads as nil here, which would emit an
-    empty declaration — that is why the pill alignment silently did nothing.
+    empty declaration, which reads as no setting at all.
   endcomment
   assign fs = settings.cart_text_font_family | default: 'default'
   assign ps = settings.cart_price_font_family | default: 'default'
 
-  assign pill = true
-  if settings.cart_item_pill == false
-    assign pill = false
-  endif
-
-  assign pill_bg = settings.cart_item_pill_background | default: '#f5f5f5'
-  assign pill_radius = settings.cart_item_pill_radius | default: 16
-  assign pill_padding = settings.cart_item_pill_padding | default: 12
-  assign pill_border_width = settings.cart_item_pill_border_width | default: 0
-  assign pill_border_color = settings.cart_item_pill_border_color | default: '#e5e5e5'
-  assign item_align = settings.cart_item_align | default: 'center'
 
   assign hide_quantity = true
   if settings.cart_show_quantity
@@ -224,44 +213,6 @@
     }
   {%- endif %}
 
-  {%- if pill %}
-    /* Each line item as a pill. Scoped through .cart-items as well so it
-       outranks the theme's .cart-items--dividers rule, which would
-       otherwise draw a rule straight through the bottom of the pill. */
-    .cart-drawer .cart-items .cart-items__table-row,
-    .cart-page .cart-items .cart-items__table-row {
-      background: {{ pill_bg }};
-      border-radius: {{ pill_radius }}px;
-      padding: {{ pill_padding }}px;
-      border: {% if pill_border_width > 0 %}{{ pill_border_width }}px solid {{ pill_border_color }}{% else %}none{% endif %};
-      align-items: {{ item_align }};
-
-      {%- if settings.cart_item_pill_shadow %}
-        box-shadow: 0 6px 16px -10px rgb(0 0 0 / 45%);
-      {%- endif %}
-
-      {%- if settings.cart_row_gap > 0 %}
-        margin-bottom: {{ settings.cart_row_gap }}px;
-      {%- endif %}
-    }
-
-    /* The pill's height is set by the image, which is taller than the text
-       beside it. Left top-aligned, the title sits tight against the top
-       edge while a band of space opens under the variant line. Centring the
-       text column evens those two gaps up. */
-    .cart-drawer .cart-items .cart-items__details,
-    .cart-page .cart-items .cart-items__details,
-    .cart-drawer .cart-items .cart-items__price,
-    .cart-page .cart-items .cart-items__price {
-      align-self: {{ item_align }};
-    }
-
-    /* The last row loses its margin in the theme's divider rules */
-    .cart-drawer .cart-items .cart-items__table-row:last-child,
-    .cart-page .cart-items .cart-items__table-row:last-child {
-      border-block-end: {% if pill_border_width > 0 %}{{ pill_border_width }}px solid {{ pill_border_color }}{% else %}none{% endif %};
-    }
-  {%- endif %}
 
   {%- unless settings.cart_show_tax_note %}
     .cart-drawer .tax-note,
