@@ -2463,6 +2463,40 @@
         "id": "cart_checkout_shadow",
         "label": "Drop shadow",
         "default": false
+      },
+      {
+        "type": "header",
+        "content": "Under the checkout button"
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_show_payment_icons",
+        "label": "Show payment icons",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_trust_show",
+        "label": "Show the trust row",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "cart_trust_1_text",
+        "label": "Item 1 (shield & tick)",
+        "default": "100% Authentic"
+      },
+      {
+        "type": "text",
+        "id": "cart_trust_2_text",
+        "label": "Item 2 (plane)",
+        "default": "Fast Delivery"
+      },
+      {
+        "type": "text",
+        "id": "cart_trust_3_text",
+        "label": "Item 3 (padlock)",
+        "default": "Secure Payment"
       }
     ]
   },

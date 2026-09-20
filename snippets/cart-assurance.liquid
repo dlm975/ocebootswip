@@ -1,0 +1,125 @@
+{%- doc -%}
+  Payment icons and a short trust row, shown under the checkout button.
+  Rendered from cart-summary, so it appears in the drawer and on the cart
+  page. Text comes from Theme settings → Cart.
+{%- enddoc -%}
+
+{%- liquid
+  comment
+    Values fall back in Liquid so this works whether or not the settings
+    have reached settings_data.json.
+  endcomment
+  assign show_icons = true
+  if settings.cart_show_payment_icons == false
+    assign show_icons = false
+  endif
+
+  assign show_trust = true
+  if settings.cart_trust_show == false
+    assign show_trust = false
+  endif
+
+  assign trust_1 = settings.cart_trust_1_text | default: '100% Authentic'
+  assign trust_2 = settings.cart_trust_2_text | default: 'Fast Delivery'
+  assign trust_3 = settings.cart_trust_3_text | default: 'Secure Payment'
+-%}
+
+{%- if show_icons and shop.enabled_payment_types.size > 0 -%}
+  <ul class="cart-assure__icons list-unstyled" role="list">
+    <li class="visually-hidden">{{ 'blocks.payment_methods' | t }}</li>
+    {%- for type in shop.enabled_payment_types -%}
+      <li>{{ type | payment_type_svg_tag: class: 'icon icon--full-color' }}</li>
+    {%- endfor -%}
+  </ul>
+{%- endif -%}
+
+{%- if show_trust -%}
+  {%- comment -%}
+    Inline SVG rather than emoji — emoji render in each platform's own
+    style, and some do not render at all on Windows.
+  {%- endcomment -%}
+  <ul class="cart-assure__trust list-unstyled" role="list">
+    {%- if trust_1 != blank -%}
+      <li>
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 2.5 4.5 5.8v5.4c0 4.6 3.2 8.9 7.5 10.3 4.3-1.4 7.5-5.7 7.5-10.3V5.8z"/>
+          <polyline points="8.8 11.9 11.2 14.3 15.4 10.1"/>
+        </svg>
+        <span>{{ trust_1 }}</span>
+      </li>
+    {%- endif -%}
+
+    {%- if trust_2 != blank -%}
+      <li>
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M2.5 13.2 21 4.2l-5 16-4.6-5.2-1.6 4.4-1.6-4.9z"/>
+          <path d="M9.2 14.4 21 4.2"/>
+        </svg>
+        <span>{{ trust_2 }}</span>
+      </li>
+    {%- endif -%}
+
+    {%- if trust_3 != blank -%}
+      <li>
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="4.2" y="10.4" width="15.6" height="10.4" rx="2.2"/>
+          <path d="M8 10.4V7.6a4 4 0 0 1 8 0v2.8"/>
+        </svg>
+        <span>{{ trust_3 }}</span>
+      </li>
+    {%- endif -%}
+  </ul>
+{%- endif -%}
+
+{% stylesheet %}
+  /* Icons shrink to share one row rather than wrapping onto a second */
+  .cart-assure__icons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: clamp(3px, 1.2vw, 8px);
+    width: 100%;
+    margin: 10px 0 0;
+    padding: 0;
+  }
+
+  .cart-assure__icons li:not(.visually-hidden) {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 34px;
+    display: flex;
+  }
+
+  .cart-assure__icons svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .cart-assure__trust {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    width: 100%;
+    margin: 10px 0 0;
+    padding: 0;
+  }
+
+  .cart-assure__trust li {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.66rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .cart-assure__trust svg {
+    flex-shrink: 0;
+    opacity: 0.75;
+  }
+{% endstylesheet %}

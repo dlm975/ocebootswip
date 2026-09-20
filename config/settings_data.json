@@ -526,7 +526,12 @@
           "selected_variant_hover_border_color": "#1a1a1a"
         }
       }
-    }
+    },
+    "cart_show_payment_icons": true,
+    "cart_trust_show": true,
+    "cart_trust_1_text": "100% Authentic",
+    "cart_trust_2_text": "Fast Delivery",
+    "cart_trust_3_text": "Secure Payment"
   },
   "presets": {
     "Horizon": {
