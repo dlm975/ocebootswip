@@ -217,6 +217,17 @@
       {%- endif %}
     }
 
+    /* The pill's height is set by the image, which is taller than the text
+       beside it. Left top-aligned, the title sits tight against the top
+       edge while a band of space opens under the variant line. Centring the
+       text column evens those two gaps up. */
+    .cart-drawer .cart-items .cart-items__details,
+    .cart-page .cart-items .cart-items__details,
+    .cart-drawer .cart-items .cart-items__price,
+    .cart-page .cart-items .cart-items__price {
+      align-self: {{ settings.cart_item_align }};
+    }
+
     /* The last row loses its margin in the theme's divider rules */
     .cart-drawer .cart-items .cart-items__table-row:last-child,
     .cart-page .cart-items .cart-items__table-row:last-child {

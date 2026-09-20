@@ -1969,6 +1969,23 @@
         "default": 12
       },
       {
+        "type": "select",
+        "id": "cart_item_align",
+        "label": "Vertical alignment",
+        "options": [
+          {
+            "value": "center",
+            "label": "Centred"
+          },
+          {
+            "value": "start",
+            "label": "Top"
+          }
+        ],
+        "default": "center",
+        "info": "Centred gives the title and variant text an equal gap to the pill's top and bottom edges."
+      },
+      {
         "type": "range",
         "id": "cart_item_pill_border_width",
         "label": "Border width",
