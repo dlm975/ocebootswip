@@ -2015,13 +2015,13 @@
         "type": "checkbox",
         "id": "cart_show_quantity",
         "label": "Show quantity selector",
-        "default": true
+        "default": false
       },
       {
         "type": "checkbox",
         "id": "cart_show_variant_price",
         "label": "Show variant price under the details",
-        "default": true,
+        "default": false,
         "info": "The per-item price. The line total is always shown on the right."
       },
       {

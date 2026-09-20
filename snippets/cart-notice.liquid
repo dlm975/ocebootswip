@@ -4,23 +4,56 @@
   cart page. Content and colours come from Theme settings → Cart.
 {%- enddoc -%}
 
-{%- if settings.cart_notice_show and settings.cart_notice_text != blank -%}
+{%- liquid
+  comment
+    Every value falls back in Liquid rather than relying on the setting
+    being present in settings_data.json. A setting that exists only as a
+    schema default reads as nil here, which would blank the text, empty
+    every custom property, and switch the whole notice off.
+  endcomment
+  assign notice_text = settings.cart_notice_text | default: 'Buy Now to secure FREE Shipping'
+
+  assign show_notice = true
+  if settings.cart_notice_show == false
+    assign show_notice = false
+  endif
+
+  assign show_blinker = true
+  if settings.cart_notice_blinker == false
+    assign show_blinker = false
+  endif
+
+  assign hug = false
+  if settings.cart_notice_full_width == false
+    assign hug = true
+  endif
+
+  assign cn_bg = settings.cart_notice_background | default: '#e7f6ee'
+  assign cn_fg = settings.cart_notice_text_color | default: '#15803d'
+  assign cn_dot = settings.cart_notice_dot_color | default: '#16a34a'
+  assign cn_radius = settings.cart_notice_radius | default: 12
+  assign cn_size = settings.cart_notice_size | default: 12
+  assign cn_bw = settings.cart_notice_border_width | default: 0
+  assign cn_bc = settings.cart_notice_border_color | default: '#c9e7d6'
+-%}
+
+{%- if show_notice and notice_text != blank -%}
   <div
-    class="cart-notice{% unless settings.cart_notice_full_width %} cart-notice--hug{% endunless %}"
+    class="cart-notice{% if hug %} cart-notice--hug{% endif %}"
     style="
-      --cn-bg: {{ settings.cart_notice_background }};
-      --cn-fg: {{ settings.cart_notice_text_color }};
-      --cn-dot: {{ settings.cart_notice_dot_color }};
-      --cn-radius: {{ settings.cart_notice_radius }}px;
-      --cn-size: {{ settings.cart_notice_size }}px;
-      --cn-border-width: {{ settings.cart_notice_border_width }}px;
-      --cn-border-color: {{ settings.cart_notice_border_color }};
+      --cn-bg: {{ cn_bg }};
+      --cn-fg: {{ cn_fg }};
+      --cn-dot: {{ cn_dot }};
+      --cn-radius: {{ cn_radius }}px;
+      --cn-size: {{ cn_size }}px;
+      --cn-border-width: {{ cn_bw }}px;
+      --cn-border-color: {{ cn_bc }};
     "
   >
-    {%- if settings.cart_notice_blinker -%}
+    {%- if show_blinker -%}
       <span class="cart-notice__dot" aria-hidden="true"></span>
     {%- endif -%}
-    <span>{{ settings.cart_notice_text }}</span>
+    <span>{{ notice_text }}</span>
   </div>
 {%- endif -%}
 
