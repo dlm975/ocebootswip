@@ -1948,6 +1948,18 @@
       },
       {
         "type": "color",
+        "id": "cart_recs_card_background",
+        "label": "Card background",
+        "default": "#ffffff"
+      },
+      {
+        "type": "color",
+        "id": "cart_recs_card_border",
+        "label": "Card border",
+        "default": "#e6e6e6"
+      },
+      {
+        "type": "color",
         "id": "cart_recs_text_color",
         "label": "Text colour",
         "default": "#111111"
