@@ -1874,6 +1874,36 @@
         "info": "Otherwise it sits beside the quantity selector."
       },
       {
+        "type": "checkbox",
+        "id": "cart_show_tax_note",
+        "label": "Show the taxes and shipping note",
+        "default": false,
+        "info": "The “taxes, discounts and shipping calculated at checkout” line."
+      },
+      {
+        "type": "header",
+        "content": "Cart colours"
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_custom_colors",
+        "label": "Use custom cart colours",
+        "default": false,
+        "info": "Off uses the colour scheme picked above."
+      },
+      {
+        "type": "color",
+        "id": "cart_background",
+        "label": "Background",
+        "default": "#ffffff"
+      },
+      {
+        "type": "color",
+        "id": "cart_text_color",
+        "label": "Text",
+        "default": "#111111"
+      },
+      {
         "type": "header",
         "content": "Cart typography"
       },
@@ -2079,11 +2109,17 @@
         "content": "Checkout button"
       },
       {
+        "type": "text",
+        "id": "cart_checkout_label",
+        "label": "Button text",
+        "info": "Leave blank to use the theme's wording."
+      },
+      {
         "type": "checkbox",
         "id": "cart_checkout_custom",
-        "label": "Customise the checkout button",
+        "label": "Use custom button colours",
         "default": false,
-        "info": "Off leaves the button exactly as the theme styles it."
+        "info": "Size, radius and text options below apply whether this is on or off."
       },
       {
         "type": "color",
@@ -2109,13 +2145,24 @@
       },
       {
         "type": "range",
+        "id": "cart_checkout_padding_inline",
+        "label": "Side padding",
+        "min": 0,
+        "max": 60,
+        "step": 1,
+        "unit": "px",
+        "default": 0
+      },
+      {
+        "type": "range",
         "id": "cart_checkout_radius",
         "label": "Corner radius",
-        "min": 0,
+        "min": -1,
         "max": 40,
         "step": 1,
         "unit": "px",
-        "default": 8
+        "default": -1,
+        "info": "-1 keeps the theme's own radius."
       },
       {
         "type": "select",

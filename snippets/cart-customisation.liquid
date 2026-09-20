@@ -197,35 +197,74 @@
     }
   {%- endif %}
 
-  {%- if settings.cart_checkout_custom %}
-    .cart-drawer .cart__checkout-button,
-    .cart-page .cart__checkout-button {
+  {%- unless settings.cart_show_tax_note %}
+    .cart-drawer .tax-note,
+    .cart-page .tax-note {
+      display: none;
+    }
+  {%- endunless %}
+
+  {%- if settings.cart_custom_colors %}
+    {%- assign bg = settings.cart_background -%}
+    {%- assign fg = settings.cart_text_color -%}
+    /* Override the scheme's own variables rather than just background and
+       colour, so everything inside — borders, muted text, the empty state —
+       follows instead of keeping the old scheme's tones. */
+    .cart-drawer .cart-drawer__dialog,
+    .cart-page {
+      --color-background: {{ bg }};
+      --color-foreground: {{ fg }};
+      --color-background-rgb: {{ bg | color_extract: 'red' }}, {{ bg | color_extract: 'green' }}, {{ bg | color_extract: 'blue' }};
+      --color-foreground-rgb: {{ fg | color_extract: 'red' }}, {{ fg | color_extract: 'green' }}, {{ fg | color_extract: 'blue' }};
+
+      background-color: {{ bg }};
+      color: {{ fg }};
+    }
+  {%- endif %}
+
+  /* ── Checkout button ──
+     Geometry and type apply whenever they are set; only the colours sit
+     behind a toggle, since a colour setting always holds a value and would
+     otherwise restyle the button the moment it was added. */
+  .cart-drawer .cart__checkout-button,
+  .cart-page .cart__checkout-button {
+    text-transform: {{ settings.cart_checkout_case }};
+    letter-spacing: {{ settings.cart_checkout_letter_spacing | divided_by: 100.0 }}em;
+
+    {%- if settings.cart_checkout_height > 0 %}
+      height: {{ settings.cart_checkout_height }}px;
+      min-height: {{ settings.cart_checkout_height }}px;
+      padding-block: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    {%- endif %}
+
+    {%- if settings.cart_checkout_padding_inline > 0 %}
+      padding-inline: {{ settings.cart_checkout_padding_inline }}px;
+    {%- endif %}
+
+    {%- if settings.cart_checkout_radius >= 0 %}
+      border-radius: {{ settings.cart_checkout_radius }}px;
+    {%- endif %}
+
+    {%- if settings.cart_checkout_font_size > 0 %}
+      font-size: {{ settings.cart_checkout_font_size }}px;
+    {%- endif %}
+
+    {%- if settings.cart_checkout_weight != 'default' %}
+      font-weight: {{ settings.cart_checkout_weight }};
+    {%- endif %}
+
+    {%- if settings.cart_checkout_custom %}
       background: {{ settings.cart_checkout_background }};
       color: {{ settings.cart_checkout_text_color }};
       border-color: {{ settings.cart_checkout_background }};
-      text-transform: {{ settings.cart_checkout_case }};
-      border-radius: {{ settings.cart_checkout_radius }}px;
-      letter-spacing: {{ settings.cart_checkout_letter_spacing | divided_by: 100.0 }}em;
       box-shadow: {% if settings.cart_checkout_shadow %}0 8px 20px -8px {{ settings.cart_checkout_background }}{% else %}none{% endif %};
+    {%- endif %}
+  }
 
-      {%- if settings.cart_checkout_height > 0 %}
-        height: {{ settings.cart_checkout_height }}px;
-        min-height: {{ settings.cart_checkout_height }}px;
-        padding-block: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      {%- endif %}
-
-      {%- if settings.cart_checkout_font_size > 0 %}
-        font-size: {{ settings.cart_checkout_font_size }}px;
-      {%- endif %}
-
-      {%- if settings.cart_checkout_weight != 'default' %}
-        font-weight: {{ settings.cart_checkout_weight }};
-      {%- endif %}
-    }
-
+  {%- if settings.cart_checkout_custom %}
     .cart-drawer .cart__checkout-button:hover,
     .cart-page .cart__checkout-button:hover {
       background: {{ settings.cart_checkout_background_hover }};

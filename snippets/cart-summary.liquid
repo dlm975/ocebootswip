@@ -94,7 +94,11 @@
     {% endif %}
     form="cart-form"
   >
-    {{ 'content.checkout' | t }}
+    {%- if settings.cart_checkout_label != blank -%}
+      {{ settings.cart_checkout_label }}
+    {%- else -%}
+      {{ 'content.checkout' | t }}
+    {%- endif -%}
   </button>
 
   {% if additional_checkout_buttons and settings.show_accelerated_checkout_buttons %}
