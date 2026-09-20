@@ -9,6 +9,16 @@
  */
 {
   "sections": {
+    "pdp_gallery_style": {
+      "type": "pdp-gallery-style",
+      "settings": {
+        "bar_width": 20,
+        "bar_height": 3,
+        "bar_color": "#111111",
+        "grid_gap": 8,
+        "corner_radius": 8
+      }
+    },
     "main": {
       "type": "product-information",
       "blocks": {
@@ -16,19 +26,19 @@
           "type": "_product-media-gallery",
           "static": true,
           "settings": {
-            "media_presentation": "carousel",
+            "media_presentation": "grid",
             "media_columns": "two",
-            "image_gap": 4,
-            "large_first_image": false,
+            "image_gap": 8,
+            "large_first_image": true,
             "icons_style": "chevron",
-            "slideshow_controls_style": "thumbnails",
-            "slideshow_mobile_controls_style": "thumbnails",
+            "slideshow_controls_style": "dots",
+            "slideshow_mobile_controls_style": "dots",
             "thumbnail_position": "right",
             "thumbnail_width": 72,
             "aspect_ratio": "adapt",
-            "constrain_to_viewport": true,
+            "constrain_to_viewport": false,
             "media_fit": "contain",
-            "media_radius": 0,
+            "media_radius": 8,
             "extend_media": false,
             "zoom": true,
             "video_loop": false,
@@ -159,6 +169,21 @@
                 "price_tVjtKg"
               ]
             },
+            "free_shipping_pill_001": {
+              "type": "free-shipping-pill",
+              "settings": {
+                "text": "Qualified for FREE shipping",
+                "show_icon": true,
+                "excluded_products": [
+                  "fg-ag-studs-for-adidas",
+                  "fg-ag-studs-for-nike"
+                ],
+                "excluded_tag": "",
+                "background": "#e7f6ee",
+                "text_color": "#15803d"
+              },
+              "blocks": {}
+            },
             "variant_picker_KALzja": {
               "type": "variant-picker",
               "name": "t:names.product_variant_picker",
@@ -215,7 +240,6 @@
                 },
                 "accelerated-checkout": {
                   "type": "accelerated-checkout",
-                  "disabled": true,
                   "static": true,
                   "settings": {},
                   "blocks": {}
@@ -239,109 +263,16 @@
             "essential_upsell_app_block_zgTHkC": {
               "type": "shopify://apps/essential-upsell/blocks/app-block/50627fd9-24fd-4250-8614-accc12826d80",
               "settings": {}
-            },
-            "trust_bar_001": {
-              "type": "product-trust-bar",
-              "settings": {
-                "icon_1": "shopify://shop_images/Twitter_Verified_Badge.svg",
-                "text_1": "Verified Boots",
-                "icon_2": "shopify://shop_images/Noto_Emoji_v2.034_2708.svg",
-                "text_2": "Express Shipping",
-                "icon_3": "shopify://shop_images/RecyclingSymbolGreen.png",
-                "text_3": "Accept Returns",
-                "padding-block-start": 8,
-                "padding-block-end": 8,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            },
-            "desc_accordion_001": {
-              "type": "product-desc-accordion",
-              "settings": {
-                "heading": "Description",
-                "open_by_default": false,
-                "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            },
-            "testimonials_001": {
-              "type": "product-testimonials",
-              "settings": {
-                "photo_1": "shopify://shop_images/IMG_7779_537ba6a9-a9ba-4ca4-831c-aa91bcdf526c.jpg",
-                "product_1": "shopify://shop_images/IMG_6706.jpg",
-                "name_1": "Cameron Archer",
-                "detail_1": "Southampton F.C. - Premier League",
-                "photo_2": "shopify://shop_images/IMG_4087_92d37382-43f5-4adc-bc41-0f70ca290fb3.jpg",
-                "product_2": "shopify://shop_images/IMG_4587_07b460ad-f5e1-4ab5-8f5f-b345c638b396.jpg",
-                "name_2": "Bryan Lasme",
-                "detail_2": "Schalke 04 - Bundesliga",
-                "photo_3": "shopify://shop_images/IMG_4084_f535780f-0678-4da3-81e8-cc518edb932d.jpg",
-                "product_3": "shopify://shop_images/IMG_7781_c792af78-66ea-4ea7-a656-c1769b85d730.jpg",
-                "name_3": "Nicholas Pierini",
-                "detail_3": "Venezia F.C. - Serie A",
-                "photo_4": "shopify://shop_images/IMG_4093_2d462edc-3fb8-4d71-9fe1-eb3233a97b88.jpg",
-                "product_4": "shopify://shop_images/IMG_7782_9031c087-9001-4a25-b391-1b3e9f16b5fe.jpg",
-                "name_4": "Lois Openda",
-                "detail_4": "Juventus F.C. - Serie A",
-                "photo_5": "shopify://shop_images/IMG_4089_f21aa9fe-a5bb-4b19-bd3d-f904bda4875e.jpg",
-                "product_5": "shopify://shop_images/IMG_7783_a02ffd54-08b8-4146-ae63-74dd7c38da91.jpg",
-                "name_5": "Garang Kuol",
-                "detail_5": "Newcastle United -  Premier League",
-                "photo_6": "shopify://shop_images/IMG_4086_d2104da2-d224-4d20-97a0-c0d6d7a52809.jpg",
-                "product_6": "shopify://shop_images/IMG_7784_ff65fdd8-bc9b-432d-bd86-76fe9158ec51.jpg",
-                "name_6": "Cameron Harper",
-                "detail_6": "New York Red Bulls - MLS",
-                "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            },
-            "faq_accordion_001": {
-              "type": "product-faq",
-              "settings": {
-                "heading": "FAQ",
-                "open_by_default": false,
-                "q1": "Are these boots legit?",
-                "a1": "Yes. We have 20+ years of experience with football boots. This means we can spot a fake from a mile away.",
-                "q2": "How long will shipping take?",
-                "a2": "We have both Express and Economy options available at checkout. Express - 3-5 Business Days. Economy - 10-14 Business Days.",
-                "q3": "Can I return them if they don't fit?",
-                "a3": "Yes. We offer returns within 7 days of your boots arriving. They must be in unworn condition.",
-                "q4": "",
-                "a4": "",
-                "q5": "",
-                "a5": "",
-                "q6": "",
-                "a6": "",
-                "q7": "",
-                "a7": "",
-                "q8": "",
-                "a8": "",
-                "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
             }
           },
           "block_order": [
             "group_icgrde",
+            "free_shipping_pill_001",
             "variant_picker_KALzja",
             "urgency_stock_001",
             "buy_buttons_pKHp9V",
             "payment_icons_001",
-            "essential_upsell_app_block_zgTHkC",
-            "trust_bar_001",
-            "desc_accordion_001",
-            "testimonials_001",
-            "faq_accordion_001"
+            "essential_upsell_app_block_zgTHkC"
           ]
         }
       },
@@ -354,6 +285,315 @@
         "color_scheme": "",
         "padding-block-start": 0,
         "padding-block-end": 0
+      }
+    },
+    "pro_player_wall": {
+      "type": "pro-player-wall",
+      "blocks": {
+        "player_mDfxBi": {
+          "type": "player",
+          "settings": {
+            "image": "shopify://shop_images/0bb8d3c0-20c4-4d54-9d95-7deb1180583d.png",
+            "name": "CAMERON ARCHER",
+            "club": "Southampton F.C.",
+            "club_badge": "shopify://shop_images/FC_Southampton.svg",
+            "flag": "shopify://shop_images/Flag_of_England.svg",
+            "boot_name": "F50 Adizero 2014",
+            "link": ""
+          }
+        },
+        "player_YGwxeH": {
+          "type": "player",
+          "settings": {
+            "name": "",
+            "club": "",
+            "boot_name": "",
+            "link": ""
+          }
+        },
+        "player_Nr4hyn": {
+          "type": "player",
+          "settings": {
+            "name": "",
+            "club": "",
+            "boot_name": "",
+            "link": ""
+          }
+        },
+        "player_GFgXXb": {
+          "type": "player",
+          "settings": {
+            "name": "",
+            "club": "",
+            "boot_name": "",
+            "link": ""
+          }
+        },
+        "player_nfExFK": {
+          "type": "player",
+          "settings": {
+            "name": "",
+            "club": "",
+            "boot_name": "",
+            "link": ""
+          }
+        },
+        "player_Mk4T4B": {
+          "type": "player",
+          "settings": {
+            "name": "",
+            "club": "",
+            "boot_name": "",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "player_mDfxBi",
+        "player_YGwxeH",
+        "player_Nr4hyn",
+        "player_GFgXXb",
+        "player_nfExFK",
+        "player_Mk4T4B"
+      ],
+      "name": "Pro Player Wall",
+      "settings": {
+        "roster_source": "shared",
+        "heading": "TRUSTED BY THE PRO'S",
+        "subheading": "",
+        "show_stars": true,
+        "star_color": "#00b67a",
+        "star_size": 20,
+        "aspect_ratio": "3 / 4",
+        "cards_mobile": 2.5,
+        "cards_desktop": 4,
+        "gap_mobile": 8,
+        "gap_desktop": 12,
+        "corner_radius": 16,
+        "attach_to": "details",
+        "blur_strength": 16,
+        "tint_opacity": 30,
+        "cross_seconds": 40,
+        "pause_on_hover": true,
+        "padding-block-start": 8,
+        "padding-block-end": 20
+      }
+    },
+    "pdp_info_panel": {
+      "type": "pdp-info-panel",
+      "settings": {
+        "attach_to_details": true,
+        "heading": "",
+        "show_description": true,
+        "description_heading": "Details",
+        "open_description": false,
+        "q1": "Are these boots legit?",
+        "a1": "Yes. We have 20+ years of experience with football boots. This means we can spot a fake from a mile away.",
+        "q2": "How long will shipping take?",
+        "a2": "We have both Express and Economy options available at checkout. Express - 3-5 Business Days. Economy - 10-14 Business Days.",
+        "q3": "Can I return them if they don't fit?",
+        "a3": "Yes. We offer returns within 7 days of your boots arriving. They must be in unworn condition.",
+        "q4": "",
+        "a4": "",
+        "q5": "",
+        "a5": "",
+        "q6": "",
+        "a6": "",
+        "q7": "",
+        "a7": "",
+        "q8": "",
+        "a8": "",
+        "padding-block-start": 32,
+        "padding-block-end": 32
+      }
+    },
+    "pdp_trust_bar": {
+      "type": "pdp-trust-bar",
+      "settings": {
+        "attach_to_details": true,
+        "icon_1": "shopify://shop_images/Twitter_Verified_Badge.svg",
+        "text_1": "Verified Boots",
+        "icon_2": "shopify://shop_images/Noto_Emoji_v2.034_2708.svg",
+        "text_2": "Express Shipping",
+        "icon_3": "shopify://shop_images/RecyclingSymbolGreen.png",
+        "text_3": "Accept Returns",
+        "background": "#f8f8f8",
+        "text_color": "#333333",
+        "corner_radius": 10,
+        "padding-block-start": 8,
+        "padding-block-end": 24
+      }
+    },
+    "customer_collage": {
+      "type": "customer-collage",
+      "blocks": {
+        "photo_1": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/IMG_5200_f35a66d2-3ff3-4aa4-966f-86e0accf906c.jpg"
+          }
+        },
+        "photo_2": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/IMG_5198_3e9e2414-b5af-4958-a71d-a24eb46cad60.jpg"
+          }
+        },
+        "photo_3": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/IMG_5195.jpg"
+          }
+        },
+        "photo_4": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/IMG_5188.jpg"
+          }
+        },
+        "photo_5": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/IMG_5185_8c3bcd6d-e182-42e4-9d2d-024fc57fab37.jpg"
+          }
+        },
+        "photo_6": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/IMG_5194_8e2b2eb2-6bd0-4c91-b7b8-82b052ee0bd1.jpg"
+          }
+        },
+        "photo_9cyMCR": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/IMG_5197_7ab42136-c43f-4473-9c12-8f7f055df50e.jpg"
+          }
+        },
+        "photo_7": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/IMG_5192_b03ddbc3-1218-4444-ac4e-a7f528da6090.jpg"
+          }
+        },
+        "photo_8": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/IMG_5189.jpg"
+          }
+        },
+        "photo_9": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/IMG_5193_b3056abe-b857-49da-ad19-1dfa35c6737c.jpg"
+          }
+        },
+        "photo_10": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/IMG_5187.jpg"
+          }
+        },
+        "photo_11": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/IMG_5196_f588a09a-ee26-40e1-a0fb-4968904534ba.jpg"
+          }
+        },
+        "photo_12": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/IMG_5193_b3056abe-b857-49da-ad19-1dfa35c6737c.jpg"
+          }
+        },
+        "photo_13": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/IMG_5186_abba120a-52a8-423d-b44d-fabc8c01dc2b.jpg"
+          }
+        },
+        "photo_14": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/IMG_5199_9ea7e20f-c461-41d9-8168-9a54f13e30c5.jpg"
+          }
+        },
+        "photo_15": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/IMG_5191_65ed734a-de10-40c5-a644-06796561d14f.jpg"
+          }
+        },
+        "photo_16": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/IMG_5172_7fee9973-3219-4499-aa91-6959a1619093.jpg"
+          }
+        }
+      },
+      "block_order": [
+        "photo_1",
+        "photo_2",
+        "photo_3",
+        "photo_4",
+        "photo_5",
+        "photo_6",
+        "photo_9cyMCR",
+        "photo_7",
+        "photo_8",
+        "photo_9",
+        "photo_10",
+        "photo_11",
+        "photo_12",
+        "photo_13",
+        "photo_14",
+        "photo_15",
+        "photo_16"
+      ],
+      "settings": {
+        "heading": "WORN BY YOU",
+        "subtext": "",
+        "handle": "@oceboots",
+        "show_verified": true,
+        "badge_color": "#3897f0",
+        "columns_mobile": 4,
+        "columns_desktop": 7,
+        "overlap": 16,
+        "row_overlap": 8,
+        "max_rotation": 5,
+        "max_drift": 10,
+        "frame_width": 4,
+        "corner_radius": 4,
+        "title_color": "#111111",
+        "plate_color": "rgba(255,255,255,0.82)",
+        "padding-block-start": 40,
+        "padding-block-end": 40
+      }
+    },
+    "pdp_about": {
+      "type": "pdp-about",
+      "settings": {
+        "image": "shopify://shop_images/IMG_4090_cc0a355e-a54e-47a4-94a2-75934174628e.jpg",
+        "image_position": "left",
+        "eyebrow": "ABOUT US",
+        "heading": "Built for the boot obsessed",
+        "body": "<p>We have spent 20+ years around football boots — chasing releases, hunting down retros and knowing a fake on sight. Every pair we list is checked by hand before it ships.</p>",
+        "button_label": "",
+        "button_link": "",
+        "tile_background": "#f5f5f5",
+        "text_color": "#111111",
+        "corner_radius": 20,
+        "padding-block-start": 32,
+        "padding-block-end": 64
+      }
+    },
+    "pdp_sticky_buy": {
+      "type": "pdp-sticky-buy",
+      "settings": {
+        "reveal_mode": "after_button",
+        "button_text": "Add to cart",
+        "sheet_heading": "Select size",
+        "button_color": "#16a34a",
+        "button_text_color": "#ffffff"
       }
     },
     "product_recommendations_qggXJq": {
@@ -400,42 +640,17 @@
         "padding-block-start": 48,
         "padding-block-end": 48
       }
-    },
-    "17709355104c65733c": {
-      "type": "_blocks",
-      "disabled": true,
-      "settings": {
-        "content_direction": "column",
-        "vertical_on_mobile": true,
-        "horizontal_alignment": "flex-start",
-        "vertical_alignment": "center",
-        "align_baseline": false,
-        "horizontal_alignment_flex_direction_column": "flex-start",
-        "vertical_alignment_flex_direction_column": "center",
-        "gap": 12,
-        "section_width": "page-width",
-        "section_height": "",
-        "section_height_custom": 50,
-        "color_scheme": "",
-        "background_media": "none",
-        "video_position": "cover",
-        "background_image_position": "cover",
-        "border": "none",
-        "border_width": 1,
-        "border_opacity": 100,
-        "border_radius": 0,
-        "toggle_overlay": false,
-        "overlay_color": "#00000026",
-        "overlay_style": "solid",
-        "gradient_direction": "to top",
-        "padding-block-start": 0,
-        "padding-block-end": 0
-      }
     }
   },
   "order": [
+    "pdp_gallery_style",
     "main",
-    "product_recommendations_qggXJq",
-    "17709355104c65733c"
+    "pro_player_wall",
+    "pdp_info_panel",
+    "pdp_trust_bar",
+    "customer_collage",
+    "pdp_about",
+    "pdp_sticky_buy",
+    "product_recommendations_qggXJq"
   ]
 }
