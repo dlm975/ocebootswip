@@ -160,6 +160,17 @@
     margin-block-end: 12px;
   }
 
+  /* The drawer summary spaces its children with --gap-2xl, which left a
+     canyon between the suggestions and the total. Tighten it here only,
+     and drop the pill's own margin so the two do not stack. */
+  .cart-drawer__summary:has(.cart-recs) {
+    gap: 12px;
+  }
+
+  .cart-drawer__summary .cart-recs {
+    margin-block-end: 0;
+  }
+
   .cart-recs__head {
     min-width: 0;
     display: flex;
