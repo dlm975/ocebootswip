@@ -197,6 +197,33 @@
     }
   {%- endif %}
 
+  {%- if settings.cart_item_pill %}
+    /* Each line item as a pill. Scoped through .cart-items as well so it
+       outranks the theme's .cart-items--dividers rule, which would
+       otherwise draw a rule straight through the bottom of the pill. */
+    .cart-drawer .cart-items .cart-items__table-row,
+    .cart-page .cart-items .cart-items__table-row {
+      background: {{ settings.cart_item_pill_background }};
+      border-radius: {{ settings.cart_item_pill_radius }}px;
+      padding: {{ settings.cart_item_pill_padding }}px;
+      border: {% if settings.cart_item_pill_border_width > 0 %}{{ settings.cart_item_pill_border_width }}px solid {{ settings.cart_item_pill_border_color }}{% else %}none{% endif %};
+
+      {%- if settings.cart_item_pill_shadow %}
+        box-shadow: 0 6px 16px -10px rgb(0 0 0 / 45%);
+      {%- endif %}
+
+      {%- if settings.cart_row_gap > 0 %}
+        margin-bottom: {{ settings.cart_row_gap }}px;
+      {%- endif %}
+    }
+
+    /* The last row loses its margin in the theme's divider rules */
+    .cart-drawer .cart-items .cart-items__table-row:last-child,
+    .cart-page .cart-items .cart-items__table-row:last-child {
+      border-block-end: {% if settings.cart_item_pill_border_width > 0 %}{{ settings.cart_item_pill_border_width }}px solid {{ settings.cart_item_pill_border_color }}{% else %}none{% endif %};
+    }
+  {%- endif %}
+
   {%- unless settings.cart_show_tax_note %}
     .cart-drawer .tax-note,
     .cart-page .tax-note {
