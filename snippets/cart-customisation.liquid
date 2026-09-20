@@ -98,6 +98,61 @@
     }
   {%- endif %}
 
+  /* "Total" rather than "Estimated total" — the wording itself lives in
+     locales/en.default.json under content.cart_estimated_total. */
+  .cart-drawer .cart__total-label,
+  .cart-page .cart__total-label {
+    text-transform: uppercase;
+  }
+
+  {%- unless settings.cart_show_quantity %}
+    /* Hidden rather than removed: the quantity inputs are the only fields
+       inside #cart-form, and the checkout button submits that form. Strip
+       them from the markup and checkout silently stops working. */
+    .cart-drawer .cart-items__quantity .quantity-selector,
+    .cart-page .cart-items__quantity .quantity-selector {
+      display: none;
+    }
+  {%- endunless %}
+
+  {%- unless settings.cart_show_variant_price %}
+    /* The unit price under the details repeats the line total opposite it */
+    .cart-drawer .cart-items__details > div:last-of-type,
+    .cart-page .cart-items__details > div:last-of-type {
+      display: none;
+    }
+  {%- endunless %}
+
+  {%- if settings.cart_remove_under_price %}
+    /* The remove button lives in the quantity cell, which is a grid item of
+       the row — so the cell is moved under the price column rather than the
+       button itself, which CSS could not lift out of its cell. */
+    .cart-drawer .cart-items__table-row,
+    .cart-page .cart-items__table-row {
+      grid-template-areas:
+        'media details price'
+        'media details quantity'
+        'media error error';
+    }
+
+    .cart-drawer .cart-items__quantity,
+    .cart-page .cart-items__quantity {
+      justify-content: flex-end;
+      width: 100%;
+      margin-block-start: var(--margin-2xs);
+    }
+
+    @container cart-items (min-width: 720px) {
+      .cart-drawer .cart-items__table-row,
+      .cart-page .cart-items__table-row {
+        grid-template-areas:
+          'media details price'
+          'media details quantity'
+          'media error error';
+      }
+    }
+  {%- endif %}
+
   {%- if settings.cart_total_size > 0 %}
     .cart-drawer .cart__total-value,
     .cart-page .cart__total-value {
@@ -149,6 +204,9 @@
       color: {{ settings.cart_checkout_text_color }};
       border-color: {{ settings.cart_checkout_background }};
       text-transform: {{ settings.cart_checkout_case }};
+      border-radius: {{ settings.cart_checkout_radius }}px;
+      letter-spacing: {{ settings.cart_checkout_letter_spacing | divided_by: 100.0 }}em;
+      box-shadow: {% if settings.cart_checkout_shadow %}0 8px 20px -8px {{ settings.cart_checkout_background }}{% else %}none{% endif %};
 
       {%- if settings.cart_checkout_height > 0 %}
         height: {{ settings.cart_checkout_height }}px;
@@ -159,9 +217,19 @@
         justify-content: center;
       {%- endif %}
 
-      {%- if settings.cart_checkout_radius >= 0 %}
-        border-radius: {{ settings.cart_checkout_radius }}px;
+      {%- if settings.cart_checkout_font_size > 0 %}
+        font-size: {{ settings.cart_checkout_font_size }}px;
       {%- endif %}
+
+      {%- if settings.cart_checkout_weight != 'default' %}
+        font-weight: {{ settings.cart_checkout_weight }};
+      {%- endif %}
+    }
+
+    .cart-drawer .cart__checkout-button:hover,
+    .cart-page .cart__checkout-button:hover {
+      background: {{ settings.cart_checkout_background_hover }};
+      border-color: {{ settings.cart_checkout_background_hover }};
     }
   {%- endif %}
 {% endstyle %}

@@ -1851,6 +1851,30 @@
       },
       {
         "type": "header",
+        "content": "Line items"
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_show_quantity",
+        "label": "Show quantity selector",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_show_variant_price",
+        "label": "Show variant price under the details",
+        "default": true,
+        "info": "The per-item price. The line total is always shown on the right."
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_remove_under_price",
+        "label": "Put the remove icon under the price",
+        "default": false,
+        "info": "Otherwise it sits beside the quantity selector."
+      },
+      {
+        "type": "header",
         "content": "Cart typography"
       },
       {
@@ -2108,6 +2132,70 @@
           }
         ],
         "default": "none"
+      },
+      {
+        "type": "range",
+        "id": "cart_checkout_font_size",
+        "label": "Text size",
+        "min": 0,
+        "max": 32,
+        "step": 1,
+        "unit": "px",
+        "default": 0
+      },
+      {
+        "type": "select",
+        "id": "cart_checkout_weight",
+        "label": "Text weight",
+        "options": [
+          {
+            "value": "default",
+            "label": "Theme default"
+          },
+          {
+            "value": "400",
+            "label": "Regular"
+          },
+          {
+            "value": "500",
+            "label": "Medium"
+          },
+          {
+            "value": "600",
+            "label": "Semibold"
+          },
+          {
+            "value": "700",
+            "label": "Bold"
+          },
+          {
+            "value": "800",
+            "label": "Extra bold"
+          }
+        ],
+        "default": "default"
+      },
+      {
+        "type": "range",
+        "id": "cart_checkout_letter_spacing",
+        "label": "Letter spacing",
+        "min": 0,
+        "max": 30,
+        "step": 1,
+        "unit": "%",
+        "default": 0
+      },
+      {
+        "type": "color",
+        "id": "cart_checkout_background_hover",
+        "label": "Background on hover",
+        "default": "#15803d"
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_checkout_shadow",
+        "label": "Drop shadow",
+        "default": false
       }
     ]
   },
