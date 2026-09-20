@@ -66,6 +66,7 @@
     "cart_thumbnail_border": "none",
     "cart_thumbnail_border_radius": 3,
     "cart_text_font_family": "body",
+    "cart_price_font_family": "heading",
     "cart_heading_size": 21,
     "cart_title_size": 13,
     "cart_title_weight": "700",
