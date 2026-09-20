@@ -1851,6 +1851,132 @@
       },
       {
         "type": "header",
+        "content": "Product image box"
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_image_box",
+        "label": "Float the image on a card",
+        "default": true
+      },
+      {
+        "type": "color",
+        "id": "cart_image_box_background",
+        "label": "Card background",
+        "default": "#ffffff"
+      },
+      {
+        "type": "range",
+        "id": "cart_image_box_radius",
+        "label": "Corner radius",
+        "min": 0,
+        "max": 24,
+        "step": 1,
+        "unit": "px",
+        "default": 10
+      },
+      {
+        "type": "range",
+        "id": "cart_image_box_padding",
+        "label": "Padding",
+        "min": 0,
+        "max": 20,
+        "step": 1,
+        "unit": "px",
+        "default": 6
+      },
+      {
+        "type": "range",
+        "id": "cart_image_box_shadow",
+        "label": "Shadow strength",
+        "min": 0,
+        "max": 20,
+        "step": 1,
+        "unit": "px",
+        "default": 6
+      },
+      {
+        "type": "header",
+        "content": "You might also like"
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_recs_show",
+        "label": "Show suggestions",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "cart_recs_heading",
+        "label": "Heading",
+        "default": "You might also like"
+      },
+      {
+        "type": "product_list",
+        "id": "cart_recs_products",
+        "label": "Products",
+        "limit": 12,
+        "info": "Anything already in the cart is skipped automatically."
+      },
+      {
+        "type": "range",
+        "id": "cart_recs_max",
+        "label": "Maximum shown",
+        "min": 1,
+        "max": 12,
+        "step": 1,
+        "unit": "",
+        "default": 4
+      },
+      {
+        "type": "text",
+        "id": "cart_recs_button_label",
+        "label": "Add button text",
+        "default": "Add"
+      },
+      {
+        "type": "text",
+        "id": "cart_recs_choose_label",
+        "label": "Multi-size button text",
+        "default": "Choose",
+        "info": "Products with more than one size link to their page instead of adding straight to the cart."
+      },
+      {
+        "type": "color",
+        "id": "cart_recs_background",
+        "label": "Background",
+        "default": "#f5f5f5"
+      },
+      {
+        "type": "color",
+        "id": "cart_recs_text_color",
+        "label": "Text colour",
+        "default": "#111111"
+      },
+      {
+        "type": "range",
+        "id": "cart_recs_radius",
+        "label": "Corner radius",
+        "min": 0,
+        "max": 32,
+        "step": 1,
+        "unit": "px",
+        "default": 16
+      },
+      {
+        "type": "color",
+        "id": "cart_recs_button_background",
+        "label": "Button background",
+        "default": "#111111"
+      },
+      {
+        "type": "color",
+        "id": "cart_recs_button_text",
+        "label": "Button text",
+        "default": "#ffffff"
+      },
+      {
+        "type": "header",
         "content": "Notice above the items"
       },
       {

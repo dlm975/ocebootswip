@@ -31,6 +31,16 @@
   if settings.cart_show_variant_price
     assign hide_variant_price = false
   endif
+
+  assign image_box = true
+  if settings.cart_image_box == false
+    assign image_box = false
+  endif
+
+  assign image_box_bg = settings.cart_image_box_background | default: '#ffffff'
+  assign image_box_radius = settings.cart_image_box_radius | default: 10
+  assign image_box_padding = settings.cart_image_box_padding | default: 6
+  assign image_box_shadow = settings.cart_image_box_shadow | default: 6
 -%}
 
 {% style %}
@@ -203,6 +213,24 @@
       .cart-page .cart-items__table-row {
         grid-template-columns: {{ settings.cart_image_width }}px 1fr 1fr minmax(var(--cart-item-price-width), auto);
       }
+    }
+  {%- endif %}
+
+  {%- if image_box %}
+    /* Lift the thumbnail onto its own card. object-fit stays contain so a
+       boot on a white background is not cropped by the padding. */
+    .cart-drawer .cart-items__media-container,
+    .cart-page .cart-items__media-container {
+      background: {{ image_box_bg }};
+      border-radius: {{ image_box_radius }}px;
+      padding: {{ image_box_padding }}px;
+      box-shadow: 0 {{ image_box_shadow }}px {{ image_box_shadow | times: 3 }}px {{ image_box_shadow | times: -1 }}px rgb(0 0 0 / 28%);
+    }
+
+    .cart-drawer .cart-items__media-image,
+    .cart-page .cart-items__media-image {
+      object-fit: contain;
+      border-radius: 0;
     }
   {%- endif %}
 

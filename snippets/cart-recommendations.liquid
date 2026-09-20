@@ -1,0 +1,254 @@
+{%- doc -%}
+  "You might also like" — a pill of hand-picked products above the cart
+  totals. Products are chosen in Theme settings → Cart.
+{%- enddoc -%}
+
+{%- liquid
+  assign show_recs = true
+  if settings.cart_recs_show == false
+    assign show_recs = false
+  endif
+
+  assign heading = settings.cart_recs_heading | default: 'You might also like'
+  assign max_items = settings.cart_recs_max | default: 4
+  assign picks = settings.cart_recs_products
+
+  comment
+    Anything already in the cart is skipped — suggesting a product the
+    shopper has just added reads as a bug.
+  endcomment
+  assign in_cart = ''
+  for item in cart.items
+    assign in_cart = in_cart | append: ',' | append: item.product_id | append: ','
+  endfor
+
+  assign shown = 0
+-%}
+
+{%- if show_recs and picks.size > 0 and cart.item_count > 0 -%}
+  {%- capture cards -%}
+    {%- for p in picks -%}
+      {%- liquid
+        assign needle = ',' | append: p.id | append: ','
+        assign skip = false
+        if in_cart contains needle
+          assign skip = true
+        endif
+        unless p.available
+          assign skip = true
+        endunless
+        if shown >= max_items
+          assign skip = true
+        endif
+      -%}
+
+      {%- unless skip -%}
+        {%- liquid
+          assign shown = shown | plus: 1
+          assign variant = p.selected_or_first_available_variant
+          assign can_add = false
+          if p.variants.size == 1 and variant.available
+            assign can_add = true
+          endif
+        -%}
+        <div class="cart-recs__card">
+          <a class="cart-recs__media" href="{{ p.url }}" tabindex="-1" aria-hidden="true">
+            {%- if p.featured_image -%}
+              <img
+                src="{{ p.featured_image | image_url: width: 200 }}"
+                alt=""
+                width="100"
+                height="100"
+                loading="lazy"
+                decoding="async"
+              >
+            {%- endif -%}
+          </a>
+
+          <a class="cart-recs__title" href="{{ p.url }}">{{ p.title }}</a>
+          <span class="cart-recs__price">{{ p.price | money }}</span>
+
+          {%- if can_add -%}
+            <button
+              type="button"
+              class="cart-recs__add"
+              data-cart-recs-add
+              data-variant-id="{{ variant.id }}"
+            >
+              {{ settings.cart_recs_button_label | default: 'Add' }}
+            </button>
+          {%- else -%}
+            {%- comment -%}
+              More than one variant, so a size has to be picked. Adding the
+              first one here would quietly put the wrong size in the cart.
+            {%- endcomment -%}
+            <a class="cart-recs__add" href="{{ p.url }}">
+              {{ settings.cart_recs_choose_label | default: 'Choose' }}
+            </a>
+          {%- endif -%}
+        </div>
+      {%- endunless -%}
+    {%- endfor -%}
+  {%- endcapture -%}
+
+  {%- if cards != blank -%}
+    <div
+      class="cart-recs"
+      style="
+        --cr-bg: {{ settings.cart_recs_background | default: '#f5f5f5' }};
+        --cr-fg: {{ settings.cart_recs_text_color | default: '#111111' }};
+        --cr-radius: {{ settings.cart_recs_radius | default: 16 }}px;
+        --cr-btn-bg: {{ settings.cart_recs_button_background | default: '#111111' }};
+        --cr-btn-fg: {{ settings.cart_recs_button_text | default: '#ffffff' }};
+      "
+    >
+      <span class="cart-recs__heading">{{ heading }}</span>
+      <div class="cart-recs__row">{{ cards }}</div>
+    </div>
+  {%- endif -%}
+{%- endif -%}
+
+{% stylesheet %}
+  .cart-recs {
+    background: var(--cr-bg, #f5f5f5);
+    color: var(--cr-fg, #111);
+    border-radius: var(--cr-radius, 16px);
+    padding: 12px;
+    margin-block-end: 12px;
+  }
+
+  .cart-recs__heading {
+    display: block;
+    font-size: 0.74rem;
+    font-weight: 700;
+    margin-block-end: 10px;
+  }
+
+  /* A scroller rather than a wrap: the drawer is narrow, and a second row
+     would push the checkout button below the fold. */
+  .cart-recs__row {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding-block-end: 2px;
+  }
+
+  .cart-recs__row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cart-recs__card {
+    flex: 0 0 auto;
+    width: 104px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .cart-recs__media {
+    display: block;
+    aspect-ratio: 1;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 2px 8px -3px rgb(0 0 0 / 30%);
+  }
+
+  .cart-recs__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .cart-recs__title {
+    font-size: 0.66rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: inherit;
+    text-decoration: none;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .cart-recs__price {
+    font-size: 0.66rem;
+    opacity: 0.7;
+  }
+
+  .cart-recs__add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-block-start: 2px;
+    padding: 6px 8px;
+    border: none;
+    border-radius: 999px;
+    background: var(--cr-btn-bg, #111);
+    color: var(--cr-btn-fg, #fff);
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .cart-recs__add[disabled] {
+    opacity: 0.5;
+    cursor: wait;
+  }
+{% endstylesheet %}
+
+<script>
+  (function () {
+    /* Delegated from document: the cart re-renders after every change, so a
+       listener bound to these buttons would be discarded on first use. */
+    if (window.__cartRecsBound) return;
+    window.__cartRecsBound = true;
+
+    function sectionIds() {
+      var ids = [];
+      document.querySelectorAll('cart-items-component[data-section-id]').forEach(function (el) {
+        var id = el.dataset.sectionId;
+        if (id && ids.indexOf(id) === -1) ids.push(id);
+      });
+      return ids.join(',');
+    }
+
+    document.addEventListener('click', function (event) {
+      var btn = event.target.closest('[data-cart-recs-add]');
+      if (!btn || btn.hasAttribute('disabled')) return;
+
+      btn.setAttribute('disabled', 'disabled');
+
+      var url = (window.Theme && Theme.routes && Theme.routes.cart_add_url) || '/cart/add.js';
+
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          items: [{ id: Number(btn.dataset.variantId), quantity: 1 }],
+          sections: sectionIds()
+        })
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          document.dispatchEvent(
+            new CustomEvent('cart:update', {
+              bubbles: true,
+              detail: { data: { source: 'cart-recommendations', sections: data.sections || null } }
+            })
+          );
+        })
+        .catch(function (error) {
+          console.error(error);
+          btn.removeAttribute('disabled');
+        });
+    });
+  })();
+</script>
