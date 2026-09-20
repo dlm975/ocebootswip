@@ -1851,6 +1851,89 @@
       },
       {
         "type": "header",
+        "content": "Notice above the items"
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_notice_show",
+        "label": "Show notice",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "cart_notice_text",
+        "label": "Text",
+        "default": "Buy Now to secure FREE Shipping"
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_notice_blinker",
+        "label": "Show pulsing blinker",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_notice_full_width",
+        "label": "Stretch to the full width",
+        "default": true,
+        "info": "Off shrinks the box to fit the text."
+      },
+      {
+        "type": "color",
+        "id": "cart_notice_background",
+        "label": "Background",
+        "default": "#e7f6ee"
+      },
+      {
+        "type": "color",
+        "id": "cart_notice_text_color",
+        "label": "Text colour",
+        "default": "#15803d"
+      },
+      {
+        "type": "color",
+        "id": "cart_notice_dot_color",
+        "label": "Blinker colour",
+        "default": "#16a34a"
+      },
+      {
+        "type": "range",
+        "id": "cart_notice_size",
+        "label": "Text size",
+        "min": 9,
+        "max": 20,
+        "step": 1,
+        "unit": "px",
+        "default": 12
+      },
+      {
+        "type": "range",
+        "id": "cart_notice_radius",
+        "label": "Corner radius",
+        "min": 0,
+        "max": 40,
+        "step": 1,
+        "unit": "px",
+        "default": 12
+      },
+      {
+        "type": "range",
+        "id": "cart_notice_border_width",
+        "label": "Border width",
+        "min": 0,
+        "max": 4,
+        "step": 1,
+        "unit": "px",
+        "default": 0
+      },
+      {
+        "type": "color",
+        "id": "cart_notice_border_color",
+        "label": "Border colour",
+        "default": "#c9e7d6"
+      },
+      {
+        "type": "header",
         "content": "Item pill"
       },
       {
