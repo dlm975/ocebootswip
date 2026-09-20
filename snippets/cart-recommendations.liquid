@@ -142,7 +142,17 @@
 {%- endif -%}
 
 {% stylesheet %}
+  /* The drawer summary is a flex column with align-items: center, so its
+     children shrink-wrap their content. Left alone, this pill grew as wide
+     as all the cards laid end to end and burst out of the drawer once a
+     second product appeared. Stretch it and pin it to the container width
+     so the cards scroll inside it instead of widening it. */
   .cart-recs {
+    align-self: stretch;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     background: var(--cr-bg, #f5f5f5);
     color: var(--cr-fg, #111);
     border-radius: var(--cr-radius, 16px);
@@ -151,6 +161,7 @@
   }
 
   .cart-recs__head {
+    min-width: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -161,6 +172,10 @@
   .cart-recs__heading {
     font-size: 0.78rem;
     font-weight: 700;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .cart-recs__nav {
@@ -201,6 +216,8 @@
   .cart-recs__row {
     display: flex;
     gap: 10px;
+    min-width: 0;
+    max-width: 100%;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     scrollbar-width: none;
