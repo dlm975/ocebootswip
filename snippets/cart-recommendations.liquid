@@ -25,6 +25,20 @@
   assign shown = 0
 -%}
 
+{%- if show_recs and picks.size == 0 and request.design_mode -%}
+  {%- comment -%}
+    Editor only. With no products chosen this section renders nothing at
+    all on the storefront, which is indistinguishable from it being broken.
+  {%- endcomment -%}
+  <div class="cart-recs cart-recs--empty">
+    <span class="cart-recs__heading">{{ heading }}</span>
+    <span class="cart-recs__empty">
+      Pick products under Theme settings → Cart → You might also like. This
+      message is only visible here in the editor.
+    </span>
+  </div>
+{%- endif -%}
+
 {%- if show_recs and picks.size > 0 and cart.item_count > 0 -%}
   {%- capture cards -%}
     {%- for p in picks -%}
@@ -122,6 +136,13 @@
     font-size: 0.74rem;
     font-weight: 700;
     margin-block-end: 10px;
+  }
+
+  .cart-recs__empty {
+    display: block;
+    font-size: 0.68rem;
+    line-height: 1.4;
+    opacity: 0.65;
   }
 
   /* A scroller rather than a wrap: the drawer is narrow, and a second row
