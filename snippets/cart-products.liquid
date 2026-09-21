@@ -33,6 +33,8 @@
       {{- cart.item_count -}}
     </span>
 
+    {% render 'cart-stars' %}
+
     <form
       action="{{ routes.cart_url }}"
       class="cart-form"

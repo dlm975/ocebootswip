@@ -532,7 +532,12 @@
     "cart_trust_1_text": "100% Authentic",
     "cart_trust_2_text": "Fast Delivery",
     "cart_trust_3_text": "Secure Payment",
-    "cart_notice_orbit_seconds": 5
+    "cart_notice_orbit_seconds": 5,
+    "cart_stars_show": true,
+    "cart_stars_text": "1000+ HAPPY CUSTOMERS",
+    "cart_stars_color": "#16a34a",
+    "cart_stars_text_color": "#15803d",
+    "cart_stars_size": 15
   },
   "presets": {
     "Horizon": {

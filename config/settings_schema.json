@@ -1988,6 +1988,44 @@
       },
       {
         "type": "header",
+        "content": "Stars above the items"
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_stars_show",
+        "label": "Show stars",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "cart_stars_text",
+        "label": "Text",
+        "default": "1000+ HAPPY CUSTOMERS"
+      },
+      {
+        "type": "color",
+        "id": "cart_stars_color",
+        "label": "Star colour",
+        "default": "#16a34a"
+      },
+      {
+        "type": "color",
+        "id": "cart_stars_text_color",
+        "label": "Text colour",
+        "default": "#15803d"
+      },
+      {
+        "type": "range",
+        "id": "cart_stars_size",
+        "label": "Star size",
+        "min": 10,
+        "max": 28,
+        "step": 1,
+        "unit": "px",
+        "default": 15
+      },
+      {
+        "type": "header",
         "content": "Notice above the items"
       },
       {
