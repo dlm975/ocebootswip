@@ -263,11 +263,23 @@
             "essential_upsell_app_block_zgTHkC": {
               "type": "shopify://apps/essential-upsell/blocks/app-block/50627fd9-24fd-4250-8614-accc12826d80",
               "settings": {}
+            },
+            "star_rating_001": {
+              "type": "product-star-rating",
+              "settings": {
+                "show_stars": true,
+                "text": "1000+ HAPPY CUSTOMERS",
+                "star_color": "#16a34a",
+                "text_color": "#15803d",
+                "star_size": 13
+              },
+              "blocks": {}
             }
           },
           "block_order": [
             "group_icgrde",
             "free_shipping_pill_001",
+            "star_rating_001",
             "variant_picker_KALzja",
             "urgency_stock_001",
             "buy_buttons_pKHp9V",

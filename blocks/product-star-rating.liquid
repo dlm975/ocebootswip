@@ -1,0 +1,171 @@
+{%- liquid
+  assign stars_text = block.settings.text | default: '1000+ HAPPY CUSTOMERS'
+-%}
+
+{%- if block.settings.show_stars or stars_text != blank -%}
+  <span
+    id="psr-{{ block.id }}"
+    class="psr"
+    style="--psr-color: {{ block.settings.star_color }}; --psr-fg: {{ block.settings.text_color }}; --psr-size: {{ block.settings.star_size }}px;"
+    {{ block.shopify_attributes }}
+  >
+    {%- if block.settings.show_stars -%}
+      <span class="psr__stars" aria-hidden="true">
+        {%- for i in (1..5) -%}
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        {%- endfor -%}
+      </span>
+    {%- endif -%}
+
+    {%- if stars_text != blank -%}
+      <span class="psr__text">{{ stars_text }}</span>
+    {%- endif -%}
+  </span>
+{%- endif -%}
+
+<style>
+  /* Hidden until the script lifts it alongside the price — see below. */
+  .psr {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    box-sizing: border-box;
+  }
+
+  /* Hug the content so it never stretches to the column or grows beside
+     the price. */
+  .psr--placed {
+    display: inline-flex;
+    flex: 0 0 auto;
+    width: fit-content;
+    max-width: 100%;
+    align-self: center;
+  }
+
+  .psr__stars {
+    display: inline-flex;
+    gap: 1px;
+    color: var(--psr-color, #16a34a);
+    flex-shrink: 0;
+  }
+
+  .psr__stars svg {
+    width: var(--psr-size, 13px);
+    height: var(--psr-size, 13px);
+    display: block;
+  }
+
+  .psr__text {
+    color: var(--psr-fg, #15803d);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1.25;
+  }
+
+  /* The price element survives variant changes — only its inner container
+     is swapped — so this can sit inside it without being wiped.
+     product-price is a custom element with no default layout, so make it a
+     row; the price container is a plain div and would otherwise take the
+     full line and push this underneath. Wrapping stays on as a safety
+     valve for very narrow screens. */
+  product-price:has(> .psr) {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 10px;
+    row-gap: 4px;
+  }
+
+  product-price:has(> .psr) > [ref='priceContainer'] {
+    flex: 0 1 auto;
+    width: auto;
+    min-width: 0;
+  }
+</style>
+
+<script>
+  (function () {
+    var el = document.getElementById('psr-{{ block.id }}');
+    if (!el) return;
+
+    function findPrice() {
+      var scope = document.querySelector('.product-details');
+      return (scope && scope.querySelector('product-price')) || document.querySelector('product-price');
+    }
+
+    function place() {
+      var price = findPrice();
+      if (price && el.parentElement !== price) price.appendChild(el);
+      /* Revealed either way — if the price block isn't on the template it
+         still shows where the merchant put it rather than vanishing. */
+      el.classList.add('psr--placed');
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', place, { once: true });
+    } else {
+      place();
+    }
+
+    window.addEventListener('load', place);
+    document.addEventListener('variant:update', place);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Star Rating",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Five stars and a line of social proof, shown beside the product price. Add it anywhere in the product details column — it moves itself next to the price."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_stars",
+      "label": "Show stars",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Text",
+      "default": "1000+ HAPPY CUSTOMERS"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star colour",
+      "default": "#16a34a"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text colour",
+      "default": "#15803d"
+    },
+    {
+      "type": "range",
+      "id": "star_size",
+      "label": "Star size",
+      "min": 9,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 13
+    }
+  ],
+  "presets": [
+    {
+      "name": "Star Rating",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}

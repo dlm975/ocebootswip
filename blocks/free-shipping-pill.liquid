@@ -50,12 +50,17 @@
 {%- endif -%}
 
 <style>
-  /* Hidden until the script lifts it alongside the price — see below. */
+  /* Overlaid on the product image, top right. Hidden until the script
+     moves it there, so it never flashes beside the price first. */
+  media-gallery:has(> .fsp) {
+    position: relative;
+  }
+
   .fsp {
     display: none;
     align-items: center;
     gap: 5px;
-    padding: 3px 8px;
+    padding: 6px 12px;
     border-radius: 999px;
     background: var(--fsp-bg, #e7f6ee);
     color: var(--fsp-fg, #15803d);
@@ -65,16 +70,25 @@
     letter-spacing: 0.01em;
     white-space: nowrap;
     box-sizing: border-box;
+    box-shadow: 0 4px 14px -6px rgb(0 0 0 / 35%);
   }
 
-  /* Hug the text: inline-flex plus fit-content so it never stretches to
-     the column, and flex: 0 0 auto so it never grows beside the price. */
   .fsp--placed {
     display: inline-flex;
-    flex: 0 0 auto;
-    width: fit-content;
-    max-width: 100%;
-    align-self: center;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 5;
+    pointer-events: none;
+    max-width: calc(100% - 24px);
+  }
+
+  @media screen and (min-width: 750px) {
+    .fsp--placed {
+      top: 16px;
+      right: 16px;
+      font-size: 0.72rem;
+    }
   }
 
   .fsp__icon {
@@ -90,27 +104,6 @@
   .fsp__note {
     font-weight: 500;
   }
-
-  /* The price element survives variant changes — only its inner container
-     is swapped — so the pill can sit inside it without being wiped.
-     product-price is a custom element with no default layout, so make it a
-     row; the price container is a plain div and would otherwise take the
-     full line and push the pill underneath. Wrapping stays on as a safety
-     valve for very narrow screens. */
-  product-price:has(> .fsp) {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    column-gap: 8px;
-    row-gap: 4px;
-  }
-
-  product-price:has(> .fsp) > [ref='priceContainer'] {
-    flex: 0 1 auto;
-    width: auto;
-    min-width: 0;
-  }
 </style>
 
 <script>
@@ -118,16 +111,16 @@
     var pill = document.getElementById('fsp-{{ block.id }}');
     if (!pill) return;
 
-    function findPrice() {
-      var scope = document.querySelector('.product-details');
-      return (scope && scope.querySelector('product-price')) || document.querySelector('product-price');
+    function gallery() {
+      var media = document.querySelector('.product-information__media');
+      return (media && media.querySelector('media-gallery')) || document.querySelector('media-gallery');
     }
 
     function place() {
-      var price = findPrice();
-      if (price && pill.parentElement !== price) price.appendChild(pill);
-      /* Revealed either way — if the price block isn't on the template the
-         pill still shows where the merchant put it rather than vanishing. */
+      var g = gallery();
+      if (g && pill.parentElement !== g) g.appendChild(pill);
+      /* Revealed either way — without a gallery it still shows where the
+         merchant put it rather than vanishing. */
       pill.classList.add('fsp--placed');
     }
 
@@ -137,10 +130,7 @@
       place();
     }
 
-    /* Belt and braces: re-run once everything has settled, and after a
-       variant change in case the price block is re-rendered wholesale. */
     window.addEventListener('load', place);
-    document.addEventListener('variant:update', place);
   })();
 </script>
 
@@ -151,7 +141,7 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "A pill shown beside the product price. Add it anywhere in the product details column — it moves itself next to the price."
+      "content": "A pill overlaid on the top right of the product image. Add it anywhere in the product details column — it moves itself onto the image."
     },
     {
       "type": "text",
