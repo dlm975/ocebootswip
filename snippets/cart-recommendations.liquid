@@ -350,14 +350,11 @@
     /* The cart re-renders after every change, so re-check on the next frame
        rather than only at load. */
     document.addEventListener('cart:update', function () {
-      requestAnimationFrame(function () {
-        document.querySelectorAll('[data-cart-recs-row]').forEach(syncArrows);
-      });
+      requestAnimationFrame(trackRows);
     });
 
-    window.addEventListener('load', function () {
-      document.querySelectorAll('[data-cart-recs-row]').forEach(syncArrows);
-    });
+    window.addEventListener('load', trackRows);
+    if (document.readyState !== 'loading') trackRows();
 
     function sectionIds() {
       var ids = [];
@@ -382,9 +379,34 @@
       var prev = wrap.querySelector('[data-cart-recs-prev]');
       var next = wrap.querySelector('[data-cart-recs-next]');
       if (!r || !prev || !next) return;
-      var maxScroll = r.scrollWidth - r.clientWidth - 1;
+
+      /* A closed <dialog> has no layout, so both measurements read 0 and
+         the maths below would disable each arrow. Nothing re-measured once
+         the drawer opened, so they stayed dead — and a disabled button
+         fires no click at all. Leave them alone until the row has width. */
+      if (!r.clientWidth) return;
+
+      var maxScroll = Math.max(0, r.scrollWidth - r.clientWidth - 1);
       prev.disabled = r.scrollLeft <= 0;
       next.disabled = r.scrollLeft >= maxScroll;
+    }
+
+    /* Opening the drawer takes the row from zero width to its real size,
+       which is the moment the arrows can finally be measured. */
+    var rowObserver = 'ResizeObserver' in window
+      ? new ResizeObserver(function (entries) {
+          entries.forEach(function (entry) { syncArrows(entry.target); });
+        })
+      : null;
+
+    function trackRows() {
+      document.querySelectorAll('[data-cart-recs-row]').forEach(function (r) {
+        syncArrows(r);
+        if (rowObserver) {
+          rowObserver.unobserve(r);
+          rowObserver.observe(r);
+        }
+      });
     }
 
     document.addEventListener('click', function (event) {
