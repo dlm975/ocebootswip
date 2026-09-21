@@ -2000,13 +2000,23 @@
         "type": "text",
         "id": "cart_notice_text",
         "label": "Text",
-        "default": "Buy Now to secure FREE Shipping"
+        "default": "SECURE FREE SHIPPING"
       },
       {
         "type": "checkbox",
         "id": "cart_notice_blinker",
-        "label": "Show pulsing blinker",
+        "label": "Show orbiting particle",
         "default": true
+      },
+      {
+        "type": "range",
+        "id": "cart_notice_orbit_seconds",
+        "label": "Seconds per orbit",
+        "min": 2,
+        "max": 12,
+        "step": 1,
+        "unit": "s",
+        "default": 5
       },
       {
         "type": "checkbox",

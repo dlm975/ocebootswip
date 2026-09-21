@@ -85,7 +85,7 @@
     "cart_recs_button_background": "#111111",
     "cart_recs_button_text": "#ffffff",
     "cart_notice_show": true,
-    "cart_notice_text": "Buy Now to secure FREE Shipping",
+    "cart_notice_text": "SECURE FREE SHIPPING",
     "cart_notice_blinker": true,
     "cart_notice_full_width": true,
     "cart_notice_background": "#e7f6ee",
@@ -531,7 +531,8 @@
     "cart_trust_show": true,
     "cart_trust_1_text": "100% Authentic",
     "cart_trust_2_text": "Fast Delivery",
-    "cart_trust_3_text": "Secure Payment"
+    "cart_trust_3_text": "Secure Payment",
+    "cart_notice_orbit_seconds": 5
   },
   "presets": {
     "Horizon": {

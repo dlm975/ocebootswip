@@ -1,26 +1,24 @@
 {%- doc -%}
-  A single boxed line above the cart items, with a pulsing blinker.
-  Rendered from cart-products, so it appears in both the drawer and on the
-  cart page. Content and colours come from Theme settings → Cart.
+  "Secure free shipping" notice with a particle orbiting the pill in a 3D
+  figure of eight. Rendered from cart-summary, between the total and the
+  checkout button.
 {%- enddoc -%}
 
 {%- liquid
   comment
     Every value falls back in Liquid rather than relying on the setting
-    being present in settings_data.json. A setting that exists only as a
-    schema default reads as nil here, which would blank the text, empty
-    every custom property, and switch the whole notice off.
+    being present in settings_data.json.
   endcomment
-  assign notice_text = settings.cart_notice_text | default: 'Buy Now to secure FREE Shipping'
+  assign notice_text = settings.cart_notice_text | default: 'SECURE FREE SHIPPING'
 
   assign show_notice = true
   if settings.cart_notice_show == false
     assign show_notice = false
   endif
 
-  assign show_blinker = true
+  assign show_orbit = true
   if settings.cart_notice_blinker == false
-    assign show_blinker = false
+    assign show_orbit = false
   endif
 
   assign hug = false
@@ -35,6 +33,7 @@
   assign cn_size = settings.cart_notice_size | default: 12
   assign cn_bw = settings.cart_notice_border_width | default: 0
   assign cn_bc = settings.cart_notice_border_color | default: '#c9e7d6'
+  assign cn_speed = settings.cart_notice_orbit_seconds | default: 5
 -%}
 
 {%- if show_notice and notice_text != blank -%}
@@ -48,31 +47,35 @@
       --cn-size: {{ cn_size }}px;
       --cn-border-width: {{ cn_bw }}px;
       --cn-border-color: {{ cn_bc }};
+      --cn-speed: {{ cn_speed }}s;
     "
   >
-    {%- if show_blinker -%}
-      <span class="cart-notice__dot" aria-hidden="true"></span>
+    <span class="cart-notice__body">{{ notice_text }}</span>
+
+    {%- if show_orbit -%}
+      <span class="cart-notice__orbit" aria-hidden="true">
+        <i class="cart-notice__particle"></i>
+        <i class="cart-notice__particle cart-notice__particle--trail"></i>
+      </span>
     {%- endif -%}
-    <span>{{ notice_text }}</span>
   </div>
 {%- endif -%}
 
 {% stylesheet %}
+  /* The pill is a 3D stage. Its background lives on __body at z = 0 so the
+     particle can be sorted in front of or behind it by depth alone — a
+     descendant of the background element would always paint on top. */
   .cart-notice {
+    position: relative;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-block-end: var(--margin-md, 12px);
-    padding: 9px 14px;
-    border-radius: var(--cn-radius, 12px);
-    border: var(--cn-border-width, 0) solid var(--cn-border-color, transparent);
-    background: var(--cn-bg, #e7f6ee);
-    color: var(--cn-fg, #15803d);
-    font-size: var(--cn-size, 12px);
-    font-weight: 700;
-    line-height: 1.3;
-    text-align: center;
+    container-type: inline-size;
+    perspective: 520px;
+    transform-style: preserve-3d;
+    margin-block-end: 12px;
+
+    /* Room for the orbit to swing outside the pill without being clipped */
+    padding-inline: 14px;
+    padding-block: 10px;
   }
 
   .cart-notice--hug {
@@ -81,34 +84,94 @@
     margin-inline: auto;
   }
 
-  .cart-notice__dot {
-    flex-shrink: 0;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--cn-dot, #16a34a);
-    animation: cart-notice-pulse 1.8s ease-out infinite;
+  .cart-notice__body {
+    position: relative;
+    flex: 1 1 auto;
+    transform: translateZ(0);
+    padding: 9px 14px;
+    border-radius: var(--cn-radius, 12px);
+    border: var(--cn-border-width, 0) solid var(--cn-border-color, transparent);
+    background: var(--cn-bg, #e7f6ee);
+    color: var(--cn-fg, #15803d);
+    font-size: var(--cn-size, 12px);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.3;
+    text-align: center;
   }
 
-  /* The ring expands out of the dot and fades. Scaling the dot itself would
-     nudge the text beside it on every pulse. */
-  @keyframes cart-notice-pulse {
-    0% {
-      box-shadow: 0 0 0 0 color-mix(in srgb, var(--cn-dot, #16a34a) 65%, transparent);
-    }
+  .cart-notice__orbit {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    pointer-events: none;
+  }
 
-    70% {
-      box-shadow: 0 0 0 8px transparent;
-    }
+  .cart-notice__particle {
+    /* Radii: x spans the pill via container units so the orbit tracks its
+       width, z is deep enough to pass clearly behind it. */
+    --cn-rx: 46cqw;
+    --cn-ry: 13px;
+    --cn-rz: 62px;
 
-    100% {
-      box-shadow: 0 0 0 0 transparent;
-    }
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 9px;
+    height: 9px;
+    margin: -4.5px 0 0 -4.5px;
+    border-radius: 50%;
+    background: var(--cn-dot, #16a34a);
+    box-shadow: 0 0 10px var(--cn-dot, #16a34a);
+    animation: cart-notice-orbit var(--cn-speed, 5s) linear infinite;
+  }
+
+  /* A second particle a little behind the first reads as motion blur */
+  .cart-notice__particle--trail {
+    width: 6px;
+    height: 6px;
+    margin: -3px 0 0 -3px;
+    opacity: 0.4;
+    box-shadow: none;
+    animation-delay: calc(var(--cn-speed, 5s) / -22);
+  }
+
+@keyframes cart-notice-orbit {
+    0% { transform: translate3d(calc(var(--cn-rx) * 0.0000), calc(var(--cn-ry) * 0.0000), calc(var(--cn-rz) * 1.0000)); }
+    4.16667% { transform: translate3d(calc(var(--cn-rx) * 0.2588), calc(var(--cn-ry) * 0.5000), calc(var(--cn-rz) * 0.9659)); }
+    8.33333% { transform: translate3d(calc(var(--cn-rx) * 0.5000), calc(var(--cn-ry) * 0.8660), calc(var(--cn-rz) * 0.8660)); }
+    12.5% { transform: translate3d(calc(var(--cn-rx) * 0.7071), calc(var(--cn-ry) * 1.0000), calc(var(--cn-rz) * 0.7071)); }
+    16.6667% { transform: translate3d(calc(var(--cn-rx) * 0.8660), calc(var(--cn-ry) * 0.8660), calc(var(--cn-rz) * 0.5000)); }
+    20.8333% { transform: translate3d(calc(var(--cn-rx) * 0.9659), calc(var(--cn-ry) * 0.5000), calc(var(--cn-rz) * 0.2588)); }
+    25% { transform: translate3d(calc(var(--cn-rx) * 1.0000), calc(var(--cn-ry) * 0.0000), calc(var(--cn-rz) * 0.0000)); }
+    29.1667% { transform: translate3d(calc(var(--cn-rx) * 0.9659), calc(var(--cn-ry) * -0.5000), calc(var(--cn-rz) * -0.2588)); }
+    33.3333% { transform: translate3d(calc(var(--cn-rx) * 0.8660), calc(var(--cn-ry) * -0.8660), calc(var(--cn-rz) * -0.5000)); }
+    37.5% { transform: translate3d(calc(var(--cn-rx) * 0.7071), calc(var(--cn-ry) * -1.0000), calc(var(--cn-rz) * -0.7071)); }
+    41.6667% { transform: translate3d(calc(var(--cn-rx) * 0.5000), calc(var(--cn-ry) * -0.8660), calc(var(--cn-rz) * -0.8660)); }
+    45.8333% { transform: translate3d(calc(var(--cn-rx) * 0.2588), calc(var(--cn-ry) * -0.5000), calc(var(--cn-rz) * -0.9659)); }
+    50% { transform: translate3d(calc(var(--cn-rx) * 0.0000), calc(var(--cn-ry) * -0.0000), calc(var(--cn-rz) * -1.0000)); }
+    54.1667% { transform: translate3d(calc(var(--cn-rx) * -0.2588), calc(var(--cn-ry) * 0.5000), calc(var(--cn-rz) * -0.9659)); }
+    58.3333% { transform: translate3d(calc(var(--cn-rx) * -0.5000), calc(var(--cn-ry) * 0.8660), calc(var(--cn-rz) * -0.8660)); }
+    62.5% { transform: translate3d(calc(var(--cn-rx) * -0.7071), calc(var(--cn-ry) * 1.0000), calc(var(--cn-rz) * -0.7071)); }
+    66.6667% { transform: translate3d(calc(var(--cn-rx) * -0.8660), calc(var(--cn-ry) * 0.8660), calc(var(--cn-rz) * -0.5000)); }
+    70.8333% { transform: translate3d(calc(var(--cn-rx) * -0.9659), calc(var(--cn-ry) * 0.5000), calc(var(--cn-rz) * -0.2588)); }
+    75% { transform: translate3d(calc(var(--cn-rx) * -1.0000), calc(var(--cn-ry) * 0.0000), calc(var(--cn-rz) * -0.0000)); }
+    79.1667% { transform: translate3d(calc(var(--cn-rx) * -0.9659), calc(var(--cn-ry) * -0.5000), calc(var(--cn-rz) * 0.2588)); }
+    83.3333% { transform: translate3d(calc(var(--cn-rx) * -0.8660), calc(var(--cn-ry) * -0.8660), calc(var(--cn-rz) * 0.5000)); }
+    87.5% { transform: translate3d(calc(var(--cn-rx) * -0.7071), calc(var(--cn-ry) * -1.0000), calc(var(--cn-rz) * 0.7071)); }
+    91.6667% { transform: translate3d(calc(var(--cn-rx) * -0.5000), calc(var(--cn-ry) * -0.8660), calc(var(--cn-rz) * 0.8660)); }
+    95.8333% { transform: translate3d(calc(var(--cn-rx) * -0.2588), calc(var(--cn-ry) * -0.5000), calc(var(--cn-rz) * 0.9659)); }
+    100% { transform: translate3d(calc(var(--cn-rx) * -0.0000), calc(var(--cn-ry) * -0.0000), calc(var(--cn-rz) * 1.0000)); }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .cart-notice__dot {
+    .cart-notice__particle {
       animation: none;
+      transform: translate3d(calc(var(--cn-rx) * -1), 0, 0);
+    }
+
+    .cart-notice__particle--trail {
+      display: none;
     }
   }
 {% endstylesheet %}
