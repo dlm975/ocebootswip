@@ -66,6 +66,18 @@
      particle can be sorted in front of or behind it by depth alone — a
      descendant of the background element would always paint on top. */
   .cart-notice {
+    /* The drawer summary is a flex column with align-items: center, so its
+       children shrink-wrap. On top of that, container-type applies inline
+       size containment, so the text inside stops contributing any width at
+       all — together they collapsed the pill to a sliver and wrapped the
+       label onto three lines. Both are settled by claiming the full width
+       explicitly. */
+    align-self: stretch;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+
     position: relative;
     display: flex;
     container-type: inline-size;
@@ -79,7 +91,9 @@
   }
 
   .cart-notice--hug {
+    align-self: center;
     width: fit-content;
+    min-width: min(260px, 100%);
     max-width: 100%;
     margin-inline: auto;
   }
@@ -98,6 +112,7 @@
     letter-spacing: 0.04em;
     line-height: 1.3;
     text-align: center;
+    text-wrap: balance;
   }
 
   .cart-notice__orbit {
