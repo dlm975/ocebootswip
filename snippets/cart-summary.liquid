@@ -72,6 +72,12 @@
         {{ total_price }}
       </text-component>
     </span>
+    {% comment %}
+      Sits directly under the total figure. .cart__total-container is a
+      flex column and .cart__total puts the figure on the right, so this
+      aligns to the end to line up beneath it rather than the label.
+    {% endcomment %}
+    <span class="cart__free-shipping cart-primary-typography">+ FREE Shipping</span>
     {% if settings.show_installments %}
       <span class="cart__summary-item cart__installments">
         {% form 'cart', cart %}
@@ -85,25 +91,31 @@
   </div>
 </div>
 
-{% render 'cart-notice' %}
-
 <div class="cart__ctas">
-  <button
-    type="submit"
-    id="checkout"
-    class="cart__checkout-button button"
-    name="checkout"
-    {% if cart == empty %}
-      disabled
-    {% endif %}
-    form="cart-form"
-  >
-    {%- if settings.cart_checkout_label != blank -%}
-      {{ settings.cart_checkout_label }}
-    {%- else -%}
-      {{ 'content.checkout' | t }}
-    {%- endif -%}
-  </button>
+  {% comment %}
+    The wrapper exists purely to give the wick a positioned box matching
+    the button exactly, so the fuse can trace its perimeter.
+  {% endcomment %}
+  <div class="cart__checkout-wick">
+    <button
+      type="submit"
+      id="checkout"
+      class="cart__checkout-button button"
+      name="checkout"
+      {% if cart == empty %}
+        disabled
+      {% endif %}
+      form="cart-form"
+    >
+      {%- if settings.cart_checkout_label != blank -%}
+        {{ settings.cart_checkout_label }}
+      {%- else -%}
+        {{ 'content.checkout' | t }}
+      {%- endif -%}
+    </button>
+
+    {% render 'cart-wick' %}
+  </div>
 
   {% if additional_checkout_buttons and settings.show_accelerated_checkout_buttons %}
     <div class="additional-checkout-buttons additional-checkout-buttons--vertical">
@@ -132,5 +144,23 @@
 
   .cart__installments {
     color: var(--color-foreground);
+  }
+
+  /* Tucked up against the total figure rather than spaced off it by the
+     container's row-gap — it reads as part of the price, not a new row. */
+  .cart__free-shipping {
+    align-self: flex-end;
+    margin-block-start: calc(var(--gap-2xs) * -1);
+    color: #15803d;
+    font-size: var(--cart-font-size--sm);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+  }
+
+  .cart__checkout-wick {
+    position: relative;
+    display: block;
+    width: 100%;
   }
 {% endstylesheet %}

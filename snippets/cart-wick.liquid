@@ -1,0 +1,300 @@
+{%- doc -%}
+  A burning bomb fuse that travels the perimeter of the checkout button,
+  one full lap every 5 minutes.
+
+  The spark's position is derived from a timestamp kept in localStorage
+  rather than from a CSS animation. A CSS animation inside the drawer
+  would pause and restart every time the dialog closes and reopens (a
+  closed dialog has no layout), which would reset the fuse. Reading the
+  clock instead means the fuse keeps burning while the drawer is shut and
+  is exactly where it should be when it reopens — and it stays in step
+  across page loads and between the drawer and the cart page.
+
+  Expects to be rendered as a sibling of .cart__checkout-button inside a
+  positioned wrapper.
+{%- enddoc -%}
+
+<cart-wick class="cart-wick" aria-hidden="true">
+  <svg class="cart-wick__svg" xmlns="http://www.w3.org/2000/svg" focusable="false">
+    <path class="cart-wick__rope"></path>
+    <path class="cart-wick__burn"></path>
+    <g class="cart-wick__spark">
+      <circle class="cart-wick__flare" r="5"></circle>
+      <circle class="cart-wick__core" r="2"></circle>
+      <circle class="cart-wick__ember" r="1.1" style="--ex: 7px; --ey: -7px;"></circle>
+      <circle class="cart-wick__ember" r="0.9" style="--ex: -6px; --ey: -8px;"></circle>
+      <circle class="cart-wick__ember" r="1" style="--ex: 8px; --ey: 5px;"></circle>
+      <circle class="cart-wick__ember" r="0.8" style="--ex: -7px; --ey: 6px;"></circle>
+    </g>
+  </svg>
+</cart-wick>
+
+{% stylesheet %}
+  .cart-wick {
+    position: absolute;
+    inset: 0;
+    display: block;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* overflow must stay visible so the spark's glow and its embers are not
+     clipped at the button's edge, which is exactly where they sit. */
+  .cart-wick__svg {
+    position: absolute;
+    inset: 0;
+    display: block;
+    overflow: visible;
+  }
+
+  /* The unlit fuse: a faint dashed rope around the whole perimeter. */
+  .cart-wick__rope {
+    fill: none;
+    stroke: rgb(255 255 255 / 28%);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-dasharray: 3 4;
+  }
+
+  /* The lit length trailing the spark. Its dash pattern is set in JS to
+     sum to exactly one perimeter, so the segment wraps seamlessly. */
+  .cart-wick__burn {
+    fill: none;
+    stroke: #ffb020;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 3px rgb(255 122 24 / 90%));
+  }
+
+  .cart-wick__spark {
+    filter: drop-shadow(0 0 6px rgb(255 176 32 / 95%));
+  }
+
+  .cart-wick__flare {
+    fill: #ff7a18;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: cart-wick-flare 0.16s steps(2, end) infinite alternate;
+  }
+
+  .cart-wick__core {
+    fill: #fff6d5;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: cart-wick-flare 0.22s steps(2, end) infinite alternate-reverse;
+  }
+
+  .cart-wick__ember {
+    fill: #ffcf5c;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: cart-wick-ember 0.6s linear infinite;
+  }
+
+  .cart-wick__ember:nth-of-type(2) {
+    animation-delay: 0.15s;
+    animation-duration: 0.52s;
+  }
+
+  .cart-wick__ember:nth-of-type(3) {
+    animation-delay: 0.3s;
+    animation-duration: 0.68s;
+  }
+
+  .cart-wick__ember:nth-of-type(4) {
+    animation-delay: 0.45s;
+    animation-duration: 0.58s;
+  }
+
+  /* Stepped rather than eased — a fuse flickers, it does not breathe. */
+  @keyframes cart-wick-flare {
+    from {
+      transform: scale(0.82);
+      opacity: 0.95;
+    }
+
+    to {
+      transform: scale(1.25);
+      opacity: 0.6;
+    }
+  }
+
+  @keyframes cart-wick-ember {
+    0% {
+      transform: translate(0, 0) scale(1);
+      opacity: 0.9;
+    }
+
+    100% {
+      transform: translate(var(--ex, 6px), var(--ey, -6px)) scale(0.15);
+      opacity: 0;
+    }
+  }
+
+  /* Nothing to burn down to when there is nothing to buy. */
+  .cart__checkout-wick:has(.cart__checkout-button[disabled]) .cart-wick {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cart-wick {
+      display: none;
+    }
+  }
+{% endstylesheet %}
+
+<script>
+  (function () {
+    if (customElements.get('cart-wick')) return;
+
+    /* One lap per 5 minutes. */
+    var PERIOD = 5 * 60 * 1000;
+
+    /* Shared by every instance on the page so the drawer and the cart
+       page never disagree about where the spark is. */
+    var started = null;
+
+    function startedAt() {
+      if (started !== null) return started;
+
+      var stored = null;
+      try {
+        stored = window.localStorage.getItem('cart-wick-start');
+      } catch (_) {
+        /* Private mode or blocked storage — fall through to a fresh
+           start so the fuse still burns, it just restarts per page. */
+      }
+
+      var parsed = stored === null ? NaN : parseInt(stored, 10);
+      if (isFinite(parsed)) {
+        started = parsed;
+        return started;
+      }
+
+      started = Date.now();
+      try {
+        window.localStorage.setItem('cart-wick-start', String(started));
+      } catch (_) {
+        /* no-op */
+      }
+      return started;
+    }
+
+    function progress() {
+      var elapsed = Date.now() - startedAt();
+      return (((elapsed % PERIOD) + PERIOD) % PERIOD) / PERIOD;
+    }
+
+    function roundedRect(x, y, w, h, r) {
+      var right = x + w;
+      var bottom = y + h;
+      return (
+        'M ' + (x + r) + ' ' + y +
+        ' H ' + (right - r) +
+        ' A ' + r + ' ' + r + ' 0 0 1 ' + right + ' ' + (y + r) +
+        ' V ' + (bottom - r) +
+        ' A ' + r + ' ' + r + ' 0 0 1 ' + (right - r) + ' ' + bottom +
+        ' H ' + (x + r) +
+        ' A ' + r + ' ' + r + ' 0 0 1 ' + x + ' ' + (bottom - r) +
+        ' V ' + (y + r) +
+        ' A ' + r + ' ' + r + ' 0 0 1 ' + (x + r) + ' ' + y +
+        ' Z'
+      );
+    }
+
+    class CartWick extends HTMLElement {
+      /* connectedCallback rather than a one-off init: the cart drawer is
+         morphed on every cart update, and this fires again whenever the
+         element is re-inserted. */
+      connectedCallback() {
+        this.svg = this.querySelector('.cart-wick__svg');
+        this.rope = this.querySelector('.cart-wick__rope');
+        this.burn = this.querySelector('.cart-wick__burn');
+        this.spark = this.querySelector('.cart-wick__spark');
+        this.button = this.parentElement && this.parentElement.querySelector('.cart__checkout-button');
+
+        if (!this.svg || !this.burn || !this.spark || !this.button) return;
+
+        this.length = 0;
+        this.trail = 0;
+        this.lastProbe = 0;
+
+        this.frameFn = () => {
+          this.frame = window.requestAnimationFrame(this.frameFn);
+          this.render();
+        };
+
+        if ('ResizeObserver' in window) {
+          this.observer = new ResizeObserver(() => this.measure());
+          this.observer.observe(this.button);
+        }
+
+        this.measure();
+        this.frame = window.requestAnimationFrame(this.frameFn);
+      }
+
+      disconnectedCallback() {
+        if (this.observer) this.observer.disconnect();
+        if (this.frame) window.cancelAnimationFrame(this.frame);
+        this.frame = null;
+      }
+
+      measure() {
+        var w = this.button.offsetWidth;
+        var h = this.button.offsetHeight;
+
+        /* Zero while the drawer's dialog is closed — there is no layout
+           to read, so stand down until it opens. */
+        if (!w || !h) {
+          this.length = 0;
+          return;
+        }
+
+        /* Follow whatever radius the checkout button settings produced,
+           rather than assuming a pill. */
+        var radius = parseFloat(getComputedStyle(this.button).borderTopLeftRadius) || 0;
+        var inset = 1.5;
+        var iw = w - inset * 2;
+        var ih = h - inset * 2;
+        var r = Math.max(0, Math.min(radius - inset, Math.min(iw, ih) / 2));
+        var d = roundedRect(inset, inset, iw, ih, r);
+
+        this.svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+        this.svg.setAttribute('width', w);
+        this.svg.setAttribute('height', h);
+        this.rope.setAttribute('d', d);
+        this.burn.setAttribute('d', d);
+
+        this.length = this.burn.getTotalLength();
+        this.trail = Math.min(this.length * 0.2, 80);
+
+        /* Dash plus gap sums to exactly one perimeter, so the lit
+           segment wraps around the corner cleanly instead of vanishing
+           on the lap boundary. */
+        this.burn.style.strokeDasharray = this.trail + ' ' + Math.max(0.01, this.length - this.trail);
+      }
+
+      render() {
+        if (!this.length) {
+          /* Re-probe occasionally in case the drawer opened without the
+             ResizeObserver firing. Throttled because reading offsetWidth
+             forces layout. */
+          var now = Date.now();
+          if (now - this.lastProbe > 250) {
+            this.lastProbe = now;
+            this.measure();
+          }
+          return;
+        }
+
+        var at = progress() * this.length;
+        this.burn.style.strokeDashoffset = String(this.trail - at);
+
+        var point = this.burn.getPointAtLength(at);
+        this.spark.setAttribute('transform', 'translate(' + point.x + ' ' + point.y + ')');
+      }
+    }
+
+    customElements.define('cart-wick', CartWick);
+  })();
+</script>
