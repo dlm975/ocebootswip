@@ -50,7 +50,7 @@
      is already the target of the theme's add-to-cart "grow" animation at
      the same specificity, and one element can only run one of them. */
   .header-actions__cart-icon--has-cart .cart-bubble {
-    animation: cartBlinkerBlink 1.1s ease-in-out infinite;
+    animation: cartBlinkerBlink 2.4s ease-in-out infinite;
   }
 
   .header-actions__cart-icon--has-cart .cart-bubble__background {
@@ -73,13 +73,15 @@
     inset: 0;
     border-radius: 999px;
     background-color: var(--cart-blinker-color);
-    animation: cartBlinkerPulse 1.1s ease-out infinite;
+    animation: cartBlinkerPulse 2.4s ease-out infinite;
     pointer-events: none;
   }
 
-  /* A hard on/off swing rather than a gentle fade — the steep holds at
-     each end are what make it read as a blink instead of a breathe. The
-     scale pop adds size change on top of the brightness change. */
+  /* Holds at each end rather than a smooth curve, so it reads as a blink
+     instead of a breathe. The dim end floors at 0.55 — the dot and its
+     count stay legible throughout, never dropping out of sight. The
+     scale change carries the emphasis the lost opacity range would
+     otherwise have provided. */
   @keyframes cartBlinkerBlink {
     0%,
     40% {
@@ -89,8 +91,8 @@
 
     55%,
     90% {
-      opacity: 0.12;
-      transform: scale(0.88);
+      opacity: 0.55;
+      transform: scale(0.9);
     }
 
     100% {
