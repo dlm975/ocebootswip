@@ -29,4 +29,79 @@
       --cart-bubble-right: 4px;
     }
   }
+
+  /* Red blinker — shown only while the cart holds something. The
+     has-cart class is set server-side and re-toggled by cart-icon.js on
+     every cart:update, so it follows add and remove without a reload. */
+  .header-actions__cart-icon--has-cart {
+    --cart-blinker-color: #fa2020;
+  }
+
+  /* The blink sits on the bubble, not on its background: the background
+     is already the target of the theme's add-to-cart "grow" animation at
+     the same specificity, and one element can only run one of them. */
+  .header-actions__cart-icon--has-cart .cart-bubble {
+    animation: cartBlinkerBlink 1.8s ease-in-out infinite;
+  }
+
+  .header-actions__cart-icon--has-cart .cart-bubble__background {
+    background-color: var(--cart-blinker-color);
+
+    /* Soft glow. Does more for perceived brightness than the hex change
+       alone, without touching the dot's size or the blink timing. */
+    box-shadow: 0 0 7px 0 rgb(250 32 32 / 65%);
+  }
+
+  .header-actions__cart-icon--has-cart .cart-bubble__text {
+    color: #fff;
+  }
+
+  /* Halo ring. A pseudo-element on the background keeps it out of the
+     markup, and painting it here leaves it under the count, which has
+     its own stacking level. */
+  .header-actions__cart-icon--has-cart .cart-bubble__background::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background-color: var(--cart-blinker-color);
+    animation: cartBlinkerPulse 1.8s ease-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes cartBlinkerBlink {
+    0%,
+    55%,
+    100% {
+      opacity: 1;
+    }
+
+    75% {
+      opacity: 0.45;
+    }
+  }
+
+  @keyframes cartBlinkerPulse {
+    0% {
+      opacity: 0.62;
+      transform: scale(1);
+    }
+
+    70%,
+    100% {
+      opacity: 0;
+      transform: scale(2.4);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .header-actions__cart-icon--has-cart .cart-bubble,
+    .header-actions__cart-icon--has-cart .cart-bubble__background::after {
+      animation: none;
+    }
+
+    .header-actions__cart-icon--has-cart .cart-bubble__background::after {
+      content: none;
+    }
+  }
 {% endstylesheet %}
