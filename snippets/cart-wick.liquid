@@ -73,7 +73,11 @@
     filter: drop-shadow(0 0 3px rgb(255 122 24 / 90%));
   }
 
+  /* Hidden until JS gives it a position. Its circles default to cx/cy 0,
+     so without this it would show in the button's top-left corner for as
+     long as anything stopped it being placed. */
   .cart-wick__spark {
+    opacity: 0;
     filter: drop-shadow(0 0 6px rgb(255 176 32 / 95%));
   }
 
@@ -216,18 +220,15 @@
     }
 
     class CartWick extends HTMLElement {
-      /* connectedCallback rather than a one-off init: the cart drawer is
-         morphed on every cart update, and this fires again whenever the
-         element is re-inserted. */
+      /* Deliberately does NOT look up its children here. connectedCallback
+         fires the moment the element is inserted, and once the definition
+         is registered that happens before the children are attached — so
+         on a morph (which the drawer does on every cart update) every
+         querySelector would return null. Collecting refs from the frame
+         loop instead lets it pick them up as soon as they exist, and
+         recover rather than dying until the next full page load. */
       connectedCallback() {
-        this.svg = this.querySelector('.cart-wick__svg');
-        this.rope = this.querySelector('.cart-wick__rope');
-        this.edge = this.querySelector('.cart-wick__edge');
-        this.spark = this.querySelector('.cart-wick__spark');
-        this.button = this.parentElement && this.parentElement.querySelector('.cart__checkout-button');
-
-        if (!this.svg || !this.rope || !this.edge || !this.spark || !this.button) return;
-
+        this.ready = false;
         this.length = 0;
         this.lastProbe = 0;
 
@@ -236,22 +237,55 @@
           this.render();
         };
 
-        if ('ResizeObserver' in window) {
-          this.observer = new ResizeObserver(() => this.measure());
-          this.observer.observe(this.button);
-        }
-
-        this.measure();
+        /* Guard against two loops if connect fires without an
+           intervening disconnect. */
+        if (this.frame) window.cancelAnimationFrame(this.frame);
         this.frame = window.requestAnimationFrame(this.frameFn);
       }
 
       disconnectedCallback() {
-        if (this.observer) this.observer.disconnect();
+        if (this.observer) {
+          this.observer.disconnect();
+          this.observer = null;
+        }
         if (this.frame) window.cancelAnimationFrame(this.frame);
         this.frame = null;
+        this.ready = false;
+      }
+
+      collect() {
+        this.svg = this.querySelector('.cart-wick__svg');
+        this.rope = this.querySelector('.cart-wick__rope');
+        this.edge = this.querySelector('.cart-wick__edge');
+        this.spark = this.querySelector('.cart-wick__spark');
+        this.button = this.parentElement && this.parentElement.querySelector('.cart__checkout-button');
+
+        this.ready = !!(this.svg && this.rope && this.edge && this.spark && this.button);
+
+        if (this.ready && !this.observer && 'ResizeObserver' in window) {
+          this.observer = new ResizeObserver(() => this.measure());
+          this.observer.observe(this.button);
+        }
+
+        return this.ready;
       }
 
       measure() {
+        /* A morph can swap the button out from under us while leaving
+           this element in place. A detached node reports zero size, which
+           would look identical to a closed drawer and stall for good, so
+           re-collect instead. */
+        if (!this.button || !this.button.isConnected) {
+          if (this.observer) {
+            this.observer.disconnect();
+            this.observer = null;
+          }
+          if (!this.collect()) {
+            this.length = 0;
+            return;
+          }
+        }
+
         var w = this.button.offsetWidth;
         var h = this.button.offsetHeight;
 
@@ -287,6 +321,9 @@
       }
 
       render() {
+        /* Keep retrying until the children are actually there. */
+        if (!this.ready && !this.collect()) return;
+
         if (!this.length) {
           /* Re-probe occasionally in case the drawer opened without the
              ResizeObserver firing. Throttled because reading offsetWidth
@@ -300,25 +337,29 @@
         }
 
         var length = this.length;
-        var at = progress() * length;
+        var at = Math.min(progress() * length, length);
         var left = Math.max(0, length - at);
 
-        /* Show only the rope still to burn, the span from the spark to
-           the end. Offsetting the dash pattern by -at puts its origin at
-           the spark; the dash then covers [at, L] and the gap covers
-           what is already burnt. Dash plus gap sums to exactly one
-           perimeter so nothing reappears on the far side. */
+        /* Show only the rope still to burn, the span from the spark round
+           to the end. Dash `left` then gap `at` sums to exactly one
+           perimeter, and starting the pattern `left` into itself puts the
+           gap over [0, at] — the part already burnt — and the dash over
+           [at, L]. `left` is used rather than the equivalent -at because
+           a negative dash offset is invalid in SVG 1.1. */
         this.rope.style.strokeDasharray = left + ' ' + at;
-        this.rope.style.strokeDashoffset = String(-at);
+        this.rope.style.strokeDashoffset = String(left);
 
         /* The hot length is clamped to what is left, so it shrinks into
            nothing at the finish rather than wrapping onto burnt rope. */
         var edge = Math.min(20, left);
         this.edge.style.strokeDasharray = edge + ' ' + Math.max(0.01, length - edge);
-        this.edge.style.strokeDashoffset = String(-at);
+        this.edge.style.strokeDashoffset = String(left);
 
         var point = this.rope.getPointAtLength(at);
         this.spark.setAttribute('transform', 'translate(' + point.x + ' ' + point.y + ')');
+
+        /* Only ever revealed once it has a real position, so it can never
+           be caught sitting at the SVG's untransformed origin. */
         this.spark.style.opacity = left < 0.5 ? '0' : '1';
       }
     }
