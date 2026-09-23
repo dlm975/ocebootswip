@@ -51,14 +51,16 @@
     overflow: visible;
   }
 
-  /* The unburnt rope: a hairline outline of the button. JS trims it back
-     from the front as the spark advances, so what is left is only the
-     length still to burn. */
+  /* The unburnt rope: a hairline yellow outline, complete all the way
+     around the button at the start. JS trims it back from the front as
+     the spark advances, so what is left is only the length still to
+     burn. */
   .cart-wick__rope {
     fill: none;
-    stroke: rgb(255 255 255 / 55%);
-    stroke-width: 1;
+    stroke: #ffd23f;
+    stroke-width: 1.25;
     stroke-linecap: butt;
+    filter: drop-shadow(0 0 1.5px rgb(255 210 63 / 55%));
   }
 
   /* A short hot length immediately ahead of the spark, so the rope glows
@@ -276,6 +278,12 @@
         this.edge.setAttribute('d', d);
 
         this.length = this.rope.getTotalLength();
+
+        /* Reaching here means the button has real layout, which only
+           happens once the drawer is actually open (a closed dialog has
+           none). Starting the clock here rather than on page load is
+           what makes the 5 minutes run from the first cart opening. */
+        startedAt();
       }
 
       render() {

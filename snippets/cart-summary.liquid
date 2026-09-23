@@ -167,12 +167,15 @@
 
   /* Tucked up against the total figure rather than spaced off it by the
      container's row-gap — it reads as part of the price, not a new row. */
-  .cart__free-shipping {
+  /* Scoped to the container so it outranks .cart-primary-typography,
+     which sets a font-weight at the same single-class specificity and
+     would otherwise win or lose on stylesheet order. */
+  .cart__total-container .cart__free-shipping {
     align-self: flex-end;
     margin-block-start: calc(var(--gap-2xs) * -1);
     color: var(--cart-fs-color, #15803d);
     font-size: var(--cart-fs-size, var(--cart-font-size--sm));
-    font-weight: var(--font-weight-bold);
+    font-weight: 700;
     letter-spacing: 0.02em;
     line-height: 1.2;
   }
