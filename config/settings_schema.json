@@ -2329,6 +2329,34 @@
       },
       {
         "type": "header",
+        "content": "Free shipping line"
+      },
+      {
+        "type": "text",
+        "id": "cart_free_shipping_text",
+        "label": "Text",
+        "default": "+ FREE Shipping",
+        "info": "Shown directly under the total amount. Leave blank to hide it."
+      },
+      {
+        "type": "color",
+        "id": "cart_free_shipping_color",
+        "label": "Text colour",
+        "default": "#15803d"
+      },
+      {
+        "type": "range",
+        "id": "cart_free_shipping_size",
+        "label": "Text size",
+        "min": 0,
+        "max": 28,
+        "step": 1,
+        "unit": "px",
+        "default": 0,
+        "info": "0 matches the rest of the cart."
+      },
+      {
+        "type": "header",
         "content": "Cart layout"
       },
       {

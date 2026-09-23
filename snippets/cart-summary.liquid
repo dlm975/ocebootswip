@@ -76,8 +76,27 @@
       Sits directly under the total figure. .cart__total-container is a
       flex column and .cart__total puts the figure on the right, so this
       aligns to the end to line up beneath it rather than the label.
+
+      Values fall back in Liquid as well as in the schema: a setting that
+      exists only as a schema default reads as nil until it has been
+      written to settings_data.
     {% endcomment %}
-    <span class="cart__free-shipping cart-primary-typography">+ FREE Shipping</span>
+    {%- liquid
+      assign fs_text = settings.cart_free_shipping_text | default: '+ FREE Shipping'
+      assign fs_color = settings.cart_free_shipping_color | default: '#15803d'
+      assign fs_size = settings.cart_free_shipping_size | default: 0
+    -%}
+    {%- if fs_text != blank -%}
+      <span
+        class="cart__free-shipping cart-primary-typography"
+        style="
+          --cart-fs-color: {{ fs_color }};
+          {% if fs_size > 0 %}--cart-fs-size: {{ fs_size }}px;{% endif %}
+        "
+      >
+        {{- fs_text -}}
+      </span>
+    {%- endif -%}
     {% if settings.show_installments %}
       <span class="cart__summary-item cart__installments">
         {% form 'cart', cart %}
@@ -151,8 +170,8 @@
   .cart__free-shipping {
     align-self: flex-end;
     margin-block-start: calc(var(--gap-2xs) * -1);
-    color: #15803d;
-    font-size: var(--cart-font-size--sm);
+    color: var(--cart-fs-color, #15803d);
+    font-size: var(--cart-fs-size, var(--cart-font-size--sm));
     font-weight: var(--font-weight-bold);
     letter-spacing: 0.02em;
     line-height: 1.2;

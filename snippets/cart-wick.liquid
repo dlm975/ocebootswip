@@ -1,6 +1,8 @@
 {%- doc -%}
-  A burning bomb fuse that travels the perimeter of the checkout button,
-  one full lap every 5 minutes.
+  A burning bomb fuse around the checkout button. The rope is a hairline
+  outline of the button; a spark starts at the top middle, travels
+  clockwise, and consumes the rope behind it, so over 5 minutes the whole
+  outline burns away and then resets.
 
   The spark's position is derived from a timestamp kept in localStorage
   rather than from a CSS animation. A CSS animation inside the drawer
@@ -17,14 +19,16 @@
 <cart-wick class="cart-wick" aria-hidden="true">
   <svg class="cart-wick__svg" xmlns="http://www.w3.org/2000/svg" focusable="false">
     <path class="cart-wick__rope"></path>
-    <path class="cart-wick__burn"></path>
+    <path class="cart-wick__edge"></path>
     <g class="cart-wick__spark">
-      <circle class="cart-wick__flare" r="5"></circle>
-      <circle class="cart-wick__core" r="2"></circle>
-      <circle class="cart-wick__ember" r="1.1" style="--ex: 7px; --ey: -7px;"></circle>
-      <circle class="cart-wick__ember" r="0.9" style="--ex: -6px; --ey: -8px;"></circle>
-      <circle class="cart-wick__ember" r="1" style="--ex: 8px; --ey: 5px;"></circle>
-      <circle class="cart-wick__ember" r="0.8" style="--ex: -7px; --ey: 6px;"></circle>
+      <circle class="cart-wick__flare" r="4"></circle>
+      <circle class="cart-wick__core" r="1.6"></circle>
+      <circle class="cart-wick__ember" r="1" style="--ex: 8px; --ey: -8px;"></circle>
+      <circle class="cart-wick__ember" r="0.85" style="--ex: -7px; --ey: -9px;"></circle>
+      <circle class="cart-wick__ember" r="0.9" style="--ex: 9px; --ey: 6px;"></circle>
+      <circle class="cart-wick__ember" r="0.75" style="--ex: -8px; --ey: 7px;"></circle>
+      <circle class="cart-wick__ember" r="0.8" style="--ex: 2px; --ey: -11px;"></circle>
+      <circle class="cart-wick__ember" r="0.7" style="--ex: -11px; --ey: 1px;"></circle>
     </g>
   </svg>
 </cart-wick>
@@ -47,22 +51,23 @@
     overflow: visible;
   }
 
-  /* The unlit fuse: a faint dashed rope around the whole perimeter. */
+  /* The unburnt rope: a hairline outline of the button. JS trims it back
+     from the front as the spark advances, so what is left is only the
+     length still to burn. */
   .cart-wick__rope {
     fill: none;
-    stroke: rgb(255 255 255 / 28%);
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-dasharray: 3 4;
+    stroke: rgb(255 255 255 / 55%);
+    stroke-width: 1;
+    stroke-linecap: butt;
   }
 
-  /* The lit length trailing the spark. Its dash pattern is set in JS to
-     sum to exactly one perimeter, so the segment wraps seamlessly. */
-  .cart-wick__burn {
+  /* A short hot length immediately ahead of the spark, so the rope glows
+     as it is about to catch rather than switching from cold to gone. */
+  .cart-wick__edge {
     fill: none;
     stroke: #ffb020;
-    stroke-width: 2.5;
-    stroke-linecap: round;
+    stroke-width: 1.6;
+    stroke-linecap: butt;
     filter: drop-shadow(0 0 3px rgb(255 122 24 / 90%));
   }
 
@@ -185,11 +190,17 @@
       return (((elapsed % PERIOD) + PERIOD) % PERIOD) / PERIOD;
     }
 
+    /* Starts at the top middle and runs clockwise, finishing back at the
+       top middle. Path length 0 is therefore the spark's starting point
+       and the burn travels right first, as asked. Left open rather than
+       closed with Z — the ends already meet, and a Z would add a
+       zero-length segment that upsets getPointAtLength at the wrap. */
     function roundedRect(x, y, w, h, r) {
       var right = x + w;
       var bottom = y + h;
+      var mid = x + w / 2;
       return (
-        'M ' + (x + r) + ' ' + y +
+        'M ' + mid + ' ' + y +
         ' H ' + (right - r) +
         ' A ' + r + ' ' + r + ' 0 0 1 ' + right + ' ' + (y + r) +
         ' V ' + (bottom - r) +
@@ -198,7 +209,7 @@
         ' A ' + r + ' ' + r + ' 0 0 1 ' + x + ' ' + (bottom - r) +
         ' V ' + (y + r) +
         ' A ' + r + ' ' + r + ' 0 0 1 ' + (x + r) + ' ' + y +
-        ' Z'
+        ' H ' + mid
       );
     }
 
@@ -209,14 +220,13 @@
       connectedCallback() {
         this.svg = this.querySelector('.cart-wick__svg');
         this.rope = this.querySelector('.cart-wick__rope');
-        this.burn = this.querySelector('.cart-wick__burn');
+        this.edge = this.querySelector('.cart-wick__edge');
         this.spark = this.querySelector('.cart-wick__spark');
         this.button = this.parentElement && this.parentElement.querySelector('.cart__checkout-button');
 
-        if (!this.svg || !this.burn || !this.spark || !this.button) return;
+        if (!this.svg || !this.rope || !this.edge || !this.spark || !this.button) return;
 
         this.length = 0;
-        this.trail = 0;
         this.lastProbe = 0;
 
         this.frameFn = () => {
@@ -263,15 +273,9 @@
         this.svg.setAttribute('width', w);
         this.svg.setAttribute('height', h);
         this.rope.setAttribute('d', d);
-        this.burn.setAttribute('d', d);
+        this.edge.setAttribute('d', d);
 
-        this.length = this.burn.getTotalLength();
-        this.trail = Math.min(this.length * 0.2, 80);
-
-        /* Dash plus gap sums to exactly one perimeter, so the lit
-           segment wraps around the corner cleanly instead of vanishing
-           on the lap boundary. */
-        this.burn.style.strokeDasharray = this.trail + ' ' + Math.max(0.01, this.length - this.trail);
+        this.length = this.rope.getTotalLength();
       }
 
       render() {
@@ -287,11 +291,27 @@
           return;
         }
 
-        var at = progress() * this.length;
-        this.burn.style.strokeDashoffset = String(this.trail - at);
+        var length = this.length;
+        var at = progress() * length;
+        var left = Math.max(0, length - at);
 
-        var point = this.burn.getPointAtLength(at);
+        /* Show only the rope still to burn, the span from the spark to
+           the end. Offsetting the dash pattern by -at puts its origin at
+           the spark; the dash then covers [at, L] and the gap covers
+           what is already burnt. Dash plus gap sums to exactly one
+           perimeter so nothing reappears on the far side. */
+        this.rope.style.strokeDasharray = left + ' ' + at;
+        this.rope.style.strokeDashoffset = String(-at);
+
+        /* The hot length is clamped to what is left, so it shrinks into
+           nothing at the finish rather than wrapping onto burnt rope. */
+        var edge = Math.min(20, left);
+        this.edge.style.strokeDasharray = edge + ' ' + Math.max(0.01, length - edge);
+        this.edge.style.strokeDashoffset = String(-at);
+
+        var point = this.rope.getPointAtLength(at);
         this.spark.setAttribute('transform', 'translate(' + point.x + ' ' + point.y + ')');
+        this.spark.style.opacity = left < 0.5 ? '0' : '1';
       }
     }
 
