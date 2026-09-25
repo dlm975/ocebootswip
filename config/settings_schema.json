@@ -2473,7 +2473,14 @@
         "type": "text",
         "id": "cart_checkout_label",
         "label": "Button text",
-        "info": "Leave blank to use the theme's wording."
+        "info": "Shown when the cart qualifies for free shipping. Leave blank to use the theme's wording."
+      },
+      {
+        "type": "text",
+        "id": "cart_checkout_label_plain",
+        "label": "Button text when shipping is not free",
+        "default": "CHECKOUT",
+        "info": "Used when the cart holds only products that do not qualify on their own, so the button does not promise free shipping."
       },
       {
         "type": "checkbox",

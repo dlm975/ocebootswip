@@ -2,6 +2,14 @@
   Renders the cart summary totals.
 {%- enddoc -%}
 
+{%- comment -%}
+  Worked out once, up front: both the shipping line under the total and
+  the checkout button's wording depend on it, and they must never
+  disagree about whether this cart ships free.
+{%- endcomment -%}
+{%- capture ship_ok -%}{%- render 'cart-ship-qualified' -%}{%- endcapture -%}
+{%- assign ship_ok = ship_ok | strip -%}
+
 <div class="cart__summary-totals">
   {% # We need to keep this node in place to allow morphing to work properly # %}
   <div class="cart__original-total-container cart-primary-typography">
@@ -81,9 +89,7 @@
       exists only as a schema default reads as nil until it has been
       written to settings_data.
     {% endcomment %}
-    {%- capture ship_ok -%}{%- render 'cart-ship-qualified' -%}{%- endcapture -%}
     {%- liquid
-      assign ship_ok = ship_ok | strip
       assign fs_text = settings.cart_free_shipping_text | default: '+ FREE Shipping'
       assign fs_color = settings.cart_free_shipping_color | default: '#15803d'
       assign fs_size = settings.cart_free_shipping_size | default: 0
@@ -132,8 +138,19 @@
       {% endif %}
       form="cart-form"
     >
-      {%- if settings.cart_checkout_label != blank -%}
-        {{ settings.cart_checkout_label }}
+      {%- liquid
+        comment
+          A cart that does not qualify gets the plain wording — the button
+          must not promise free shipping the order will not get.
+        endcomment
+        if ship_ok == '1'
+          assign checkout_label = settings.cart_checkout_label
+        else
+          assign checkout_label = settings.cart_checkout_label_plain | default: 'CHECKOUT'
+        endif
+      -%}
+      {%- if checkout_label != blank -%}
+        {{ checkout_label }}
       {%- else -%}
         {{ 'content.checkout' | t }}
       {%- endif -%}
