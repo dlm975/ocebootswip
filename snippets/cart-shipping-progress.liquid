@@ -168,13 +168,12 @@
     background: var(--cs-fill, #16a34a);
   }
 
-  /* Rides the head of the fill. Rotated because the Apple glyph points to
-     the upper right, and it should be flying along the bar. */
+  /* Rides the head of the fill, at the glyph's own angle. */
   .cart-ship__plane {
     position: absolute;
     left: var(--cs-pct, 0%);
     top: 50%;
-    transform: translate(-50%, -50%) rotate(45deg);
+    transform: translate(-50%, -50%);
     font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
     font-size: 15px;
     line-height: 1;
