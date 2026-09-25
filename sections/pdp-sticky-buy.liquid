@@ -64,13 +64,6 @@
         >
       {%- endif -%}
 
-      <div class="psb__info">
-        <span class="psb__title">{{ p.title }}</span>
-        <span class="psb__price" data-psb-price>
-          {{- current.price | money_with_currency -}}
-        </span>
-      </div>
-
       {%- if show_sizes -%}
         <button
           type="button"
@@ -164,7 +157,6 @@
               data-psb-opt
               data-variant-id="{{ v.id }}"
               data-label="{{ v_label | escape }}"
-              data-price="{{ v.price | money_with_currency | escape }}"
               aria-selected="{% if v.id == current.id %}true{% else %}false{% endif %}"
               {% unless v.available %}disabled aria-disabled="true"{% endunless %}
             >
@@ -228,33 +220,6 @@
     display: block;
   }
 
-  .psb__info {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 2px;
-    min-width: 0;
-    flex: 1 1 auto;
-  }
-
-  .psb__title {
-    font-size: 0.72rem;
-    font-weight: 600;
-    line-height: 1.2;
-    color: #111;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .psb__price {
-    font-size: 0.82rem;
-    font-weight: 700;
-    line-height: 1.1;
-    color: #111;
-    font-variant-numeric: tabular-nums;
-  }
-
   /* ── Size pill ── */
   .psb__pill {
     flex: 0 0 auto;
@@ -299,15 +264,24 @@
     transform: rotate(180deg);
   }
 
-  /* ── Add to cart ── */
+  /* ── Add to cart ──
+     Takes the space the title and price used to occupy: with those gone
+     every other child hugs its content, so without this the bar would
+     bunch up against the left edge. */
   .psb__form {
-    flex: 0 0 auto;
+    flex: 1 1 auto;
+    min-width: 0;
     display: block;
   }
 
   .psb__form form {
     display: flex;
     align-items: center;
+    width: 100%;
+  }
+
+  .psb .psb__atc {
+    width: 100%;
   }
 
   .psb .psb__atc {
@@ -507,14 +481,6 @@
       box-shadow: 0 20px 44px -16px rgba(0, 0, 0, 0.3), 0 2px 10px rgba(0, 0, 0, 0.08);
     }
 
-    .psb__title {
-      font-size: 0.78rem;
-    }
-
-    .psb__price {
-      font-size: 0.88rem;
-    }
-
     .psb__pill {
       max-width: 150px;
     }
@@ -565,7 +531,6 @@
     var sheet = root.querySelector('[data-psb-sheet]');
     var scrim = root.querySelector('[data-psb-scrim]');
     var label = root.querySelector('[data-psb-label]');
-    var priceEl = root.querySelector('[data-psb-price]');
     var variantInput = root.querySelector('input[name="id"]');
     var atc = root.querySelector('.psb__atc');
     var opts = [].slice.call(root.querySelectorAll('[data-psb-opt]'));
@@ -642,10 +607,9 @@
        price and buy button, and fires variant:update which syncs this bar
        back. Only fall back to setting our own input when there's no picker
        on the page (or its option value has since changed). */
-    function applyLocally(id, text, price) {
+    function applyLocally(id, text) {
       if (variantInput) variantInput.value = id;
       if (label && text) label.textContent = text;
-      if (priceEl && price) priceEl.textContent = price;
 
       opts.forEach(function (o) {
         o.setAttribute('aria-selected', o.dataset.variantId === String(id) ? 'true' : 'false');
@@ -688,9 +652,8 @@
 
         var id = opt.dataset.variantId;
         var text = opt.dataset.label;
-        var price = opt.dataset.price;
 
-        applyLocally(id, text, price);
+        applyLocally(id, text);
         syncMainPicker(text);
         close();
       });
@@ -706,7 +669,7 @@
       })[0];
 
       if (match) {
-        applyLocally(resource.id, match.dataset.label, match.dataset.price);
+        applyLocally(resource.id, match.dataset.label);
       } else if (variantInput) {
         variantInput.value = resource.id;
       }
