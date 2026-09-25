@@ -509,12 +509,11 @@
 
     /* Hugs its contents rather than sitting at a fixed width, so the card
        grows and shrinks with the selected size's text — "US 9" gets a
-       compact card, "US 12.5 - UK 11.5 - EU 47" gets a wide one. The
-       bounds stop it looking stunted on the short end or running past the
-       viewport on the long one. */
+       compact card, "US 12.5 - UK 11.5 - EU 47" gets a wide one. No floor:
+       the contents themselves are the minimum, so a short size leaves no
+       empty space. The max only stops a long one running off screen. */
     .psb__bar {
       width: fit-content;
-      min-width: 280px;
       max-width: min(560px, calc(100vw - 48px));
       padding: 12px 14px;
       border: 1px solid rgba(0, 0, 0, 0.08);
