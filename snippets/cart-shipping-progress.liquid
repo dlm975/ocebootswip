@@ -35,14 +35,16 @@
   endif
 
   comment
-    Nothing to measure, so the fill is a state rather than a proportion:
-    full once the cart qualifies, a stub beforehand so the track still
-    reads as a bar rather than an empty groove.
+    Nothing to measure, so the fill marks a stage rather than a
+    proportion. The bar only renders with something in the cart, so
+    reaching it at all means the halfway checkpoint is passed: an
+    accessory on its own parks the plane mid-bar, and a qualifying
+    product flies it to the end.
   endcomment
   if qualified
     assign pct = 100
   else
-    assign pct = 12
+    assign pct = 50
   endif
 
   assign track = settings.cart_ship_track | default: '#e6e6e6'
@@ -84,15 +86,24 @@
       {{ message }}
     </p>
 
-    <div
-      class="cart-ship__track"
-      role="progressbar"
-      aria-valuemin="0"
-      aria-valuemax="100"
-      aria-valuenow="{{ pct }}"
-      aria-label="{{ message | strip_html | escape }}"
-    >
-      <span class="cart-ship__fill"></span>
+    {%- comment -%}
+      The rail sits outside the track because the track clips its fill,
+      and the checkpoint and plane both need to overhang it.
+    {%- endcomment -%}
+    <div class="cart-ship__rail">
+      <div
+        class="cart-ship__track"
+        role="progressbar"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="{{ pct }}"
+        aria-label="{{ message | strip_html | escape }}"
+      >
+        <span class="cart-ship__fill"></span>
+      </div>
+
+      <span class="cart-ship__check{% if pct >= 50 %} cart-ship__check--hit{% endif %}" aria-hidden="true"></span>
+      <span class="cart-ship__plane" aria-hidden="true">&#9992;&#65039;</span>
     </div>
   </div>
 {%- endif -%}
@@ -123,12 +134,53 @@
     flex-shrink: 0;
   }
 
+  /* Padded so the plane and the checkpoint, which both stand proud of the
+     track, are not clipped by the card above or the list below. */
+  .cart-ship__rail {
+    position: relative;
+    padding-block: 9px;
+  }
+
   .cart-ship__track {
     position: relative;
     height: 6px;
     border-radius: 999px;
     background: var(--cs-track, #e6e6e6);
     overflow: hidden;
+  }
+
+  /* Halfway marker. Reached as soon as anything is in the cart, so it is
+     the plane's first stop rather than a target to aim at. */
+  .cart-ship__check {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 9px;
+    height: 9px;
+    margin: -4.5px 0 0 -4.5px;
+    border-radius: 50%;
+    background: var(--cs-track, #e6e6e6);
+    box-shadow: 0 0 0 2px rgb(255 255 255 / 85%);
+    transition: background-color 0.3s ease;
+  }
+
+  .cart-ship__check--hit {
+    background: var(--cs-fill, #16a34a);
+  }
+
+  /* Rides the head of the fill. Rotated because the Apple glyph points to
+     the upper right, and it should be flying along the bar. */
+  .cart-ship__plane {
+    position: absolute;
+    left: var(--cs-pct, 0%);
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+    font-size: 15px;
+    line-height: 1;
+    filter: drop-shadow(0 1px 2px rgb(0 0 0 / 25%));
+    transition: left 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+    pointer-events: none;
   }
 
   /* Animated rather than snapped, so adding a qualifying item visibly
@@ -144,7 +196,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .cart-ship__fill {
+    .cart-ship__fill,
+    .cart-ship__plane {
       transition: none;
     }
   }

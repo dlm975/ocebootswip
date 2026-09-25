@@ -2,8 +2,6 @@
   Renders the cart summary totals.
 {%- enddoc -%}
 
-{% render 'cart-stars' %}
-
 <div class="cart__summary-totals">
   {% # We need to keep this node in place to allow morphing to work properly # %}
   <div class="cart__original-total-container cart-primary-typography">
@@ -57,6 +55,8 @@
   -%}
 
   <div class="cart__total-container">
+    {% render 'cart-stars' %}
+
     <span
       class="cart__summary-item cart__total"
       role="status"
