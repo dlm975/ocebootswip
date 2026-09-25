@@ -24,9 +24,40 @@
   endfor
 
   assign current = p.selected_or_first_available_variant
-  assign show_sizes = false
-  if p.variants.size > 1
-    assign show_sizes = true
+
+  case size_pos
+    when 1
+      assign size_label = current.option1
+    when 2
+      assign size_label = current.option2
+    when 3
+      assign size_label = current.option3
+    else
+      assign size_label = current.title
+  endcase
+
+  comment
+    Shopify names the sole variant of an option-less product "Default
+    Title" — a label worth showing to nobody.
+  endcomment
+  if size_label == 'Default Title'
+    assign size_label = ''
+  endif
+
+  comment
+    Two separate questions: whether there is a size worth showing, and
+    whether there is a choice to make. A one-size product still displays
+    its size, just as a plain label rather than a picker that opens onto
+    a single option.
+  endcomment
+  assign show_size = false
+  if size_label != blank
+    assign show_size = true
+  endif
+
+  assign show_picker = false
+  if p.variants.size > 1 and show_size
+    assign show_picker = true
   endif
 
   assign form_id = 'psb-form-' | append: section.id
@@ -64,7 +95,7 @@
         >
       {%- endif -%}
 
-      {%- if show_sizes -%}
+      {%- if show_picker -%}
         <button
           type="button"
           class="psb__pill"
@@ -72,24 +103,19 @@
           aria-haspopup="listbox"
           aria-expanded="false"
         >
-          <span class="psb__pill-label" data-psb-label>
-            {%- liquid
-              case size_pos
-                when 1
-                  echo current.option1
-                when 2
-                  echo current.option2
-                when 3
-                  echo current.option3
-                else
-                  echo current.title
-              endcase
-            -%}
-          </span>
+          <span class="psb__pill-label" data-psb-label>{{ size_label }}</span>
           <svg class="psb__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="13" height="13" aria-hidden="true">
             <polyline points="6 9 12 15 18 9"/>
           </svg>
         </button>
+      {%- elsif show_size -%}
+        {%- comment -%}
+          One variant only: the size still shows, but as a label with no
+          chevron and nothing to open.
+        {%- endcomment -%}
+        <span class="psb__pill psb__pill--static">
+          <span class="psb__pill-label" data-psb-label>{{ size_label }}</span>
+        </span>
       {%- endif -%}
 
       <product-form-component
@@ -123,7 +149,7 @@
       </product-form-component>
     </div>
 
-    {%- if show_sizes -%}
+    {%- if show_picker -%}
       <div class="psb__sheet" data-psb-sheet hidden>
         <div class="psb__sheet-grip" aria-hidden="true"></div>
 
@@ -244,6 +270,16 @@
 
   .psb__pill:active {
     transform: scale(0.96);
+  }
+
+  /* Same shape, but nothing to press. */
+  .psb__pill--static {
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .psb__pill--static:active {
+    transform: none;
   }
 
   .psb__pill[aria-expanded='true'] {
