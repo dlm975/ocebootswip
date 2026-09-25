@@ -247,12 +247,15 @@
   }
 
   /* ── Size pill ── */
+  /* Sized to its text so the whole size reads out. Shrink is left on as a
+     last resort only — the label still truncates rather than shoving the
+     add-to-cart button off the bar on a very narrow screen. */
   .psb__pill {
-    flex: 0 0 auto;
+    flex: 0 1 auto;
+    min-width: 0;
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    max-width: 38vw;
     height: 38px;
     padding: 0 12px;
     border: 1.5px solid rgba(0, 0, 0, 0.16);
@@ -301,23 +304,18 @@
   }
 
   /* ── Add to cart ──
-     Takes the space the title and price used to occupy: with those gone
-     every other child hugs its content, so without this the bar would
-     bunch up against the left edge. */
+     Keeps its natural width and never shrinks; the auto margin absorbs
+     all the slack so it sits hard against the right edge while the size
+     pill keeps whatever width its text needs. */
   .psb__form {
-    flex: 1 1 auto;
-    min-width: 0;
+    flex: 0 0 auto;
+    margin-inline-start: auto;
     display: block;
   }
 
   .psb__form form {
     display: flex;
     align-items: center;
-    width: 100%;
-  }
-
-  .psb .psb__atc {
-    width: 100%;
   }
 
   .psb .psb__atc {
@@ -517,9 +515,6 @@
       box-shadow: 0 20px 44px -16px rgba(0, 0, 0, 0.3), 0 2px 10px rgba(0, 0, 0, 0.08);
     }
 
-    .psb__pill {
-      max-width: 150px;
-    }
 
     /* Anchor the sheet to the card instead of the screen edge */
     .psb__scrim {
