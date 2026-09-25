@@ -1,6 +1,7 @@
 {%- doc -%}
-  "You might also like" — a pill of hand-picked products above the cart
-  totals. Products are chosen in Theme settings → Cart.
+  "You might also like" — a pill of hand-picked products at the top of the
+  cart, under the shipping progress bar and above the item list. Products
+  are chosen in Theme settings → Cart.
 {%- enddoc -%}
 
 {%- liquid
@@ -158,17 +159,6 @@
     border-radius: var(--cr-radius, 16px);
     padding: 12px;
     margin-block-end: 12px;
-  }
-
-  /* The drawer summary spaces its children with --gap-2xl, which left a
-     canyon between the suggestions and the total. Tighten it here only,
-     and drop the pill's own margin so the two do not stack. */
-  .cart-drawer__summary:has(.cart-recs) {
-    gap: 12px;
-  }
-
-  .cart-drawer__summary .cart-recs {
-    margin-block-end: 0;
   }
 
   .cart-recs__head {

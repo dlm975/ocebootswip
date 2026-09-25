@@ -1,0 +1,151 @@
+{%- doc -%}
+  Free shipping status bar, at the very top of the cart.
+
+  Shipping is free on everything except a named set of accessories, and
+  even those ship free when they travel with something that qualifies. So
+  the test is about what the cart CONTAINS, not what it is worth: one
+  qualifying line is enough to unlock the whole order.
+
+  The exclusion list lives in Theme settings → Cart → Free shipping bar and
+  is shared with the product page's shipping pill, so the two can't drift.
+
+  No JavaScript: the drawer re-renders from Liquid on every cart update, so
+  the bar follows the cart on its own.
+{%- enddoc -%}
+
+{%- liquid
+  comment
+    Values fall back in Liquid as well as in the schema — a setting that
+    exists only as a schema default reads as nil until it reaches
+    settings_data.
+  endcomment
+  assign show_bar = true
+  if settings.cart_ship_show == false
+    assign show_bar = false
+  endif
+-%}
+
+{%- capture ship_ok -%}{%- render 'cart-ship-qualified' -%}{%- endcapture -%}
+
+{%- liquid
+  assign ship_ok = ship_ok | strip
+  assign qualified = false
+  if ship_ok == '1'
+    assign qualified = true
+  endif
+
+  comment
+    Nothing to measure, so the fill is a state rather than a proportion:
+    full once the cart qualifies, a stub beforehand so the track still
+    reads as a bar rather than an empty groove.
+  endcomment
+  if qualified
+    assign pct = 100
+  else
+    assign pct = 12
+  endif
+
+  assign track = settings.cart_ship_track | default: '#e6e6e6'
+  assign fill = settings.cart_ship_fill | default: '#16a34a'
+  assign fg = settings.cart_ship_text_color | default: '#15803d'
+  assign pending_fill = settings.cart_ship_pending_fill | default: '#d1a300'
+  assign pending_fg = settings.cart_ship_pending_text_color | default: '#8a6d00'
+
+  assign pending_copy = settings.cart_ship_text_pending | default: 'Add any pair of boots to unlock FREE shipping'
+  assign done_copy = settings.cart_ship_text_done | default: 'FREE shipping unlocked'
+
+  if qualified
+    assign message = done_copy
+  else
+    assign message = pending_copy
+    assign fill = pending_fill
+    assign fg = pending_fg
+  endif
+-%}
+
+{%- if show_bar and cart.item_count > 0 -%}
+  <div
+    class="cart-ship{% if qualified %} cart-ship--done{% endif %}"
+    style="
+      --cs-track: {{ track }};
+      --cs-fill: {{ fill }};
+      --cs-fg: {{ fg }};
+      --cs-pct: {{ pct }}%;
+    "
+  >
+    <p class="cart-ship__text" role="status">
+      {%- if qualified -%}
+        <span class="cart-ship__tick" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="13" height="13">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </span>
+      {%- endif -%}
+      {{ message }}
+    </p>
+
+    <div
+      class="cart-ship__track"
+      role="progressbar"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="{{ pct }}"
+      aria-label="{{ message | strip_html | escape }}"
+    >
+      <span class="cart-ship__fill"></span>
+    </div>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .cart-ship {
+    align-self: stretch;
+    width: 100%;
+    box-sizing: border-box;
+    margin-block-end: 12px;
+  }
+
+  .cart-ship__text {
+    margin: 0 0 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    text-align: center;
+    color: var(--cs-fg, #15803d);
+    font-size: var(--cart-font-size--sm, 0.8rem);
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .cart-ship__tick {
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+
+  .cart-ship__track {
+    position: relative;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--cs-track, #e6e6e6);
+    overflow: hidden;
+  }
+
+  /* Animated rather than snapped, so adding a qualifying item visibly
+     runs the bar to full. The drawer re-renders on cart update, so this
+     plays from the previous value each time. */
+  .cart-ship__fill {
+    display: block;
+    height: 100%;
+    width: var(--cs-pct, 0%);
+    border-radius: inherit;
+    background: var(--cs-fill, #16a34a);
+    transition: width 0.45s cubic-bezier(0.32, 0.72, 0, 1), background-color 0.3s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cart-ship__fill {
+      transition: none;
+    }
+  }
+{% endstylesheet %}

@@ -41,14 +41,17 @@
 {%- endif -%}
 
 {% stylesheet %}
+  /* Lives in .cart-drawer__summary, which centres its children and so
+     shrink-wraps them — stretch keeps this on the full width. */
   .cart-stars {
     display: flex;
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
     gap: 4px 8px;
+    align-self: stretch;
     width: 100%;
-    margin-block-end: 12px;
+    margin-block-end: 10px;
   }
 
   .cart-stars__row {

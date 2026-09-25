@@ -33,7 +33,24 @@
       {{- cart.item_count -}}
     </span>
 
-    {% render 'cart-stars' %}
+    {% comment %}
+      Top of the drawer: the shipping bar and the upsell share one card so
+      the suggestions read as the way to fill the bar, rather than as an
+      unrelated block that happens to sit under it. The card borrows the
+      suggestions' own background and radius settings so the two halves
+      cannot be styled apart.
+    {% endcomment %}
+    {%- liquid
+      assign unlock_bg = settings.cart_recs_background | default: '#f5f5f5'
+      assign unlock_radius = settings.cart_recs_radius | default: 16
+    -%}
+    <div
+      class="cart-unlock"
+      style="--cu-bg: {{ unlock_bg }}; --cu-radius: {{ unlock_radius }}px;"
+    >
+      {% render 'cart-shipping-progress' %}
+      {% render 'cart-recommendations' %}
+    </div>
 
     <form
       action="{{ routes.cart_url }}"
@@ -329,6 +346,45 @@
 </div>
 
 {% stylesheet %}
+  /* ── Unlock card: shipping bar + suggestions, as one unit ── */
+  .cart-unlock {
+    align-self: stretch;
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--cu-bg, #f5f5f5);
+    border-radius: var(--cu-radius, 16px);
+    padding: 12px;
+    margin-block-end: 12px;
+  }
+
+  /* Both halves can render nothing — an empty cart hides the bar, no
+     chosen products hides the suggestions — which would otherwise leave a
+     bare tinted box. :empty will not do here because the Liquid leaves
+     whitespace behind. */
+  .cart-unlock:not(:has(*)) {
+    display: none;
+  }
+
+  /* The halves give up their own chrome; the card provides it once. */
+  .cart-unlock .cart-ship {
+    margin-block-end: 0;
+  }
+
+  .cart-unlock .cart-recs {
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    margin-block-end: 0;
+  }
+
+  /* Only when the bar is actually above it, so a card holding just the
+     suggestions has no stray rule across its top. */
+  .cart-unlock .cart-ship + .cart-recs {
+    margin-block-start: 10px;
+    padding-block-start: 10px;
+    border-block-start: 1px solid rgb(0 0 0 / 8%);
+  }
+
   .cart-items {
     --cart-item-media-width-min: 2.5rem;
     --cart-item-media-width-max: 7.5rem;

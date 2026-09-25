@@ -2,7 +2,7 @@
   Renders the cart summary totals.
 {%- enddoc -%}
 
-{% render 'cart-recommendations' %}
+{% render 'cart-stars' %}
 
 <div class="cart__summary-totals">
   {% # We need to keep this node in place to allow morphing to work properly # %}
@@ -81,12 +81,18 @@
       exists only as a schema default reads as nil until it has been
       written to settings_data.
     {% endcomment %}
+    {%- capture ship_ok -%}{%- render 'cart-ship-qualified' -%}{%- endcapture -%}
     {%- liquid
+      assign ship_ok = ship_ok | strip
       assign fs_text = settings.cart_free_shipping_text | default: '+ FREE Shipping'
       assign fs_color = settings.cart_free_shipping_color | default: '#15803d'
       assign fs_size = settings.cart_free_shipping_size | default: 0
     -%}
-    {%- if fs_text != blank -%}
+    {%- comment -%}
+      Hidden on a cart that does not qualify — promising free shipping
+      under the total of an accessories-only order would be a lie.
+    {%- endcomment -%}
+    {%- if fs_text != blank and ship_ok == '1' -%}
       <span
         class="cart__free-shipping cart-primary-typography"
         style="

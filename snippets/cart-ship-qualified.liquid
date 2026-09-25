@@ -1,0 +1,51 @@
+{%- doc -%}
+  Echoes "1" when the current cart qualifies for free shipping, "0" when
+  it does not. Nothing else — it is meant to be captured:
+
+    {%- capture ship_ok -%}{%- render 'cart-ship-qualified' -%}{%- endcapture -%}
+    {%- assign ship_ok = ship_ok | strip -%}
+
+  Shipping is free on everything except a named set of accessories, and
+  even those ship free when they travel with something that qualifies, so
+  a single qualifying line unlocks the whole order.
+
+  Kept in one place so the progress bar, the total's shipping line and
+  anything added later cannot disagree about who qualifies.
+{%- enddoc -%}
+
+{%- liquid
+  comment
+    Handles are wrapped in commas on both sides so that "nike-studs" can
+    never match inside "nike-studs-pro".
+  endcomment
+  assign excluded_handles = ''
+  for item in settings.cart_ship_excluded_products
+    assign excluded_handles = excluded_handles | append: ',' | append: item.handle | append: ','
+  endfor
+
+  assign excluded_tag = settings.cart_ship_excluded_tag | strip
+
+  assign qualifying = 0
+  for line in cart.items
+    assign is_excluded = false
+
+    assign needle = ',' | append: line.product.handle | append: ','
+    if excluded_handles contains needle
+      assign is_excluded = true
+    endif
+
+    if excluded_tag != blank and line.product.tags contains excluded_tag
+      assign is_excluded = true
+    endif
+
+    unless is_excluded
+      assign qualifying = qualifying | plus: 1
+    endunless
+  endfor
+
+  if qualifying > 0
+    echo '1'
+  else
+    echo '0'
+  endif
+-%}

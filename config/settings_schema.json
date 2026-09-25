@@ -2329,6 +2329,71 @@
       },
       {
         "type": "header",
+        "content": "Free shipping bar"
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_ship_show",
+        "label": "Show the progress bar",
+        "default": true
+      },
+      {
+        "type": "product_list",
+        "id": "cart_ship_excluded_products",
+        "label": "Products that do not qualify on their own",
+        "limit": 50,
+        "info": "Shipping is free on everything else. These still ship free when the cart also contains a qualifying product. Shared with the product page shipping pill."
+      },
+      {
+        "type": "text",
+        "id": "cart_ship_excluded_tag",
+        "label": "Or use this product tag",
+        "info": "Optional \u2014 useful when more than 50 products need excluding. Case sensitive."
+      },
+      {
+        "type": "text",
+        "id": "cart_ship_text_pending",
+        "label": "Text when the cart does not qualify",
+        "default": "Add any pair of boots to unlock FREE shipping"
+      },
+      {
+        "type": "text",
+        "id": "cart_ship_text_done",
+        "label": "Text once unlocked",
+        "default": "FREE shipping unlocked"
+      },
+      {
+        "type": "color",
+        "id": "cart_ship_pending_fill",
+        "label": "Bar colour before unlocking",
+        "default": "#d1a300"
+      },
+      {
+        "type": "color",
+        "id": "cart_ship_pending_text_color",
+        "label": "Text colour before unlocking",
+        "default": "#8a6d00"
+      },
+      {
+        "type": "color",
+        "id": "cart_ship_fill",
+        "label": "Bar colour",
+        "default": "#16a34a"
+      },
+      {
+        "type": "color",
+        "id": "cart_ship_track",
+        "label": "Bar background",
+        "default": "#e6e6e6"
+      },
+      {
+        "type": "color",
+        "id": "cart_ship_text_color",
+        "label": "Text colour",
+        "default": "#15803d"
+      },
+      {
+        "type": "header",
         "content": "Free shipping line"
       },
       {
