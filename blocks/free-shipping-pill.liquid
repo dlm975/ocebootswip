@@ -7,14 +7,34 @@
   comment
     Merchants pick the products that should NOT carry the pill, so the
     default for a new product is to show it.
+
+    Two lists are consulted: the shared one in Theme settings → Cart,
+    which the cart's shipping bar also reads, and this block's own. The
+    shared list is the one to maintain — the block list is kept only so
+    that existing configurations keep working.
   endcomment
   assign excluded = false
-  for item in block.settings.excluded_products
+
+  for item in settings.cart_ship_excluded_products
     if item.id == p.id
       assign excluded = true
       break
     endif
   endfor
+
+  unless excluded
+    for item in block.settings.excluded_products
+      if item.id == p.id
+        assign excluded = true
+        break
+      endif
+    endfor
+  endunless
+
+  assign shared_tag = settings.cart_ship_excluded_tag | strip
+  if shared_tag != blank and p.tags contains shared_tag
+    assign excluded = true
+  endif
 
   assign tag = block.settings.excluded_tag | strip
   if tag != blank and p.tags contains tag
@@ -162,9 +182,9 @@
     {
       "type": "product_list",
       "id": "excluded_products",
-      "label": "Products to hide it on",
+      "label": "Products to hide it on (legacy)",
       "limit": 50,
-      "info": "The pill shows on every product except these."
+      "info": "Maintain the list in Theme settings → Cart → Free shipping bar instead — it drives both this pill and the cart's shipping bar. Anything listed here is still hidden as well."
     },
     {
       "type": "text",
