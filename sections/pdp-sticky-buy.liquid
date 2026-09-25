@@ -507,14 +507,20 @@
       gap: 10px;
     }
 
+    /* Hugs its contents rather than sitting at a fixed width, so the card
+       grows and shrinks with the selected size's text — "US 9" gets a
+       compact card, "US 12.5 - UK 11.5 - EU 47" gets a wide one. The
+       bounds stop it looking stunted on the short end or running past the
+       viewport on the long one. */
     .psb__bar {
-      width: min(420px, calc(100vw - 48px));
+      width: fit-content;
+      min-width: 280px;
+      max-width: min(560px, calc(100vw - 48px));
       padding: 12px 14px;
       border: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 18px;
       box-shadow: 0 20px 44px -16px rgba(0, 0, 0, 0.3), 0 2px 10px rgba(0, 0, 0, 0.08);
     }
-
 
     /* Anchor the sheet to the card instead of the screen edge */
     .psb__scrim {
