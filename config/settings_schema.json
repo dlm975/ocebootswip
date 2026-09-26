@@ -2363,6 +2363,17 @@
         "default": "FREE shipping unlocked"
       },
       {
+        "type": "range",
+        "id": "cart_ship_text_size",
+        "label": "Message text size",
+        "min": 0,
+        "max": 24,
+        "step": 1,
+        "unit": "px",
+        "default": 0,
+        "info": "0 matches the rest of the cart. Applies to both the locked and unlocked wording."
+      },
+      {
         "type": "color",
         "id": "cart_ship_pending_fill",
         "label": "Bar colour before unlocking",

@@ -53,6 +53,8 @@
   assign pending_fill = settings.cart_ship_pending_fill | default: '#d1a300'
   assign pending_fg = settings.cart_ship_pending_text_color | default: '#8a6d00'
 
+  assign text_size = settings.cart_ship_text_size | default: 0
+
   assign pending_copy = settings.cart_ship_text_pending | default: 'Add any pair of boots to unlock FREE shipping'
   assign done_copy = settings.cart_ship_text_done | default: 'FREE shipping unlocked'
 
@@ -73,6 +75,7 @@
       --cs-fill: {{ fill }};
       --cs-fg: {{ fg }};
       --cs-pct: {{ pct }}%;
+      {% if text_size > 0 %}--cs-size: {{ text_size }}px;{% endif %}
     "
   >
     <p class="cart-ship__text" role="status">
@@ -124,7 +127,7 @@
     gap: 5px;
     text-align: center;
     color: var(--cs-fg, #15803d);
-    font-size: var(--cart-font-size--sm, 0.8rem);
+    font-size: var(--cs-size, var(--cart-font-size--sm, 0.8rem));
     font-weight: 600;
     line-height: 1.3;
   }
@@ -132,6 +135,13 @@
   .cart-ship__tick {
     display: inline-flex;
     flex-shrink: 0;
+  }
+
+  /* Sized in em so the tick grows with the message rather than staying
+     at the 13px in its markup. */
+  .cart-ship__tick svg {
+    width: 1em;
+    height: 1em;
   }
 
   /* Padded so the plane and the checkpoint, which both stand proud of the
