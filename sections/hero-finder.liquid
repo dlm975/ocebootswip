@@ -1,0 +1,538 @@
+{%- doc -%}
+  Hero image with a floating finder panel in the lower quarter: pick a
+  model, pick a size, then a button that takes the shopper straight to
+  that combination.
+
+  Models are blocks, each carrying its own link, so the panel can point at
+  collections, a search, or anything else. The size dropdown appends a
+  filter to whichever link the chosen model carries, which is how Shopify
+  collection filtering reads sizes from a URL.
+
+  The button is a real link with a working href, so it still goes
+  somewhere sensible if the script never runs.
+{%- enddoc -%}
+
+{%- liquid
+  assign img = section.settings.image
+  assign img_mobile = section.settings.image_mobile
+  if img_mobile == blank
+    assign img_mobile = img
+  endif
+
+  assign overlay = section.settings.overlay_opacity | default: 0 | divided_by: 100.0
+
+  assign fallback = section.settings.button_link
+  if fallback == blank
+    assign fallback = routes.all_products_collection_url
+  endif
+
+  assign size_param = section.settings.size_param | default: 'filter.v.option.size'
+  assign sizes = section.settings.sizes | newline_to_br | split: '<br />'
+-%}
+
+<div
+  class="hf"
+  id="hf-{{ section.id }}"
+  data-size-param="{{ size_param | escape }}"
+  style="
+    --hf-h: {{ section.settings.height_desktop | default: 620 }}px;
+    --hf-h-mobile: {{ section.settings.height_mobile | default: 520 }}px;
+    --hf-scrim: {{ overlay | round: 2 }};
+    --hf-bottom: {{ section.settings.panel_bottom | default: 6 }}%;
+    --hf-panel-w: {{ section.settings.panel_width | default: 520 }}px;
+    --hf-radius: {{ section.settings.panel_radius | default: 20 }}px;
+    --hf-panel-bg: {{ section.settings.panel_background | default: '#ffffff' }};
+    --hf-panel-fg: {{ section.settings.panel_text_color | default: '#111111' }};
+    --hf-btn-bg: {{ section.settings.button_background | default: '#111111' }};
+    --hf-btn-fg: {{ section.settings.button_text_color | default: '#ffffff' }};
+  "
+  {{ section.shopify_attributes }}
+>
+  <div class="hf__media" aria-hidden="true">
+    {%- if img != blank -%}
+      <picture>
+        <source
+          media="(max-width: 749px)"
+          srcset="{{ img_mobile | image_url: width: 750 }} 750w, {{ img_mobile | image_url: width: 1100 }} 1100w"
+          sizes="100vw"
+        >
+        <img
+          src="{{ img | image_url: width: 2000 }}"
+          srcset="{{ img | image_url: width: 900 }} 900w, {{ img | image_url: width: 1400 }} 1400w, {{ img | image_url: width: 2000 }} 2000w"
+          sizes="100vw"
+          alt=""
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+          width="2000"
+          height="800"
+        >
+      </picture>
+    {%- else -%}
+      <div class="hf__placeholder">
+        {{ 'hero-apparel-1' | placeholder_svg_tag: 'hf__placeholder-svg' }}
+      </div>
+    {%- endif -%}
+
+    {%- if overlay > 0 -%}
+      <div class="hf__scrim"></div>
+    {%- endif -%}
+  </div>
+
+  <div class="hf__panel">
+    {%- if section.settings.panel_heading != blank -%}
+      <p class="hf__panel-heading">{{ section.settings.panel_heading }}</p>
+    {%- endif -%}
+
+    <div class="hf__fields">
+      <div class="hf__field">
+        <label class="hf__label" for="hf-model-{{ section.id }}">
+          {{ section.settings.model_label | default: 'Model' }}
+        </label>
+        <div class="hf__select-wrap">
+          <select class="hf__select" id="hf-model-{{ section.id }}" data-hf-model>
+            <option value="">{{ section.settings.model_placeholder | default: 'Select model' }}</option>
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'model' -%}
+                {%- liquid
+                  assign block_label = block.settings.label
+                  if block_label == blank
+                    assign block_label = 'Model'
+                  endif
+                -%}
+                <option value="{{ block.settings.link }}" {{ block.shopify_attributes }}>
+                  {{- block_label -}}
+                </option>
+              {%- endif -%}
+            {%- endfor -%}
+          </select>
+          {% render 'hf-chevron' %}
+        </div>
+      </div>
+
+      <div class="hf__field">
+        <label class="hf__label" for="hf-size-{{ section.id }}">
+          {{ section.settings.size_label | default: 'Size' }}
+        </label>
+        <div class="hf__select-wrap">
+          <select class="hf__select" id="hf-size-{{ section.id }}" data-hf-size>
+            <option value="">{{ section.settings.size_placeholder | default: 'Select size' }}</option>
+            {%- for size in sizes -%}
+              {%- assign size_clean = size | strip_newlines | strip -%}
+              {%- if size_clean != blank -%}
+                <option value="{{ size_clean | escape }}">{{ size_clean }}</option>
+              {%- endif -%}
+            {%- endfor -%}
+          </select>
+          {% render 'hf-chevron' %}
+        </div>
+      </div>
+    </div>
+
+    <a class="hf__button" href="{{ fallback }}" data-hf-go>
+      {{ section.settings.button_text | default: 'Shop now' }}
+    </a>
+  </div>
+</div>
+
+{% stylesheet %}
+  .hf {
+    position: relative;
+    width: 100%;
+    height: var(--hf-h-mobile, 520px);
+    overflow: hidden;
+  }
+
+  @media screen and (min-width: 750px) {
+    .hf {
+      height: var(--hf-h, 620px);
+    }
+  }
+
+  .hf__media,
+  .hf__media img,
+  .hf__placeholder,
+  .hf__scrim {
+    position: absolute;
+    inset: 0;
+  }
+
+  .hf__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .hf__placeholder-svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .hf__scrim {
+    background: rgb(0 0 0 / calc(var(--hf-scrim, 0) * 100%));
+  }
+
+  /* The panel floats in the lower quarter. Anchored from the bottom so it
+     keeps its distance from the base of the image at any hero height. */
+  .hf__panel {
+    position: absolute;
+    left: 50%;
+    bottom: var(--hf-bottom, 6%);
+    transform: translateX(-50%);
+    width: min(var(--hf-panel-w, 520px), calc(100% - 32px));
+    box-sizing: border-box;
+    padding: 16px;
+    border-radius: var(--hf-radius, 20px);
+    background: var(--hf-panel-bg, #fff);
+    color: var(--hf-panel-fg, #111);
+    box-shadow: 0 18px 40px -16px rgb(0 0 0 / 45%), 0 2px 8px rgb(0 0 0 / 10%);
+  }
+
+  .hf__panel-heading {
+    margin: 0 0 10px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-align: center;
+  }
+
+  /* Side by side from the start — two short dropdowns read as one choice,
+     and stacking them pushes the button out of the lower quarter. */
+  .hf__fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .hf__field {
+    min-width: 0;
+  }
+
+  .hf__label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    opacity: 0.65;
+  }
+
+  .hf__select-wrap {
+    position: relative;
+  }
+
+  /* appearance:none loses the native arrow, so one is drawn back in and
+     pushed out of the way of pointer events. */
+  .hf__select {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 42px;
+    box-sizing: border-box;
+    padding: 0 30px 0 12px;
+    border: 1.5px solid rgb(0 0 0 / 14%);
+    border-radius: 12px;
+    background: transparent;
+    color: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .hf__select:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 1px;
+  }
+
+  .hf__chevron {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    opacity: 0.55;
+  }
+
+  .hf__button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 12px;
+    min-height: 46px;
+    padding: 0 18px;
+    border-radius: 12px;
+    background: var(--hf-btn-bg, #111);
+    color: var(--hf-btn-fg, #fff);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-align: center;
+    text-decoration: none;
+    transition: transform 0.18s ease, opacity 0.18s ease;
+  }
+
+  .hf__button:hover {
+    opacity: 0.92;
+  }
+
+  .hf__button:active {
+    transform: scale(0.99);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hf__button {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+<script>
+  (function () {
+    var root = document.getElementById('hf-{{ section.id }}');
+    if (!root) return;
+
+    var model = root.querySelector('[data-hf-model]');
+    var size = root.querySelector('[data-hf-size]');
+    var go = root.querySelector('[data-hf-go]');
+    if (!go) return;
+
+    var fallback = go.getAttribute('href');
+    var param = root.dataset.sizeParam || 'filter.v.option.size';
+
+    function destination() {
+      var base = (model && model.value) || fallback;
+      if (!base) return null;
+
+      var chosen = size && size.value;
+      if (!chosen) return base;
+
+      var join = base.indexOf('?') === -1 ? '?' : '&';
+      return base + join + encodeURIComponent(param) + '=' + encodeURIComponent(chosen);
+    }
+
+    /* Kept on the href rather than only handled on click, so the real
+       destination shows in the status bar and survives opening in a new
+       tab or being copied. */
+    function sync() {
+      var url = destination();
+      if (url) go.setAttribute('href', url);
+    }
+
+    if (model) model.addEventListener('change', sync);
+    if (size) size.addEventListener('change', sync);
+
+    sync();
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Hero finder",
+  "tag": "section",
+  "class": "hero-finder-wrapper",
+  "blocks": [
+    {
+      "type": "model",
+      "name": "Model",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Name",
+          "default": "Nike"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Links to",
+          "info": "The collection or page this model opens. The chosen size is added to it as a filter."
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Mobile image",
+      "info": "Optional. Falls back to the image above."
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Image darkening",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "height_desktop",
+      "label": "Height on desktop",
+      "min": 320,
+      "max": 900,
+      "step": 10,
+      "unit": "px",
+      "default": 620
+    },
+    {
+      "type": "range",
+      "id": "height_mobile",
+      "label": "Height on mobile",
+      "min": 280,
+      "max": 800,
+      "step": 10,
+      "unit": "px",
+      "default": 520
+    },
+    {
+      "type": "header",
+      "content": "Panel"
+    },
+    {
+      "type": "text",
+      "id": "panel_heading",
+      "label": "Heading",
+      "info": "Optional, shown above the dropdowns."
+    },
+    {
+      "type": "range",
+      "id": "panel_bottom",
+      "label": "Distance from the bottom",
+      "min": 0,
+      "max": 25,
+      "step": 1,
+      "unit": "%",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "panel_width",
+      "label": "Panel width",
+      "min": 320,
+      "max": 760,
+      "step": 10,
+      "unit": "px",
+      "default": 520
+    },
+    {
+      "type": "range",
+      "id": "panel_radius",
+      "label": "Corner radius",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "panel_background",
+      "label": "Panel background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "panel_text_color",
+      "label": "Panel text",
+      "default": "#111111"
+    },
+    {
+      "type": "header",
+      "content": "Dropdowns"
+    },
+    {
+      "type": "text",
+      "id": "model_label",
+      "label": "Model field label",
+      "default": "Model"
+    },
+    {
+      "type": "text",
+      "id": "model_placeholder",
+      "label": "Model placeholder",
+      "default": "Select model"
+    },
+    {
+      "type": "text",
+      "id": "size_label",
+      "label": "Size field label",
+      "default": "Size"
+    },
+    {
+      "type": "text",
+      "id": "size_placeholder",
+      "label": "Size placeholder",
+      "default": "Select size"
+    },
+    {
+      "type": "textarea",
+      "id": "sizes",
+      "label": "Sizes",
+      "default": "US 6\nUS 7\nUS 8\nUS 9\nUS 10\nUS 11\nUS 12",
+      "info": "One per line. These must match your size option values exactly for filtering to work."
+    },
+    {
+      "type": "text",
+      "id": "size_param",
+      "label": "Size filter parameter",
+      "default": "filter.v.option.size",
+      "info": "Advanced. The URL parameter your collection filtering uses for size."
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Fallback link",
+      "info": "Used when no model has been chosen."
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Button background",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero finder",
+      "blocks": [
+        { "type": "model", "settings": { "label": "Nike" } },
+        { "type": "model", "settings": { "label": "adidas" } },
+        { "type": "model", "settings": { "label": "Puma" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
