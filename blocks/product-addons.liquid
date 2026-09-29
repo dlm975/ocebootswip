@@ -46,6 +46,16 @@
         if item.variants.size == 1 and variant.available
           assign can_add = true
         endif
+
+        comment
+          The price moved onto the button, so the card no longer needs its
+          own price line — which is most of what makes it short.
+        endcomment
+        if item.price_varies
+          assign price_label = item.price_min | money | prepend: 'from '
+        else
+          assign price_label = item.price | money
+        endif
       -%}
       <div class="pa__card">
         <a class="pa__media" href="{{ item.url }}" tabindex="-1" aria-hidden="true">
@@ -63,13 +73,14 @@
 
         <div class="pa__info">
           <a class="pa__title" href="{{ item.url }}">{{ item.title }}</a>
-          <span class="pa__price">
-            {%- if item.compare_at_price > item.price -%}
-              <s class="pa__was">{{ item.compare_at_price | money }}</s>
-            {%- endif -%}
-            <span class="pa__now">{{ item.price | money }}</span>
-          </span>
         </div>
+
+        {%- capture price_tag -%}
+          {%- if item.compare_at_price > item.price -%}
+            <s class="pa__was">{{ item.compare_at_price | money }}</s>
+          {%- endif -%}
+          <span class="pa__now">{{ price_label }}</span>
+        {%- endcapture -%}
 
         {%- if can_add -%}
           <button
@@ -78,7 +89,10 @@
             data-pa-add
             data-variant-id="{{ variant.id }}"
           >
-            <span aria-hidden="true">+</span> {{ block.settings.button_label | default: 'Add' }}
+            <span class="pa__add-label">
+              <span aria-hidden="true">+</span> {{ block.settings.button_label | default: 'Add' }}
+            </span>
+            {{ price_tag }}
           </button>
         {%- else -%}
           {%- comment -%}
@@ -86,7 +100,8 @@
             first one here would quietly put the wrong size in the cart.
           {%- endcomment -%}
           <a class="pa__add" href="{{ item.url }}">
-            {{ block.settings.choose_label | default: 'Choose' }}
+            <span class="pa__add-label">{{ block.settings.choose_label | default: 'Choose' }}</span>
+            {{ price_tag }}
           </a>
         {%- endif -%}
       </div>
@@ -139,13 +154,13 @@
     background: var(--pa-bg, #f5f5f5);
     color: var(--pa-fg, #111);
     border-radius: var(--pa-radius, 16px);
-    padding: 10px;
+    padding: 7px;
   }
 
   .pa__heading {
     display: block;
-    margin-bottom: 6px;
-    font-size: 0.74rem;
+    margin-bottom: 4px;
+    font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.01em;
   }
@@ -156,13 +171,13 @@
   .pa__list {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    gap: 6px;
   }
 
-  /* Thumbnail and text on the top row, the button spanning underneath.
-     The second row takes the free space and the button sits at its
-     bottom, so a card with a two-line title does not leave its
-     neighbour's button floating halfway up. */
+  /* Thumbnail and title on the top row, the button spanning underneath
+     carrying the price. The second row takes the free space and the
+     button sits at its bottom, so a card whose title wraps does not
+     leave its neighbour's button floating halfway up. */
   .pa__card {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -171,8 +186,8 @@
       'media info'
       'action action';
     align-items: center;
-    gap: 6px 8px;
-    padding: 7px;
+    gap: 4px 7px;
+    padding: 5px;
     border-radius: calc(var(--pa-radius, 16px) - 6px);
     background: var(--pa-card-bg, #fff);
     border: 1px solid var(--pa-card-border, #e6e6e6);
@@ -182,9 +197,9 @@
 
   .pa__media {
     grid-area: media;
-    width: 36px;
-    height: 36px;
-    border-radius: 7px;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
     overflow: hidden;
     background: rgb(0 0 0 / 4%);
     display: block;
@@ -205,11 +220,13 @@
     gap: 1px;
   }
 
+  /* Two lines before the price moved out; one now, which is what takes
+     the card's top row down to the thumbnail's own height. */
   .pa__title {
     color: inherit;
-    font-size: 0.68rem;
+    font-size: 0.66rem;
     font-weight: 600;
-    line-height: 1.2;
+    line-height: 1.25;
     text-decoration: none;
     overflow: hidden;
     display: -webkit-box;
@@ -217,16 +234,14 @@
     -webkit-box-orient: vertical;
   }
 
-  .pa__price {
-    display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 4px;
-    font-size: 0.68rem;
+  /* Price pieces now live inside the button. */
+  .pa__add-label {
+    flex: 0 0 auto;
   }
 
   .pa__was {
-    opacity: 0.5;
+    opacity: 0.6;
+    font-weight: 500;
   }
 
   .pa__now {
@@ -239,18 +254,19 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 3px;
-    min-height: 26px;
-    padding: 0 8px;
+    gap: 4px;
+    min-height: 22px;
+    padding: 0 7px;
     border: none;
     border-radius: 999px;
     background: var(--pa-btn-bg, #111);
     color: var(--pa-btn-fg, #fff);
-    font-size: 0.74rem;
+    font-size: 0.66rem;
     font-weight: 700;
     line-height: 1;
     text-decoration: none;
     white-space: nowrap;
+    overflow: hidden;
     cursor: pointer;
     transition: opacity 0.18s ease, transform 0.18s ease;
   }
