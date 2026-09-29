@@ -274,6 +274,25 @@
             "essential_upsell_app_block_zgTHkC": {
               "type": "shopify://apps/essential-upsell/blocks/app-block/50627fd9-24fd-4250-8614-accc12826d80",
               "settings": {}
+            },
+            "addon_offer_001": {
+              "type": "product-addons",
+              "settings": {
+                "heading": "Add to your order",
+                "max_items": 2,
+                "products": [],
+                "match_keyword": "adidas",
+                "products_alt": [],
+                "button_label": "Add",
+                "choose_label": "Choose",
+                "radius": 16,
+                "background": "#f5f5f5",
+                "text_color": "#111111",
+                "card_background": "#ffffff",
+                "card_border": "#e6e6e6",
+                "button_background": "#111111",
+                "button_text_color": "#ffffff"
+              }
             }
           },
           "block_order": [
@@ -281,6 +300,7 @@
             "free_shipping_pill_001",
             "star_rating_001",
             "variant_picker_KALzja",
+            "addon_offer_001",
             "urgency_stock_001",
             "buy_buttons_pKHp9V",
             "payment_icons_001",
