@@ -139,42 +139,52 @@
     background: var(--pa-bg, #f5f5f5);
     color: var(--pa-fg, #111);
     border-radius: var(--pa-radius, 16px);
-    padding: 12px;
+    padding: 10px;
   }
 
   .pa__heading {
     display: block;
-    margin-bottom: 8px;
-    font-size: 0.8rem;
+    margin-bottom: 6px;
+    font-size: 0.74rem;
     font-weight: 700;
     letter-spacing: 0.01em;
   }
 
-  /* Stacked rather than the cart's side-scroller: the details column is
-     narrow, and with only a couple of add-ons there is nothing to page
-     through. */
+  /* Side by side rather than the cart's side-scroller: the details column
+     is narrow, and two short cards cost roughly half the height that
+     stacking them did. */
   .pa__list {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 8px;
   }
 
+  /* Thumbnail and text on the top row, the button spanning underneath.
+     The second row takes the free space and the button sits at its
+     bottom, so a card with a two-line title does not leave its
+     neighbour's button floating halfway up. */
   .pa__card {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      'media info'
+      'action action';
     align-items: center;
-    gap: 10px;
-    padding: 8px;
+    gap: 6px 8px;
+    padding: 7px;
     border-radius: calc(var(--pa-radius, 16px) - 6px);
     background: var(--pa-card-bg, #fff);
     border: 1px solid var(--pa-card-border, #e6e6e6);
     box-sizing: border-box;
+    min-width: 0;
   }
 
   .pa__media {
-    flex: 0 0 auto;
-    width: 48px;
-    height: 48px;
-    border-radius: 8px;
+    grid-area: media;
+    width: 36px;
+    height: 36px;
+    border-radius: 7px;
     overflow: hidden;
     background: rgb(0 0 0 / 4%);
     display: block;
@@ -188,18 +198,18 @@
   }
 
   .pa__info {
-    flex: 1 1 auto;
+    grid-area: info;
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
   }
 
   .pa__title {
     color: inherit;
-    font-size: 0.76rem;
+    font-size: 0.68rem;
     font-weight: 600;
-    line-height: 1.25;
+    line-height: 1.2;
     text-decoration: none;
     overflow: hidden;
     display: -webkit-box;
@@ -210,8 +220,9 @@
   .pa__price {
     display: flex;
     align-items: baseline;
-    gap: 5px;
-    font-size: 0.76rem;
+    flex-wrap: wrap;
+    gap: 4px;
+    font-size: 0.68rem;
   }
 
   .pa__was {
@@ -223,13 +234,14 @@
   }
 
   .pa__add {
-    flex: 0 0 auto;
+    grid-area: action;
+    align-self: end;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 3px;
-    min-height: 32px;
-    padding: 0 12px;
+    min-height: 26px;
+    padding: 0 8px;
     border: none;
     border-radius: 999px;
     background: var(--pa-btn-bg, #111);
