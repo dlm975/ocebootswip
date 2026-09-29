@@ -123,6 +123,7 @@
             <span class="pa__add-label">
               <span aria-hidden="true">+</span> {{ block.settings.button_label | default: 'Add' }}
             </span>
+            <span class="pa__sep" aria-hidden="true">-</span>
             {{ price_tag }}
           </button>
         {%- else -%}
@@ -132,6 +133,7 @@
           {%- endcomment -%}
           <a class="pa__add" href="{{ item.url }}">
             <span class="pa__add-label">{{ block.settings.choose_label | default: 'Choose' }}</span>
+            <span class="pa__sep" aria-hidden="true">-</span>
             {{ price_tag }}
           </a>
         {%- endif -%}
@@ -186,11 +188,15 @@
     color: var(--pa-fg, #111);
     border-radius: var(--pa-radius, 16px);
     padding: 7px;
+    font-family: var(--font-body--family);
+    font-style: var(--font-body--style);
   }
 
   .pa__heading {
     display: block;
     margin-bottom: 4px;
+    font-family: var(--font-heading--family);
+    font-style: var(--font-heading--style);
     font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.01em;
@@ -276,6 +282,15 @@
     text-overflow: ellipsis;
   }
 
+  /* Drops out with the label when the line runs short, so the dash is
+     never left dangling against the price. */
+  .pa__sep {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    opacity: 0.7;
+  }
+
   .pa__was {
     flex: 1 1 auto;
     min-width: 0;
@@ -289,9 +304,16 @@
     font-weight: 700;
   }
 
+  /* Set explicitly rather than left to inherit: buttons do not take
+     their type from the page, browsers substitute the system UI font.
+     That is what kept this one upright while everything around it is
+     set in the theme's italic cut. Named here for the anchor variant
+     too, so both states match. */
   .pa__add {
     grid-area: action;
     align-self: end;
+    font-family: var(--font-heading--family);
+    font-style: var(--font-heading--style);
     display: inline-flex;
     align-items: center;
     justify-content: center;
