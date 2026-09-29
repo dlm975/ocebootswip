@@ -212,7 +212,7 @@
             "addon_offer_001": {
               "type": "product-addons",
               "settings": {
-                "heading": "Add-ons",
+                "heading": "Add-ons +",
                 "max_items": 2,
                 "products": [
                   "fg-ag-studs-for-nike",
@@ -226,7 +226,7 @@
                 "button_label": "Add",
                 "choose_label": "Choose",
                 "radius": 16,
-                "background": "#f5f5f5",
+                "background": "#CEF2DE",
                 "text_color": "#111111",
                 "card_background": "#ffffff",
                 "card_border": "#e6e6e6",
