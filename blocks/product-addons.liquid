@@ -50,11 +50,42 @@
         comment
           The price moved onto the button, so the card no longer needs its
           own price line — which is most of what makes it short.
+
+          money already renders in the active market's presentment
+          currency, so the figure follows the region selector on its own.
+          The theme's own product-card setting decides whether the code is
+          shown beside it, which is the same rule snippets/price.liquid
+          applies to any product that is not the one being viewed.
         endcomment
+        assign use_code = settings.currency_code_enabled_product_cards
+
         if item.price_varies
-          assign price_label = item.price_min | money | prepend: 'from '
+          assign base_price = item.price_min
         else
-          assign price_label = item.price | money
+          assign base_price = item.price
+        endif
+
+        if base_price == 0
+          assign price_label = block.settings.free_label | default: 'FREE'
+        else
+          if use_code
+            assign price_label = base_price | money_with_currency
+          else
+            assign price_label = base_price | money
+          endif
+          if item.price_varies
+            assign price_label = price_label | prepend: 'from '
+          endif
+        endif
+
+        assign show_was = false
+        if item.compare_at_price > item.price
+          assign show_was = true
+          if use_code
+            assign was_label = item.compare_at_price | money_with_currency
+          else
+            assign was_label = item.compare_at_price | money
+          endif
         endif
       -%}
       <div class="pa__card">
@@ -76,8 +107,8 @@
         </div>
 
         {%- capture price_tag -%}
-          {%- if item.compare_at_price > item.price -%}
-            <s class="pa__was">{{ item.compare_at_price | money }}</s>
+          {%- if show_was -%}
+            <s class="pa__was">{{ was_label }}</s>
           {%- endif -%}
           <span class="pa__now">{{ price_label }}</span>
         {%- endcapture -%}
@@ -234,17 +265,27 @@
     -webkit-box-orient: vertical;
   }
 
-  /* Price pieces now live inside the button. */
+  /* Price pieces now live inside the button. Showing the currency code
+     makes this line noticeably longer, so the shrink order matters: the
+     old price gives way first, then the label, and the actual price never
+     shrinks or clips. */
   .pa__add-label {
-    flex: 0 0 auto;
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .pa__was {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
     opacity: 0.6;
     font-weight: 500;
   }
 
   .pa__now {
+    flex: 0 0 auto;
     font-weight: 700;
   }
 
@@ -424,6 +465,13 @@
       "id": "choose_label",
       "label": "Button text when a size must be picked",
       "default": "Choose"
+    },
+    {
+      "type": "text",
+      "id": "free_label",
+      "label": "Wording for a zero price",
+      "default": "FREE",
+      "info": "Shown in place of the amount when an add-on costs nothing."
     },
     {
       "type": "range",
