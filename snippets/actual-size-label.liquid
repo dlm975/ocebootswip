@@ -53,14 +53,60 @@
       }}
     </dialog>
   </dialog-component>
+
+  <script>
+    (function () {
+      /* The free shipping pill is moved onto the gallery by its own script and
+         may be hidden per product, so measure it rather than assume its size. */
+      var GAP = 12;
+      var root = document.documentElement;
+      var observed = null;
+      var observer = 'ResizeObserver' in window ? new ResizeObserver(update) : null;
+
+      function update() {
+        var pill = document.querySelector('media-gallery .fsp--placed');
+        var tag = Array.prototype.find.call(document.querySelectorAll('.actual-size-tag'), function (el) {
+          return el.offsetParent;
+        });
+
+        if (observer && pill && pill !== observed) {
+          observer.observe(pill);
+          observed = pill;
+        }
+
+        if (!pill || !tag || !pill.offsetHeight) {
+          root.style.removeProperty('--size-tag-top');
+          return;
+        }
+
+        var top = pill.getBoundingClientRect().bottom - tag.offsetParent.getBoundingClientRect().top + GAP;
+        root.style.setProperty('--size-tag-top', Math.round(top) + 'px');
+      }
+
+      /* Next frame, so the pill's own DOMContentLoaded/load placement has run first */
+      function schedule() {
+        requestAnimationFrame(update);
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', schedule, { once: true });
+      } else {
+        schedule();
+      }
+      window.addEventListener('load', schedule);
+      window.addEventListener('resize', schedule);
+    })();
+  </script>
 {%- endif -%}
 
 {% stylesheet %}
   /* ── Floating hang tag ── */
   .actual-size-tag {
     position: absolute;
-    top: 16px;
+    /* --size-tag-top is set by the script below so the tag sits under the free shipping pill */
+    top: var(--size-tag-top, 16px);
     right: 16px;
+    /* Below the free shipping pill (z-index 5) so it can never cover it */
     z-index: var(--layer-raised);
     display: flex;
     align-items: center;
