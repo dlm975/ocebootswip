@@ -19,10 +19,14 @@
     aria-controls="{{ dialog_id }}"
     on:click="#{{ dialog_id }}/showDialog"
   >
-    <span class="actual-size-tag__label">
-      <span class="actual-size-tag__hole" aria-hidden="true"></span>
-      <span class="actual-size-tag__text">See actual<br>size label</span>
-    </span>
+    <img
+      class="actual-size-tag__image"
+      src="{{ 'actual-size-tag.png' | asset_url }}"
+      alt="See actual size label"
+      width="600"
+      height="225"
+      decoding="async"
+    >
   </button>
 {%- else -%}
   {%- assign image_alt = image.alt | default: 'Actual size label' -%}
@@ -100,105 +104,66 @@
 {%- endif -%}
 
 {% stylesheet %}
-  /* ── Floating hang tag ── */
+  /* ── Floating size tag (assets/actual-size-tag.png) ──
+     The PNG has transparent padding around the label: 5.47% of its width at
+     the top, 4.69% at the bottom and 11.67% at each side. Negative margins
+     cancel it so the visible label, not the image box, lines up 12px under
+     the free shipping pill and with the pill's right edge. */
   .actual-size-tag {
+    --size-tag-width: 150px;
+
     position: absolute;
     /* --size-tag-top is set by the script below so the tag sits under the free shipping pill */
     top: var(--size-tag-top, 16px);
     right: 16px;
     /* Below the free shipping pill (z-index 5) so it can never cover it */
     z-index: var(--layer-raised);
-    display: flex;
-    align-items: center;
-    min-height: var(--minimum-touch-target, 44px);
-    margin: 0;
+    display: block;
+    width: var(--size-tag-width);
+    margin: calc(var(--size-tag-width) * -0.0547) calc(var(--size-tag-width) * -0.1167) 0 0;
     padding: 0;
     border: 0;
     background: none;
-    color: #111111;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
 
-  .actual-size-tag__label {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 11px 7px 9px;
-    border: 1px solid #111111;
-    border-radius: 4px;
-    background-color: #fbfaf7;
-    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08), 0 4px 10px rgb(0 0 0 / 0.1);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  /* Stitched inner edge, like a woven garment label */
-  .actual-size-tag__label::after {
-    content: '';
-    position: absolute;
-    inset: 2px;
-    border: 1px dashed rgb(17 17 17 / 0.28);
-    border-radius: 2px;
-    pointer-events: none;
-  }
-
-  .actual-size-tag__hole {
-    flex: none;
-    width: 7px;
-    height: 7px;
-    border: 1px solid #111111;
-    border-radius: 50%;
-    background-color: #e4e2dd;
-    box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.25);
-  }
-
-  .actual-size-tag__text {
-    font-family: var(--font-body--family);
-    font-size: 9px;
-    font-weight: 700;
-    line-height: 1.2;
-    letter-spacing: 0.08em;
-    text-align: left;
-    text-transform: uppercase;
-    white-space: nowrap;
+  .actual-size-tag__image {
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: transform 0.2s ease;
   }
 
   .actual-size-tag:focus-visible {
     outline: none;
   }
 
-  .actual-size-tag:focus-visible .actual-size-tag__label {
+  .actual-size-tag:focus-visible .actual-size-tag__image {
     outline: 2px solid #111111;
-    outline-offset: 2px;
+    outline-offset: -4px;
+    border-radius: 12px;
   }
 
   @media (hover: hover) {
-    .actual-size-tag:hover .actual-size-tag__label {
+    .actual-size-tag:hover .actual-size-tag__image {
       transform: scale(1.05);
-      box-shadow: 0 2px 4px rgb(0 0 0 / 0.1), 0 8px 18px rgb(0 0 0 / 0.14);
     }
   }
 
   @media screen and (max-width: 749px) {
     .actual-size-tag {
+      --size-tag-width: 120px;
+
       top: auto;
       right: 12px;
       bottom: 12px;
-    }
-
-    .actual-size-tag__label {
-      padding: 6px 9px 6px 8px;
-      gap: 6px;
-    }
-
-    .actual-size-tag__text {
-      font-size: 8.5px;
+      margin: 0 calc(var(--size-tag-width) * -0.1167) calc(var(--size-tag-width) * -0.0469) 0;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .actual-size-tag__label {
+    .actual-size-tag__image {
       transition: none;
     }
   }
