@@ -168,10 +168,21 @@
     }
   }
 
-  /* ── Lightbox ── */
+  /* ── Lightbox ──
+     The dialog box is the image frame, pinned to the full viewport with
+     auto margins so it sits dead centre; the ::backdrop is the overlay.
+     Keeping the box tight to the image is what lets dialog-component's
+     click-outside close work. The theme's elementSlideInTop animates
+     margin-top, which would cancel the centring, so it has its own fade. */
   .actual-size-dialog {
-    max-width: calc(100vw - 32px);
-    max-height: calc(100dvh - 32px);
+    position: fixed;
+    inset: 0;
+    width: fit-content;
+    height: fit-content;
+    max-width: 90vw;
+    max-height: 90vh;
+    max-height: 90dvh;
+    margin: auto;
     padding: 0;
     border: 0;
     border-radius: 8px;
@@ -185,19 +196,51 @@
   }
 
   .actual-size-dialog[open] {
-    animation: elementSlideInTop var(--animation-speed) var(--animation-easing) forwards;
+    animation: actualSizeDialogIn var(--animation-speed) var(--animation-easing) forwards;
   }
 
   .actual-size-dialog.dialog-closing {
-    animation: elementSlideOutTop var(--animation-speed) var(--animation-easing) forwards;
+    animation: actualSizeDialogOut var(--animation-speed) var(--animation-easing) forwards;
+  }
+
+  @keyframes actualSizeDialogIn {
+    from {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes actualSizeDialogOut {
+    from {
+      opacity: 1;
+      transform: none;
+    }
+
+    to {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .actual-size-dialog[open],
+    .actual-size-dialog.dialog-closing {
+      animation-duration: 1ms;
+    }
   }
 
   .actual-size-dialog__image {
     display: block;
     width: auto;
     height: auto;
-    max-width: calc(100vw - 32px);
-    max-height: calc(100dvh - 32px);
+    max-width: 90vw;
+    max-height: 90vh;
+    max-height: 90dvh;
     object-fit: contain;
     border-radius: inherit;
     touch-action: pinch-zoom;
