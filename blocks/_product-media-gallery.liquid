@@ -12,8 +12,8 @@
   assign selected_variant_media = selected_product.selected_or_first_available_variant.featured_media
   assign first_3d_model = selected_product.media | where: 'media_type', 'model' | first
 
-  # "See actual size label" tag — only when this product has an image in custom.actual_size_label
-  assign size_label = selected_product.metafields.custom.actual_size_label.value
+  # "See actual size label" tag — only when this product has an image in custom.custom_actual_size_label
+  assign size_label = selected_product.metafields.custom.custom_actual_size_label.value
   assign has_size_label = false
   if size_label.media_type == 'image' and size_label.preview_image != blank
     assign has_size_label = true
