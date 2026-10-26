@@ -12,6 +12,17 @@
   assign selected_variant_media = selected_product.selected_or_first_available_variant.featured_media
   assign first_3d_model = selected_product.media | where: 'media_type', 'model' | first
 
+  # "See actual size label" tag — only when this product has an image in custom.actual_size_label
+  assign size_label = selected_product.metafields.custom.actual_size_label.value
+  assign has_size_label = false
+  if size_label.media_type == 'image' and size_label.preview_image != blank
+    assign has_size_label = true
+    assign size_label_dialog_id = 'actual-size-label-' | append: block.id
+    capture size_label_tag
+      render 'actual-size-label', image: size_label, dialog_id: size_label_dialog_id, part: 'tag'
+    endcapture
+  endif
+
   if block.settings.hide_variants
     assign variant_images = product.images | where: 'attached_to_variant?', true | map: 'src'
   endif
@@ -275,6 +286,11 @@
     {% endcapture %}
   {% endif %}
 
+  {%- comment -%} Rendered inside slideshow-container so the tag floats over the image, not the slides {%- endcomment -%}
+  {% if has_size_label %}
+    {% assign slideshow_arrows = slideshow_arrows | append: size_label_tag %}
+  {% endif %}
+
   {% render 'slideshow',
     ref: 'slideshow',
     class: slideshow_class,
@@ -313,6 +329,9 @@
             >
               <span class="visually-hidden">{{ 'actions.open_image_in_full_screen' | t }}</span>
             </button>
+          {%- endif -%}
+          {%- if has_size_label and forloop.first -%}
+            {{ size_label_tag }}
           {%- endif -%}
           {%- liquid
             if needs_both_sizes and forloop.first
@@ -426,6 +445,10 @@
         </ul>
       </dialog>
     </zoom-dialog>
+  {%- endif -%}
+
+  {%- if has_size_label -%}
+    {%- render 'actual-size-label', image: size_label, dialog_id: size_label_dialog_id, part: 'dialog' -%}
   {%- endif -%}
 
   {%- if first_3d_model -%}

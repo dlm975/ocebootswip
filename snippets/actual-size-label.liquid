@@ -1,0 +1,215 @@
+{%- doc -%}
+  Renders the "See actual size label" hang tag that floats over the product
+  gallery, or the dialog it opens. Callers must only render this when the
+  product's `custom.actual_size_label` metafield holds an image.
+
+  @param {object} image - the size label image (MediaImage from the metafield)
+  @param {string} dialog_id - id of the dialog-component the tag opens
+  @param {string} part - 'tag' or 'dialog'
+
+  @example
+  {% render 'actual-size-label', image: size_label, dialog_id: 'actual-size-label-123', part: 'tag' %}
+{%- enddoc -%}
+
+{%- if part == 'tag' -%}
+  <button
+    type="button"
+    class="actual-size-tag"
+    aria-haspopup="dialog"
+    aria-controls="{{ dialog_id }}"
+    on:click="#{{ dialog_id }}/showDialog"
+  >
+    <span class="actual-size-tag__label">
+      <span class="actual-size-tag__hole" aria-hidden="true"></span>
+      <span class="actual-size-tag__text">See actual<br>size label</span>
+    </span>
+  </button>
+{%- else -%}
+  {%- assign image_alt = image.alt | default: 'Actual size label' -%}
+  <dialog-component id="{{ dialog_id }}">
+    <dialog
+      ref="dialog"
+      class="actual-size-dialog"
+      aria-label="Actual size label"
+      scroll-lock
+    >
+      <button
+        type="button"
+        class="button button-unstyled actual-size-dialog__close"
+        aria-label="{{ 'actions.close' | t }}"
+        on:click="#{{ dialog_id }}/closeDialog"
+      >
+        {{ 'icon-close.svg' | inline_asset_content }}
+      </button>
+      {{
+        image.preview_image
+        | image_url: width: 2400
+        | image_tag:
+          class: 'actual-size-dialog__image',
+          loading: 'lazy',
+          sizes: '(min-width: 750px) 90vw, 100vw',
+          widths: '600, 900, 1200, 1600, 2000, 2400',
+          alt: image_alt
+      }}
+    </dialog>
+  </dialog-component>
+{%- endif -%}
+
+{% stylesheet %}
+  /* ── Floating hang tag ── */
+  .actual-size-tag {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: var(--layer-raised);
+    display: flex;
+    align-items: center;
+    min-height: var(--minimum-touch-target, 44px);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #111111;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .actual-size-tag__label {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 11px 7px 9px;
+    border: 1px solid #111111;
+    border-radius: 4px;
+    background-color: #fbfaf7;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08), 0 4px 10px rgb(0 0 0 / 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  /* Stitched inner edge, like a woven garment label */
+  .actual-size-tag__label::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border: 1px dashed rgb(17 17 17 / 0.28);
+    border-radius: 2px;
+    pointer-events: none;
+  }
+
+  .actual-size-tag__hole {
+    flex: none;
+    width: 7px;
+    height: 7px;
+    border: 1px solid #111111;
+    border-radius: 50%;
+    background-color: #e4e2dd;
+    box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.25);
+  }
+
+  .actual-size-tag__text {
+    font-family: var(--font-body--family);
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .actual-size-tag:focus-visible {
+    outline: none;
+  }
+
+  .actual-size-tag:focus-visible .actual-size-tag__label {
+    outline: 2px solid #111111;
+    outline-offset: 2px;
+  }
+
+  @media (hover: hover) {
+    .actual-size-tag:hover .actual-size-tag__label {
+      transform: scale(1.05);
+      box-shadow: 0 2px 4px rgb(0 0 0 / 0.1), 0 8px 18px rgb(0 0 0 / 0.14);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .actual-size-tag {
+      top: auto;
+      right: 12px;
+      bottom: 12px;
+    }
+
+    .actual-size-tag__label {
+      padding: 6px 9px 6px 8px;
+      gap: 6px;
+    }
+
+    .actual-size-tag__text {
+      font-size: 8.5px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .actual-size-tag__label {
+      transition: none;
+    }
+  }
+
+  /* ── Lightbox ── */
+  .actual-size-dialog {
+    max-width: calc(100vw - 32px);
+    max-height: calc(100dvh - 32px);
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background-color: #ffffff;
+    overflow: visible;
+    box-shadow: var(--shadow-popover);
+  }
+
+  .actual-size-dialog::backdrop {
+    background: rgb(0 0 0 / 0.75);
+  }
+
+  .actual-size-dialog[open] {
+    animation: elementSlideInTop var(--animation-speed) var(--animation-easing) forwards;
+  }
+
+  .actual-size-dialog.dialog-closing {
+    animation: elementSlideOutTop var(--animation-speed) var(--animation-easing) forwards;
+  }
+
+  .actual-size-dialog__image {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: calc(100vw - 32px);
+    max-height: calc(100dvh - 32px);
+    object-fit: contain;
+    border-radius: inherit;
+    touch-action: pinch-zoom;
+  }
+
+  .actual-size-dialog__close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: var(--layer-flat);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--minimum-touch-target, 44px);
+    height: var(--minimum-touch-target, 44px);
+    border-radius: 50%;
+    background-color: rgb(255 255 255 / 0.92);
+    color: #111111;
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.2);
+  }
+
+  .actual-size-dialog__close svg {
+    width: 16px;
+    height: 16px;
+  }
+{% endstylesheet %}
