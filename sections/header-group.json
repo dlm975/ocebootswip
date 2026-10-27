@@ -17,7 +17,7 @@
         "announcement_p78QMR": {
           "type": "_announcement",
           "settings": {
-            "text": "DHL EXPRESS SHIPPING, 2-5 DAYS WORLDWIDE",
+            "text": "ORDERS SHIPPING TOMORROW ✈️⚡️",
             "link": "",
             "font": "var(--font-heading--family)",
             "font_size": "0.75rem",
@@ -35,7 +35,7 @@
       "settings": {
         "speed": 3,
         "section_width": "full-width",
-        "color_scheme": "scheme-3",
+        "color_scheme": "scheme-d779fa1c-5ad7-4d2a-b8a3-5bceeed4a438",
         "divider_width": 0,
         "padding-block-start": 10,
         "padding-block-end": 10
