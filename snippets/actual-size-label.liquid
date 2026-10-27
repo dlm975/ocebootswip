@@ -105,8 +105,8 @@
 
 {% stylesheet %}
   /* ── Floating size tag (assets/actual-size-tag.png) ──
-     The PNG has transparent padding around the label: 5.47% of its width at
-     the top, 4.69% at the bottom and 11.67% at each side. Negative margins
+     The PNG has transparent padding around the label: 4.44% of its width at
+     the top, 3.71% at the bottom and 4.44% at each side. Negative margins
      cancel it so the visible label, not the image box, lines up 12px under
      the free shipping pill and with the pill's right edge. */
   .actual-size-tag {
@@ -120,7 +120,7 @@
     z-index: var(--layer-raised);
     display: block;
     width: var(--size-tag-width);
-    margin: calc(var(--size-tag-width) * -0.0547) calc(var(--size-tag-width) * -0.1167) 0 0;
+    margin: calc(var(--size-tag-width) * -0.0444) calc(var(--size-tag-width) * -0.0444) 0 0;
     padding: 0;
     border: 0;
     background: none;
@@ -158,7 +158,7 @@
       top: auto;
       right: 12px;
       bottom: 12px;
-      margin: 0 calc(var(--size-tag-width) * -0.1167) calc(var(--size-tag-width) * -0.0469) 0;
+      margin: 0 calc(var(--size-tag-width) * -0.0444) calc(var(--size-tag-width) * -0.0371) 0;
     }
   }
 
