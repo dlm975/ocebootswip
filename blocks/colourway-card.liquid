@@ -1,0 +1,436 @@
+{%- doc -%}
+  Colourway card: for products with a colourway option, shows the colourway's main image, a row of
+  colourway swatches and a size dropdown. Swapping colourway or size updates the image, price and link.
+  Renders nothing for products without more than one colourway, so the standard card gallery shows instead.
+
+  Swatch image = the colourway's variant image (set the side-on shot on each variant in admin).
+  Main image = the first product image whose alt text matches the colourway name, falling back to the swatch image.
+{%- enddoc -%}
+
+{%- liquid
+  assign product = closest.product
+  assign option_names = block.settings.option_names | downcase | split: ','
+  assign colour_option = null
+  assign size_option = null
+
+  for option in product.options_with_values
+    assign option_name = option.name | downcase | strip
+    for candidate in option_names
+      if option_name == candidate
+        assign colour_option = option
+      endif
+    endfor
+    if option_name == 'size'
+      assign size_option = option
+    endif
+  endfor
+
+  assign show_card = false
+  if colour_option and colour_option.values.size > 1
+    assign show_card = true
+  endif
+
+  assign selected_variant = product.selected_or_first_available_variant
+  assign colour_key = 'option' | append: colour_option.position
+  assign size_key = 'option' | append: size_option.position
+  assign initial_colourway = selected_variant[colour_key]
+-%}
+
+{%- if show_card -%}
+  {%- capture colourway_data -%}
+    [
+    {%- for value in colour_option.values -%}
+      {%- liquid
+        assign colourway_variants = product.variants | where: colour_key, value
+        assign swatch_media = colourway_variants.first.featured_media
+        assign main_media = product.media | where: 'alt', value | first
+        if main_media == blank
+          assign main_media = swatch_media
+        endif
+        if main_media == blank
+          assign main_media = product.featured_media
+        endif
+        assign image_small = main_media.preview_image | image_url: width: 400
+        assign image_large = main_media.preview_image | image_url: width: 800
+        assign image_srcset = image_small | append: ' 400w, ' | append: image_large | append: ' 800w'
+      -%}
+      {
+        "name": {{ value | json }},
+        "image": {{ image_large | json }},
+        "srcset": {{ image_srcset | json }},
+        "variants": [
+          {%- for variant in colourway_variants -%}
+            {%- liquid
+              if settings.currency_code_enabled_product_cards
+                assign variant_price = variant.price | money_with_currency
+                assign variant_compare = variant.compare_at_price | money_with_currency
+              else
+                assign variant_price = variant.price | money
+                assign variant_compare = variant.compare_at_price | money
+              endif
+              assign variant_label = variant[size_key] | default: variant.title
+              for option in variant.options
+                assign option_index = forloop.index
+                assign this_key = 'option' | append: option_index
+                if this_key != colour_key and this_key != size_key
+                  assign variant_label = variant_label | append: ' · ' | append: option
+                endif
+              endfor
+            -%}
+            {
+              "id": {{ variant.id }},
+              "label": {{ variant_label | json }},
+              "available": {{ variant.available }},
+              "price": {{ variant_price | json }},
+              "compare": {% if variant.compare_at_price > variant.price %}{{ variant_compare | json }}{% else %}null{% endif %},
+              "url": {{ variant.url | json }}
+            }{% unless forloop.last %},{% endunless %}
+          {%- endfor -%}
+        ]
+      }{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+    ]
+  {%- endcapture -%}
+
+  {%- assign initial_media = product.media | where: 'alt', initial_colourway | first -%}
+  {%- if initial_media == blank -%}
+    {%- assign initial_media = selected_variant.featured_media | default: product.featured_media -%}
+  {%- endif -%}
+
+  <colourway-card
+    class="colourway-card spacing-style"
+    data-initial-colourway="{{ initial_colourway | escape }}"
+    data-initial-variant="{{ selected_variant.id }}"
+    data-sold-out-label="{{ block.settings.sold_out_label | escape }}"
+    style="
+      {% render 'spacing-style', settings: block.settings %}
+      --colourway-swatch-size: {{ block.settings.swatch_size }}px;
+      --colourway-image-ratio: {{ initial_media.preview_image.aspect_ratio | default: 1 }};
+    "
+    {{ block.shopify_attributes }}
+  >
+    <script type="application/json" data-colourway-data>{{ colourway_data | strip_newlines }}</script>
+
+    <div class="colourway-card__image">
+      {%- if initial_media != blank -%}
+        <img
+          src="{{ initial_media.preview_image | image_url: width: 800 }}"
+          srcset="{{ initial_media.preview_image | image_url: width: 400 }} 400w, {{ initial_media.preview_image | image_url: width: 800 }} 800w"
+          sizes="(min-width: 750px) 25vw, 50vw"
+          alt="{{ product.title | escape }}"
+          width="{{ initial_media.preview_image.width }}"
+          height="{{ initial_media.preview_image.height }}"
+          loading="lazy"
+          data-colourway-image
+        >
+      {%- endif -%}
+    </div>
+
+    <div class="colourway-card__swatches" role="radiogroup" aria-label="{{ colour_option.name | escape }}">
+      {%- for value in colour_option.values -%}
+        {%- liquid
+          assign colourway_variants = product.variants | where: colour_key, value
+          assign swatch_media = colourway_variants.first.featured_media | default: product.featured_media
+          assign colourway_available = colourway_variants | where: 'available', true | size
+        -%}
+        <button
+          type="button"
+          class="colourway-card__swatch{% if colourway_available == 0 %} colourway-card__swatch--sold-out{% endif %}"
+          role="radio"
+          aria-checked="{% if value == initial_colourway %}true{% else %}false{% endif %}"
+          aria-label="{{ value | escape }}"
+          title="{{ value | escape }}"
+          data-colourway="{{ value | escape }}"
+        >
+          {%- if swatch_media != blank -%}
+            {{ swatch_media.preview_image | image_url: width: 120 | image_tag: alt: '', loading: 'lazy' }}
+          {%- else -%}
+            <span class="colourway-card__swatch-text">{{ value | slice: 0, 2 }}</span>
+          {%- endif -%}
+        </button>
+      {%- endfor -%}
+    </div>
+
+    {%- if block.settings.show_colourway_name -%}
+      <p class="colourway-card__name" data-colourway-name>{{ initial_colourway }}</p>
+    {%- endif -%}
+
+    <label class="visually-hidden" for="ColourwaySize-{{ block.id }}-{{ product.id }}">
+      {{- size_option.name | default: 'Size' -}}
+    </label>
+    <select
+      id="ColourwaySize-{{ block.id }}-{{ product.id }}"
+      class="colourway-card__size"
+      data-colourway-size
+    >
+      {%- assign initial_variants = product.variants | where: colour_key, initial_colourway -%}
+      {%- for variant in initial_variants -%}
+        <option
+          value="{{ variant.id }}"
+          {% if variant.id == selected_variant.id %}selected{% endif %}
+          {% unless variant.available %}disabled{% endunless %}
+        >
+          {{- variant[size_key] | default: variant.title -}}
+          {%- unless variant.available %} – {{ block.settings.sold_out_label }}{% endunless -%}
+        </option>
+      {%- endfor -%}
+    </select>
+  </colourway-card>
+{%- endif -%}
+
+{% javascript %}
+  class ColourwayCard extends HTMLElement {
+    connectedCallback() {
+      const dataElement = this.querySelector('[data-colourway-data]');
+      if (!dataElement) return;
+
+      this.colourways = JSON.parse(dataElement.textContent);
+      this.card = this.closest('product-card');
+      this.image = this.querySelector('[data-colourway-image]');
+      this.nameElement = this.querySelector('[data-colourway-name]');
+      this.select = this.querySelector('[data-colourway-size]');
+      this.swatches = [...this.querySelectorAll('[data-colourway]')];
+
+      this.swatches.forEach((swatch) => {
+        swatch.addEventListener('click', () => this.selectColourway(swatch.dataset.colourway));
+      });
+      this.select.addEventListener('change', () => this.selectVariant(Number(this.select.value)));
+
+      this.selectColourway(this.dataset.initialColourway, Number(this.dataset.initialVariant));
+    }
+
+    /**
+     * @param {string} name - Colourway option value
+     * @param {number} [preferredVariantId] - Variant to select if it belongs to this colourway
+     */
+    selectColourway(name, preferredVariantId) {
+      const colourway = this.colourways.find((entry) => entry.name === name);
+      if (!colourway) return;
+
+      this.current = colourway;
+
+      this.swatches.forEach((swatch) => {
+        swatch.setAttribute('aria-checked', String(swatch.dataset.colourway === name));
+      });
+
+      if (this.nameElement) this.nameElement.textContent = name;
+
+      if (this.image && colourway.image) {
+        this.image.removeAttribute('srcset');
+        this.image.src = colourway.image;
+        this.image.srcset = colourway.srcset;
+      }
+
+      const variants = [...colourway.variants].sort((a, b) => sizeValue(a.label) - sizeValue(b.label));
+      this.select.replaceChildren(
+        ...variants.map((variant) => {
+          const option = document.createElement('option');
+          option.value = String(variant.id);
+          option.textContent = variant.available
+            ? variant.label
+            : `${variant.label} – ${this.dataset.soldOutLabel}`;
+          option.disabled = !variant.available;
+          return option;
+        })
+      );
+
+      const preferred = variants.find((variant) => variant.id === preferredVariantId);
+      const variant = preferred || variants.find((entry) => entry.available) || variants[0];
+      this.selectVariant(variant.id);
+    }
+
+    /** @param {number} id - Variant id */
+    selectVariant(id) {
+      const variant = this.current?.variants.find((entry) => entry.id === id);
+      if (!variant) return;
+
+      this.select.value = String(id);
+      this.updatePrice(variant);
+
+      const link = this.card?.querySelector('.product-card__link');
+      if (link instanceof HTMLAnchorElement) link.href = variant.url;
+    }
+
+    updatePrice(variant) {
+      const container = this.card?.querySelector('product-price [ref="priceContainer"]');
+      if (!container) return;
+
+      const price = document.createElement('span');
+      price.className = 'price';
+      price.textContent = variant.price;
+
+      if (variant.compare) {
+        const compare = document.createElement('span');
+        compare.className = 'compare-at-price';
+        compare.textContent = variant.compare;
+        container.replaceChildren(price, document.createTextNode(' '), compare);
+      } else {
+        container.replaceChildren(price);
+      }
+    }
+  }
+
+  /** Sort key from a size label like "US 10.5 - UK 9.5 - EU 44.5". */
+  function sizeValue(label) {
+    const match = /US\s*([\d.]+)/i.exec(label) || /([\d.]+)/.exec(label);
+    return match ? parseFloat(match[1]) : Number.MAX_VALUE;
+  }
+
+  if (!customElements.get('colourway-card')) {
+    customElements.define('colourway-card', ColourwayCard);
+  }
+{% endjavascript %}
+
+{% stylesheet %}
+  /* The colourway card brings its own image, so hide the standard gallery on those cards. */
+  .product-card:has(colourway-card) .card-gallery {
+    display: none;
+  }
+
+  .colourway-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs, 6px);
+    width: 100%;
+  }
+
+  .colourway-card__image {
+    aspect-ratio: var(--colourway-image-ratio);
+    overflow: hidden;
+    border-radius: var(--product-corner-radius, 0);
+  }
+
+  .colourway-card__image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .colourway-card__swatches {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-block: 2px;
+  }
+
+  .colourway-card__swatches::-webkit-scrollbar {
+    display: none;
+  }
+
+  .colourway-card__swatch {
+    flex: 0 0 var(--colourway-swatch-size);
+    width: var(--colourway-swatch-size);
+    height: var(--colourway-swatch-size);
+    padding: 0;
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.15);
+    border-radius: 4px;
+    background: rgb(var(--color-foreground-rgb) / 0.04);
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .colourway-card__swatch img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .colourway-card__swatch[aria-checked='true'] {
+    border-color: var(--color-foreground);
+    box-shadow: inset 0 0 0 1px var(--color-foreground);
+  }
+
+  .colourway-card__swatch--sold-out {
+    opacity: 0.4;
+  }
+
+  .colourway-card__swatch-text {
+    font-size: 0.625rem;
+    text-transform: uppercase;
+  }
+
+  .colourway-card__name {
+    margin: 0;
+    font-size: 0.75rem;
+    opacity: 0.7;
+  }
+
+  .colourway-card__size {
+    width: 100%;
+    padding: 6px 8px;
+    font-size: 0.75rem;
+    color: var(--color-foreground);
+    background: var(--color-background);
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.2);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Colourway card",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Shows for products with more than one colourway. Swatches use each colourway's variant image; the main image is the first product image whose alt text matches the colourway name."
+    },
+    {
+      "type": "text",
+      "id": "option_names",
+      "label": "Colourway option names",
+      "info": "Comma-separated, not case-sensitive",
+      "default": "colourway,colorway"
+    },
+    {
+      "type": "range",
+      "id": "swatch_size",
+      "label": "Swatch size",
+      "min": 24,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "checkbox",
+      "id": "show_colourway_name",
+      "label": "Show selected colourway name",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "sold_out_label",
+      "label": "Sold out label",
+      "default": "Sold out"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ]
+}
+{% endschema %}

@@ -72,6 +72,20 @@
     {% else %}
       {% paginate collection.products by 24 %}
         {% capture children %}
+          {% assign pinned_product = section.settings.pinned_product %}
+          {% if pinned_product != blank and paginate.current_page == 1 %}
+            <li
+              id="{{ section.id }}-{{ pinned_product.id }}"
+              class="product-grid__item product-grid__item--pinned"
+              data-page="1"
+              data-product-id="{{ pinned_product.id }}"
+              ref="cards[]"
+            >
+              {% # theme-check-disable %}
+              {% content_for 'block', type: '_product-card', id: 'product-card', closest.product: pinned_product %}
+              {% # theme-check-enable %}
+            </li>
+          {% endif %}
           {% for product in collection.products %}
           <li
             id="{{ section.id }}-{{ product.id }}"
@@ -316,6 +330,16 @@
       "step": 1,
       "unit": "px",
       "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Testing"
+    },
+    {
+      "type": "product",
+      "id": "pinned_product",
+      "label": "Pin product to top of grid",
+      "info": "For previewing products that aren't in this collection (e.g. unlisted test products). Leave empty for live use."
     },
     {
       "type": "header",
