@@ -16,6 +16,8 @@ One product per line: name, US size(s), NZD price, condition (optional, default 
 - SEO description (`global.description_tag`) filled in.
 - Size label image in metafield `custom.custom_actual_size_label` (file_reference). The eBay builder flags products without it.
 - Photos sent in chat: match each to its product. The size label/tongue close-up goes in the metafield.
+- Size tag photos also confirm the model: check the style/ART code and sizes on the tag against the shorthand and flag any mismatch. Use the sizes printed on the tag for brands not in the charts below (e.g. Puma).
+- Uploading a chat image (saved under `/root/.claude/uploads/...`): `stagedUploadsCreate` (resource IMAGE, httpMethod POST), POST the file to the returned URL with curl `-F` using every returned parameter exactly, then `fileCreate` with the `resourceUrl`, then set the metafield to the new MediaImage ID with `metafieldsSet`.
 
 ## Size charts
 
