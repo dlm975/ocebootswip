@@ -9,6 +9,7 @@ One product per line: name, US size(s), NZD price, condition (optional, default 
 ## Product fields
 
 - Status: **DRAFT always**. Collections are automated; do not add any.
+- Sales channels: select **all** of them on every new product with `publishablePublish`. The store has 6 publications: 157533798711, 157534060855, 157534093623, 158372233527, 170666328375 (Google & YouTube), 219442118967 (`gid://shopify/Publication/<id>`). Re-check with `publications` if one fails. Drafts show `isPublished: false` until set to Active; that is expected.
 - Vendor `Oce Boots`. Handle: title in lowercase with dashes + `-DDMMYY` (creation date).
 - Options: `Size` (e.g. `US 10 - UK 9 - EU 44`) and `Condition`.
 - Every variant: price = NZD base price, 1 in stock, inventory tracked, policy DENY (no overselling), 1 kg, requires shipping, taxable.
