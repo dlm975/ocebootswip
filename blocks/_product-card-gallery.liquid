@@ -2,11 +2,9 @@
 
 {% capture children %}
   {% unless closest.product == blank %}
-    {% if template.name == 'collection' and closest.product.tags contains 'BFSALE' %}
-      {% render 'bfsale-badge', product: closest.product %}
-    {% else %}
+    {% unless template.name == 'collection' and closest.product.tags contains 'BFSALE' %}
       {% render 'product-card-badges', product: closest.product %}
-    {% endif %}
+    {% endunless %}
     {%  if settings.quick_add or settings.mobile_quick_add %}
       {% render 'quick-add', product: closest.product, section_id: section.id %}
     {% endif %}
@@ -14,6 +12,10 @@
 {% endcapture %}
 
 {% render 'card-gallery', children: children %}
+
+{% if closest.product != blank and template.name == 'collection' and closest.product.tags contains 'BFSALE' %}
+  {% render 'bfsale-badge', product: closest.product %}
+{% endif %}
 
 {% # Title and price for the zoomed out grid view %}
 <div class="product-grid-view-zoom-out--details">

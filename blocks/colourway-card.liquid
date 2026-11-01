@@ -131,10 +131,11 @@
           data-colourway-image
         >
       {%- endif -%}
-      {%- if is_bfsale -%}
-        {% render 'bfsale-badge', product: product %}
-      {%- endif -%}
     </div>
+
+    {%- if is_bfsale -%}
+      {% render 'bfsale-badge', product: product %}
+    {%- endif -%}
 
     <div class="colourway-card__swatches" role="radiogroup" aria-label="{{ colour_option.name | escape }}">
       {%- for value in colour_option.values -%}
