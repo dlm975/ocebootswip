@@ -131,6 +131,9 @@
           data-colourway-image
         >
       {%- endif -%}
+      {%- if is_bfsale -%}
+        {% render 'bfsale-flame' %}
+      {%- endif -%}
     </div>
 
     {%- if is_bfsale -%}
