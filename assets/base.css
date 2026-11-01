@@ -4130,6 +4130,7 @@ text-component {
 
 .bfsale-price {
   color: #1a8a3a;
+  font-weight: 700;
 }
 
 /* Diagonal strikethrough across the RRP amount */
