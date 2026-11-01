@@ -10,7 +10,7 @@
   assign bf_variant = product.selected_or_first_available_variant
   assign bf_percent = 0
   if bf_variant.compare_at_price > bf_variant.price
-    assign bf_percent = bf_variant.compare_at_price | minus: bf_variant.price | times: 100.0 | divided_by: bf_variant.compare_at_price | round
+    assign bf_percent = bf_variant.compare_at_price | minus: bf_variant.price | times: 100.0 | divided_by: bf_variant.compare_at_price | round | divided_by: 5.0 | ceil | times: 5
   endif
 -%}
 
