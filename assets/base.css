@@ -4118,8 +4118,15 @@ text-component {
 }
 
 /* BFSALE: red struck-through compare-at price, then green "NOW <price>", on collection cards */
+/* Keep the BFSALE price on one line: the card becomes a size container and the
+   line scales down with the card width (it measures ~15.5x its font size with currency codes). */
+.product-grid__item:has(.bfsale-price-line) {
+  container-type: inline-size;
+}
+
 .bfsale-price-line {
   white-space: nowrap;
+  font-size: min(1em, 6cqi);
 }
 
 .bfsale-rrp {
