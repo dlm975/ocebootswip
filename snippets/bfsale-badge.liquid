@@ -1,0 +1,39 @@
+{%- doc -%}
+  Renders the gold "x% OFF" badge in the top-right of a product card image for products tagged BFSALE.
+  The percentage is based on the selected (or first available) variant's compare-at price.
+  Renders an empty, hidden badge when there is no discount so JS can fill it on variant change.
+
+  @param {product} product - The product to render the badge for
+{%- enddoc -%}
+
+{%- liquid
+  assign bf_variant = product.selected_or_first_available_variant
+  assign bf_percent = 0
+  if bf_variant.compare_at_price > bf_variant.price
+    assign bf_percent = bf_variant.compare_at_price | minus: bf_variant.price | times: 100.0 | divided_by: bf_variant.compare_at_price | round
+  endif
+-%}
+
+<span class="bfsale-badge" data-bfsale-badge{% if bf_percent <= 0 %} hidden{% endif %}>
+  {%- if bf_percent > 0 %}{{ bf_percent }}% OFF{% endif -%}
+</span>
+
+{% stylesheet %}
+  .bfsale-badge {
+    position: absolute;
+    top: calc(var(--padding-xs, 8px) + var(--padding-block-start, 0px));
+    right: calc(var(--padding-xs, 8px) + var(--padding-inline-end, 0px));
+    z-index: var(--layer-raised, 2);
+    color: #c9a227;
+    font-weight: 700;
+    font-style: italic;
+    font-size: var(--font-size--sm, 0.875rem);
+    line-height: 1;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .bfsale-badge[hidden] {
+    display: none;
+  }
+{% endstylesheet %}

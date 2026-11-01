@@ -4116,3 +4116,10 @@ text-component {
   transform: none;
   box-shadow: none;
 }
+
+/* BFSALE: red "RRP <compare-at price>" shown next to the price on collection cards */
+.bfsale-rrp {
+  margin-inline-start: 0.4em;
+  color: #d0021b;
+  white-space: nowrap;
+}

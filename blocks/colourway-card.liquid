@@ -34,6 +34,11 @@
   assign colour_key = 'option' | append: colour_option.position
   assign size_key = 'option' | append: size_option.position
   assign initial_colourway = selected_variant[colour_key]
+
+  assign is_bfsale = false
+  if template.name == 'collection' and product.tags contains 'BFSALE'
+    assign is_bfsale = true
+  endif
 -%}
 
 {%- if show_card -%}
@@ -83,6 +88,7 @@
               "available": {{ variant.available }},
               "price": {{ variant_price | json }},
               "compare": {% if variant.compare_at_price > variant.price %}{{ variant_compare | json }}{% else %}null{% endif %},
+              "percent": {% if variant.compare_at_price > variant.price %}{{ variant.compare_at_price | minus: variant.price | times: 100.0 | divided_by: variant.compare_at_price | round }}{% else %}0{% endif %},
               "url": {{ variant.url | json }}
             }{% unless forloop.last %},{% endunless %}
           {%- endfor -%}
@@ -102,6 +108,7 @@
     data-initial-colourway="{{ initial_colourway | escape }}"
     data-initial-variant="{{ selected_variant.id }}"
     data-sold-out-label="{{ block.settings.sold_out_label | escape }}"
+    {% if is_bfsale %}data-bfsale{% endif %}
     style="
       {% render 'spacing-style', settings: block.settings %}
       --colourway-swatch-size: {{ block.settings.swatch_size }}px;
@@ -123,6 +130,9 @@
           loading="lazy"
           data-colourway-image
         >
+      {%- endif -%}
+      {%- if is_bfsale -%}
+        {% render 'bfsale-badge', product: product %}
       {%- endif -%}
     </div>
 
@@ -259,6 +269,27 @@
       price.className = 'price';
       price.textContent = variant.price;
 
+      if (this.hasAttribute('data-bfsale')) {
+        const badge = this.querySelector('[data-bfsale-badge]');
+        if (badge) {
+          badge.textContent = variant.percent > 0 ? `${variant.percent}% OFF` : '';
+          badge.hidden = !(variant.percent > 0);
+        }
+
+        if (variant.compare) {
+          const rrp = document.createElement('span');
+          rrp.className = 'bfsale-rrp';
+          const amount = document.createElement('span');
+          amount.className = 'bfsale-rrp__amount';
+          amount.textContent = variant.compare;
+          rrp.append('RRP ', amount);
+          container.replaceChildren(price, document.createTextNode(' '), rrp);
+        } else {
+          container.replaceChildren(price);
+        }
+        return;
+      }
+
       if (variant.compare) {
         const compare = document.createElement('span');
         compare.className = 'compare-at-price';
@@ -295,6 +326,7 @@
   }
 
   .colourway-card__image {
+    position: relative;
     aspect-ratio: var(--colourway-image-ratio);
     overflow: hidden;
     border-radius: var(--product-corner-radius, 0);
