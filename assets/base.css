@@ -4146,6 +4146,10 @@ text-component {
   margin-inline-end: 0;
 }
 
+.bfsale-price-line--pdp .bfsale-price {
+  color: #000;
+}
+
 .bfsale-pdp-tags {
   display: inline-flex;
   align-items: center;
