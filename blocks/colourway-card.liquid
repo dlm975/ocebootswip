@@ -36,8 +36,10 @@
   assign initial_colourway = selected_variant[colour_key]
 
   assign is_bfsale = false
-  if template.name == 'collection' and product.tags contains 'BFSALE'
-    assign is_bfsale = true
+  if template.name == 'collection' or template.name == 'product'
+    if product.tags contains 'BFSALE'
+      assign is_bfsale = true
+    endif
   endif
 -%}
 
