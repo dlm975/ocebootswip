@@ -4118,10 +4118,18 @@ text-component {
 }
 
 /* BFSALE: red "RRP <compare-at price>" shown next to the price on collection cards */
+.bfsale-price-line {
+  white-space: nowrap;
+}
+
 .bfsale-rrp {
-  margin-inline-start: 0.4em;
+  margin-inline-end: 0.4em;
   color: #d0021b;
   white-space: nowrap;
+}
+
+.bfsale-price {
+  color: #1a8a3a;
 }
 
 /* Diagonal strikethrough across the RRP amount */

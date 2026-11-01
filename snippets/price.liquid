@@ -20,9 +20,13 @@
   endif
 
   # BFSALE: on collection product cards, show the compare-at price as red "RRP" text after the price
+  assign is_bfsale_card = false
   assign show_bfsale_rrp = false
-  if show_compare_price and template.name == 'collection' and product_resource.tags contains 'BFSALE' and product.handle != closest.product.handle
-    assign show_bfsale_rrp = true
+  if template.name == 'collection' and product_resource.tags contains 'BFSALE' and product.handle != closest.product.handle
+    assign is_bfsale_card = true
+    if show_compare_price
+      assign show_bfsale_rrp = true
+    endif
   endif
 
   if product_resource == blank and request.design_mode
@@ -47,15 +51,15 @@
   endif
 -%}
 
-<div ref="priceContainer">
+<div ref="priceContainer"{% if is_bfsale_card %} class="bfsale-price-line"{% endif %}>
   {% if show_bfsale_rrp %}
-    <span role="group">
-      <span class="visually-hidden">{{ 'content.price_sale' | t }}&nbsp;</span>
-      <span class="price">{{ price }}</span>
-    </span>
     <span role="group" class="bfsale-rrp">
       <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
       RRP <span class="bfsale-rrp__amount">{{- compare_at_price -}}</span>
+    </span>
+    <span role="group">
+      <span class="visually-hidden">{{ 'content.price_sale' | t }}&nbsp;</span>
+      <span class="price bfsale-price">{{ price }}</span>
     </span>
   {% else %}
   {% if show_sale_price_first == false and show_compare_price %}

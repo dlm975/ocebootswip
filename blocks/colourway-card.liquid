@@ -283,7 +283,8 @@
           amount.className = 'bfsale-rrp__amount';
           amount.textContent = variant.compare;
           rrp.append('RRP ', amount);
-          container.replaceChildren(price, document.createTextNode(' '), rrp);
+          price.classList.add('bfsale-price');
+          container.replaceChildren(rrp, document.createTextNode(' '), price);
         } else {
           container.replaceChildren(price);
         }
