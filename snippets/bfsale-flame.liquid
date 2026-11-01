@@ -1,9 +1,12 @@
 {%- doc -%}
   Animated flame emoji shown in the top-right corner of BFSALE product card images.
   Uses the native emoji, so it renders in Apple's style on Apple devices and the platform's own style elsewhere.
+  With inline: true it renders in the text flow, for placing next to the product page price.
+
+  @param {boolean} [inline] - Render inline instead of positioned over the card image
 {%- enddoc -%}
 
-<span class="bfsale-flame" aria-hidden="true">🔥</span>
+<span class="bfsale-flame{% if inline %} bfsale-flame--inline{% endif %}" aria-hidden="true">🔥</span>
 
 {% stylesheet %}
   .bfsale-flame {
@@ -18,6 +21,13 @@
     filter: drop-shadow(0 0 4px rgb(255 120 0 / 0.55));
     animation: bfsale-flicker 1.6s ease-in-out infinite;
     pointer-events: none;
+  }
+
+  .bfsale-flame--inline {
+    position: static;
+    display: inline-block;
+    font-size: 1.25em;
+    vertical-align: middle;
   }
 
   @keyframes bfsale-flicker {

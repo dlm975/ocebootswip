@@ -4117,16 +4117,48 @@ text-component {
   box-shadow: none;
 }
 
-/* BFSALE: red struck-through compare-at price, then green "NOW <price>", on collection cards */
-/* Keep the BFSALE price on one line: the card becomes a size container and the
+/* BFSALE: red struck-through compare-at price, then green "NOW <price>" (collection + product pages) */
+/* Cards: keep the price on one line; the card becomes a size container and the
    line scales down with the card width (it measures ~15.5x its font size with currency codes). */
-.product-grid__item:has(.bfsale-price-line) {
+:is(.product-grid__item, .resource-list__item):has(.bfsale-price-line--card) {
   container-type: inline-size;
 }
 
-.bfsale-price-line {
+.bfsale-price-line--card {
   white-space: nowrap;
   font-size: min(1em, 6cqi);
+}
+
+/* Product page: price, % OFF badge and flame in a row that wraps on small screens */
+.bfsale-price-line--pdp {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 0.5em;
+  row-gap: 0.35em;
+}
+
+.bfsale-price-line--pdp > [role='group'] {
+  white-space: nowrap;
+}
+
+.bfsale-price-line--pdp .bfsale-rrp {
+  margin-inline-end: 0;
+}
+
+.bfsale-price-line--pdp .bfsale-price {
+  color: #000;
+}
+
+.bfsale-pdp-tags {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  white-space: nowrap;
+}
+
+.bfsale-price-line--pdp .unit-price {
+  flex-basis: 100%;
 }
 
 .bfsale-rrp {

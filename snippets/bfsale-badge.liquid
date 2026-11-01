@@ -4,7 +4,10 @@
   The percentage is based on the selected (or first available) variant's compare-at price.
   Renders an empty, hidden badge when there is no discount so JS can fill it on variant change.
 
+  With inline: true it renders just the badge (no anchor), for placing next to the product page price.
+
   @param {product} product - The product to render the badge for
+  @param {boolean} [inline] - Render an inline badge instead of the card-image anchor
 {%- enddoc -%}
 
 {%- liquid
@@ -15,11 +18,17 @@
   endif
 -%}
 
-<div class="bfsale-badge-anchor">
-  <span class="bfsale-badge" data-bfsale-badge{% if bf_percent <= 0 %} hidden{% endif %}>
+{%- if inline -%}
+  <span class="bfsale-badge bfsale-badge--inline" data-bfsale-badge{% if bf_percent <= 0 %} hidden{% endif %}>
     {%- if bf_percent > 0 %}{{ bf_percent }}% OFF{% endif -%}
   </span>
-</div>
+{%- else -%}
+  <div class="bfsale-badge-anchor">
+    <span class="bfsale-badge" data-bfsale-badge{% if bf_percent <= 0 %} hidden{% endif %}>
+      {%- if bf_percent > 0 %}{{ bf_percent }}% OFF{% endif -%}
+    </span>
+  </div>
+{%- endif -%}
 
 {% stylesheet %}
   /* Zero-height anchor placed right after the image; cancels the card's flex gap so it sits on the image edge */
@@ -63,6 +72,14 @@
     border-radius: 6px;
     white-space: nowrap;
     pointer-events: none;
+  }
+
+  .bfsale-badge--inline {
+    position: static;
+    transform: none;
+    display: inline-block;
+    font-size: 0.85em;
+    vertical-align: middle;
   }
 
   .bfsale-badge[hidden] {

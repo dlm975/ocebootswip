@@ -25,7 +25,7 @@
 
     {%- render 'meta-tags' -%}
     {%- render 'fonts' -%}
-    {%- if template.name == 'collection' -%}
+    {%- if template.name == 'collection' or template.name == 'product' -%}
       {%- # Oswald Bold for the BFSALE "% OFF" badge -%}
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

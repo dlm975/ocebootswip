@@ -19,14 +19,23 @@
     assign show_compare_price = true
   endif
 
-  # BFSALE: on collection product cards, show the compare-at price as red "RRP" text after the price
-  assign is_bfsale_card = false
+  # BFSALE: on collection and product pages, products tagged BFSALE show the compare-at price struck through
+  # in red, then "NOW <price>" in green. On the product page's own price the % OFF badge and flame sit inline.
+  assign bfsale_page = false
+  if template.name == 'collection' or template.name == 'product'
+    assign bfsale_page = true
+  endif
+  assign is_bfsale = false
+  if bfsale_page and product_resource.tags contains 'BFSALE'
+    assign is_bfsale = true
+  endif
+  assign is_bfsale_pdp = false
+  if is_bfsale and template.name == 'product' and product.handle == closest.product.handle
+    assign is_bfsale_pdp = true
+  endif
   assign show_bfsale_rrp = false
-  if template.name == 'collection' and product_resource.tags contains 'BFSALE' and product.handle != closest.product.handle
-    assign is_bfsale_card = true
-    if show_compare_price
-      assign show_bfsale_rrp = true
-    endif
+  if is_bfsale and show_compare_price
+    assign show_bfsale_rrp = true
   endif
 
   if product_resource == blank and request.design_mode
@@ -51,7 +60,12 @@
   endif
 -%}
 
-<div ref="priceContainer"{% if is_bfsale_card %} class="bfsale-price-line"{% endif %}>
+<div
+  ref="priceContainer"
+  {% if is_bfsale %}
+    class="bfsale-price-line {% if is_bfsale_pdp %}bfsale-price-line--pdp{% else %}bfsale-price-line--card{% endif %}"
+  {% endif %}
+>
   {% if show_bfsale_rrp %}
     <span role="group" class="bfsale-rrp">
       <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
@@ -61,6 +75,12 @@
       <span class="visually-hidden">{{ 'content.price_sale' | t }}&nbsp;</span>
       <span class="bfsale-price" aria-hidden="true">NOW </span><span class="price bfsale-price">{{ price }}</span>
     </span>
+    {% if is_bfsale_pdp %}
+      <span class="bfsale-pdp-tags">
+        {%- render 'bfsale-badge', product: product_resource, inline: true -%}
+        {%- render 'bfsale-flame', inline: true -%}
+      </span>
+    {% endif %}
   {% else %}
   {% if show_sale_price_first == false and show_compare_price %}
     <span role="group">

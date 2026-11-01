@@ -1,8 +1,17 @@
 
 
+{% liquid
+  assign is_bfsale_card = false
+  if template.name == 'collection' or template.name == 'product'
+    if closest.product.tags contains 'BFSALE'
+      assign is_bfsale_card = true
+    endif
+  endif
+%}
+
 {% capture children %}
   {% unless closest.product == blank %}
-    {% if template.name == 'collection' and closest.product.tags contains 'BFSALE' %}
+    {% if is_bfsale_card %}
       {% render 'bfsale-flame' %}
     {% else %}
       {% render 'product-card-badges', product: closest.product %}
@@ -15,7 +24,7 @@
 
 {% render 'card-gallery', children: children %}
 
-{% if closest.product != blank and template.name == 'collection' and closest.product.tags contains 'BFSALE' %}
+{% if closest.product != blank and is_bfsale_card %}
   {% render 'bfsale-badge', product: closest.product %}
 {% endif %}
 
