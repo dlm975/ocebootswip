@@ -283,9 +283,13 @@
           const amount = document.createElement('span');
           amount.className = 'bfsale-rrp__amount';
           amount.textContent = variant.compare;
-          rrp.append('RRP ', amount);
+          rrp.append(amount);
           price.classList.add('bfsale-price');
-          container.replaceChildren(rrp, document.createTextNode(' '), price);
+          const now = document.createElement('span');
+          now.className = 'bfsale-price';
+          now.setAttribute('aria-hidden', 'true');
+          now.textContent = 'NOW ';
+          container.replaceChildren(rrp, document.createTextNode(' '), now, price);
         } else {
           container.replaceChildren(price);
         }

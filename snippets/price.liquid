@@ -55,11 +55,11 @@
   {% if show_bfsale_rrp %}
     <span role="group" class="bfsale-rrp">
       <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
-      RRP <span class="bfsale-rrp__amount">{{- compare_at_price -}}</span>
+      <span class="bfsale-rrp__amount">{{- compare_at_price -}}</span>
     </span>
     <span role="group">
       <span class="visually-hidden">{{ 'content.price_sale' | t }}&nbsp;</span>
-      <span class="price bfsale-price">{{ price }}</span>
+      <span class="bfsale-price" aria-hidden="true">NOW </span><span class="price bfsale-price">{{ price }}</span>
     </span>
   {% else %}
   {% if show_sale_price_first == false and show_compare_price %}

@@ -4117,7 +4117,7 @@ text-component {
   box-shadow: none;
 }
 
-/* BFSALE: red "RRP <compare-at price>" shown next to the price on collection cards */
+/* BFSALE: red struck-through compare-at price, then green "NOW <price>", on collection cards */
 .bfsale-price-line {
   white-space: nowrap;
 }
