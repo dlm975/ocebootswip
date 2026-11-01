@@ -4116,3 +4116,40 @@ text-component {
   transform: none;
   box-shadow: none;
 }
+
+/* BFSALE: red struck-through compare-at price, then green "NOW <price>", on collection cards */
+/* Keep the BFSALE price on one line: the card becomes a size container and the
+   line scales down with the card width (it measures ~15.5x its font size with currency codes). */
+.product-grid__item:has(.bfsale-price-line) {
+  container-type: inline-size;
+}
+
+.bfsale-price-line {
+  white-space: nowrap;
+  font-size: min(1em, 6cqi);
+}
+
+.bfsale-rrp {
+  margin-inline-end: 0.4em;
+  color: #d0021b;
+  white-space: nowrap;
+}
+
+.bfsale-price {
+  color: #1a8a3a;
+  font-weight: 700;
+}
+
+/* Diagonal strikethrough across the RRP amount */
+.bfsale-rrp__amount {
+  display: inline-block;
+  line-height: 1;
+  padding-inline: 1px;
+  background: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 0.75px),
+    currentColor calc(50% - 0.75px),
+    currentColor calc(50% + 0.75px),
+    transparent calc(50% + 0.75px)
+  );
+}
