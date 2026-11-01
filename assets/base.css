@@ -4123,3 +4123,17 @@ text-component {
   color: #d0021b;
   white-space: nowrap;
 }
+
+/* Diagonal strikethrough across the RRP amount */
+.bfsale-rrp__amount {
+  display: inline-block;
+  line-height: 1;
+  padding-inline: 1px;
+  background: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 0.75px),
+    currentColor calc(50% - 0.75px),
+    currentColor calc(50% + 0.75px),
+    transparent calc(50% + 0.75px)
+  );
+}
