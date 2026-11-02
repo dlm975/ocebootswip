@@ -4135,7 +4135,12 @@ text-component {
   flex-wrap: wrap;
   align-items: center;
   column-gap: 0.5em;
-  row-gap: 0.35em;
+  row-gap: 1em; /* room for the flames on the % OFF badge if it wraps to its own line */
+}
+
+/* Room above the row for the flames rising off the % OFF badge */
+.bfsale-price-line--pdp:has(.bfsale-fire:not([hidden])) {
+  padding-block-start: 1em;
 }
 
 .bfsale-price-line--pdp > [role='group'] {
