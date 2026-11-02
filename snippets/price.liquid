@@ -76,10 +76,7 @@
       <span class="bfsale-price" aria-hidden="true">NOW </span><span class="price bfsale-price">{{ price }}</span>
     </span>
     {% if is_bfsale_pdp %}
-      <span class="bfsale-pdp-tags">
-        {%- render 'bfsale-badge', product: product_resource, inline: true -%}
-        {%- render 'bfsale-flame', inline: true -%}
-      </span>
+      {%- render 'bfsale-badge', product: product_resource, inline: true -%}
     {% endif %}
   {% else %}
   {% if show_sale_price_first == false and show_compare_price %}

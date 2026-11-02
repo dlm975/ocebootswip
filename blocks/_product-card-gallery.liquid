@@ -11,11 +11,9 @@
 
 {% capture children %}
   {% unless closest.product == blank %}
-    {% if is_bfsale_card %}
-      {% render 'bfsale-flame' %}
-    {% else %}
+    {% unless is_bfsale_card %}
       {% render 'product-card-badges', product: closest.product %}
-    {% endif %}
+    {% endunless %}
     {%  if settings.quick_add or settings.mobile_quick_add %}
       {% render 'quick-add', product: closest.product, section_id: section.id %}
     {% endif %}

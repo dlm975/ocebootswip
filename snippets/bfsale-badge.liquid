@@ -1,10 +1,11 @@
 {%- doc -%}
-  Renders the "x% OFF" pill for products tagged BFSALE. Render it directly after the card image: it sits in a
-  zero-height anchor so the pill straddles the image's bottom edge, left-aligned with the product title.
+  Renders the "x% OFF" pill, with animated flames rising off its top edge, for products tagged BFSALE.
+  On cards, render it directly after the card image: it sits in a zero-height anchor so the pill straddles the
+  image's bottom edge, left-aligned with the product title.
   The percentage is based on the selected (or first available) variant's compare-at price.
-  Renders an empty, hidden badge when there is no discount so JS can fill it on variant change.
+  Renders hidden when there is no discount so JS can fill it on variant change.
 
-  With inline: true it renders just the badge (no anchor), for placing next to the product page price.
+  With inline: true it renders without the anchor, for placing next to the product page price.
 
   @param {product} product - The product to render the badge for
   @param {boolean} [inline] - Render an inline badge instead of the card-image anchor
@@ -18,16 +19,22 @@
   endif
 -%}
 
-{%- if inline -%}
-  <span class="bfsale-badge bfsale-badge--inline" data-bfsale-badge{% if bf_percent <= 0 %} hidden{% endif %}>
-    {%- if bf_percent > 0 %}{{ bf_percent }}% OFF{% endif -%}
-  </span>
-{%- else -%}
-  <div class="bfsale-badge-anchor">
-    <span class="bfsale-badge" data-bfsale-badge{% if bf_percent <= 0 %} hidden{% endif %}>
+{%- capture bf_fire -%}
+  <span class="bfsale-fire {% if inline %}bfsale-fire--inline{% else %}bfsale-fire--card{% endif %}" data-bfsale-fire{% if bf_percent <= 0 %} hidden{% endif %}>
+    <span class="bfsale-fire__flames" aria-hidden="true">
+      {%- for i in (1..7) -%}<i class="bfsale-fire__flame"></i>{%- endfor -%}
+      {%- for i in (1..3) -%}<i class="bfsale-fire__ember"></i>{%- endfor -%}
+    </span>
+    <span class="bfsale-badge" data-bfsale-badge>
       {%- if bf_percent > 0 %}{{ bf_percent }}% OFF{% endif -%}
     </span>
-  </div>
+  </span>
+{%- endcapture -%}
+
+{%- if inline -%}
+  {{ bf_fire }}
+{%- else -%}
+  <div class="bfsale-badge-anchor">{{ bf_fire }}</div>
 {%- endif -%}
 
 {% stylesheet %}
@@ -53,20 +60,22 @@
   }
 
   .bfsale-badge {
-    position: absolute;
-    top: 0;
-    left: 0;
-    transform: translateY(-95%);
+    position: relative;
+    z-index: 1;
+    display: inline-block;
     color: #fff;
     font-family: 'Oswald', sans-serif;
     font-weight: 700;
     font-style: italic;
-    font-size: var(--font-size--sm, 0.875rem);
+    font-size: 1em;
     line-height: 1;
     letter-spacing: -0.01em;
     -webkit-text-stroke: 2px #000;
     paint-order: stroke fill;
-    padding: 0.3em 0.75em 0.3em 0.65em;
+    /* Oswald's capitals sit low in the line box (0.13em gap above vs 0.035em below at line-height 1),
+       so the top padding is 0.095em smaller to centre the text optically. The italic glyphs also sit
+       right of their advance box, so the right padding is heavier to centre them horizontally. */
+    padding: 0.33em 1.03em 0.425em 0.77em;
     background: #5a31f4;
     box-shadow: 0 2px 6px rgb(0 0 0 / 0.35);
     border-radius: 6px;
@@ -74,12 +83,113 @@
     pointer-events: none;
   }
 
-  .bfsale-badge--inline {
-    position: static;
-    transform: none;
+  /* Badge + animated flames rising off its top edge */
+  .bfsale-fire {
+    position: relative;
     display: inline-block;
+    isolation: isolate;
+  }
+
+  /* Card: straddles the bottom edge of the image */
+  .bfsale-fire--card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translateY(-95%);
+    font-size: var(--font-size--sm, 0.875rem);
+    pointer-events: none;
+  }
+
+  /* Product page: inline next to the price */
+  .bfsale-fire--inline {
     font-size: 0.85em;
     vertical-align: middle;
+  }
+
+  .bfsale-fire[hidden] {
+    display: none;
+  }
+
+  .bfsale-fire__flames {
+    position: absolute;
+    inset-inline: 6%;
+    bottom: calc(100% - 0.35em);
+    height: 1.4em;
+    z-index: 0;
+    pointer-events: none;
+    filter: drop-shadow(0 0 0.15em rgb(255 110 0 / 0.6));
+  }
+
+  .bfsale-fire__flame {
+    --size: 0.9em;
+    --dur: 1s;
+    --delay: 0s;
+    position: absolute;
+    bottom: 0;
+    width: var(--size);
+    height: calc(var(--size) * 1.45);
+    margin-inline-start: calc(var(--size) / -2);
+    transform-origin: 50% 100%;
+    animation: bfsale-flame-dance var(--dur) ease-in-out var(--delay) infinite alternate;
+  }
+
+  /* Teardrop: a square with one sharp corner, rotated so the point faces up */
+  .bfsale-fire__flame::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: var(--size);
+    height: var(--size);
+    border-radius: 0 50% 50% 50%;
+    transform: rotate(45deg);
+    transform-origin: 50% 50%;
+    background: radial-gradient(circle at 62% 62%, #fff6c2 0%, #ffd23f 28%, #ff8a00 58%, #ff3d00 85%);
+  }
+
+  .bfsale-fire__flame:nth-child(1) { left: 6%;  --size: 0.6em;  --dur: 0.9s;  --delay: -0.2s; }
+  .bfsale-fire__flame:nth-child(2) { left: 20%; --size: 0.85em; --dur: 1.15s; --delay: -0.6s; }
+  .bfsale-fire__flame:nth-child(3) { left: 35%; --size: 0.7em;  --dur: 0.8s;  --delay: -0.1s; }
+  .bfsale-fire__flame:nth-child(4) { left: 50%; --size: 1em;    --dur: 1.3s;  --delay: -0.9s; }
+  .bfsale-fire__flame:nth-child(5) { left: 65%; --size: 0.75em; --dur: 0.95s; --delay: -0.4s; }
+  .bfsale-fire__flame:nth-child(6) { left: 80%; --size: 0.9em;  --dur: 1.1s;  --delay: -0.7s; }
+  .bfsale-fire__flame:nth-child(7) { left: 94%; --size: 0.6em;  --dur: 0.85s; --delay: -0.3s; }
+
+  @keyframes bfsale-flame-dance {
+    0%   { transform: scale(1, 1) skewX(0deg); opacity: 0.95; }
+    25%  { transform: scale(0.9, 1.2) skewX(-5deg); opacity: 1; }
+    50%  { transform: scale(1.06, 0.88) skewX(4deg); opacity: 0.9; }
+    75%  { transform: scale(0.94, 1.12) skewX(-3deg); opacity: 1; }
+    100% { transform: scale(1, 0.95) skewX(2deg); opacity: 0.92; }
+  }
+
+  .bfsale-fire__ember {
+    position: absolute;
+    bottom: 0.3em;
+    width: 0.14em;
+    height: 0.14em;
+    border-radius: 50%;
+    background: #ffd23f;
+    box-shadow: 0 0 0.15em #ff8a00;
+    opacity: 0;
+    animation: bfsale-ember-rise 1.8s ease-out infinite;
+  }
+
+  .bfsale-fire__ember:nth-of-type(8)  { left: 28%; animation-delay: -0.3s; }
+  .bfsale-fire__ember:nth-of-type(9)  { left: 55%; animation-delay: -1.1s; animation-duration: 2.2s; }
+  .bfsale-fire__ember:nth-of-type(10) { left: 76%; animation-delay: -0.7s; animation-duration: 1.6s; }
+
+  @keyframes bfsale-ember-rise {
+    0%   { transform: translate(0, 0); opacity: 0; }
+    15%  { opacity: 1; }
+    100% { transform: translate(0.3em, -1.6em); opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bfsale-fire__flame,
+    .bfsale-fire__ember {
+      animation: none;
+    }
   }
 
   .bfsale-badge[hidden] {
