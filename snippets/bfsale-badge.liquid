@@ -66,7 +66,10 @@
     letter-spacing: -0.01em;
     -webkit-text-stroke: 2px #000;
     paint-order: stroke fill;
-    padding: 0.3em 0.75em 0.3em 0.65em;
+    /* Oswald's capitals sit low in the line box (0.13em gap above vs 0.035em below at line-height 1),
+       so the top padding is 0.095em smaller to centre the text optically. The italic glyphs also sit
+       right of their advance box, so the right padding is heavier to centre them horizontally. */
+    padding: 0.33em 1.03em 0.425em 0.77em;
     background: #5a31f4;
     box-shadow: 0 2px 6px rgb(0 0 0 / 0.35);
     border-radius: 6px;
