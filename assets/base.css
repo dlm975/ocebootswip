@@ -4155,13 +4155,6 @@ text-component {
   color: #000;
 }
 
-.bfsale-pdp-tags {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5em;
-  white-space: nowrap;
-}
-
 .bfsale-price-line--pdp .unit-price {
   flex-basis: 100%;
 }

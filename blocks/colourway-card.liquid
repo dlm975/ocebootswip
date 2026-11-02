@@ -133,9 +133,6 @@
           data-colourway-image
         >
       {%- endif -%}
-      {%- if is_bfsale -%}
-        {% render 'bfsale-flame' %}
-      {%- endif -%}
     </div>
 
     {%- if is_bfsale -%}
@@ -276,10 +273,11 @@
       price.textContent = variant.price;
 
       if (this.hasAttribute('data-bfsale')) {
-        const badge = this.querySelector('[data-bfsale-badge]');
-        if (badge) {
+        const fire = this.querySelector('[data-bfsale-fire]');
+        const badge = fire?.querySelector('[data-bfsale-badge]');
+        if (fire && badge) {
           badge.textContent = variant.percent > 0 ? `${variant.percent}% OFF` : '';
-          badge.hidden = !(variant.percent > 0);
+          fire.hidden = !(variant.percent > 0);
         }
 
         if (variant.compare) {
