@@ -1,0 +1,680 @@
+{% doc %}
+  Collection header: bold heading with a size selector underneath.
+
+  - Toggle switch for US / UK / EU size systems (remembered per shopper).
+  - Multiple sizes can be selected; they're ORed together, the same as the theme's
+    own filters.
+  - Sizes come from this collection's own "Size" filter (Search & Discovery), so
+    only sizes the collection actually stocks are shown. The catalogue stores sizes as
+    "US 9 - UK 8 - EU 42"; each chip covers every option value with that size in the
+    chosen system.
+  - Selecting a size updates the URL and re-renders the product grid through the
+    theme's facets form (no page reload); without it, the page navigates instead.
+    Filters changed elsewhere on the page are reflected back into the chips.
+{% enddoc %}
+
+{%- liquid
+  assign size_filter = null
+  for filter in collection.filters
+    if filter.type == 'list'
+      assign label = filter.label | downcase
+      if filter.param_name contains 'option.size' or label == 'size'
+        assign size_filter = filter
+        break
+      endif
+    endif
+  endfor
+
+  assign heading = section.settings.heading | default: collection.title
+-%}
+
+{% style %}
+  {{ section.settings.heading_font | font_face: font_display: 'swap' }}
+
+  #csh-{{ section.id }} {
+    --csh-accent: {{ section.settings.accent_color }};
+    --csh-accent-text: {{ section.settings.accent_text_color }};
+    --csh-text: {{ section.settings.text_color }};
+    --csh-muted: {{ section.settings.text_color | color_modify: 'alpha', 0.55 }};
+    --csh-line: {{ section.settings.text_color | color_modify: 'alpha', 0.14 }};
+    --csh-track: {{ section.settings.text_color | color_modify: 'alpha', 0.07 }};
+    background: {{ section.settings.background_color }};
+    color: var(--csh-text);
+    padding: {{ section.settings.padding_top }}px 20px {{ section.settings.padding_bottom }}px;
+  }
+
+  #csh-{{ section.id }} .csh {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: {{ section.settings.alignment }};
+    text-align: {% if section.settings.alignment == 'flex-start' %}left{% else %}center{% endif %};
+    gap: 18px;
+  }
+
+  #csh-{{ section.id }} .csh__heading {
+    margin: 0;
+    font-family: {{ section.settings.heading_font.family }}, {{ section.settings.heading_font.fallback_families }};
+    font-weight: {{ section.settings.heading_font.weight }};
+    font-style: {{ section.settings.heading_font.style }};
+    font-size: clamp(32px, 7vw, {{ section.settings.heading_size }}px);
+    line-height: 0.95;
+    letter-spacing: {{ section.settings.heading_letter_spacing | divided_by: 100.0 }}em;
+    {% if section.settings.uppercase %}text-transform: uppercase;{% endif %}
+    color: var(--csh-text);
+    overflow-wrap: anywhere;
+  }
+
+  #csh-{{ section.id }} .csh__desc {
+    margin: -6px 0 0;
+    max-width: 640px;
+    color: var(--csh-muted);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  #csh-{{ section.id }} .csh__desc p { margin: 0; }
+
+  #csh-{{ section.id }} .csh__sizes {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: inherit;
+    gap: 14px;
+  }
+
+  #csh-{{ section.id }} .csh__bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: {{ section.settings.alignment }};
+  }
+
+  #csh-{{ section.id }} .csh__label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  /* US / UK / EU toggle switch */
+  #csh-{{ section.id }} .csh__toggle {
+    position: relative;
+    display: inline-grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 4px;
+    border-radius: 999px;
+    background: var(--csh-track);
+    border: 1px solid var(--csh-line);
+    isolation: isolate;
+  }
+
+  #csh-{{ section.id }} .csh__toggle input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #csh-{{ section.id }} .csh__toggle label {
+    position: relative;
+    z-index: 1;
+    min-width: 54px;
+    padding: 8px 14px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    border-radius: 999px;
+    cursor: pointer;
+    color: var(--csh-text);
+    transition: color 0.25s ease;
+    user-select: none;
+  }
+
+  #csh-{{ section.id }} .csh__toggle input:checked + label {
+    color: var(--csh-accent-text);
+  }
+
+  #csh-{{ section.id }} .csh__toggle input:focus-visible + label {
+    outline: 2px solid var(--csh-accent);
+    outline-offset: 2px;
+  }
+
+  #csh-{{ section.id }} .csh__thumb {
+    position: absolute;
+    z-index: 0;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc((100% - 8px) / 3);
+    border-radius: 999px;
+    background: var(--csh-accent);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.25);
+    transition: transform 0.3s cubic-bezier(0.3, 1.3, 0.5, 1);
+  }
+
+  #csh-{{ section.id }} .csh__toggle[data-sys='uk'] .csh__thumb { transform: translateX(100%); }
+  #csh-{{ section.id }} .csh__toggle[data-sys='eu'] .csh__thumb { transform: translateX(200%); }
+
+  /* Size chips */
+  #csh-{{ section.id }} .csh__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: {{ section.settings.alignment }};
+    max-width: 980px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  #csh-{{ section.id }} .csh__chip {
+    min-width: 58px;
+    height: 44px;
+    padding: 0 12px;
+    border-radius: {{ section.settings.chip_radius }}px;
+    border: 1.5px solid var(--csh-line);
+    background: transparent;
+    color: var(--csh-text);
+    font: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  }
+
+  #csh-{{ section.id }} .csh__chip:hover:not(:disabled) {
+    border-color: var(--csh-text);
+  }
+
+  #csh-{{ section.id }} .csh__chip:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  #csh-{{ section.id }} .csh__chip[aria-pressed='true'] {
+    background: var(--csh-accent);
+    border-color: var(--csh-accent);
+    color: var(--csh-accent-text);
+  }
+
+  #csh-{{ section.id }} .csh__chip:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+
+  #csh-{{ section.id }} .csh__chip:focus-visible {
+    outline: 2px solid var(--csh-accent);
+    outline-offset: 2px;
+  }
+
+  #csh-{{ section.id }} .csh__status {
+    min-height: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--csh-muted);
+  }
+
+  #csh-{{ section.id }} .csh__clear {
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    font-weight: 700;
+    color: var(--csh-text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  #csh-{{ section.id }} .csh__clear[hidden] { display: none; }
+
+  #csh-{{ section.id }} .csh__empty {
+    font-size: 13px;
+    color: var(--csh-muted);
+    margin: 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    #csh-{{ section.id }} {
+      padding: {{ section.settings.padding_top | times: 0.7 | round }}px 16px {{ section.settings.padding_bottom | times: 0.7 | round }}px;
+    }
+
+    #csh-{{ section.id }} .csh__heading {
+      font-size: clamp(28px, 11vw, {{ section.settings.heading_size_mobile }}px);
+    }
+
+    #csh-{{ section.id }} .csh__chips {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));
+      width: 100%;
+    }
+
+    #csh-{{ section.id }} .csh__chip {
+      min-width: 0;
+      width: 100%;
+    }
+  }
+{% endstyle %}
+
+<div id="csh-{{ section.id }}" class="csh-section">
+  <div class="csh">
+    {% if section.settings.heading_tag == 'h1' %}
+      <h1 class="csh__heading">{{ heading }}</h1>
+    {% else %}
+      <h2 class="csh__heading">{{ heading }}</h2>
+    {% endif %}
+
+    {% if section.settings.show_description and collection.description != blank %}
+      <div class="csh__desc">{{ collection.description }}</div>
+    {% endif %}
+
+    {% if section.settings.show_sizes %}
+      {% if size_filter %}
+        <collection-size-selector
+          class="csh__sizes"
+          data-section-id="{{ section.id }}"
+          data-param="{{ size_filter.param_name }}"
+          data-default-sys="{{ section.settings.default_system }}"
+        >
+          <script type="application/json" data-size-values>
+            [
+              {%- for v in size_filter.values -%}
+                {"value": {{ v.value | json }}, "count": {{ v.count | default: 0 }}, "active": {{ v.active }}}
+                {%- unless forloop.last %},{% endunless -%}
+              {%- endfor -%}
+            ]
+          </script>
+
+          <div class="csh__bar">
+            {% if section.settings.selector_label != blank %}
+              <span class="csh__label" id="csh-label-{{ section.id }}">{{ section.settings.selector_label }}</span>
+            {% endif %}
+            <div class="csh__toggle" role="radiogroup" aria-label="Size system" data-sys="{{ section.settings.default_system }}">
+              {%- assign systems = 'us,uk,eu' | split: ',' -%}
+              {% for sys in systems %}
+                <input
+                  type="radio"
+                  name="csh-sys-{{ section.id }}"
+                  id="csh-sys-{{ section.id }}-{{ sys }}"
+                  value="{{ sys }}"
+                  {% if sys == section.settings.default_system %}checked{% endif %}
+                >
+                <label for="csh-sys-{{ section.id }}-{{ sys }}">{{ sys | upcase }}</label>
+              {% endfor %}
+              <span class="csh__thumb" aria-hidden="true"></span>
+            </div>
+          </div>
+
+          <ul class="csh__chips" aria-labelledby="csh-label-{{ section.id }}"></ul>
+
+          <div class="csh__status" aria-live="polite">
+            <span class="csh__count"></span>
+            <button type="button" class="csh__clear" hidden>Clear sizes</button>
+          </div>
+        </collection-size-selector>
+      {% elsif request.design_mode %}
+        <p class="csh__empty">
+          No "Size" filter found for this collection. Turn on the Size filter in the Shopify Search &amp; Discovery
+          app.
+        </p>
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
+
+<script type="module">
+  if (!customElements.get('collection-size-selector')) {
+    const SYSTEMS = ['us', 'uk', 'eu'];
+    const STORE_KEY = 'csh-size-system';
+
+    // "US 9 - UK 8 - EU 42 2/3" -> { us: '9', uk: '8', eu: '42 2/3' }
+    const parse = (value) => {
+      const out = {};
+      for (const sys of SYSTEMS) {
+        const m = value.match(new RegExp('\\b' + sys + '\\s*([0-9]+(?:\\.[0-9]+)?(?:\\s+[12]/3)?)', 'i'));
+        if (m) out[sys] = m[1].replace(/\s+/g, ' ').trim();
+      }
+      return out;
+    };
+
+    const toNumber = (size) => {
+      const [whole, frac] = size.split(' ');
+      let n = parseFloat(whole);
+      if (frac === '1/3') n += 1 / 3;
+      if (frac === '2/3') n += 2 / 3;
+      return n;
+    };
+
+    const pretty = (size) => size.replace(' 1/3', '\u2153').replace(' 2/3', '\u2154');
+
+    class CollectionSizeSelector extends HTMLElement {
+      connectedCallback() {
+        this.param = this.dataset.param;
+        this.toggle = this.querySelector('.csh__toggle');
+        this.list = this.querySelector('.csh__chips');
+        this.countEl = this.querySelector('.csh__count');
+        this.clearBtn = this.querySelector('.csh__clear');
+        this.values = this.readValues(this);
+
+        let sys = this.dataset.defaultSys || 'us';
+        try {
+          const saved = localStorage.getItem(STORE_KEY);
+          if (SYSTEMS.includes(saved)) sys = saved;
+        } catch (e) {}
+        this.setSystem(sys, false);
+
+        this.toggle.addEventListener('change', (e) => {
+          if (e.target.name && e.target.checked) this.setSystem(e.target.value, true);
+        });
+        this.list.addEventListener('click', (e) => {
+          const chip = e.target.closest('.csh__chip');
+          if (chip && !chip.disabled) this.toggleChip(chip);
+        });
+        this.clearBtn.addEventListener('click', () => this.apply(new Set()));
+
+        this.onExternalChange = () => this.refresh();
+        document.addEventListener('filter:update', this.onExternalChange);
+        window.addEventListener('popstate', this.onExternalChange);
+      }
+
+      disconnectedCallback() {
+        document.removeEventListener('filter:update', this.onExternalChange);
+        window.removeEventListener('popstate', this.onExternalChange);
+      }
+
+      readValues(root) {
+        const script = root.querySelector('[data-size-values]');
+        try {
+          return JSON.parse(script.textContent);
+        } catch (e) {
+          return [];
+        }
+      }
+
+      // Option values currently applied, read from the URL (source of truth).
+      activeValues() {
+        return new Set(new URL(window.location.href).searchParams.getAll(this.param));
+      }
+
+      setSystem(sys, remember) {
+        this.sys = sys;
+        this.toggle.dataset.sys = sys;
+        const radio = this.toggle.querySelector(`input[value="${sys}"]`);
+        if (radio) radio.checked = true;
+        if (remember) {
+          try { localStorage.setItem(STORE_KEY, sys); } catch (e) {}
+        }
+        this.renderChips();
+      }
+
+      // Group every option value by its size in the current system.
+      groups() {
+        const map = new Map();
+        for (const v of this.values) {
+          const size = parse(v.value)[this.sys];
+          if (!size) continue;
+          if (!map.has(size)) map.set(size, { size, values: [], count: 0 });
+          const g = map.get(size);
+          g.values.push(v.value);
+          g.count += v.count || 0;
+        }
+        return [...map.values()].sort((a, b) => toNumber(a.size) - toNumber(b.size));
+      }
+
+      renderChips() {
+        const active = this.activeValues();
+        this.list.replaceChildren();
+        for (const g of this.groups()) {
+          const li = document.createElement('li');
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'csh__chip';
+          btn.textContent = pretty(g.size);
+          btn.dataset.values = JSON.stringify(g.values);
+          const on = g.values.some((v) => active.has(v));
+          btn.setAttribute('aria-pressed', String(on));
+          btn.setAttribute('aria-label', `${this.sys.toUpperCase()} ${pretty(g.size)}`);
+          btn.disabled = g.count === 0 && !on;
+          li.append(btn);
+          this.list.append(li);
+        }
+        this.updateStatus(active);
+      }
+
+      updateStatus(active) {
+        const pressed = this.list.querySelectorAll('.csh__chip[aria-pressed="true"]').length;
+        const hasAny = active.size > 0;
+        this.countEl.textContent = pressed
+          ? `${pressed} size${pressed === 1 ? '' : 's'} selected`
+          : hasAny ? 'Size filter applied' : '';
+        this.clearBtn.hidden = !hasAny;
+      }
+
+      toggleChip(chip) {
+        const next = this.activeValues();
+        const values = JSON.parse(chip.dataset.values);
+        const on = chip.getAttribute('aria-pressed') === 'true';
+        for (const v of values) on ? next.delete(v) : next.add(v);
+        chip.setAttribute('aria-pressed', String(!on));
+        this.apply(next);
+      }
+
+      apply(values) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete(this.param);
+        url.searchParams.delete('page');
+        for (const v of values) url.searchParams.append(this.param, v);
+
+        const facets = document.querySelector('facets-form-component');
+        if (facets && typeof facets.updateFiltersByURL === 'function') {
+          facets.updateFiltersByURL(url.toString());
+          // filter:update fires from the facets form; refresh() syncs chips and counts.
+        } else {
+          window.location.href = url.toString();
+        }
+      }
+
+      // Re-read this section for the current URL so counts follow other filters too.
+      async refresh() {
+        this.renderChips();
+        try {
+          const url = new URL(window.location.href);
+          url.searchParams.set('section_id', this.dataset.sectionId);
+          const html = await (await fetch(url)).text();
+          const doc = new DOMParser().parseFromString(html, 'text/html');
+          const fresh = doc.querySelector('collection-size-selector');
+          if (!fresh) return;
+          this.values = this.readValues(fresh);
+          this.renderChips();
+        } catch (e) {}
+      }
+    }
+
+    customElements.define('collection-size-selector', CollectionSizeSelector);
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Collection size header",
+  "class": "collection-size-header-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Leave empty to use the collection title."
+    },
+    {
+      "type": "font_picker",
+      "id": "heading_font",
+      "label": "Heading font",
+      "default": "oswald_n7"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size (desktop)",
+      "min": 32,
+      "max": 140,
+      "step": 2,
+      "unit": "px",
+      "default": 88
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "label": "Heading size (mobile)",
+      "min": 28,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "heading_letter_spacing",
+      "label": "Letter spacing",
+      "min": -5,
+      "max": 20,
+      "step": 1,
+      "default": 1
+    },
+    {
+      "type": "checkbox",
+      "id": "uppercase",
+      "label": "Uppercase",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag",
+      "options": [
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" }
+      ],
+      "default": "h1"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Show collection description",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Alignment",
+      "options": [
+        { "value": "flex-start", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Size selector"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sizes",
+      "label": "Show size selector",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "selector_label",
+      "label": "Label",
+      "default": "Select your size"
+    },
+    {
+      "type": "select",
+      "id": "default_system",
+      "label": "Default size system",
+      "info": "Shoppers' own choice is remembered after they switch.",
+      "options": [
+        { "value": "us", "label": "US" },
+        { "value": "uk", "label": "UK" },
+        { "value": "eu", "label": "EU" }
+      ],
+      "default": "us"
+    },
+    {
+      "type": "range",
+      "id": "chip_radius",
+      "label": "Size button corner radius",
+      "min": 0,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Colors and spacing"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Selected size / toggle",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "accent_text_color",
+      "label": "Selected size / toggle text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 28
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection size header"
+    }
+  ],
+  "enabled_on": {
+    "templates": ["collection"]
+  }
+}
+{% endschema %}
