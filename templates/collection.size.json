@@ -30,7 +30,7 @@
         "accent_color": "#000000",
         "accent_text_color": "#ffffff",
         "padding_top": 48,
-        "padding_bottom": 28
+        "padding_bottom": 0
       }
     },
     "main": {
@@ -50,7 +50,7 @@
             "enable_grid_density": true,
             "inherit_color_scheme": true,
             "color_scheme": "",
-            "padding-block-start": 8,
+            "padding-block-start": 0,
             "padding-block-end": 8,
             "padding-inline-start": 0,
             "padding-inline-end": 0,

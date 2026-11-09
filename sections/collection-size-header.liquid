@@ -81,7 +81,7 @@
     display: flex;
     flex-direction: column;
     align-items: inherit;
-    gap: 14px;
+    gap: 12px;
   }
 
   #csh-{{ section.id }} .csh__bar {
@@ -211,7 +211,6 @@
   }
 
   #csh-{{ section.id }} .csh__status {
-    min-height: 20px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -232,6 +231,9 @@
   }
 
   #csh-{{ section.id }} .csh__clear[hidden] { display: none; }
+
+  /* No space reserved under the size tiles until there's something to say */
+  #csh-{{ section.id }} .csh__status[data-empty] { display: none; }
 
   #csh-{{ section.id }} .csh__empty {
     font-size: 13px;
@@ -318,7 +320,7 @@
 
           <ul class="csh__chips" aria-labelledby="csh-label-{{ section.id }}"></ul>
 
-          <div class="csh__status" aria-live="polite">
+          <div class="csh__status" aria-live="polite" data-empty>
             <span class="csh__count"></span>
             <button type="button" class="csh__clear" hidden>Clear sizes</button>
           </div>
@@ -459,6 +461,7 @@
           ? `${pressed} size${pressed === 1 ? '' : 's'} selected`
           : hasAny ? 'Size filter applied' : '';
         this.clearBtn.hidden = !hasAny;
+        this.countEl.parentElement.toggleAttribute('data-empty', !this.countEl.textContent && !hasAny);
       }
 
       toggleChip(chip) {
@@ -671,7 +674,7 @@
       "max": 120,
       "step": 4,
       "unit": "px",
-      "default": 28
+      "default": 0
     }
   ],
   "presets": [
