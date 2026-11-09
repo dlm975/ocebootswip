@@ -4118,15 +4118,31 @@ text-component {
 }
 
 /* BFSALE: red struck-through compare-at price, then green "NOW <price>" (collection + product pages) */
-/* Cards: keep the price on one line; the card becomes a size container and the
-   line scales down with the card width (it measures ~15.5x its font size with currency codes). */
-:is(.product-grid__item, .resource-list__item):has(.bfsale-price-line--card) {
-  container-type: inline-size;
+/* Cards: RRP and "NOW <price>" on one line. <price-fit> (assets/price-fit.js) shrinks the
+   text to fit the card; if it can't fit at its minimum size the RRP wraps above, but
+   "NOW" and the new price never split. */
+.bfsale-price-line--card {
+  min-width: 0;
+  max-width: 100%;
 }
 
-.bfsale-price-line--card {
+.bfsale-fit {
+  display: block;
   white-space: nowrap;
-  font-size: min(1em, 6cqi);
+  max-width: 100%;
+}
+
+.bfsale-fit[data-wrapped] {
+  white-space: normal;
+}
+
+.bfsale-now {
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.bfsale-fit .bfsale-rrp {
+  margin-inline-end: 0.15em;
 }
 
 /* Product page: price, % OFF badge and flame in a row that wraps on small screens */

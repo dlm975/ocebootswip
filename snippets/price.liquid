@@ -38,6 +38,14 @@
     assign show_bfsale_rrp = true
   endif
 
+  # Collection pages: every product with a compare-at price gets the RRP / "NOW <price>" line,
+  # kept on one line by <price-fit> (assets/price-fit.js), which shrinks the text to fit the card.
+  assign is_sale_card = false
+  if template.name == 'collection' and show_compare_price and is_bfsale_pdp == false
+    assign is_sale_card = true
+    assign show_bfsale_rrp = true
+  endif
+
   if product_resource == blank and request.design_mode
     assign price = 1999
   endif
@@ -62,19 +70,24 @@
 
 <div
   ref="priceContainer"
-  {% if is_bfsale %}
-    class="bfsale-price-line {% if is_bfsale_pdp %}bfsale-price-line--pdp{% else %}bfsale-price-line--card{% endif %}"
+  {% if is_bfsale_pdp %}
+    class="bfsale-price-line bfsale-price-line--pdp"
+  {% elsif is_bfsale or is_sale_card %}
+    class="bfsale-price-line bfsale-price-line--card"
   {% endif %}
 >
   {% if show_bfsale_rrp %}
+    {%- unless is_bfsale_pdp -%}<price-fit class="bfsale-fit">{%- endunless -%}
     <span role="group" class="bfsale-rrp">
       <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
       <span class="bfsale-rrp__amount">{{- compare_at_price -}}</span>
     </span>
-    <span role="group">
+    {%- if is_bfsale_pdp == false %} {% endif -%}
+    <span role="group" class="bfsale-now">
       <span class="visually-hidden">{{ 'content.price_sale' | t }}&nbsp;</span>
-      <span class="bfsale-price" aria-hidden="true">NOW </span><span class="price bfsale-price">{{ price }}</span>
+      <span class="bfsale-price" aria-hidden="true">NOW&nbsp;</span><span class="price bfsale-price">{{ price }}</span>
     </span>
+    {%- unless is_bfsale_pdp -%}</price-fit>{%- endunless -%}
     {% if is_bfsale_pdp %}
       {%- render 'bfsale-badge', product: product_resource, inline: true -%}
     {% endif %}

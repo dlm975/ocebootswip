@@ -30,6 +30,8 @@
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap">
+      {%- # Shrinks sale price lines on product cards to fit one line -%}
+      <script src="{{ 'price-fit.js' | asset_url }}" defer></script>
     {%- endif -%}
     {%- render 'scripts' -%}
     {%- render 'theme-styles-variables' -%}
