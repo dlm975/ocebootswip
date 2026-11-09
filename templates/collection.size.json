@@ -1,8 +1,37 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "size_header": {
       "type": "collection-size-header",
-      "settings": {}
+      "settings": {
+        "heading": "BLACK FRIDAY SALE",
+        "heading_font": "oswald_n7",
+        "heading_size": 136,
+        "heading_size_mobile": 64,
+        "heading_letter_spacing": 1,
+        "uppercase": true,
+        "heading_tag": "h1",
+        "show_description": false,
+        "alignment": "center",
+        "show_sizes": true,
+        "selector_label": "Select your size",
+        "default_system": "us",
+        "chip_radius": 10,
+        "background_color": "#ffffff",
+        "text_color": "#000000",
+        "accent_color": "#000000",
+        "accent_text_color": "#ffffff",
+        "padding_top": 48,
+        "padding_bottom": 28
+      }
     },
     "main": {
       "type": "main-collection",
