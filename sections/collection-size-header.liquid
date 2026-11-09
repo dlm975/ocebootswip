@@ -68,6 +68,14 @@
     {% if section.settings.uppercase %}text-transform: uppercase;{% endif %}
     color: var(--csh-text);
     overflow-wrap: anywhere;
+    /* Trim the font's empty space above the capitals so the heading sits tight under the header */
+    text-box: trim-start cap alphabetic;
+  }
+
+  @supports not (text-box: trim-start cap alphabetic) {
+    #csh-{{ section.id }} .csh__heading {
+      margin-top: -0.11em;
+    }
   }
 
   #csh-{{ section.id }} .csh__desc {
