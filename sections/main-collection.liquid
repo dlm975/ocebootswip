@@ -104,10 +104,10 @@
       grid-template-columns: repeat(2, 1fr) !important;
     }
   }
-  /* 5 columns on desktop */
+  /* Desktop columns (setting, default 5) */
   @media screen and (min-width: 750px) {
     .product-grid--{{ section.id }}:is(.product-grid--grid):not([product-grid-view='zoom-out']) {
-      --product-grid-columns-desktop: repeat(5, 1fr) !important;
+      --product-grid-columns-desktop: repeat({{ section.settings.desktop_columns | default: 5 }}, 1fr) !important;
     }
   }
 {% endstyle %}
@@ -193,6 +193,15 @@
     "templates": ["collection"]
   },
   "settings": [
+    {
+      "type": "range",
+      "id": "desktop_columns",
+      "label": "Products per row on desktop",
+      "min": 3,
+      "max": 6,
+      "step": 1,
+      "default": 5
+    },
     {
       "type": "select",
       "id": "layout_type",
