@@ -30,7 +30,7 @@
         "accent_color": "#000000",
         "accent_text_color": "#ffffff",
         "padding_top": 20,
-        "padding_bottom": 0,
+        "padding_bottom": 12,
         "toggle_on_color": "#34C759",
         "toggle_on_text_color": "#FFFFFF",
         "toggle_track_color": "#E9E9EB",
