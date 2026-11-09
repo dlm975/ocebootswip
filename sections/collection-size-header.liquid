@@ -250,13 +250,19 @@
 
     #csh-{{ section.id }} .csh__chips {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 5px;
       width: 100%;
     }
 
     #csh-{{ section.id }} .csh__chip {
       min-width: 0;
       width: 100%;
+      height: 40px;
+      padding: 0 2px;
+      font-size: 13px;
+      letter-spacing: -0.02em;
+      border-radius: {{ section.settings.chip_radius | times: 0.8 | round }}px;
     }
   }
 {% endstyle %}
