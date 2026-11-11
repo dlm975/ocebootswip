@@ -36,6 +36,23 @@
     {%- render 'cart-customisation' -%}
     {%- render 'color-schemes' -%}
 
+    {%- comment -%}
+      OCE Boots Glass skin. Off by default; "Glass design" in theme settings turns it on for the
+      homepage only or for every page. With it off, nothing below loads and the theme is unchanged.
+    {%- endcomment -%}
+    {%- liquid
+      assign oce_glass = false
+      if settings.glass_mode == 'all'
+        assign oce_glass = true
+      elsif settings.glass_mode == 'home' and template.name == 'index'
+        assign oce_glass = true
+      endif
+    -%}
+    {%- if oce_glass -%}
+      {{ 'oce-glass.css' | asset_url | stylesheet_tag }}
+      <script src="{{ 'oce-glass.js' | asset_url }}" defer="defer"></script>
+    {%- endif -%}
+
     {% if request.design_mode %}
       {%- render 'theme-editor' -%}
     {% endif %}
@@ -43,7 +60,7 @@
     {{ content_for_header }}
   </head>
 
-  <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}">
+  <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}{% if oce_glass %} oce-glass{% endif %}">
     {% render 'skip-to-content-link', href: '#MainContent', text: 'accessibility.skip_to_text' %}
     <div id="header-group">
       {% sections 'header-group' %}

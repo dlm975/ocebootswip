@@ -3705,5 +3705,25 @@
         "default": "#ffffff"
       }
     ]
+  },
+  {
+    "name": "Glass design",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "OCE Boots Glass skin: clear glass header, cards and tiles on a grey ground. It only changes how things look. Switch it off to return to the standard theme."
+      },
+      {
+        "type": "select",
+        "id": "glass_mode",
+        "label": "Show the glass design on",
+        "options": [
+          { "value": "off", "label": "Nowhere (standard theme)" },
+          { "value": "home", "label": "Homepage only" },
+          { "value": "all", "label": "Every page" }
+        ],
+        "default": "off"
+      }
+    ]
   }
 ]
