@@ -560,9 +560,12 @@
       aspect-ratio: auto;
       height: 100%;
       width: 100%;
-      overflow: scroll;
+      overflow: hidden;
       scrollbar-width: none;
       justify-content: center;
+
+      /* Pinch, two-finger movement and drag are handled by drag-zoom-wrapper.js, not the browser */
+      touch-action: none;
 
       &::-webkit-scrollbar {
         display: none;
@@ -574,8 +577,17 @@
 
       object-fit: var(--product-media-fit);
       overflow: hidden;
-      transform: scale(var(--drag-zoom-scale))
+      transform: scale(var(--drag-zoom-scale, 1))
         translate(var(--drag-zoom-translate-x, 0), var(--drag-zoom-translate-y, 0));
+    }
+
+    /* Double-tap zoom eases in and out; pinching and dragging track the fingers directly */
+    .product-media__drag-zoom-wrapper[data-animating] .product-media__image {
+      transition: transform 0.25s ease-out;
+
+      @media (prefers-reduced-motion: reduce) {
+        transition: none;
+      }
     }
 
     .media-gallery--hint {

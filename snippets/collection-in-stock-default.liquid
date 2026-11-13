@@ -1,0 +1,37 @@
+{%- doc -%}
+  Collections open showing in-stock products only, on every collection template.
+
+  Shopify can only hide sold-out products through the Availability filter, so a collection opened
+  without that filter is reloaded once with it applied (before the page paints). Shoppers who turn
+  the filter off themselves (or clear all filters) see sold-out products again; that choice is
+  remembered for the collection for the rest of their visit.
+
+  Needs the Availability filter enabled in the Search & Discovery app. Skipped in the theme editor.
+{%- enddoc -%}
+
+{%- if template.name == 'collection' and request.design_mode == false -%}
+  <script>
+    (function () {
+      var PARAM = 'filter.v.availability';
+      var key = 'show-sold-out:' + location.pathname;
+      var storage = {
+        get: function () { try { return sessionStorage.getItem(key); } catch (e) { return null; } },
+        set: function (on) {
+          try { on ? sessionStorage.setItem(key, '1') : sessionStorage.removeItem(key); } catch (e) {}
+        },
+      };
+
+      var url = new URL(location.href);
+      if (!url.searchParams.has(PARAM) && !storage.get()) {
+        url.searchParams.set(PARAM, '1');
+        location.replace(url.toString());
+        return;
+      }
+
+      // Filters changed by the shopper: remember whether they chose to see sold-out products.
+      document.addEventListener('filter:update', function () {
+        storage.set(!new URL(location.href).searchParams.has(PARAM));
+      });
+    })();
+  </script>
+{%- endif -%}
