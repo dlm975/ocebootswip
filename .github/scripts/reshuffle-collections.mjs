@@ -6,8 +6,10 @@
  * shuffle is written), then every product is given a new random position.
  *
  * Environment:
- *   SHOPIFY_STORE_DOMAIN  e.g. your-store.myshopify.com
- *   SHOPIFY_ADMIN_TOKEN   Admin API access token with read_products + write_products
+ *   SHOPIFY_STORE_DOMAIN   e.g. your-store.myshopify.com
+ *   SHOPIFY_CLIENT_ID      Client ID of the Dev Dashboard app installed on the store
+ *   SHOPIFY_CLIENT_SECRET  Client secret of that app (scopes: read_products, write_products)
+ *   SHOPIFY_ADMIN_TOKEN    optional: a ready-made Admin API token, used instead of the client ID/secret
  *   ONLY_HANDLES          optional, comma-separated collection handles to limit the run to
  *   EXCLUDE_HANDLES       optional, comma-separated collection handles to leave alone
  *   DRY_RUN               "true" to log what would happen without changing anything
@@ -17,15 +19,37 @@ const API_VERSION = '2026-01';
 const MOVES_PER_CALL = 250; // Shopify's limit for collectionReorderProducts
 
 const domain = process.env.SHOPIFY_STORE_DOMAIN;
-const token = process.env.SHOPIFY_ADMIN_TOKEN;
+const clientId = process.env.SHOPIFY_CLIENT_ID;
+const clientSecret = process.env.SHOPIFY_CLIENT_SECRET;
+let token = process.env.SHOPIFY_ADMIN_TOKEN;
 const dryRun = process.env.DRY_RUN === 'true';
 const list = (value) => new Set((value || '').split(',').map((s) => s.trim()).filter(Boolean));
 const onlyHandles = list(process.env.ONLY_HANDLES);
 const excludeHandles = list(process.env.EXCLUDE_HANDLES);
 
-if (!domain || !token) {
-  console.error('Missing SHOPIFY_STORE_DOMAIN or SHOPIFY_ADMIN_TOKEN.');
+if (!domain || !(token || (clientId && clientSecret))) {
+  console.error('Missing SHOPIFY_STORE_DOMAIN, or SHOPIFY_CLIENT_ID and SHOPIFY_CLIENT_SECRET.');
   process.exit(1);
+}
+
+/**
+ * Dev Dashboard apps don't show a token in the admin: the app's client ID and secret are
+ * exchanged for a short-lived Admin API token (valid 24 hours) at the start of each run.
+ */
+async function requestToken() {
+  const response = await fetch(`https://${domain}/admin/oauth/access_token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ grant_type: 'client_credentials', client_id: clientId, client_secret: clientSecret }),
+  });
+  if (!response.ok) {
+    throw new Error(
+      `Could not get an access token (HTTP ${response.status}). Check the client ID and secret, and that the app is installed on the store.`
+    );
+  }
+  const body = await response.json();
+  if (!body.access_token) throw new Error('Shopify did not return an access token.');
+  return body.access_token;
 }
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -151,6 +175,8 @@ async function reshuffle(collection) {
 
   return `shuffled ${ids.length} products`;
 }
+
+if (!token) token = await requestToken();
 
 const collections = (await allCollections()).filter(
   (collection) =>
