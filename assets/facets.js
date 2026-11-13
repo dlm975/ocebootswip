@@ -18,6 +18,16 @@ const SEARCH_QUERY = 'q';
  *
  * @extends {Component<FacetsFormRefs>}
  */
+/**
+ * The collection's (or search's) own sort order, as rendered on the sort dropdown.
+ * @param {Element} element - Any element inside the results section
+ * @returns {string | undefined}
+ */
+function getDefaultSortBy(element) {
+  const source = element.closest('.shopify-section')?.querySelector('[data-default-sort-by]');
+  return source instanceof HTMLElement ? source.dataset.defaultSortBy : undefined;
+}
+
 class FacetsFormComponent extends Component {
   requiredRefs = ['facetsForm'];
 
@@ -33,6 +43,11 @@ class FacetsFormComponent extends Component {
     if (newParameters.get('filter.v.price.lte') === '') newParameters.delete('filter.v.price.lte');
 
     newParameters.delete('page');
+
+    // Keep links short: the grid view switch is not a filter, and the default sort order needs no parameter.
+    newParameters.delete('grid');
+    newParameters.delete('grid-mobile');
+    if (newParameters.get('sort_by') === getDefaultSortBy(this)) newParameters.delete('sort_by');
 
     const searchQuery = this.#getSearchQuery();
     if (searchQuery) newParameters.set(SEARCH_QUERY, searchQuery);
@@ -684,7 +699,11 @@ class SortSelectComponent extends HTMLElement {
     if (!(select instanceof HTMLSelectElement)) return;
 
     const url = new URL(window.location.href);
-    url.searchParams.set('sort_by', select.value);
+    if (select.value === getDefaultSortBy(this)) {
+      url.searchParams.delete('sort_by');
+    } else {
+      url.searchParams.set('sort_by', select.value);
+    }
     url.searchParams.delete('page');
 
     const facetsForm = this.closest('.shopify-section')?.querySelector('facets-form-component');
@@ -699,7 +718,7 @@ class SortSelectComponent extends HTMLElement {
   /** Keeps the select in step when sorting changes elsewhere (desktop dropdown, back button). */
   #syncFromURL = () => {
     const select = this.querySelector('select');
-    const sortBy = new URL(window.location.href).searchParams.get('sort_by');
+    const sortBy = new URL(window.location.href).searchParams.get('sort_by') ?? getDefaultSortBy(this);
     if (select && sortBy && select.value !== sortBy) select.value = sortBy;
   };
 }
