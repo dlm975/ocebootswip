@@ -19,6 +19,22 @@ const SEARCH_QUERY = 'q';
  * @extends {Component<FacetsFormRefs>}
  */
 /**
+ * The address bar shows a short form of the size filter (snippets/collection-in-stock-default.liquid).
+ * These convert between it and Shopify's full parameters; without that snippet they change nothing.
+ * @param {string | URL} url
+ * @returns {URL}
+ */
+const expandFilterURL = (url) =>
+  /** @type {any} */ (window).OceFilterUrl?.expand(url) ?? new URL(String(url), window.location.href);
+
+/**
+ * @param {string | URL} url
+ * @returns {string}
+ */
+const compactFilterURL = (url) =>
+  (/** @type {any} */ (window).OceFilterUrl?.compact(url) ?? new URL(String(url), window.location.href)).toString();
+
+/**
  * The collection's (or search's) own sort order, as rendered on the sort dropdown.
  * @param {Element} element - Any element inside the results section
  * @returns {string | undefined}
@@ -82,7 +98,7 @@ class FacetsFormComponent extends Component {
       url.searchParams.append(param, value);
     }
 
-    history.pushState({ urlParameters: urlParameters.toString() }, '', url.toString());
+    history.pushState({ urlParameters: urlParameters.toString() }, '', compactFilterURL(url));
   }
 
   /**
@@ -112,7 +128,7 @@ class FacetsFormComponent extends Component {
    * @param {string} url - The URL to update filters with
    */
   updateFiltersByURL(url) {
-    history.pushState('', '', url);
+    history.pushState('', '', compactFilterURL(url));
     this.dispatchEvent(new FilterUpdateEvent(this.createURLParameters()));
     this.#updateSection();
   }
@@ -698,7 +714,7 @@ class SortSelectComponent extends HTMLElement {
     const select = event.target;
     if (!(select instanceof HTMLSelectElement)) return;
 
-    const url = new URL(window.location.href);
+    const url = expandFilterURL(window.location.href);
     if (select.value === getDefaultSortBy(this)) {
       url.searchParams.delete('sort_by');
     } else {

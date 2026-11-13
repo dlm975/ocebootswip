@@ -371,6 +371,9 @@
       return n;
     };
 
+    // The address bar may show the short size form; read it back as Shopify's full filter parameters.
+    const currentURL = () => window.OceFilterUrl?.expand(window.location.href) ?? new URL(window.location.href);
+
     const pretty = (size) => size.replace(' 1/3', '\u2153').replace(' 2/3', '\u2154');
 
     class CollectionSizeSelector extends HTMLElement {
@@ -426,7 +429,7 @@
 
       // Option values currently applied, read from the URL (source of truth).
       activeValues() {
-        return new Set(new URL(window.location.href).searchParams.getAll(this.param));
+        return new Set(currentURL().searchParams.getAll(this.param));
       }
 
       setSystem(sys, remember) {
@@ -496,7 +499,7 @@
       }
 
       apply(values) {
-        const url = new URL(window.location.href);
+        const url = currentURL();
         url.searchParams.delete(this.param);
         url.searchParams.delete('page');
         for (const v of values) url.searchParams.append(this.param, v);
@@ -514,7 +517,7 @@
       async refresh() {
         this.renderChips();
         try {
-          const url = new URL(window.location.href);
+          const url = currentURL();
           url.searchParams.set('section_id', this.dataset.sectionId);
           const html = await (await fetch(url)).text();
           const doc = new DOMParser().parseFromString(html, 'text/html');

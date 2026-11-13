@@ -1,37 +1,109 @@
 {%- doc -%}
-  Collections open showing in-stock products only, on every collection template.
+  Address handling for collection and search pages. Runs in the head, before the page paints.
 
-  Shopify can only hide sold-out products through the Availability filter, so a collection opened
-  without that filter is reloaded once with it applied (before the page paints). Shoppers who turn
-  the filter off themselves (or clear all filters) see sold-out products again; that choice is
-  remembered for the collection for the rest of their visit.
+  1. Short size links. Shopify needs each size's full name in the address
+     ("filter.v.option.size=US 7.5 - UK 6.5 - EU 40.5", about 47 characters each). The address bar
+     shows a compact form instead: "size=7.5x6.5x40.5-8.5x7.5x42" (US x UK x EU, sizes joined by "-",
+     "_1" / "_2" for EU thirds). A page opened with the compact form (reload, shared link) is reloaded
+     once with Shopify's full filter; the address is then swapped back to the compact form.
+     window.OceFilterUrl.expand / .compact convert between the two, for the theme code that reads or
+     writes the address (assets/section-renderer.js, assets/facets.js, the collection size header).
 
-  Needs the Availability filter enabled in the Search & Discovery app. Skipped in the theme editor.
+  2. In-stock default (collections only). Shopify can only hide sold-out products through the
+     Availability filter, so a collection opened without that filter is reloaded once with it applied.
+     Shoppers who turn the filter off themselves (or clear all filters) see sold-out products again;
+     that choice is remembered for the collection for the rest of their visit.
+     Needs the Availability filter enabled in the Search & Discovery app.
+
+  Skipped in the theme editor.
 {%- enddoc -%}
 
-{%- if template.name == 'collection' and request.design_mode == false -%}
+{%- if template.name == 'collection' or template.name == 'search' -%}
   <script>
     (function () {
-      var PARAM = 'filter.v.availability';
-      var key = 'show-sold-out:' + location.pathname;
-      var storage = {
-        get: function () { try { return sessionStorage.getItem(key); } catch (e) { return null; } },
-        set: function (on) {
-          try { on ? sessionStorage.setItem(key, '1') : sessionStorage.removeItem(key); } catch (e) {}
-        },
-      };
+      var SIZE = 'filter.v.option.size';
+      var SHORT = 'size';
+      var AVAILABILITY = 'filter.v.availability';
+      var FULL = /^US (\d+(?:\.\d+)?) - UK (\d+(?:\.\d+)?) - EU (\d+(?:\.\d+)?)(?: ([12])\/3)?$/;
+      var CODE = /^(\d+(?:\.\d+)?)x(\d+(?:\.\d+)?)x(\d+(?:\.\d+)?)(?:_([12]))?$/;
 
-      var url = new URL(location.href);
-      if (!url.searchParams.has(PARAM) && !storage.get()) {
-        url.searchParams.set(PARAM, '1');
-        location.replace(url.toString());
-        return;
+      function toURL(value) {
+        return new URL(value instanceof URL ? value.href : String(value), location.href);
       }
 
-      // Filters changed by the shopper: remember whether they chose to see sold-out products.
-      document.addEventListener('filter:update', function () {
-        storage.set(!new URL(location.href).searchParams.has(PARAM));
-      });
+      /* size=7.5x6.5x40.5-... -> Shopify's full size filter parameters */
+      function expand(value) {
+        var url = toURL(value);
+        var codes = url.searchParams.getAll(SHORT);
+        if (!codes.length) return url;
+
+        url.searchParams.delete(SHORT);
+        codes.join('-').split('-').forEach(function (code) {
+          var m = CODE.exec(code);
+          if (m) {
+            url.searchParams.append(SIZE, 'US ' + m[1] + ' - UK ' + m[2] + ' - EU ' + m[3] + (m[4] ? ' ' + m[4] + '/3' : ''));
+          }
+        });
+        return url;
+      }
+
+      /* Shopify's full size filter parameters -> size=7.5x6.5x40.5-... (anything unrecognised is left as it is) */
+      function compact(value) {
+        var url = toURL(value);
+        var values = url.searchParams.getAll(SIZE);
+        if (!values.length) return url;
+
+        var codes = [];
+        var others = [];
+        values.forEach(function (v) {
+          var m = FULL.exec(v);
+          if (m) codes.push(m[1] + 'x' + m[2] + 'x' + m[3] + (m[4] ? '_' + m[4] : ''));
+          else others.push(v);
+        });
+        if (!codes.length) return url;
+
+        url.searchParams.delete(SIZE);
+        others.forEach(function (v) { url.searchParams.append(SIZE, v); });
+        url.searchParams.append(SHORT, codes.join('-'));
+        return url;
+      }
+
+      window.OceFilterUrl = { expand: expand, compact: compact };
+
+      {% if request.design_mode == false %}
+        var current = new URL(location.href);
+        var target = expand(current);
+        var mustReload = current.searchParams.has(SHORT);
+
+        {% if template.name == 'collection' %}
+          var key = 'show-sold-out:' + location.pathname;
+          var storage = {
+            get: function () { try { return sessionStorage.getItem(key); } catch (e) { return null; } },
+            set: function (on) {
+              try { on ? sessionStorage.setItem(key, '1') : sessionStorage.removeItem(key); } catch (e) {}
+            },
+          };
+
+          if (!target.searchParams.has(AVAILABILITY) && !storage.get()) {
+            target.searchParams.set(AVAILABILITY, '1');
+            mustReload = true;
+          }
+
+          // Filters changed by the shopper: remember whether they chose to see sold-out products.
+          document.addEventListener('filter:update', function () {
+            storage.set(!new URL(location.href).searchParams.has(AVAILABILITY));
+          });
+        {% endif %}
+
+        if (mustReload) {
+          location.replace(target.toString());
+          return;
+        }
+
+        // Loaded with Shopify's full parameters: show the short form in the address bar.
+        var short = compact(current);
+        if (short.href !== current.href) history.replaceState(history.state, '', short.toString());
+      {% endif %}
     })();
   </script>
 {%- endif -%}

@@ -119,6 +119,9 @@ const SECTION_ID_PREFIX = 'shopify-section-';
  * @returns {string} The section rendering URL
  */
 function buildSectionRenderingURL(sectionId, url = new URL(window.location.href)) {
+  // The address bar may hold the short size form (snippets/collection-in-stock-default.liquid);
+  // Shopify needs the full filter parameters.
+  url = /** @type {any} */ (window).OceFilterUrl?.expand(url) ?? url;
   url.searchParams.set('section_id', normalizeSectionId(sectionId));
   url.searchParams.sort();
 
