@@ -10,9 +10,10 @@
 
 {% capture children %}
   {% unless closest.product == blank %}
-    {% unless is_bfsale_card %}
+    {% comment %} BFSALE cards swap the Sale badge for the % OFF badge, but a sold-out product always says so. {% endcomment %}
+    {% if is_bfsale_card == false or closest.product.available == false %}
       {% render 'product-card-badges', product: closest.product %}
-    {% endunless %}
+    {% endif %}
     {%  if settings.quick_add or settings.mobile_quick_add %}
       {% render 'quick-add', product: closest.product, section_id: section.id %}
     {% endif %}
