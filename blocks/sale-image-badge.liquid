@@ -20,7 +20,7 @@
 <div
   id="sale-img-badge-{{ block.id }}"
   class="sale-img-badge"
-  style="--sib-accent: {{ block.settings.accent | default: '#e53e3e' }};"
+  style="--sib-accent: {{ block.settings.accent | default: '#d0021b' }};"
   {{ block.shopify_attributes }}
 >
   {{ block.settings.text | default: 'ON SALE' }}
@@ -43,7 +43,7 @@
     right: auto;
     z-index: 5;
     pointer-events: none;
-    background: var(--sib-accent, #e53e3e);
+    background: var(--sib-accent, #d0021b);
     color: #ffffff;
     font-style: italic;
     font-weight: 800;
@@ -123,7 +123,7 @@
       "type": "color",
       "id": "accent",
       "label": "Badge colour",
-      "default": "#e53e3e"
+      "default": "#d0021b"
     }
   ],
   "presets": [

@@ -38,6 +38,16 @@
   {{ accent_font_bold_italic | font_face: font_display: 'swap' }}
 
   :root {
+    /* Brand accents shared by the custom sections: one fill green, one text green, one sale red */
+    --brand-green: #14b554;
+    --brand-green-strong: #15803d;
+    --brand-red: #d0021b;
+
+    /* Shared corner sizes for the custom sections. Action buttons use md (the theme's own button radius);
+       pills (999px) are kept for selectors, tags and switches. */
+    --brand-radius-sm: 10px;
+    --brand-radius-md: {{ settings.button_border_radius_primary | default: 14 }}px;
+    --brand-radius-lg: 20px;
     /* Page Layout */
     --sidebar-width: 25rem;
     --narrow-content-width: 36rem;

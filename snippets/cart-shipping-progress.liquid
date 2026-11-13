@@ -48,7 +48,7 @@
   endif
 
   assign track = settings.cart_ship_track | default: '#e6e6e6'
-  assign fill = settings.cart_ship_fill | default: '#16a34a'
+  assign fill = settings.cart_ship_fill | default: '#14b554'
   assign fg = settings.cart_ship_text_color | default: '#15803d'
   assign pending_fill = settings.cart_ship_pending_fill | default: '#d1a300'
   assign pending_fg = settings.cart_ship_pending_text_color | default: '#8a6d00'
@@ -175,7 +175,7 @@
   }
 
   .cart-ship__check--hit {
-    background: var(--cs-fill, #16a34a);
+    background: var(--cs-fill, #14b554);
   }
 
   /* Rides the head of the fill, at the glyph's own angle. */
@@ -200,7 +200,7 @@
     height: 100%;
     width: var(--cs-pct, 0%);
     border-radius: inherit;
-    background: var(--cs-fill, #16a34a);
+    background: var(--cs-fill, #14b554);
     transition: width 0.45s cubic-bezier(0.32, 0.72, 0, 1), background-color 0.3s ease;
   }
 

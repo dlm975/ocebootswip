@@ -22,7 +22,7 @@
 <div
   id="sale-cd-{{ block.id }}"
   class="sale-cd"
-  style="--sale-cd-accent: {{ block.settings.accent | default: '#e53e3e' }}; {% render 'spacing-style', settings: block.settings %}"
+  style="--sale-cd-accent: {{ block.settings.accent | default: '#d0021b' }}; {% render 'spacing-style', settings: block.settings %}"
   {% if has_end %}data-end="{{ end_date }}T{{ end_time }}:00{{ tz }}"{% endif %}
   data-expired-behavior="{{ block.settings.expired_behavior | default: 'hide' }}"
   {{ block.shopify_attributes }}
@@ -66,7 +66,7 @@
 <style>
   .sale-cd {
     background: #111111;
-    border-radius: 14px;
+    border-radius: var(--brand-radius-md);
     padding: 12px 16px 13px;
     display: flex;
     flex-direction: column;
@@ -299,7 +299,7 @@
       "type": "color",
       "id": "accent",
       "label": "Accent colour",
-      "default": "#e53e3e"
+      "default": "#d0021b"
     },
     {
       "type": "header",

@@ -45,6 +45,12 @@ img {
   height: auto;
 }
 
+/* Buttons take the site font instead of the browser's default (Arial) */
+button {
+  font-family: inherit;
+  font-style: inherit;
+}
+
 input,
 textarea,
 select {
@@ -4177,12 +4183,12 @@ text-component {
 
 .bfsale-rrp {
   margin-inline-end: 0.4em;
-  color: #d0021b;
+  color: var(--brand-red);
   white-space: nowrap;
 }
 
 .bfsale-price {
-  color: #1a8a3a;
+  color: var(--brand-green-strong);
   font-weight: 700;
 }
 

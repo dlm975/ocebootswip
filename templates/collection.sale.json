@@ -13,7 +13,7 @@
         "tz_offset": "+12:00",
         "expired_behavior": "message",
         "expired_text": "This sale has ended",
-        "accent": "#e53e3e"
+        "accent": "#d0021b"
       }
     },
     "main": {

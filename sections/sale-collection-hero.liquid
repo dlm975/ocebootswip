@@ -20,7 +20,7 @@
   <div
     id="scs-{{ section.id }}"
     class="scs"
-    style="--scs-accent: {{ section.settings.accent | default: '#e53e3e' }};"
+    style="--scs-accent: {{ section.settings.accent | default: '#d0021b' }};"
     {% if has_end %}data-end="{{ end_date }}T{{ end_time }}:00{{ tz }}"{% endif %}
     data-expired-behavior="{{ section.settings.expired_behavior | default: 'message' }}"
   >
@@ -92,12 +92,12 @@
     position: relative;
     overflow: hidden;
     background: #111111;
-    border-radius: 24px;
+    border-radius: var(--brand-radius-lg);
     box-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 
   @media screen and (max-width: 749px) {
-    .scs { border-radius: 18px; }
+    .scs { border-radius: var(--brand-radius-lg); }
   }
 
   .scs__media {
@@ -193,7 +193,7 @@
     padding: clamp(10px, 2vw, 14px) 8px;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 14px;
+    border-radius: var(--brand-radius-md);
   }
 
   .scs__num {
@@ -368,7 +368,7 @@
       "type": "color",
       "id": "accent",
       "label": "Accent colour",
-      "default": "#e53e3e"
+      "default": "#d0021b"
     }
   ],
   "presets": [

@@ -326,7 +326,7 @@
                 "show_savings": true,
                 "expired_behavior": "hide",
                 "expired_text": "This sale has ended",
-                "accent": "#e53e3e",
+                "accent": "#d0021b",
                 "padding-block-start": 4,
                 "padding-block-end": 4,
                 "padding-inline-start": 0,
@@ -340,7 +340,7 @@
                 "text": "ON SALE",
                 "show_percent": false,
                 "only_when_discounted": true,
-                "accent": "#e53e3e"
+                "accent": "#d0021b"
               },
               "blocks": {}
             },

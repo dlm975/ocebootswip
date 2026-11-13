@@ -239,7 +239,7 @@
     position: relative;
     margin-inline: 16px;
     margin-bottom: 32px;
-    border-radius: 24px;
+    border-radius: var(--brand-radius-lg);
     overflow: hidden;
     background: #111;
     box-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.32), 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -316,7 +316,7 @@
 
   .ps__hero-wrap {
     aspect-ratio: 1 / 1;
-    border-radius: 16px;
+    border-radius: var(--brand-radius-md);
     overflow: hidden;
     background: rgba(255,255,255,0.06);
   }
@@ -421,7 +421,7 @@
   .ps__thumb {
     width: 100%;
     aspect-ratio: 1 / 1;
-    border-radius: 12px;
+    border-radius: var(--brand-radius-md);
     border: 2px solid transparent;
     overflow: hidden;
     cursor: pointer;
@@ -465,7 +465,7 @@
 
   .ps__size-btn {
     padding: 9px 4px;
-    border-radius: 10px;
+    border-radius: var(--brand-radius-sm);
     border: none;
     background: rgba(255, 255, 255, 0.1);
     color: rgba(255, 255, 255, 0.85);
@@ -504,7 +504,7 @@
     color: #111;
     font-size: 0.95rem;
     font-weight: 800;
-    border-radius: 999px;
+    border-radius: var(--brand-radius-md);
     border: none;
     cursor: pointer;
     letter-spacing: 0.01em;
@@ -564,7 +564,7 @@
     .ps__thumbs        { grid-area: thumbs; gap: 4px; }
     .ps__cart-form     { grid-area: buy; }
 
-    .ps__hero-wrap { aspect-ratio: 1 / 1; border-radius: 10px; }
+    .ps__hero-wrap { aspect-ratio: 1 / 1; border-radius: var(--brand-radius-sm); }
 
     .ps__soleplate-btns { flex-direction: column; flex-wrap: nowrap; gap: 5px; }
     .ps__soleplate-label { font-size: 0.55rem; }
