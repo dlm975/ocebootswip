@@ -1,0 +1,42 @@
+name: Reshuffle collections
+
+# Randomises the product order of every collection each Friday.
+# 12:20 UTC Thursday is 1:20am Friday in New Zealand during daylight time (12:20am in winter).
+on:
+  schedule:
+    - cron: '20 12 * * 4'
+  workflow_dispatch:
+    inputs:
+      only_handles:
+        description: 'Only these collection handles (comma-separated). Leave empty for all.'
+        required: false
+        default: ''
+      dry_run:
+        description: 'Dry run: log what would change without changing anything'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: reshuffle-collections
+  cancel-in-progress: false
+
+jobs:
+  reshuffle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Reshuffle
+        run: node .github/scripts/reshuffle-collections.mjs
+        env:
+          SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+          ONLY_HANDLES: ${{ inputs.only_handles }}
+          EXCLUDE_HANDLES: ${{ vars.RESHUFFLE_EXCLUDE_HANDLES }}
+          DRY_RUN: ${{ inputs.dry_run }}
