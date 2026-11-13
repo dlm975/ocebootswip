@@ -19,9 +19,10 @@ const API_VERSION = '2026-01';
 const MOVES_PER_CALL = 250; // Shopify's limit for collectionReorderProducts
 
 const domain = process.env.SHOPIFY_STORE_DOMAIN;
-const clientId = process.env.SHOPIFY_CLIENT_ID;
-const clientSecret = process.env.SHOPIFY_CLIENT_SECRET;
-let token = process.env.SHOPIFY_ADMIN_TOKEN;
+// Trimmed: a stray space or line break copied into a secret is enough for Shopify to reject it.
+const clientId = process.env.SHOPIFY_CLIENT_ID?.trim();
+const clientSecret = process.env.SHOPIFY_CLIENT_SECRET?.trim();
+let token = process.env.SHOPIFY_ADMIN_TOKEN?.trim();
 const dryRun = process.env.DRY_RUN === 'true';
 const list = (value) => new Set((value || '').split(',').map((s) => s.trim()).filter(Boolean));
 const onlyHandles = list(process.env.ONLY_HANDLES);
@@ -42,12 +43,30 @@ async function requestToken() {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ grant_type: 'client_credentials', client_id: clientId, client_secret: clientSecret }),
   });
+  const text = await response.text();
+  let body = {};
+  try {
+    body = JSON.parse(text);
+  } catch (error) {
+    // Not JSON: Shopify's reason, if any, is in the text itself.
+  }
+
   if (!response.ok) {
+    // Shopify's own reason (never contains the secret), e.g. "shop_not_permitted" or "invalid_client".
+    const reason = [body.error, body.error_description].filter(Boolean).join(': ') || text.slice(0, 300).trim();
+    const hints = {
+      shop_not_permitted:
+        'The app and the store are not in the same Shopify organization. In the Dev Dashboard, check the store is listed under the same organization as the app.',
+      invalid_client: 'The client ID or client secret is wrong. Re-copy both from the app\'s Settings in the Dev Dashboard.',
+      application_cannot_be_found: 'The client ID is wrong. Re-copy it from the app\'s Settings in the Dev Dashboard.',
+      app_not_installed: 'The app is not installed on the store. Install it from the app\'s page in the Dev Dashboard.',
+    };
+    const hint = hints[body.error] ?? 'Check the client ID and secret, and that the app is installed on the store.';
     throw new Error(
-      `Could not get an access token (HTTP ${response.status}). Check the client ID and secret, and that the app is installed on the store.`
+      `Could not get an access token (HTTP ${response.status}). Shopify said: ${reason || 'no reason given'}. ${hint} ` +
+        `[client ID length ${clientId.length}, secret length ${clientSecret.length}, store ${domain}]`
     );
   }
-  const body = await response.json();
   if (!body.access_token) throw new Error('Shopify did not return an access token.');
   return body.access_token;
 }
