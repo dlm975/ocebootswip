@@ -2,10 +2,9 @@
 
 {% liquid
   assign is_bfsale_card = false
-  if template.name == 'collection' or template.name == 'product'
-    if closest.product.tags contains 'BFSALE'
-      assign is_bfsale_card = true
-    endif
+  # BFSALE cards look the same wherever a product card is shown (home, search, collections, product pages...)
+  if closest.product.tags contains 'BFSALE'
+    assign is_bfsale_card = true
   endif
 %}
 

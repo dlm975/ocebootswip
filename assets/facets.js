@@ -661,6 +661,314 @@ if (!customElements.get('sorting-filter-component')) {
 }
 
 /**
+ * Sort control that sits outside the filter drawer, next to the grid view switch.
+ * A native select: choosing an option updates sort_by in the URL (keeping every
+ * applied filter) and re-renders the results through the facets form.
+ */
+class SortSelectComponent extends HTMLElement {
+  connectedCallback() {
+    this.addEventListener('change', this.#handleChange);
+    document.addEventListener(ThemeEvents.FilterUpdate, this.#syncFromURL);
+    window.addEventListener('popstate', this.#syncFromURL);
+  }
+
+  disconnectedCallback() {
+    this.removeEventListener('change', this.#handleChange);
+    document.removeEventListener(ThemeEvents.FilterUpdate, this.#syncFromURL);
+    window.removeEventListener('popstate', this.#syncFromURL);
+  }
+
+  /** @param {Event} event */
+  #handleChange = (event) => {
+    const select = event.target;
+    if (!(select instanceof HTMLSelectElement)) return;
+
+    const url = new URL(window.location.href);
+    url.searchParams.set('sort_by', select.value);
+    url.searchParams.delete('page');
+
+    const facetsForm = this.closest('.shopify-section')?.querySelector('facets-form-component');
+
+    if (facetsForm instanceof FacetsFormComponent) {
+      facetsForm.updateFiltersByURL(url.toString());
+    } else {
+      window.location.assign(url.toString());
+    }
+  };
+
+  /** Keeps the select in step when sorting changes elsewhere (desktop dropdown, back button). */
+  #syncFromURL = () => {
+    const select = this.querySelector('select');
+    const sortBy = new URL(window.location.href).searchParams.get('sort_by');
+    if (select && sortBy && select.value !== sortBy) select.value = sortBy;
+  };
+}
+
+if (!customElements.get('sort-select-component')) {
+  customElements.define('sort-select-component', SortSelectComponent);
+}
+
+const SIZE_SYSTEMS = ['us', 'uk', 'eu'];
+const SIZE_SYSTEM_STORE_KEY = 'csh-size-system';
+const SIZE_SYSTEM_EVENT = 'size-system:change';
+
+/**
+ * "US 9 - UK 8 - EU 42 2/3" -> { us: '9', uk: '8', eu: '42 2/3' }
+ * @param {string} value
+ * @returns {Record<string, string>}
+ */
+const parseSizeValue = (value) => {
+  /** @type {Record<string, string>} */
+  const sizes = {};
+  for (const system of SIZE_SYSTEMS) {
+    const match = value.match(new RegExp('\\b' + system + '\\s*([0-9]+(?:\\.[0-9]+)?(?:\\s+[12]/3)?)', 'i'));
+    if (match?.[1]) sizes[system] = match[1].replace(/\s+/g, ' ').trim();
+  }
+  return sizes;
+};
+
+/** @param {string} size */
+const sizeToNumber = (size) => {
+  const [whole = '', fraction] = size.split(' ');
+  let number = parseFloat(whole);
+  if (fraction === '1/3') number += 1 / 3;
+  if (fraction === '2/3') number += 2 / 3;
+  return number;
+};
+
+/** @param {string} size */
+const prettySize = (size) => size.replace(' 1/3', '⅓').replace(' 2/3', '⅔');
+
+/**
+ * Size filter for the filter drawer: a US / UK / EU switch and one button per size.
+ *
+ * The filter's real checkboxes stay in the form (hidden) and remain the source of
+ * truth, so the rest of the facets code works unchanged. Each size button covers
+ * every option value with that size in the chosen system ("US 9 - UK 8 - EU 42"
+ * and "US 9 - UK 8.5 - EU 42.5" are both "US 9"), and pressing it ticks those
+ * checkboxes and fires the same change event a shopper's tap would.
+ * The chosen system is shared with the collection size header.
+ */
+class FacetSizeChips extends HTMLElement {
+  /** @type {MutationObserver | undefined} */
+  #observer;
+  #system = 'us';
+  #renderQueued = false;
+  /** @type {string | null} */
+  #restoreFocusKey = null;
+
+  connectedCallback() {
+    this.#system = this.#initialSystem();
+    this.addEventListener('click', this.#handleClick);
+    this.addEventListener('focusout', (event) => {
+      if (event.relatedTarget) this.#restoreFocusKey = null;
+    });
+    this.addEventListener('keydown', this.#handleKeyDown);
+    document.addEventListener(SIZE_SYSTEM_EVENT, this.#handleSystemChange);
+
+    // Section re-renders morph this markup back to what the server sent, so redraw afterwards.
+    this.#observer = new MutationObserver(() => this.#queueRender());
+    this.#render();
+  }
+
+  disconnectedCallback() {
+    this.removeEventListener('click', this.#handleClick);
+    this.removeEventListener('keydown', this.#handleKeyDown);
+    document.removeEventListener(SIZE_SYSTEM_EVENT, this.#handleSystemChange);
+    this.#observer?.disconnect();
+  }
+
+  get #root() {
+    return this.closest('facet-inputs-component') ?? this.parentElement;
+  }
+
+  /** @returns {HTMLInputElement[]} */
+  get #inputs() {
+    return Array.from(this.#root?.querySelectorAll('input[type="checkbox"]') ?? []);
+  }
+
+  #initialSystem() {
+    try {
+      const saved = localStorage.getItem(SIZE_SYSTEM_STORE_KEY);
+      if (saved && SIZE_SYSTEMS.includes(saved)) return saved;
+    } catch (error) {
+      // Storage unavailable: fall through to the default.
+    }
+    const header = document.querySelector('collection-size-selector');
+    const fallback = (header instanceof HTMLElement && header.dataset.defaultSys) || this.dataset.defaultSys;
+    return fallback && SIZE_SYSTEMS.includes(fallback) ? fallback : 'us';
+  }
+
+  #queueRender() {
+    if (this.#renderQueued) return;
+    this.#renderQueued = true;
+    requestAnimationFrame(() => {
+      this.#renderQueued = false;
+      if (this.isConnected) this.#render();
+    });
+  }
+
+  /** Every option value grouped by its size in the current system, smallest first. */
+  #groups() {
+    /** @type {Map<string, { label: string, order: number, inputs: HTMLInputElement[] }>} */
+    const groups = new Map();
+    let unparsed = 0;
+
+    for (const input of this.#inputs) {
+      const size = parseSizeValue(input.value)[this.#system];
+      const key = size ?? `raw:${input.value}`;
+      let group = groups.get(key);
+      if (!group) {
+        group = size
+          ? { label: prettySize(size), order: sizeToNumber(size), inputs: [] }
+          : { label: input.dataset.label || input.value, order: Number.MAX_SAFE_INTEGER, inputs: [] };
+        groups.set(key, group);
+      }
+      if (!size) unparsed++;
+      group.inputs.push(input);
+    }
+
+    return { groups: [...groups.values()].sort((a, b) => a.order - b.order), unparsed };
+  }
+
+  #render() {
+    this.#observer?.disconnect();
+
+    const toggle = this.querySelector('.size-facet__toggle');
+    const list = this.querySelector('.size-facet__chips');
+    const inputs = this.#inputs;
+    const { groups, unparsed } = this.#groups();
+
+    // None of the values are "US x - UK y - EU z" sizes: leave the theme's own list in place.
+    const usable = inputs.length > 0 && unparsed < inputs.length;
+    this.hidden = !usable;
+    this.#root?.querySelector('.facets__inputs-wrapper')?.toggleAttribute('hidden', usable);
+
+    if (usable && toggle instanceof HTMLElement && list) {
+      toggle.dataset.sys = this.#system;
+      for (const button of toggle.querySelectorAll('.size-facet__sys')) {
+        if (!(button instanceof HTMLElement)) continue;
+        const selected = button.dataset.sys === this.#system;
+        button.setAttribute('aria-checked', String(selected));
+        button.tabIndex = selected ? 0 : -1;
+      }
+
+
+      list.replaceChildren(
+        ...groups.map((group, index) => {
+          const pressed = group.inputs.some((input) => input.checked);
+          const item = document.createElement('li');
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'size-facet__chip';
+          button.textContent = group.label;
+          button.dataset.index = String(index);
+          button.dataset.key = `${this.#system}:${group.label}`;
+          button.setAttribute('aria-pressed', String(pressed));
+          if (group.order !== Number.MAX_SAFE_INTEGER) {
+            button.setAttribute('aria-label', `${this.#system.toUpperCase()} ${group.label}`);
+          }
+          button.disabled = !pressed && group.inputs.every((input) => input.disabled);
+          item.append(button);
+          return item;
+        })
+      );
+
+      // A re-render replaces the pressed button: hand keyboard focus back to it.
+      if (this.#restoreFocusKey && (!document.activeElement || document.activeElement === document.body)) {
+        for (const button of list.querySelectorAll('.size-facet__chip')) {
+          if (button instanceof HTMLElement && button.dataset.key === this.#restoreFocusKey) {
+            button.focus({ preventScroll: true });
+          }
+        }
+      }
+    }
+
+    if (this.#root) {
+      this.#observer?.observe(this.#root, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['checked', 'disabled', 'aria-checked', 'data-sys', 'hidden'],
+      });
+    }
+  }
+
+  /**
+   * @param {string} system
+   * @param {boolean} remember
+   */
+  #setSystem(system, remember) {
+    if (!SIZE_SYSTEMS.includes(system) || system === this.#system) return;
+    this.#system = system;
+    this.#render();
+
+    if (!remember) return;
+    try {
+      localStorage.setItem(SIZE_SYSTEM_STORE_KEY, system);
+    } catch (error) {
+      // Storage unavailable: the choice lasts for this page only.
+    }
+    document.dispatchEvent(new CustomEvent(SIZE_SYSTEM_EVENT, { detail: system }));
+  }
+
+  /** @param {Event} event */
+  #handleSystemChange = (event) => {
+    if (event instanceof CustomEvent && typeof event.detail === 'string') this.#setSystem(event.detail, false);
+  };
+
+  /** @param {MouseEvent} event */
+  #handleClick = (event) => {
+    if (!(event.target instanceof Element)) return;
+
+    const systemButton = event.target.closest('.size-facet__sys');
+    if (systemButton instanceof HTMLElement && systemButton.dataset.sys) {
+      this.#setSystem(systemButton.dataset.sys, true);
+      return;
+    }
+
+    const chip = event.target.closest('.size-facet__chip');
+    if (!(chip instanceof HTMLButtonElement) || chip.disabled) return;
+
+    const group = this.#groups().groups[Number(chip.dataset.index)];
+    if (!group) return;
+
+    const pressed = chip.getAttribute('aria-pressed') === 'true';
+    for (const input of group.inputs) {
+      if (pressed) input.checked = false;
+      else if (!input.disabled) input.checked = true;
+    }
+    chip.setAttribute('aria-pressed', String(!pressed));
+    this.#restoreFocusKey = chip.dataset.key ?? null;
+
+    // Same event a tap on the checkbox would fire: the facets form picks it up from here.
+    group.inputs[0]?.dispatchEvent(new Event('change', { bubbles: true }));
+  };
+
+  /**
+   * Arrow keys move between US / UK / EU, as in a radio group.
+   * @param {KeyboardEvent} event
+   */
+  #handleKeyDown = (event) => {
+    if (!(event.target instanceof HTMLElement) || !event.target.classList.contains('size-facet__sys')) return;
+
+    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key];
+    if (!step) return;
+
+    event.preventDefault();
+    const next = SIZE_SYSTEMS[(SIZE_SYSTEMS.indexOf(this.#system) + step + SIZE_SYSTEMS.length) % SIZE_SYSTEMS.length];
+    if (!next) return;
+    this.#setSystem(next, true);
+    const button = this.querySelector(`.size-facet__sys[data-sys="${next}"]`);
+    if (button instanceof HTMLElement) button.focus();
+  };
+}
+
+if (!customElements.get('facet-size-chips')) {
+  customElements.define('facet-size-chips', FacetSizeChips);
+}
+
+/**
  * @typedef {Object} FacetStatusRefs
  * @property {HTMLElement} facetStatus - The facet status element
  */

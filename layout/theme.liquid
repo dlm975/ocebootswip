@@ -25,14 +25,12 @@
 
     {%- render 'meta-tags' -%}
     {%- render 'fonts' -%}
-    {%- if template.name == 'collection' or template.name == 'product' -%}
-      {%- # Oswald Bold for the BFSALE "% OFF" badge -%}
-      <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap">
-      {%- # Shrinks sale price lines on product cards to fit one line -%}
-      <script src="{{ 'price-fit.js' | asset_url }}" defer></script>
-    {%- endif -%}
+    {%- # Oswald Bold for the BFSALE "% OFF" badge -%}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap">
+    {%- # Shrinks sale price lines on product cards to fit one line -%}
+    <script src="{{ 'price-fit.js' | asset_url }}" defer></script>
     {%- render 'scripts' -%}
     {%- render 'theme-styles-variables' -%}
     {%- render 'cart-customisation' -%}

@@ -37,9 +37,13 @@ export default class PaginatedList extends Component {
 
     this.#storeImageRatioSettings();
 
-    this.#fetchPage('next');
-    this.#fetchPage('previous');
-    this.#observeViewMore();
+    // Pages are only preloaded and appended on scroll when the list renders the view-more
+    // sentinels. Lists that use numbered pagination (snippets/pagination.liquid) leave them out.
+    if (this.refs.viewMoreNext || this.refs.viewMorePrevious) {
+      this.#fetchPage('next');
+      this.#fetchPage('previous');
+      this.#observeViewMore();
+    }
 
     // Listen for filter updates to clear cached pages
     document.addEventListener(ThemeEvents.FilterUpdate, this.#handleFilterUpdate);
@@ -478,8 +482,8 @@ export default class PaginatedList extends Component {
         // Now the DOM has been updated with the new filtered content
         this.#observeViewMore();
 
-        // Fetch the next page
-        this.#fetchPage('next');
+        // Fetch the next page (only when the list appends pages on scroll)
+        if (this.refs.viewMoreNext) this.#fetchPage('next');
       }
     });
 

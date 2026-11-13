@@ -9,6 +9,11 @@
  */
 {
   "accessibility": {
+    "pagination": "Pagination",
+    "previous_page": "Previous page",
+    "next_page": "Next page",
+    "page_number": "Page {{ number }}",
+    "size_system": "Size system",
     "account": "Open account menu",
     "cart": "Cart",
     "cart_count": "Total items in cart",

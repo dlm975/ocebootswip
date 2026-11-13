@@ -1,7 +1,8 @@
 {% doc %}
   Collection header: bold heading with a size selector underneath.
 
-  - Toggle switch for US / UK / EU size systems (remembered per shopper).
+  - Toggle switch for US / UK / EU size systems (remembered per shopper, and shared with the
+    size filter in the filter drawer).
   - Multiple sizes can be selected; they're ORed together, the same as the theme's
     own filters.
   - Sizes come from this collection's own "Size" filter (Search & Discovery), so
@@ -350,6 +351,7 @@
   if (!customElements.get('collection-size-selector')) {
     const SYSTEMS = ['us', 'uk', 'eu'];
     const STORE_KEY = 'csh-size-system';
+    const SYSTEM_EVENT = 'size-system:change';
 
     // "US 9 - UK 8 - EU 42 2/3" -> { us: '9', uk: '8', eu: '42 2/3' }
     const parse = (value) => {
@@ -399,11 +401,18 @@
         this.onExternalChange = () => this.refresh();
         document.addEventListener('filter:update', this.onExternalChange);
         window.addEventListener('popstate', this.onExternalChange);
+
+        // The filter drawer has the same US / UK / EU switch: follow it.
+        this.onSystemChange = (e) => {
+          if (SYSTEMS.includes(e.detail) && e.detail !== this.sys) this.setSystem(e.detail, false);
+        };
+        document.addEventListener(SYSTEM_EVENT, this.onSystemChange);
       }
 
       disconnectedCallback() {
         document.removeEventListener('filter:update', this.onExternalChange);
         window.removeEventListener('popstate', this.onExternalChange);
+        document.removeEventListener(SYSTEM_EVENT, this.onSystemChange);
       }
 
       readValues(root) {
@@ -427,6 +436,8 @@
         if (radio) radio.checked = true;
         if (remember) {
           try { localStorage.setItem(STORE_KEY, sys); } catch (e) {}
+          // Keep the size filter in the filter drawer on the same system.
+          document.dispatchEvent(new CustomEvent(SYSTEM_EVENT, { detail: sys }));
         }
         this.renderChips();
       }

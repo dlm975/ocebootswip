@@ -355,10 +355,11 @@
     form.addEventListener('submit', function (e) {
       var q = input.value.trim();
       if (!q) { e.preventDefault(); return; }
-      /* Append a wildcard so Shopify prefix-matches the last term:
-         "pred" finds "predator". Skip if the user already used one
-         or is quoting an exact phrase. */
-      if (!/[*"]$/.test(q)) input.value = q + '*';
+      /* Send exactly what was typed. Shopify already matches partial words on
+         products ("pred" finds "predator"); a trailing "*" turned the search
+         into match-everything. Strip any typed wildcard and tidy the spacing. */
+      input.value = q.replace(/\*+/g, ' ').replace(/\s+/g, ' ').trim();
+      if (!input.value) e.preventDefault();
     });
 
     window.customSearchOpen  = openSearch;

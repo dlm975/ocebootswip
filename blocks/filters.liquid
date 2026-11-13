@@ -288,6 +288,35 @@
       </div>
     {% endif %}
 
+    {% if block.settings.enable_filtering and block.settings.enable_sorting %}
+      <sort-select-component class="sort-select">
+        <label
+          class="sort-select__label"
+          for="SortSelect-{{ section.id }}"
+        >
+          {{- 'actions.sort' | t -}}
+          <span class="svg-wrapper icon-caret">
+            {{- 'icon-caret.svg' | inline_asset_content -}}
+          </span>
+        </label>
+        <select
+          id="SortSelect-{{ section.id }}"
+          class="sort-select__input"
+        >
+          {% for option in results.sort_options %}
+            <option
+              value="{{ option.value }}"
+              {% if option.value == sort_by %}
+                selected
+              {% endif %}
+            >
+              {{ option.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </sort-select-component>
+    {% endif %}
+
     <div class="facets-mobile-wrapper facets-controls-wrapper">
       {% if block.settings.enable_filtering == false and block.settings.enable_sorting %}
         <facets-form-component
@@ -421,14 +450,12 @@
           {% endif %}
 
           {% if block.settings.enable_sorting %}
-            {% render 'sorting',
-              results: results,
-              sort_by: sort_by,
-              filter_style: block.settings.filter_style,
-              suffix: 'overflow',
-              should_use_select_on_mobile: should_use_select_on_mobile,
-              section_id: section.id
-            %}
+            {% # Sorting lives outside the drawer (next to the grid view switch); this keeps the current sort when a drawer filter changes. %}
+            <input
+              type="hidden"
+              name="sort_by"
+              value="{{ sort_by }}"
+            >
           {% endif %}
         </form>
       </facets-form-component>
@@ -479,6 +506,49 @@
     align-items: center;
     gap: var(--gap-sm);
     justify-content: flex-end;
+  }
+
+  /* Sort control in the mobile toolbar, beside the grid view switch. The native select covers the label. */
+  .sort-select {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: var(--minimum-touch-target);
+    margin-inline: auto var(--gap-md);
+  }
+
+  .sort-select__label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-2xs);
+    cursor: pointer;
+  }
+
+  .sort-select__label .icon-caret {
+    width: var(--icon-size-xs);
+    height: var(--icon-size-xs);
+    color: rgb(var(--color-foreground-rgb) / var(--opacity-50));
+  }
+
+  .sort-select__input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    border: 0;
+    opacity: 0;
+    cursor: pointer;
+    appearance: none;
+
+    /* 16px keeps iOS from zooming the page when the picker opens */
+    font-size: 16px;
+  }
+
+  .sort-select:has(.sort-select__input:focus-visible) {
+    outline: var(--focus-outline-width) solid currentcolor;
+    outline-offset: var(--focus-outline-offset);
+    border-radius: var(--style-border-radius-xs);
   }
 
   .facets-mobile-wrapper:has(> :nth-child(2)) {

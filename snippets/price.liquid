@@ -19,18 +19,18 @@
     assign show_compare_price = true
   endif
 
-  # BFSALE: on collection and product pages, products tagged BFSALE show the compare-at price struck through
+  # BFSALE: on every page type, products tagged BFSALE show the compare-at price struck through
   # in red, then "NOW <price>" in green. On the product page's own price the % OFF badge and flame sit inline.
-  assign bfsale_page = false
-  if template.name == 'collection' or template.name == 'product'
-    assign bfsale_page = true
+  assign is_main_product_price = false
+  if template.name == 'product' and product.handle == closest.product.handle
+    assign is_main_product_price = true
   endif
   assign is_bfsale = false
-  if bfsale_page and product_resource.tags contains 'BFSALE'
+  if product_resource.tags contains 'BFSALE'
     assign is_bfsale = true
   endif
   assign is_bfsale_pdp = false
-  if is_bfsale and template.name == 'product' and product.handle == closest.product.handle
+  if is_bfsale and is_main_product_price
     assign is_bfsale_pdp = true
   endif
   assign show_bfsale_rrp = false
@@ -38,10 +38,10 @@
     assign show_bfsale_rrp = true
   endif
 
-  # Collection pages: every product with a compare-at price gets the RRP / "NOW <price>" line,
+  # Product cards, on every page type: every product with a compare-at price gets the RRP / "NOW <price>" line,
   # kept on one line by <price-fit> (assets/price-fit.js), which shrinks the text to fit the card.
   assign is_sale_card = false
-  if template.name == 'collection' and show_compare_price and is_bfsale_pdp == false
+  if show_compare_price and is_main_product_price == false
     assign is_sale_card = true
     assign show_bfsale_rrp = true
   endif

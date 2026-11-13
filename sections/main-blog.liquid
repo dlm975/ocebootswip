@@ -21,7 +21,6 @@
     {% content_for 'blocks' %}
 
     {%- paginate blog.articles by 12 -%}
-      <span ref="viewMorePrevious"></span>
       <div
         ref="grid"
         class="blog-posts-container"
@@ -37,7 +36,7 @@
           </div>
         {% endfor %}
       </div>
-      <span ref="viewMoreNext"></span>
+      {% render 'pagination', paginate: paginate %}
     {%- endpaginate -%}
   </div>
 </blog-posts-list>
