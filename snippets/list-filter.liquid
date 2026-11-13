@@ -24,10 +24,11 @@
     assign is_image = true
   endif
 
-  # Filter drawer: the Size filter becomes a US / UK / EU switch with one button per size
-  # (facet-size-chips in assets/facets.js). The checkboxes below stay in the form, hidden, as its inputs.
+  # The Size filter is a US / UK / EU switch with one button per size, in the filter drawer and in the
+  # desktop dropdown alike (facet-size-chips in assets/facets.js). The checkboxes below stay in the form,
+  # hidden, as its inputs.
   assign is_size_chips = false
-  if in_drawer and is_swatch == false and is_image == false
+  if is_swatch == false and is_image == false
     assign filter_label_downcase = filter.label | downcase
     if filter.param_name contains 'option.size' or filter_label_downcase == 'size'
       assign is_size_chips = true
@@ -383,7 +384,7 @@
                         {% if is_disabled %}
                           disabled
                         {% endif %}
-                        {% if autofocus %}
+                        {% if autofocus and is_size_chips == false %}
                           autofocus
                         {% endif %}
                         ref="facetInputs[]"
@@ -409,6 +410,13 @@
                       </label>
                     </div>
                   {% else %}
+                    {% liquid
+                      # Hidden inputs behind the size buttons never take focus when the drawer opens
+                      assign checkbox_autofocus = autofocus
+                      if is_size_chips
+                        assign checkbox_autofocus = false
+                      endif
+                    %}
                     {% render 'checkbox',
                       name: value.param_name,
                       value: value.value,
@@ -418,7 +426,7 @@
                       disabled: is_disabled,
                       inputRef: 'facetInputs[]',
                       events: 'on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"',
-                      autofocus: autofocus
+                      autofocus: checkbox_autofocus
                     %}
                   {% endif %}
                 {% endif %}
@@ -470,7 +478,7 @@
 </accordion-custom>
 
 {% stylesheet %}
-  /* Size filter in the drawer: US / UK / EU switch + one button per size */
+  /* Size filter (drawer and desktop dropdown): US / UK / EU switch + one button per size */
   .size-facet {
     --size-facet-toggle-on: #34c759;
     --size-facet-toggle-on-text: #fff;
@@ -483,6 +491,33 @@
     gap: var(--gap-md);
     width: 100%;
     padding-block-end: var(--padding-sm);
+  }
+
+  /* Desktop dropdown: a fixed-width panel, tall enough for the switch and every size without clipping */
+  @media screen and (min-width: 750px) {
+    .facets--horizontal .facets__panel-content:has(.size-facet) {
+      --facets-panel-height: min(480px, 70vh);
+    }
+
+    .facets--horizontal .size-facet {
+      width: 340px;
+      max-width: calc(100vw - var(--page-margin) * 2);
+      padding: var(--padding-md);
+      padding-block-end: var(--padding-xs);
+    }
+
+    .facets--horizontal .size-facet__chips {
+      max-height: min(300px, 45vh);
+      overflow-y: auto;
+      scrollbar-width: thin;
+
+      /* Room for the focus ring and hover outline inside the scroll area */
+      padding: 2px;
+    }
+
+    .facets--horizontal .size-facet__chip {
+      height: var(--button-size-md, 40px);
+    }
   }
 
   .size-facet[hidden],
