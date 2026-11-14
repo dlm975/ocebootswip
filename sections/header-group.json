@@ -17,11 +17,11 @@
         "announcement_p78QMR": {
           "type": "_announcement",
           "settings": {
-            "text": "ORDERS SHIPPING TOMORROW ✈️⚡️",
+            "text": "25% off with the code GOAL25 ⚽",
             "link": "",
-            "font": "var(--font-heading--family)",
-            "font_size": "0.75rem",
-            "weight": "",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "weight": "600",
             "letter_spacing": "normal",
             "case": "none"
           },
@@ -37,8 +37,13 @@
         "section_width": "full-width",
         "color_scheme": "scheme-d779fa1c-5ad7-4d2a-b8a3-5bceeed4a438",
         "divider_width": 0,
-        "padding-block-start": 10,
-        "padding-block-end": 10
+        "padding-block-start": 8,
+        "padding-block-end": 8,
+        "layout": "promo",
+        "countdown_end": "2026-11-30 23:59",
+        "countdown_label": "Offer ends in",
+        "hide_when_expired": false,
+        "show_close": true
       }
     },
     "header_section": {
@@ -115,12 +120,14 @@
         "enable_transparent_header_product": false,
         "product_color_scheme": "default",
         "enable_transparent_header_collection": false,
-        "collection_color_scheme": "default"
+        "collection_color_scheme": "default",
+        "color_scheme_mobile": "scheme-1",
+        "invert_logo_mobile": true
       }
     }
   },
   "order": [
-    "header_announcements_jTCiUX",
-    "header_section"
+    "header_section",
+    "header_announcements_jTCiUX"
   ]
 }

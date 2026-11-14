@@ -1,4 +1,29 @@
+{% liquid
+  assign promo = false
+  if section.settings.layout == 'promo'
+    assign promo = true
+  endif
 
+  # The countdown end is typed in the store's time zone. Pin it to the store's current UTC offset so every
+  # visitor counts down to the same moment, wherever their device clock is set.
+  assign countdown_end = section.settings.countdown_end | strip
+  if promo and countdown_end != blank
+    assign countdown_offset = 'now' | date: '%z'
+    assign countdown_offset_hours = countdown_offset | slice: 0, 3
+    assign countdown_offset_minutes = countdown_offset | slice: 3, 2
+    assign countdown_iso = countdown_end | replace: ' ', 'T'
+    if countdown_iso.size == 10
+      assign countdown_iso = countdown_iso | append: 'T23:59'
+    endif
+    if countdown_iso.size == 16
+      assign countdown_iso = countdown_iso | append: ':00'
+    endif
+    assign countdown_iso = countdown_iso | append: countdown_offset_hours | append: ':' | append: countdown_offset_minutes
+  endif
+
+  # Changing the end date gives a new key, so a new promotion shows again for visitors who closed the last one.
+  assign dismiss_key = 'announcement-dismissed:' | append: section.id | append: ':' | append: countdown_end
+%}
 
 {% if section.blocks.size > 1 %}
   <script
@@ -8,19 +33,56 @@
   ></script>
 {% endif %}
 
+{% if promo %}
+  {%- unless request.design_mode -%}
+    {%- comment -%} Runs before paint so a closed bar never flashes on the next page of the session. {%- endcomment -%}
+    <script>
+      try {
+        if (sessionStorage.getItem({{ dismiss_key | json }})) {
+          document.getElementById({{ 'shopify-section-' | append: section.id | json }}).style.display = 'none';
+        }
+      } catch (e) {}
+    </script>
+  {%- endunless -%}
+  <script
+    src="{{ 'announcement-promo.js' | asset_url }}"
+    type="module"
+  ></script>
+{% endif %}
+
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <aside
-  class="announcement-bar spacing-style section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}"
+  class="announcement-bar{% if promo %} announcement-bar--promo{% endif %} spacing-style section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}"
   style="{% render 'spacing-padding', settings: section.settings %}; --border-bottom-width: {{ section.settings.divider_width }}px;"
+  {% if promo %}
+    aria-label="Promotion"
+  {% endif %}
 >
   {% liquid
     assign autoplay = false
     assign show_arrows = false
     if section.blocks.size > 1
       assign autoplay = true
-      assign show_arrows = true
+      unless promo
+        assign show_arrows = true
+      endunless
     endif
   %}
+
+  {% if promo %}
+    <announcement-promo
+      class="announcement-bar__promo"
+      data-dismiss-key="{{ dismiss_key | escape }}"
+      data-section-id="{{ section.id }}"
+      {% if request.design_mode %}
+        data-design-mode
+      {% endif %}
+      {% if section.settings.hide_when_expired %}
+        data-hide-when-expired
+      {% endif %}
+    >
+      <div class="announcement-bar__promo-content">
+  {% endif %}
 
   <announcement-bar-component
     class="announcement-bar__slider"
@@ -36,6 +98,54 @@
       {% content_for 'blocks' %}
     </div>
   </announcement-bar-component>
+
+  {% if promo %}
+        {% if countdown_iso != blank %}
+          <p
+            class="announcement-bar__countdown"
+            role="timer"
+            data-end="{{ countdown_iso | escape }}"
+          >
+            <span
+              class="visually-hidden"
+              data-countdown-label
+            >
+              {{- section.settings.countdown_label -}}
+            </span>
+            <span
+              class="announcement-bar__countdown-digits"
+              aria-hidden="true"
+            >
+              {%- comment -%} Filled by announcement-promo.js; these placeholders hold the line's height before it runs. {%- endcomment -%}
+              <span data-unit="days">00</span>
+              <span class="announcement-bar__countdown-sep">:</span>
+              <span data-unit="hours">00</span>
+              <span class="announcement-bar__countdown-sep">:</span>
+              <span data-unit="minutes">00</span>
+              <span class="announcement-bar__countdown-sep">:</span>
+              <span data-unit="seconds">00</span>
+            </span>
+          </p>
+        {% endif %}
+      </div>
+
+      {% if section.settings.show_close %}
+        <button
+          type="button"
+          class="announcement-bar__close"
+          aria-label="Close promotion"
+          data-announcement-close
+        >
+          <span
+            class="svg-wrapper"
+            aria-hidden="true"
+          >
+            {{- 'icon-close.svg' | inline_asset_content -}}
+          </span>
+        </button>
+      {% endif %}
+    </announcement-promo>
+  {% endif %}
 </aside>
 
 {% stylesheet %}
@@ -120,6 +230,126 @@
     position: absolute;
     inset: 0;
   }
+  /* Promo layout: message and countdown on the left, close button on the right. Matches the header's mobile gutter. */
+  .announcement-bar--promo {
+    --announcement-gutter: clamp(12px, 4.1vw, 32px);
+  }
+
+  .announcement-bar__promo {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm, 12px);
+    min-height: 48px;
+    padding-inline: var(--announcement-gutter) 16px;
+  }
+
+  .announcement-bar__promo-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .announcement-bar--promo .announcement-bar__slider {
+    grid-column: auto;
+  }
+
+  .announcement-bar--promo .announcement-bar__slides {
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+  }
+
+  .announcement-bar--promo .announcement-bar__slide {
+    --text-align: left !important;
+    --line-height: 1.25 !important;
+
+    place-content: start;
+    color: var(--color-foreground-heading);
+  }
+
+  .announcement-bar--promo .announcement-bar__slide,
+  .announcement-bar--promo .announcement-bar__slide > * {
+    margin-inline: 0;
+    text-align: left;
+  }
+
+  /* Narrow phones: a notch smaller so the message keeps to one line */
+  @media screen and (max-width: 359px) {
+    .announcement-bar--promo .announcement-bar__slide.custom-font-size,
+    .announcement-bar--promo .announcement-bar__slide.custom-font-size > *,
+    .announcement-bar--promo .announcement-bar__countdown {
+      font-size: min(var(--font-size, 1rem), 0.875rem);
+    }
+  }
+
+  .announcement-bar__countdown {
+    margin: 0;
+    font-family: var(--font-body--family);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--color-foreground-heading);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+    white-space: nowrap;
+  }
+
+  .announcement-bar__countdown-digits {
+    display: inline-flex;
+    gap: 0.5em;
+  }
+
+  .announcement-bar__countdown[hidden] {
+    display: none;
+  }
+
+  .announcement-bar__close {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--color-foreground-heading);
+
+    /* A shade darker than the bar itself, whatever colour scheme the bar uses */
+    background-color: rgb(0 0 0 / 0.12);
+    transition: background-color var(--animation-speed, 0.2s) var(--animation-easing, ease);
+
+    /* 44px touch target without changing the visible circle */
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+    }
+
+    &:hover {
+      background-color: rgb(0 0 0 / 0.2);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-foreground-heading);
+      outline-offset: 2px;
+    }
+
+    .svg-wrapper,
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    svg {
+      stroke-width: 1.75;
+    }
+  }
 {% endstylesheet %}
 
 {% schema %}
@@ -142,6 +372,56 @@
       "max": 10,
       "default": 5,
       "unit": "sec"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        {
+          "value": "centered",
+          "label": "Centered slider"
+        },
+        {
+          "value": "promo",
+          "label": "Promotion with countdown"
+        }
+      ],
+      "default": "centered"
+    },
+    {
+      "type": "header",
+      "content": "Promotion",
+      "visible_if": "{{ section.settings.layout == 'promo' }}"
+    },
+    {
+      "type": "text",
+      "id": "countdown_end",
+      "label": "Countdown end",
+      "info": "Store time zone, as YYYY-MM-DD HH:MM, e.g. 2026-11-30 23:59. Leave empty to hide the countdown.",
+      "visible_if": "{{ section.settings.layout == 'promo' }}"
+    },
+    {
+      "type": "text",
+      "id": "countdown_label",
+      "label": "Countdown label for screen readers",
+      "default": "Offer ends in",
+      "visible_if": "{{ section.settings.layout == 'promo' }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_when_expired",
+      "label": "Hide the bar once the countdown ends",
+      "default": false,
+      "visible_if": "{{ section.settings.layout == 'promo' }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_close",
+      "label": "Show close button",
+      "info": "A closed bar stays hidden for the rest of the visitor's browsing session.",
+      "default": true,
+      "visible_if": "{{ section.settings.layout == 'promo' }}"
     },
     {
       "type": "header",
