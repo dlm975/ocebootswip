@@ -305,6 +305,39 @@
     display: none;
   }
 
+  /* 1024px and wider: message and countdown centred, close button pinned right */
+  @media screen and (min-width: 1024px) {
+    .announcement-bar__promo {
+      position: relative;
+      justify-content: center;
+      padding-inline: 72px;
+    }
+
+    .announcement-bar__promo-content {
+      flex: 0 1 auto;
+      align-items: center;
+    }
+
+    .announcement-bar--promo .announcement-bar__slide {
+      --text-align: center !important;
+
+      place-content: center;
+    }
+
+    .announcement-bar--promo .announcement-bar__slide,
+    .announcement-bar--promo .announcement-bar__slide > * {
+      text-align: center;
+    }
+
+    /* Extra class: this block sits above the base button rule, which sets position: relative */
+    .announcement-bar__promo .announcement-bar__close {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+  }
+
   .announcement-bar__close {
     flex: none;
     display: inline-flex;
@@ -322,7 +355,7 @@
     background-color: rgb(0 0 0 / 0.12);
     transition: background-color var(--animation-speed, 0.2s) var(--animation-easing, ease);
 
-    /* 44px touch target without changing the visible circle */
+    /* 44px touch target without changing the visible circle (position: absolute on desktop also anchors it) */
     position: relative;
 
     &::before {
