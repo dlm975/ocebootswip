@@ -1,3 +1,5 @@
+{%- # With the Barlow brand fonts on, the fonts from the Typography pickers are no longer shown, so they are not preloaded. -%}
+{%- unless settings.brand_fonts_barlow -%}
 {%- unless settings.type_body_font.system?
   and settings.type_subheading_font.system?
   and settings.type_heading_font.system?
@@ -47,3 +49,4 @@
   >
 {%- endunless -%}
 {% # theme-check-enable %}
+{%- endunless -%}

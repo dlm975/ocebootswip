@@ -328,6 +328,13 @@
         "content": "t:content.fonts"
       },
       {
+        "type": "checkbox",
+        "id": "brand_fonts_barlow",
+        "label": "Use Barlow brand fonts",
+        "info": "Barlow Condensed for headings, buttons, menus, labels, prices and sizes; Barlow for body text. Loaded from Google Fonts and used instead of the fonts picked below.",
+        "default": true
+      },
+      {
         "type": "font_picker",
         "id": "type_body_font",
         "default": "work_sans_n4",
@@ -2348,7 +2355,7 @@
         "type": "text",
         "id": "cart_ship_excluded_tag",
         "label": "Or use this product tag",
-        "info": "Optional \u2014 useful when more than 50 products need excluding. Case sensitive."
+        "info": "Optional — useful when more than 50 products need excluding. Case sensitive."
       },
       {
         "type": "text",
