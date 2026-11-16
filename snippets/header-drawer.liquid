@@ -631,9 +631,14 @@
 </header-drawer>
 
 {% stylesheet %}
-  /* Brand drill-down inside the drawer accordion: inset like the child links */
+  /* Brand drill-down inside the drawer: inset like the child links */
   .menu-drawer__drill {
     padding-inline: var(--padding-xl, 20px);
+  }
+
+  /* While the brand drill-down is open, the menu items below it are hidden */
+  .menu-drawer__menu > li:has(> details[open] .brand-drill) ~ li {
+    display: none;
   }
 
   .header__icon--menu {

@@ -32,7 +32,7 @@
 
 <brand-drill-menu
   class="brand-drill brand-drill--{{ variant }}"
-  style="--brand-drill-rows: {{ max_rows }};"
+  style="--brand-drill-rows: {{ max_rows }}; --brand-drill-brands: {{ parent_link.links.size }};"
 >
   <ul
     class="brand-drill__brands list-unstyled"
@@ -109,14 +109,28 @@
     color: var(--color-foreground);
   }
 
-  /* The models are positioned beside the brand column; the column is tall enough for the longest list */
+  /* The brand column is as tall as the longest model list, and the brands share that height
+     equally: each brand's name is sized to fill its share. The models sit beside the column. */
+  .brand-drill {
+    --brand-drill-height: calc(var(--brand-drill-rows) * var(--brand-drill-model-row));
+    --brand-drill-brand-row: calc(var(--brand-drill-height) / var(--brand-drill-brands));
+  }
+
   .brand-drill__brands {
     position: relative;
+    display: flex;
+    flex-direction: column;
     width: max-content;
-    min-width: 11rem;
-    min-height: calc(var(--brand-drill-rows) * var(--brand-drill-model-row));
+    height: var(--brand-drill-height);
     margin: 0;
-    padding: 0 40px 0 0;
+    padding: 0 48px 0 0;
+  }
+
+  .brand-drill__brand {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    min-height: 0;
   }
 
   .brand-drill__brand-link,
@@ -132,11 +146,26 @@
   }
 
   .brand-drill__brand-link {
-    min-height: var(--brand-drill-row);
-    align-items: center;
-    font-size: 1.125rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
+    font-size: calc(var(--brand-drill-brand-row) * 0.74);
+    font-weight: 750;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    font-variation-settings: 'opsz' 32;
+  }
+
+  .brand-drill__brand-link .brand-drill__count {
+    margin-block-start: 0.6em;
+  }
+
+  .brand-drill__model-link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    color: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: filter var(--animation-speed, 0.2s) var(--animation-easing, ease),
+      opacity var(--animation-speed, 0.2s) var(--animation-easing, ease);
   }
 
   .brand-drill__model-link {
@@ -228,19 +257,17 @@
   }
 
   .brand-drill--drawer .brand-drill__brands {
-    min-width: 0;
-    width: 42%;
-    padding-right: 16px;
+    padding-right: 20px;
   }
 
+  /* Capped on phones so the longest brand name and the models fit side by side */
   .brand-drill--drawer .brand-drill__brand-link {
-    font-size: 1.0625rem;
+    font-size: min(calc(var(--brand-drill-brand-row) * 0.74), 11vw);
   }
 
   .brand-drill--drawer .brand-drill__models {
-    /* The brand column is 42% of the drawer; the models take the other 58% (138% of 42%) */
-    width: 138%;
     min-width: 0;
+    width: max-content;
   }
 
   .brand-drill--drawer .brand-drill__model-link {
