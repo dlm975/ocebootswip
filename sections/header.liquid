@@ -944,6 +944,50 @@
       text-underline-offset: 3px;
     }
 
+    /* Silo cutouts: the boots from the homepage grid as image tiles, two rows per brand column */
+    #header-component .menu-list__submenu .mega-menu__column:has(.mega-menu__link--cutout) > div > ul {
+      display: grid;
+      grid-auto-flow: column;
+      grid-template-rows: repeat(2, auto);
+      gap: 8px 12px;
+      column-count: auto !important; /* stylelint-disable-line declaration-no-important */
+    }
+
+    #header-component .menu-list__submenu .mega-menu__link--cutout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      width: 112px;
+      padding: 6px 4px 8px;
+      border-radius: 2px;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    #header-component .menu-list__submenu .mega-menu__link--cutout:is(:hover, :focus-visible) {
+      background: var(--brand-mist, #F1F5F9);
+      text-decoration: none;
+    }
+
+    #header-component .menu-list__submenu .mega-menu__link--cutout:is(:hover, :focus-visible) .mega-menu__link-title {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    #header-component .menu-list__submenu .mega-menu__cutout {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1 / 1;
+      object-fit: contain;
+      transition: transform var(--animation-speed) var(--animation-easing);
+    }
+
+    #header-component .menu-list__submenu .mega-menu__link--cutout:hover .mega-menu__cutout {
+      transform: scale(1.06);
+    }
+
     #header-component .menu-list__submenu .mega-menu__link--parent {
       margin-block-end: 4px;
       font-weight: 600;

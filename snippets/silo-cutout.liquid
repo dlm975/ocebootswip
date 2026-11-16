@@ -1,0 +1,32 @@
+{%- doc -%}
+  Outputs the file name of the boot cutout image for a silo collection, or nothing.
+
+  The images are the ones the homepage "shop by model" cutout grid (collection-cutout-grid in
+  templates/index.json) uses for the same collections, uploaded under Content > Files. The header
+  can't read the homepage's section settings, so the pairs are listed here: when a cutout in that
+  grid changes, change it here too.
+
+  @param {string} handle - The collection handle
+
+  @example
+  {%- capture file -%}{% render 'silo-cutout', handle: link.object.handle %}{%- endcapture -%}
+{%- enddoc -%}
+
+{%- case handle -%}
+  {%- when 'superfly-copy' -%}IMG_2052-Photoroom.png
+  {%- when 'mercurial' -%}IMG_2038.png
+  {%- when 'magista-1' -%}IMG-2072.png
+  {%- when 'tiempo-1' -%}IMG_2043-Photoroom.png
+  {%- when 'x' -%}IMG_2045-Photoroom.png
+  {%- when 'hypervenom-1' -%}IMG_2053-Photoroom.png
+  {%- when 'predator-1' -%}IMG_2048-Photoroom.png
+  {%- when 'nemeziz' -%}IMG_2044-Photoroom.png
+  {%- when 'copa' -%}IMG_2046-Photoroom.png
+  {%- when 'ctr360-1' -%}IMG_2047-Photoroom.png
+  {%- when 'phantom-1' -%}IMG_2049-Photoroom.png
+  {%- when 'f50' -%}IMG_2050-Photoroom.png
+  {%- when 'total-91' -%}IMG_2042-Photoroom.png
+  {%- when 'puma-1' -%}IMG_2054-Photoroom.png
+  {%- when 'mizuno' -%}IMG_2055-Photoroom.png
+  {%- when '11pro' -%}IMG_2056-Photoroom.png
+{%- endcase -%}

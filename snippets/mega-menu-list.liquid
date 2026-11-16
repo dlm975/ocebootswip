@@ -108,15 +108,41 @@
         >
           {% for childLink in link.links %}
             {% assign break_after_modulo = forloop.index | modulo: links_before_wrap %}
+            {%- liquid
+              # Silo collections show their boot cutout from the homepage grid (snippets/silo-cutout)
+              assign cutout_image = blank
+              if childLink.type == 'collection_link'
+                capture cutout_file
+                  render 'silo-cutout', handle: childLink.object.handle
+                endcapture
+                assign cutout_file = cutout_file | strip
+                if cutout_file != blank
+                  assign cutout_image = images[cutout_file]
+                endif
+              endif
+            -%}
             <li
-              {% if break_after_modulo == 0 and should_break_columns %}
+              {% if break_after_modulo == 0 and should_break_columns and cutout_image == blank %}
                 style="break-after: column;"
               {% endif %}
             >
               <a
                 href="{{ childLink.url }}"
-                class="mega-menu__link"
+                class="mega-menu__link{% if cutout_image != blank %} mega-menu__link--cutout{% endif %}"
               >
+                {%- if cutout_image != blank -%}
+                  {{
+                    cutout_image
+                    | image_url: width: 320
+                    | image_tag:
+                      loading: 'lazy',
+                      class: 'mega-menu__cutout',
+                      alt: '',
+                      width: 160,
+                      height: 160,
+                      sizes: '112px'
+                  }}
+                {%- endif -%}
                 <span class="mega-menu__link-title">{{- childLink.title -}}</span>
               </a>
             </li>
