@@ -93,6 +93,8 @@
         }
       },
       "settings": {
+        "invert_logo": true,
+        "search_style_desktop": "field",
         "logo_position": "left",
         "menu_position": "left",
         "menu_row": "bottom",
@@ -120,9 +122,7 @@
         "enable_transparent_header_product": false,
         "product_color_scheme": "default",
         "enable_transparent_header_collection": false,
-        "collection_color_scheme": "default",
-        "invert_logo": true,
-        "search_style_desktop": "field"
+        "collection_color_scheme": "default"
       }
     }
   },
