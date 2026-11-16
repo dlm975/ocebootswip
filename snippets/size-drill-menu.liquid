@@ -4,7 +4,7 @@
 
   Desktop: US / UK / EU stacked in a column; pointing at one blurs the others and its sizes open
   out across the full width of the dropdown. Drawer (phones): US / UK / EU on one line; tapping
-  one blurs the others and opens its sizes below in a 4-wide grid, the menu growing to fit.
+  one blurs the others and opens its sizes below in a 3-wide grid, the menu growing to fit.
   Behaviour is in assets/size-drill-menu.js.
 
   The sizes come from the menu's links, one per size collection, each titled like
@@ -215,8 +215,9 @@
     padding: 0;
   }
 
-  .size-drill__sizes[hidden] {
-    display: none;
+  /* Sizes stay out of sight until their system is chosen (beats the grid rules below) */
+  .size-drill .size-drill__sizes[hidden] {
+    display: none !important; /* stylelint-disable-line declaration-no-important */
   }
 
   /* A size: the number in bold with its product count small at its shoulder */
@@ -320,7 +321,7 @@
     }
   }
 
-  /* ---- Drawer (phones): systems on one line, sizes below in a 4-wide grid ---- */
+  /* ---- Drawer (phones): systems on one line, sizes below in a 3-wide grid ---- */
   .size-drill--drawer {
     --color-foreground-rgb: 18 18 18;
 
@@ -345,7 +346,7 @@
 
   .size-drill--drawer .size-drill__sizes {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 4px 12px;
     padding-block: 18px 6px;
   }
