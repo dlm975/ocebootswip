@@ -214,7 +214,7 @@
   .ppw__stars svg {
     width: var(--ppw-star-size, 20px);
     height: var(--ppw-star-size, 20px);
-    fill: var(--ppw-star-color, #14b554);
+    fill: var(--ppw-star-color, #EC4899);
     display: block;
   }
 
@@ -224,8 +224,8 @@
     container-type: inline-size;
     overflow: hidden;
     /* soften the edges instead of hard-clipping cards */
-    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
-    mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #121212 6%, #121212 94%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #121212 6%, #121212 94%, transparent 100%);
   }
 
   .ppw__track {
@@ -264,7 +264,7 @@
     aspect-ratio: var(--ppw-ratio, 3 / 4);
     border-radius: var(--ppw-radius, 16px);
     overflow: hidden;
-    background: #111;
+    background: #121212;
     text-decoration: none;
     color: inherit;
     box-shadow: 0 18px 36px -14px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.14);
@@ -322,8 +322,8 @@
     );
     -webkit-backdrop-filter: blur(var(--ppw-blur)) saturate(140%);
     backdrop-filter: blur(var(--ppw-blur)) saturate(140%);
-    -webkit-mask-image: linear-gradient(to top, #000 0%, #000 30%, rgba(0, 0, 0, 0.5) 60%, transparent 100%);
-    mask-image: linear-gradient(to top, #000 0%, #000 30%, rgba(0, 0, 0, 0.5) 60%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to top, #121212 0%, #121212 30%, rgba(0, 0, 0, 0.5) 60%, transparent 100%);
+    mask-image: linear-gradient(to top, #121212 0%, #121212 30%, rgba(0, 0, 0, 0.5) 60%, transparent 100%);
   }
 
   .ppw__crest {
@@ -588,7 +588,7 @@
       "type": "color",
       "id": "star_color",
       "label": "Star colour",
-      "default": "#14b554"
+      "default": "#EC4899"
     },
     {
       "type": "range",

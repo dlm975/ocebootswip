@@ -14,7 +14,7 @@
       "settings": {
         "bar_width": 20,
         "bar_height": 3,
-        "bar_color": "#111111",
+        "bar_color": "#121212",
         "grid_gap": 8,
         "corner_radius": 8
       }
@@ -107,7 +107,7 @@
                 "border_opacity": 100,
                 "border_radius": 0,
                 "toggle_overlay": false,
-                "overlay_color": "#00000026",
+                "overlay_color": "#12121226",
                 "overlay_style": "solid",
                 "gradient_direction": "to top",
                 "padding-block-start": 0,
@@ -132,7 +132,7 @@
                     "wrap": "pretty",
                     "color": "",
                     "background": false,
-                    "background_color": "#00000026",
+                    "background_color": "#12121226",
                     "corner_radius": 0,
                     "padding-block-start": 0,
                     "padding-block-end": 0,
@@ -173,8 +173,8 @@
                   "settings": {
                     "show_stars": true,
                     "text": "1000+ HAPPY CUSTOMERS",
-                    "star_color": "#14b554",
-                    "text_color": "#11602e",
+                    "star_color": "#EC4899",
+                    "text_color": "#1F2937",
                     "star_size": 13,
                     "placement": "in_place"
                   },
@@ -198,8 +198,8 @@
                   "fg-ag-studs-for-nike"
                 ],
                 "excluded_tag": "",
-                "background": "#e7f6ee",
-                "text_color": "#15803d"
+                "background": "#F1F5F9",
+                "text_color": "#121212"
               },
               "blocks": {}
             },
@@ -301,11 +301,11 @@
                 "choose_label": "Choose",
                 "free_label": "FREE",
                 "radius": 16,
-                "background": "#cef2de",
-                "text_color": "#111111",
+                "background": "#F1F5F9",
+                "text_color": "#121212",
                 "card_background": "#ffffff",
-                "card_border": "#e6e6e6",
-                "button_background": "#111111",
+                "card_border": "#64748B40",
+                "button_background": "#121212",
                 "button_text_color": "#ffffff"
               },
               "blocks": {}
@@ -414,7 +414,7 @@
         "heading": "Trusted by the pros",
         "subheading": "",
         "show_stars": true,
-        "star_color": "#14b554",
+        "star_color": "#EC4899",
         "star_size": 20,
         "aspect_ratio": "3 / 4",
         "cards_mobile": 2.5,
@@ -469,8 +469,8 @@
         "text_2": "Express Shipping",
         "icon_3": "shopify://shop_images/RecyclingSymbolGreen.png",
         "text_3": "Accept Returns",
-        "background": "#f8f8f8",
-        "text_color": "#333333",
+        "background": "#F1F5F9",
+        "text_color": "#1F2937",
         "corner_radius": 10,
         "padding-block-start": 8,
         "padding-block-end": 24
@@ -615,7 +615,7 @@
         "max_drift": 10,
         "frame_width": 4,
         "corner_radius": 4,
-        "title_color": "#111111",
+        "title_color": "#121212",
         "plate_color": "rgba(255,255,255,0.82)",
         "padding-block-start": 40,
         "padding-block-end": 40
@@ -631,8 +631,8 @@
         "body": "<p>We have spent 20+ years around football boots — chasing releases, hunting down retros and knowing a fake on sight. Every pair we list is checked by hand before it ships.</p>",
         "button_label": "",
         "button_link": "",
-        "tile_background": "#f5f5f5",
-        "text_color": "#111111",
+        "tile_background": "#F1F5F9",
+        "text_color": "#121212",
         "corner_radius": 20,
         "padding-block-start": 32,
         "padding-block-end": 64
@@ -644,7 +644,7 @@
         "reveal_mode": "after_button",
         "button_text": "Add to cart",
         "sheet_heading": "Select size",
-        "button_color": "#14b554",
+        "button_color": "#EC4899",
         "button_text_color": "#ffffff"
       }
     },

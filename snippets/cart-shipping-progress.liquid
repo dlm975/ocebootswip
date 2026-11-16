@@ -47,9 +47,9 @@
     assign pct = 50
   endif
 
-  assign track = settings.cart_ship_track | default: '#e6e6e6'
-  assign fill = settings.cart_ship_fill | default: '#14b554'
-  assign fg = settings.cart_ship_text_color | default: '#15803d'
+  assign track = settings.cart_ship_track | default: '#64748B40'
+  assign fill = settings.cart_ship_fill | default: '#EC4899'
+  assign fg = settings.cart_ship_text_color | default: '#121212'
   assign pending_fill = settings.cart_ship_pending_fill | default: '#d1a300'
   assign pending_fg = settings.cart_ship_pending_text_color | default: '#8a6d00'
 
@@ -126,7 +126,7 @@
     justify-content: center;
     gap: 5px;
     text-align: center;
-    color: var(--cs-fg, #15803d);
+    color: var(--cs-fg, #121212);
     font-size: var(--cs-size, var(--cart-font-size--sm, 0.8rem));
     font-weight: 600;
     line-height: 1.3;
@@ -155,7 +155,7 @@
     position: relative;
     height: 6px;
     border-radius: 999px;
-    background: var(--cs-track, #e6e6e6);
+    background: var(--cs-track, #64748B40);
     overflow: hidden;
   }
 
@@ -169,13 +169,13 @@
     height: 9px;
     margin: -4.5px 0 0 -4.5px;
     border-radius: 50%;
-    background: var(--cs-track, #e6e6e6);
+    background: var(--cs-track, #64748B40);
     box-shadow: 0 0 0 2px rgb(255 255 255 / 85%);
     transition: background-color 0.3s ease;
   }
 
   .cart-ship__check--hit {
-    background: var(--cs-fill, #14b554);
+    background: var(--cs-fill, #EC4899);
   }
 
   /* Rides the head of the fill, at the glyph's own angle. */
@@ -200,7 +200,7 @@
     height: 100%;
     width: var(--cs-pct, 0%);
     border-radius: inherit;
-    background: var(--cs-fill, #14b554);
+    background: var(--cs-fill, #EC4899);
     transition: width 0.45s cubic-bezier(0.32, 0.72, 0, 1), background-color 0.3s ease;
   }
 

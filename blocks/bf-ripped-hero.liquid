@@ -467,12 +467,12 @@
         const shadow = el('filter', { id: id + 'sh', x: '-10%', y: '-10%', width: '120%', height: '120%' });
         shadow.append(el('feDropShadow', {
           dx: 0, dy: (unit * 0.012).toFixed(1), stdDeviation: (unit * 0.018).toFixed(1),
-          'flood-color': '#000', 'flood-opacity': 0.75,
+          'flood-color': '#121212', 'flood-opacity': 0.75,
         }));
         const flapShadow = el('filter', { id: id + 'fs', x: '-30%', y: '-30%', width: '160%', height: '160%' });
         flapShadow.append(el('feDropShadow', {
           dx: (unit * 0.004).toFixed(1), dy: (unit * 0.008).toFixed(1), stdDeviation: (unit * 0.009).toFixed(1),
-          'flood-color': '#000', 'flood-opacity': 0.45,
+          'flood-color': '#121212', 'flood-opacity': 0.45,
         }));
         // Fibrous look on the torn white rim.
         const rough = el('filter', { id: id + 'rf' });
@@ -493,7 +493,7 @@
           d: frame + pathOf(rimPts), 'fill-rule': 'evenodd', fill: '#f4f2ee', filter: `url(#${id}rf)`,
         }));
         const printed = el('g', { 'clip-path': `url(#${id}hc)` });
-        printed.append(el('rect', { width: W, height: H, fill: '#1a1a1a' }));
+        printed.append(el('rect', { width: W, height: H, fill: '#121212' }));
         if (img) {
           printed.append(el('image', {
             href: img, x: 0, y: 0, width: W, height: H,
@@ -501,10 +501,10 @@
           }));
         }
         const dim = parseFloat(this.dataset.dim || '0');
-        if (dim > 0) printed.append(el('rect', { width: W, height: H, fill: this.dataset.dimColor || '#000', opacity: dim }));
+        if (dim > 0) printed.append(el('rect', { width: W, height: H, fill: this.dataset.dimColor || '#121212', opacity: dim }));
         // Subtle darkening right at the torn edge where the paper lifts.
         printed.append(el('path', {
-          d: pathOf(holePts), fill: 'none', stroke: '#000', 'stroke-opacity': 0.35,
+          d: pathOf(holePts), fill: 'none', stroke: '#121212', 'stroke-opacity': 0.35,
           'stroke-width': (unit * 0.02).toFixed(1), 'stroke-linejoin': 'round',
           filter: `url(#${id}eb)`,
         }));
@@ -589,7 +589,7 @@
       "type": "color",
       "id": "overlay_color",
       "label": "Image overlay color",
-      "default": "#000000"
+      "default": "#121212"
     },
     {
       "type": "range",
@@ -810,19 +810,19 @@
       "type": "color",
       "id": "button_text_color",
       "label": "Text color",
-      "default": "#000000"
+      "default": "#121212"
     },
     {
       "type": "color",
       "id": "button_hover_background",
       "label": "Hover background",
-      "default": "#e6e6e6"
+      "default": "#64748B40"
     },
     {
       "type": "color",
       "id": "button_hover_text_color",
       "label": "Hover text color",
-      "default": "#000000"
+      "default": "#121212"
     },
     {
       "type": "range",

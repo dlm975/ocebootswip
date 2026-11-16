@@ -61,7 +61,7 @@
   }
 
   .urgency-dot--orange {
-    background: #ed8936;
+    background: #EC4899;
     box-shadow: 0 0 0 0 rgba(237,137,54,0.4);
     animation: urgency-pulse-orange 1.6s ease-in-out infinite;
   }
@@ -90,7 +90,8 @@
     100% { box-shadow: 0 0 0 0 rgba(214,158,46,0); }
   }
 
+  /* Navy text: pink text is too faint at this size; the dot carries the accent */
   .urgency-text {
-    color: #ed8936;
+    color: var(--brand-navy, #1F2937);
   }
 {% endstylesheet %}
