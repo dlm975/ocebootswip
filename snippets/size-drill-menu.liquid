@@ -313,16 +313,18 @@
     height: calc(3 * var(--size-drill-system-row));
   }
 
-  /* One row, spread to the full width with equal gaps between sizes; the type scales with the
-     width so the longest list (EU) always fits */
+  /* One row with equal gaps between sizes; the type is as big as the width allows for the longest
+     list (EU) to fit, and every size type uses the same size and gap */
   .size-drill--desktop .size-drill__sizes {
     grid-area: 1 / 1;
     align-self: start;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     align-content: flex-start;
-    column-gap: 12px;
+    /* One gap for every size type, scaled with the type */
+    column-gap: 0.5em;
+    font-size: clamp(1rem, calc(100cqi / (var(--size-drill-columns) * 2.9)), 1.75rem);
     height: var(--size-drill-size-row);
     /* On the same line as its system (US sizes level with US, UK with UK, EU with EU), centred on
        it whether the sizes take one row or wrap onto two */
@@ -331,7 +333,7 @@
   }
 
   .size-drill--desktop .size-drill__value {
-    font-size: clamp(1rem, calc(100cqi / (var(--size-drill-columns) * 3.15)), 1.375rem);
+    font-size: 1em;
   }
 
   .size-drill--desktop .size-drill__count {
