@@ -309,6 +309,8 @@
   .size-drill--desktop .size-drill__panels {
     display: grid;
     container-type: inline-size;
+    /* As tall as the US / UK / EU column whichever sizes are open, so the dropdown never resizes */
+    height: calc(3 * var(--size-drill-system-row));
   }
 
   /* One row, spread to the full width with equal gaps between sizes; the type scales with the
