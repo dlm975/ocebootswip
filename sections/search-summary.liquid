@@ -62,7 +62,7 @@
       const term = box.dataset.term;
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      /** @param {{ text: string, url: string }[]} suggestions */
+      // suggestions: [{ text, url }]
       function render(suggestions) {
         const shown = suggestions
           .filter(function (suggestion) {
