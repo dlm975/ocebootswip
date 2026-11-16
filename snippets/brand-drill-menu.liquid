@@ -215,10 +215,14 @@
     }
   }
 
-  /* Drawer (phones): a little smaller so brand and models fit side by side */
+  /* Drawer (phones): a little smaller so brand and models fit side by side. The drawer is styled white
+     with ink links (snippets/header-drawer), whatever its colour scheme says, so the list follows that. */
   .brand-drill--drawer {
     --brand-drill-row: 40px;
     --brand-drill-model-row: 34px;
+    --color-foreground-rgb: 18 18 18;
+
+    color: var(--brand-ink, #121212);
 
     padding-block: 4px 12px;
   }
