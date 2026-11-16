@@ -89,21 +89,25 @@ class HeaderDrawer extends Component {
     const details = this.#getDetailsElement(event);
     if (!details) return;
     const summary = details.querySelector('summary');
-    const before = summary?.getBoundingClientRect().top ?? 0;
+    if (!summary) return;
 
     if (details.hasAttribute('open')) {
       event.preventDefault();
-      details.addEventListener('toggle', () => this.#revealSiblings(details, before), { once: true });
-      this.#close(details);
-    } else {
-      this.open(event);
-      // The details opens after this click, which hides the other items: slide the title from where it was
-      requestAnimationFrame(() => {
-        if (!summary || this.#reducedMotion) return;
-        const shift = before - summary.getBoundingClientRect().top;
-        if (shift) summary.animate([{ transform: `translateY(${shift}px)` }, { transform: 'none' }], RETURN_TIMING);
-      });
+      this.#closeInPlace(details, summary);
+      return;
     }
+
+    // Opening: the details opens right after this click and the other items hide. Before that
+    // frame is painted, slide the title up from where it was and ease the panel to its new height.
+    const titleTop = summary.getBoundingClientRect().top;
+    const panel = details.closest('.menu-drawer');
+    const panelHeight = panel?.getBoundingClientRect().height ?? 0;
+    this.open(event);
+    requestAnimationFrame(() => {
+      if (this.#reducedMotion) return;
+      this.#slide(summary, titleTop - summary.getBoundingClientRect().top);
+      this.#easeHeight(panel, panelHeight);
+    });
   }
 
   get #reducedMotion() {
@@ -111,30 +115,55 @@ class HeaderDrawer extends Component {
   }
 
   /**
-   * After a menu item closes, its siblings reappear: those above slide down from the top of the
-   * menu, those below slide up from its bottom, and the item's title slides back into place.
+   * Close an open menu item: its sub items fade out, then in one step (so no frame is painted
+   * halfway) the details closes and the other items, the title and the panel height are animated
+   * back from where they appear to be.
    * @param {HTMLDetailsElement} details
-   * @param {number} titleTop - Where the item's title was while open
+   * @param {HTMLElement} summary
    */
-  #revealSiblings(details, titleTop) {
-    const item = details.closest('li');
-    const container = details.closest('.menu-drawer');
-    if (!item?.parentElement || !container) return;
+  async #closeInPlace(details, summary) {
+    if (details.dataset.closing) return;
+    details.dataset.closing = 'true';
 
-    // Reappearing items would replay the drawer's opening fade (menu-drawer-nav-open), staying
-    // invisible while they slide back in; skip it so only the slide plays
+    summary.setAttribute('aria-expanded', 'false');
+    details.classList.remove('menu-open');
+    await onAnimationEnd(details);
+
+    const panel = details.closest('.menu-drawer');
+    const titleTop = summary.getBoundingClientRect().top;
+    const panelHeight = panel?.getBoundingClientRect().height ?? 0;
+
+    details.removeAttribute('open');
+    delete details.dataset.closing;
+    trapFocus(this.refs.details);
+
+    this.#revealSiblings(details, summary, titleTop, panel, panelHeight);
+  }
+
+  /**
+   * Siblings reappear: those above slide down from the top of the panel, those below slide up
+   * from its bottom, the item's title slides back into place and the panel grows smoothly.
+   * Runs in the same task as the details closing, so the new layout is never painted unanimated.
+   * @param {HTMLDetailsElement} details
+   * @param {HTMLElement} summary
+   * @param {number} titleTop - Where the item's title was while open
+   * @param {Element | null} panel - The drawer panel
+   * @param {number} panelHeight - The panel's height while the item was open
+   */
+  #revealSiblings(details, summary, titleTop, panel, panelHeight) {
+    const item = details.closest('li');
+    if (!item?.parentElement) return;
+
+    // Reappearing items would replay the drawer's opening fade (menu-drawer-nav-open); skip it
     for (const animation of item.parentElement.getAnimations({ subtree: true })) {
       if (animation instanceof CSSAnimation && animation.animationName === 'menu-drawer-nav-open') animation.finish();
     }
 
-    if (this.#reducedMotion) return;
+    if (this.#reducedMotion || !panel) return;
 
-    const box = container.getBoundingClientRect();
-    const summary = details.querySelector('summary');
-    if (summary) {
-      const shift = titleTop - summary.getBoundingClientRect().top;
-      if (shift) summary.animate([{ transform: `translateY(${shift}px)` }, { transform: 'none' }], RETURN_TIMING);
-    }
+    const box = panel.getBoundingClientRect();
+    this.#slide(summary, titleTop - summary.getBoundingClientRect().top);
+    this.#easeHeight(panel, panelHeight);
 
     const siblings = [...item.parentElement.children].filter((el) => el instanceof HTMLElement);
     const index = siblings.indexOf(item);
@@ -145,10 +174,35 @@ class HeaderDrawer extends Component {
       const distance = Math.abs(i - index) - 1;
       el.animate([{ transform: `translateY(${from}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }], {
         ...RETURN_TIMING,
-        delay: distance * 50,
+        delay: distance * 40,
         fill: 'backwards',
       });
     });
+  }
+
+  /**
+   * Animate an element from a vertical offset back to its place
+   * @param {Element} element
+   * @param {number} offset
+   */
+  #slide(element, offset) {
+    if (Math.abs(offset) < 1) return;
+    element.animate([{ transform: `translateY(${offset}px)` }, { transform: 'none' }], RETURN_TIMING);
+  }
+
+  /**
+   * Ease the drawer panel from its previous height to its new one instead of jumping
+   * @param {Element | null} panel
+   * @param {number} from - Previous height in px
+   */
+  #easeHeight(panel, from) {
+    if (!(panel instanceof HTMLElement)) return;
+    const to = panel.getBoundingClientRect().height;
+    if (Math.abs(to - from) < 1) return;
+    panel.style.overflow = 'hidden';
+    const animation = panel.animate([{ height: `${from}px` }, { height: `${to}px` }], RETURN_TIMING);
+    const done = () => panel.style.removeProperty('overflow');
+    animation.finished.then(done, done);
   }
 
   /**
