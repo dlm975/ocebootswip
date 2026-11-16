@@ -624,6 +624,46 @@
     display: none;
   }
 
+  /* Its sub items drop down from under the title as the title slides up (instead of the theme's
+     slide in from the side), and simply fade out when it closes */
+  .menu-drawer__menu-container--focus > .menu-drawer__submenu {
+    transform: none;
+  }
+
+  .menu-drawer__menu-container--focus.menu-open > .menu-drawer__submenu {
+    transform: none;
+    animation: menu-drawer-drop 0.55s cubic-bezier(0.3, 0.7, 0.3, 1) both;
+  }
+
+  .menu-drawer__menu-container--focus > .menu-drawer__submenu .menu-drawer__animated-element {
+    animation: none;
+  }
+
+  @keyframes menu-drawer-drop {
+    from {
+      opacity: 0;
+      transform: translateY(-24px);
+      clip-path: inset(0 0 100% 0);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+      clip-path: inset(0 0 -50% 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .menu-drawer__menu-container--focus.menu-open > .menu-drawer__submenu {
+      animation: none;
+    }
+  }
+
+  /* No grey/black tap flash on phones when menu items are tapped */
+  .menu-drawer :is(a, summary, button, [role='button']) {
+    -webkit-tap-highlight-color: transparent;
+  }
+
   /* An open item's row shows an X instead of the arrow; tapping the row closes it */
   .menu-drawer__drill-close {
     display: none;
