@@ -119,7 +119,15 @@ class HeaderDrawer extends Component {
   #revealSiblings(details, titleTop) {
     const item = details.closest('li');
     const container = details.closest('.menu-drawer');
-    if (!item?.parentElement || !container || this.#reducedMotion) return;
+    if (!item?.parentElement || !container) return;
+
+    // Reappearing items would replay the drawer's opening fade (menu-drawer-nav-open), staying
+    // invisible while they slide back in; skip it so only the slide plays
+    for (const animation of item.parentElement.getAnimations({ subtree: true })) {
+      if (animation instanceof CSSAnimation && animation.animationName === 'menu-drawer-nav-open') animation.finish();
+    }
+
+    if (this.#reducedMotion) return;
 
     const box = container.getBoundingClientRect();
     const summary = details.querySelector('summary');
