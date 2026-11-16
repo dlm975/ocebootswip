@@ -22,7 +22,6 @@
   assign variant = variant | default: 'desktop'
   assign systems = 'US,UK,EU' | split: ','
   assign filter_base = collections['all-football-boots'].url | default: routes.all_products_collection_url
-  assign desktop_columns = 10
   assign most_sizes = 0
 -%}
 
@@ -75,20 +74,10 @@
         endfor
       endcapture
       assign keys = keys | split: ',' | uniq
-      if keys.size > most_sizes
-        assign most_sizes = keys.size
-      endif
       assign system_handle = system | downcase
       assign panel_id = id | append: '-' | append: system_handle
     -%}
-    <ul
-      id="{{ panel_id }}"
-      class="size-drill__sizes list-unstyled"
-      role="list"
-      aria-label="{{ system }}"
-      data-size-system-panel
-      hidden
-    >
+    {%- capture size_items -%}
       {%- for key in keys -%}
         {%- liquid
           assign total = 0
@@ -128,17 +117,35 @@
           </a>
         </li>
       {%- endfor -%}
+    {%- endcapture -%}
+    {%- liquid
+      assign size_count = size_items | split: '<li>' | size | minus: 1
+      if size_count > most_sizes
+        assign most_sizes = size_count
+      endif
+    -%}
+    <ul
+      id="{{ panel_id }}"
+      class="size-drill__sizes list-unstyled"
+      role="list"
+      aria-label="{{ system }}"
+      data-size-system-panel
+      hidden
+    >
+      {{- size_items -}}
     </ul>
   {%- endfor -%}
 {%- endcapture -%}
 
 {%- liquid
-  assign desktop_rows = most_sizes | plus: desktop_columns | minus: 1 | divided_by: desktop_columns
+  # Desktop: every size on one row, all systems on the same pitch (set by the longest list);
+  # narrow desktops fall back to two rows
+  assign half_sizes = most_sizes | plus: 1 | divided_by: 2
 -%}
 
 <size-drill-menu
   class="size-drill size-drill--{{ variant }}"
-  style="--size-drill-columns: {{ desktop_columns }}; --size-drill-rows: {{ desktop_rows }};"
+  style="--size-drill-columns: {{ most_sizes }}; --size-drill-half: {{ half_sizes }};"
 >
   <ul
     class="size-drill__systems list-unstyled"
@@ -269,7 +276,7 @@
 
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
-    column-gap: 56px;
+    column-gap: 40px;
     align-items: start;
 
     /* Span the whole dropdown, so the sizes share its full width in even columns */
@@ -295,19 +302,44 @@
     font-size: calc(var(--size-drill-system-row) * 0.74);
   }
 
-  /* Every panel sits in the same place; the dropdown keeps one height whichever is open */
+  /* Every panel sits in the same place; the dropdown keeps one height whichever is open. The
+     sizes sit on one row across the full width, every system on the same column pitch (set by the
+     longest list), with the type scaled to that pitch. */
   .size-drill--desktop .size-drill__panels {
     display: grid;
-    min-height: calc(var(--size-drill-rows) * var(--size-drill-size-row));
+    container-type: inline-size;
   }
 
   .size-drill--desktop .size-drill__sizes {
+    --size-drill-pitch: calc(100cqi / var(--size-drill-columns));
+
     grid-area: 1 / 1;
     display: grid;
     grid-template-columns: repeat(var(--size-drill-columns), minmax(0, 1fr));
     grid-auto-rows: var(--size-drill-size-row);
     align-items: center;
     padding-block-start: calc((var(--size-drill-system-row) - var(--size-drill-size-row)) / 2);
+  }
+
+  .size-drill--desktop .size-drill__value {
+    font-size: clamp(1rem, calc(var(--size-drill-pitch) * 0.3), 1.375rem);
+  }
+
+  .size-drill--desktop .size-drill__count {
+    font-size: 0.5625rem;
+  }
+
+  .size-drill--desktop .size-drill__size {
+    gap: 2px;
+  }
+
+  /* Too narrow for one row at a readable size: two rows */
+  @container (max-width: 1100px) {
+    .size-drill--desktop .size-drill__sizes {
+      --size-drill-pitch: calc(100cqi / var(--size-drill-half));
+
+      grid-template-columns: repeat(var(--size-drill-half), minmax(0, 1fr));
+    }
   }
 
   /* Choosing a system shifts the whole list left (from under "Shop by Size" to the dropdown's
@@ -327,10 +359,6 @@
 
   .size-drill--desktop .size-drill__sizes:not([hidden]) {
     animation: size-drill-open-out var(--size-drill-duration) var(--size-drill-ease) both;
-  }
-
-  .size-drill--desktop .size-drill__value {
-    font-size: 1.75rem;
   }
 
   @keyframes size-drill-open-out {
