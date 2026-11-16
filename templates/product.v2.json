@@ -173,7 +173,7 @@
                   "settings": {
                     "show_stars": true,
                     "text": "1000+ HAPPY CUSTOMERS",
-                    "star_color": "#EC4899",
+                    "star_color": "#25D366",
                     "text_color": "#121212",
                     "star_size": 13,
                     "placement": "in_place"
@@ -405,7 +405,7 @@
         "heading": "Trusted by the pros",
         "subheading": "",
         "show_stars": true,
-        "star_color": "#EC4899",
+        "star_color": "#25D366",
         "star_size": 20,
         "aspect_ratio": "3 / 4",
         "cards_mobile": 2.5,
@@ -635,7 +635,7 @@
         "reveal_mode": "after_button",
         "button_text": "Add to cart",
         "sheet_heading": "Select size",
-        "button_color": "#EC4899",
+        "button_color": "#25D366",
         "button_text_color": "#ffffff"
       }
     },

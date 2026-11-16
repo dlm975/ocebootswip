@@ -28,7 +28,7 @@
 
   assign cn_bg = settings.cart_notice_background | default: '#F1F5F9'
   assign cn_fg = settings.cart_notice_text_color | default: '#121212'
-  assign cn_dot = settings.cart_notice_dot_color | default: '#EC4899'
+  assign cn_dot = settings.cart_notice_dot_color | default: '#25D366'
   assign cn_radius = settings.cart_notice_radius | default: 12
   assign cn_size = settings.cart_notice_size | default: 12
   assign cn_bw = settings.cart_notice_border_width | default: 0
@@ -136,8 +136,8 @@
     height: 9px;
     margin: -4.5px 0 0 -4.5px;
     border-radius: 50%;
-    background: var(--cn-dot, #EC4899);
-    box-shadow: 0 0 10px var(--cn-dot, #EC4899);
+    background: var(--cn-dot, #25D366);
+    box-shadow: 0 0 10px var(--cn-dot, #25D366);
     animation: cart-notice-orbit var(--cn-speed, 5s) linear infinite;
   }
 

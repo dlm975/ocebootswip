@@ -38,18 +38,20 @@
   {{ accent_font_bold_italic | font_face: font_display: 'swap' }}
 
   :root {
-    /* Brand palette: ink #121212, navy #1F2937, slate #334155, muted #64748B, mist #F1F5F9, pink #EC4899.
-       The old accent names stay so the custom sections keep working: fills and highlights use the pink
-       accent, accent-coloured text uses ink. */
+    /* Brand palette: ink #121212, navy #1F2937, slate #334155, muted #64748B, mist #F1F5F9, and two accents
+       taken from verified ticks: blue #3897F0 (the Instagram tick already used on the site) for the brand
+       accent and attention, green #25D366 for trust and success (ratings, free shipping, quick add).
+       The old accent names stay so the custom sections keep working. */
     --brand-ink: #121212;
     --brand-navy: #1F2937;
     --brand-slate: #334155;
     --brand-muted: #64748B;
     --brand-mist: #F1F5F9;
-    --brand-pink: #EC4899;
-    --brand-green: var(--brand-pink);
+    --brand-blue: #3897F0;
+    --brand-tick-green: #25D366;
+    --brand-green: var(--brand-tick-green);
     --brand-green-strong: var(--brand-ink);
-    --brand-red: var(--brand-pink);
+    --brand-red: var(--brand-blue);
 
     /* Shared corner sizes for the custom sections. Action buttons use md (the theme's own button radius);
        pills (999px) are kept for selectors, tags and switches. */
