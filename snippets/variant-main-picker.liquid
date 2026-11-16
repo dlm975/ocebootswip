@@ -56,6 +56,7 @@
           <div
             class="pill-option{% if has_multiple and is_size_grid == false %} pill-option--interactive{% endif %}{% if is_size_grid %} size-grid{% endif %}"
             data-option-name="{{ product_option.name | escape }}"
+            {% if is_size_grid %}data-product-id="{{ product_resource.id }}"{% if product_resource.selected_variant %} data-chosen{% endif %}{% endif %}
             {% if hide_option %}hidden{% endif %}
           >
             {%- if is_size_grid -%}
@@ -68,6 +69,7 @@
               -%}
               <div class="size-grid__head">
                 <p class="size-grid__label" id="SizeGridLabel-{{ block.id }}-{{ product_option.position }}">{{ size_label | escape }}</p>
+                {%- comment -%} Rendered for the current variant; shown only once a size is chosen (.size-grid[data-chosen]) {%- endcomment -%}
                 {%- if block.settings.show_stock_urgency -%}
                   {% render 'urgency-stock',
                     variant: product_resource.selected_or_first_available_variant,
@@ -89,10 +91,12 @@
                     if product_option_value.selected and product_resource.selected_variant
                       assign is_chosen = true
                     endif
+                    # The current variant's size; it only looks selected once the shopper has chosen (data-chosen)
+                    assign is_current = product_option_value.selected
                   -%}
                   <button
                     type="button"
-                    class="pill-option__item size-grid__item{% if is_chosen %} pill-option__item--selected{% endif %}{% if product_option_value.available == false %} pill-option__item--unavailable{% endif %}"
+                    class="pill-option__item size-grid__item{% if is_current %} pill-option__item--selected{% endif %}{% if product_option_value.available == false %} pill-option__item--unavailable{% endif %}"
                     role="radio"
                     aria-checked="{{ is_chosen }}"
                     {% if product_option_value.available == false %}
@@ -388,8 +392,13 @@
     outline-offset: 2px;
   }
 
-  .size-grid__item.pill-option__item--selected {
+  .size-grid[data-chosen] .size-grid__item.pill-option__item--selected {
     border: 1.5px solid #000;
+  }
+
+  /* Low-stock message only once a size is chosen */
+  .size-grid:not([data-chosen]) .product-urgency-stock {
+    display: none;
   }
 
   .size-grid__main {
@@ -763,6 +772,27 @@
       initChooseLabels();
     }
 
+    /* ── Size grid: once a size is chosen, keep the grid in its "chosen" state (tile highlight,
+       low-stock message) when the picker is re-rendered after the variant fetch ── */
+    var chosenProducts = {};
+    function syncChosen() {
+      document.querySelectorAll('.size-grid').forEach(function (grid) {
+        var chosen = grid.hasAttribute('data-chosen') || chosenProducts[grid.dataset.productId];
+        if (chosen && !grid.hasAttribute('data-chosen')) grid.setAttribute('data-chosen', '');
+        if (grid.hasAttribute('data-chosen')) chosenProducts[grid.dataset.productId] = true;
+        grid.querySelectorAll('.size-grid__item').forEach(function (item) {
+          var checked = chosen && item.classList.contains('pill-option__item--selected') ? 'true' : 'false';
+          if (item.getAttribute('aria-checked') !== checked) item.setAttribute('aria-checked', checked);
+        });
+      });
+    }
+    new MutationObserver(syncChosen).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-chosen'] });
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', syncChosen);
+    } else {
+      syncChosen();
+    }
+
     /* ── Event delegation — survives DOM morphing after variant fetch ── */
     document.addEventListener('click', function (e) {
 
@@ -792,6 +822,8 @@
       if (gridItem) {
         if (gridItem.disabled) return;
         var grid = gridItem.closest('.size-grid');
+        chosenProducts[grid.dataset.productId] = true;
+        grid.setAttribute('data-chosen', '');
         var gridSelect = grid.querySelector('.pill-option__select');
         var gridValue = gridItem.dataset.value;
         Array.from(gridSelect.options).forEach(function (opt) {
