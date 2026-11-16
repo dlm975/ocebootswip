@@ -1,18 +1,69 @@
-<div id="cs-overlay" aria-hidden="true" role="dialog" aria-label="Search" aria-modal="true">
-  <div class="cs-backdrop" id="cs-backdrop"></div>
+{%- comment -%}
+  Full-screen search: a very slightly see-through white sheet over the page.
 
-  <button class="cs-close" id="cs-close" aria-label="Close search">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="18" height="18" aria-hidden="true">
-      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-    </svg>
-  </button>
+  Opened by the header's search icon (phones) and by the header search field (desktop), through
+  window.customSearchOpen(). As you type it shows, under the field:
+    - up to 4 category suggestions built from the titles of the matching products
+      ("vapor" -> "Nike Mercurial", "Nike Mercurial Vapor", "Nike Mercurial Vapor 15" ...).
+      A suggestion that is a Shop by Silo brand, or a brand and one of its models, links to that
+      collection; any other opens the search results for it.
+    - recommended products as white cards (image, title, price), 2 wide.
+  Results come from sections/search-overlay-results through Shopify's predictive search.
+{%- endcomment -%}
 
-  <div class="cs-center">
-    <div class="cs-row">
-      <form class="cs-form" id="cs-form" action="{{ routes.search_url }}" method="get" autocomplete="off">
+{%- liquid
+  # Brands and models from the Shop by Silo menu, so suggestions can link to their collections
+  assign silo_link = nil
+  for link in linklists['header-menu'].links
+    for child in link.links
+      if child.links != blank
+        assign silo_link = link
+        break
+      endif
+    endfor
+    if silo_link
+      break
+    endif
+  endfor
+-%}
+
+<script type="application/json" id="cs-catalog">
+  [
+    {%- if silo_link -%}
+      {%- for brand in silo_link.links -%}
+        {"name": {{ brand.title | downcase | json }}, "url": {{ brand.url | json }}, "models": {
+          {%- for model in brand.links -%}
+            {{ model.title | downcase | json }}: {{ model.url | json }}{% unless forloop.last %},{% endunless %}
+          {%- endfor -%}
+        }}{% unless forloop.last %},{% endunless %}
+      {%- endfor -%}
+    {%- endif -%}
+  ]
+</script>
+
+<div
+  id="cs-overlay"
+  aria-hidden="true"
+  role="dialog"
+  aria-label="Search"
+  aria-modal="true"
+  data-suggest-url="{{ routes.predictive_search_url }}"
+  data-search-url="{{ routes.search_url }}"
+  inert
+>
+  <div class="cs-sheet">
+    <div class="cs-bar">
+      <form
+        class="cs-form"
+        id="cs-form"
+        action="{{ routes.search_url }}"
+        method="get"
+        autocomplete="off"
+        role="search"
+      >
         <input type="hidden" name="type" value="product">
         <div class="cs-field">
-          <svg class="cs-glass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+          <svg class="cs-glass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
             <circle cx="11" cy="11" r="7"/>
             <line x1="16.5" y1="16.5" x2="21" y2="21"/>
           </svg>
@@ -22,264 +73,473 @@
             type="search"
             name="q"
             spellcheck="false"
+            autocapitalize="off"
+            autocorrect="off"
             enterkeyhint="search"
             aria-label="Search"
+            aria-controls="cs-body"
           >
           <div class="cs-prompts" id="cs-prompts" aria-hidden="true">
             <span id="cs-prompt-text"></span>
           </div>
-          <button type="submit" class="cs-submit" id="cs-submit" aria-label="Submit search">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" aria-hidden="true">
-              <line x1="5" y1="12" x2="19" y2="12"/>
-              <polyline points="12 5 19 12 12 19"/>
+          <button type="button" class="cs-clear" id="cs-clear" aria-label="Clear search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="14" height="14" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
         </div>
       </form>
-      <button type="button" class="cs-cancel" id="cs-cancel">Cancel</button>
+      <button type="button" class="cs-close" id="cs-close" aria-label="Close search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="22" height="22" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
     </div>
-    <p class="cs-hint"><kbd>Esc</kbd> to close</p>
+
+    <div class="cs-body" id="cs-body" aria-live="polite">
+      <section class="cs-suggest" id="cs-suggest" hidden aria-label="Suggested categories">
+        <ul class="cs-suggest__list" id="cs-suggest-list" role="list"></ul>
+      </section>
+
+      <section class="cs-products" id="cs-products" hidden aria-label="Products">
+        <h2 class="cs-label">Products</h2>
+        <div id="cs-products-grid"></div>
+        <a class="cs-viewall" id="cs-viewall" href="{{ routes.search_url }}">
+          <span id="cs-viewall-text">View all results</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </a>
+      </section>
+
+      <p class="cs-none" id="cs-none" hidden></p>
+    </div>
   </div>
 </div>
 
 <style>
+  /* ---- Sheet: very slightly see-through white over the whole page ---- */
   #cs-overlay {
+    --cs-ink: var(--brand-ink, #121212);
+    --cs-muted: rgb(18 18 18 / 0.55);
+    --cs-ease: cubic-bezier(0.3, 0.7, 0.3, 1);
+    --cs-gutter: 16px;
+
     position: fixed;
     inset: 0;
     z-index: 9999;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.25s ease-out;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    background: rgb(255 255 255 / 0.9);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    backdrop-filter: blur(18px) saturate(140%);
+    color: var(--cs-ink);
     font-family: var(--font-body--family);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease-out, visibility 0s linear 0.25s;
   }
 
   #cs-overlay.cs-open {
     opacity: 1;
-    pointer-events: all;
-    /* block background page scroll on touch without locking body */
-    touch-action: none;
+    visibility: visible;
+    transition: opacity 0.25s ease-out, visibility 0s;
   }
 
-  /* Static blur, faded in by the overlay's own opacity — animating
-     backdrop-filter itself is what caused the jank */
-  .cs-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.42);
-    -webkit-backdrop-filter: blur(22px) saturate(160%);
-    backdrop-filter: blur(22px) saturate(160%);
+  html.cs-locked,
+  html.cs-locked body {
+    overflow: hidden;
   }
 
-  /* Spotlight-style: anchored to the upper third so the iOS keyboard
-     never collides with or jumps the field */
-  .cs-center {
-    position: relative;
-    z-index: 1;
-    width: min(560px, 92vw);
-    margin-top: max(18vh, calc(16px + env(safe-area-inset-top, 0px)));
-    transform: scale(0.97) translateY(-8px);
-    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  .cs-sheet {
+    width: min(760px, 100%);
+    margin-inline: auto;
+    padding: 0 var(--cs-gutter) calc(40px + env(safe-area-inset-bottom, 0px));
+    transform: translateY(-10px);
+    transition: transform 0.55s var(--cs-ease);
   }
 
-  #cs-overlay.cs-open .cs-center {
-    transform: scale(1) translateY(0);
+  #cs-overlay.cs-open .cs-sheet {
+    transform: none;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    #cs-overlay, .cs-center { transition-duration: 0.01s; }
+  @media screen and (min-width: 750px) {
+    #cs-overlay {
+      --cs-gutter: 32px;
+    }
   }
 
-  .cs-row {
+  /* ---- Field: underlined, like the header's search bar; stays at the top while scrolling ---- */
+  .cs-bar {
+    position: sticky;
+    top: 0;
+    z-index: 2;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 12px;
+    padding-block: calc(14px + env(safe-area-inset-top, 0px)) 14px;
+    background: linear-gradient(rgb(255 255 255 / 0.96) 75%, rgb(255 255 255 / 0));
   }
 
-  .cs-form { flex: 1; min-width: 0; }
+  @media screen and (min-width: 750px) {
+    .cs-bar {
+      padding-block: 40px 20px;
+    }
+  }
 
-  /* Frosted dark-glass pill field (iOS search bar material) */
+  .cs-form {
+    flex: 1;
+    min-width: 0;
+  }
+
   .cs-field {
     position: relative;
     display: flex;
     align-items: center;
     gap: 10px;
-    background: rgba(28, 28, 30, 0.72);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: var(--brand-radius-md);
-    padding: 13px 14px;
-    box-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.2);
+    border-bottom: 2px solid var(--cs-ink);
+    padding-block: 8px;
   }
 
   .cs-glass {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     flex-shrink: 0;
-    color: rgba(255, 255, 255, 0.45);
   }
 
   .cs-input {
     flex: 1;
     min-width: 0;
     background: transparent;
-    border: none;
-    outline: none;
-    color: #ffffff;
-    font-size: 1.15rem; /* ≥16px so iOS never auto-zooms */
-    font-family: inherit;
-    font-weight: 400;
-    letter-spacing: -0.01em;
-    text-align: left;
+    border: 0;
+    outline: 0;
     padding: 0;
-    caret-color: #0a84ff;
+    color: var(--cs-ink);
+    font: inherit;
+    font-size: 1.25rem; /* 16px or more, so iOS never zooms */
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    caret-color: var(--brand-blue, #3897f0);
     appearance: none;
     position: relative;
     z-index: 1;
   }
 
-  /* hide browser's native ✕ clear button */
+  @media screen and (min-width: 750px) {
+    .cs-input,
+    .cs-prompts {
+      font-size: 1.75rem;
+    }
+  }
+
   .cs-input::-webkit-search-cancel-button,
   .cs-input::-webkit-search-decoration {
     display: none;
   }
 
-  /* cycling prompt — sits behind the input text, aligned with it */
+  /* Cycling example searches, behind the empty field */
   .cs-prompts {
     position: absolute;
-    left: 44px;
-    right: 48px;
+    left: 32px;
+    right: 40px;
     top: 0;
     bottom: 0;
     display: flex;
     align-items: center;
     pointer-events: none;
-    color: rgba(255, 255, 255, 0.35);
-    font-size: 1.15rem;
-    font-family: inherit;
+    color: var(--cs-muted);
+    font-size: 1.25rem;
+    font-weight: 500;
     letter-spacing: -0.01em;
     white-space: nowrap;
     overflow: hidden;
-    opacity: 1;
     transition: opacity 0.3s ease;
   }
 
   .cs-prompts.cs-prompt-fade { opacity: 0; }
   .cs-prompts.cs-prompt-hidden { display: none; }
 
-  /* Submit arrow — only visible once there's a query */
-  .cs-submit {
+  .cs-clear,
+  .cs-close {
     flex-shrink: 0;
-    width: 30px;
-    height: 30px;
-    border: none;
-    border-radius: 50%;
-    background: #ffffff;
-    color: #121212;
-    cursor: pointer;
-    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--cs-ink);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .cs-clear {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgb(18 18 18 / 0.08);
     opacity: 0;
     transform: scale(0.6);
     pointer-events: none;
-    -webkit-tap-highlight-color: transparent;
-    transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+    transition: opacity 0.2s ease, transform 0.25s var(--cs-ease);
   }
 
-  .cs-field.cs-has-query .cs-submit {
+  .cs-field.cs-has-query .cs-clear {
     opacity: 1;
-    transform: scale(1);
+    transform: none;
     pointer-events: auto;
   }
 
-  .cs-submit:active { transform: scale(0.88); }
-
-  /* iOS Cancel button — touch devices only */
-  .cs-cancel {
-    display: none;
-    flex-shrink: 0;
-    border: none;
-    background: none;
-    color: rgba(255, 255, 255, 0.9);
-    font-family: inherit;
-    font-size: 1rem;
-    font-weight: 400;
-    padding: 10px 8px;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .cs-cancel:active { opacity: 0.5; }
-
-  .cs-hint {
-    margin-top: 14px;
-    text-align: center;
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.45);
-    letter-spacing: 0.01em;
-    font-family: inherit;
-  }
-
-  .cs-hint kbd {
-    font-family: inherit;
-    font-size: inherit;
-    background: rgba(255, 255, 255, 0.12);
-    border-radius: 4px;
-    padding: 1px 5px;
-  }
-
-  /* Close button — desktop only (mobile uses Cancel) */
   .cs-close {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 2;
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    background: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.75);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin-inline-end: -10px;
+  }
+
+  .cs-clear:focus-visible,
+  .cs-close:focus-visible {
+    outline: 2px solid var(--cs-ink);
+    outline-offset: 2px;
+  }
+
+  /* ---- Results ---- */
+  .cs-body {
+    padding-block-start: 8px;
+    transition: opacity 0.15s ease;
+  }
+
+  .cs-body.cs-loading {
+    opacity: 0.55;
+  }
+
+  .cs-body > [hidden] {
+    display: none;
+  }
+
+  .cs-reveal {
+    animation: cs-reveal 0.45s var(--cs-ease) both;
+  }
+
+  @keyframes cs-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+
+  /* Suggested categories: bold names, stacked */
+  .cs-suggest__list {
+    margin: 0 0 28px;
     padding: 0;
+    list-style: none;
+  }
+
+  .cs-suggest__link {
+    display: inline-block;
+    padding-block: 7px;
+    color: var(--cs-ink);
+    font-size: 1.375rem;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    font-variation-settings: 'opsz' 32;
+    text-decoration: none;
     -webkit-tap-highlight-color: transparent;
-    transition: background 0.15s, color 0.15s, transform 0.2s cubic-bezier(0.32, 0.72, 0, 1);
   }
 
-  .cs-close:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
+  @media screen and (min-width: 750px) {
+    .cs-suggest__link {
+      font-size: 1.75rem;
+      padding-block: 6px;
+    }
   }
 
-  .cs-close:active { transform: scale(0.92); }
+  .cs-suggest__link:is(:hover, :focus-visible) {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 5px;
+  }
 
-  @media (hover: none) and (pointer: coarse) {
-    .cs-cancel { display: block; }
-    .cs-close, .cs-hint { display: none; }
-    .cs-center { margin-top: calc(16px + env(safe-area-inset-top, 0px)); }
+  .cs-suggest__link:focus-visible {
+    outline: 2px solid var(--cs-ink);
+    outline-offset: 3px;
+  }
+
+  /* The part you haven't typed reads lighter */
+  .cs-suggest__rest {
+    color: rgb(18 18 18 / 0.45);
+  }
+
+  .cs-label {
+    margin: 0 0 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--cs-muted);
+  }
+
+  /* Products: white cards, 2 wide */
+  .cs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media screen and (min-width: 750px) {
+    .cs-grid {
+      gap: 16px;
+    }
+  }
+
+  .cs-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 10px 10px 14px;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgb(18 18 18 / 0.06), 0 6px 20px rgb(18 18 18 / 0.05);
+    color: var(--cs-ink);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: box-shadow 0.2s ease, transform 0.2s var(--cs-ease);
+  }
+
+  @media (hover: hover) {
+    .cs-card:hover {
+      box-shadow: 0 1px 2px rgb(18 18 18 / 0.08), 0 10px 28px rgb(18 18 18 / 0.09);
+      transform: translateY(-2px);
+    }
+  }
+
+  .cs-card:focus-visible {
+    outline: 2px solid var(--cs-ink);
+    outline-offset: 2px;
+  }
+
+  .cs-card__media {
+    display: block;
+    aspect-ratio: 1;
+    margin-block-end: 10px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #ffffff;
+  }
+
+  .cs-card__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .cs-card__title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 0.8125rem;
+    font-weight: 460;
+    line-height: 1.3;
+    letter-spacing: -0.005em;
+  }
+
+  .cs-card__price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 6px;
+    margin-block-start: auto;
+    padding-block-start: 6px;
+    font-size: 0.875rem;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cs-card__from {
+    color: var(--cs-muted);
+    font-size: 0.75rem;
+  }
+
+  .cs-card__was {
+    color: rgb(18 18 18 / 0.45);
+    font-size: 0.75rem;
+  }
+
+  .cs-viewall {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-block-start: 22px;
+    color: var(--cs-ink);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .cs-viewall:is(:hover, :focus-visible) span {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .cs-none {
+    margin: 12px 0 0;
+    color: var(--cs-muted);
+    font-size: 1rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #cs-overlay,
+    .cs-sheet,
+    .cs-body,
+    .cs-card {
+      transition: none;
+    }
+
+    .cs-reveal {
+      animation: none;
+    }
   }
 </style>
 
 <script>
   (function () {
-    const overlay    = document.getElementById('cs-overlay');
-    const input      = document.getElementById('cs-input');
-    const backdrop   = document.getElementById('cs-backdrop');
-    const closeBtn   = document.getElementById('cs-close');
-    const cancelBtn  = document.getElementById('cs-cancel');
-    const form       = document.getElementById('cs-form');
-    const field      = form.querySelector('.cs-field');
-    const promptsEl  = document.getElementById('cs-prompts');
+    const overlay = document.getElementById('cs-overlay');
+    const input = document.getElementById('cs-input');
+    const form = document.getElementById('cs-form');
+    const field = form.querySelector('.cs-field');
+    const clearBtn = document.getElementById('cs-clear');
+    const closeBtn = document.getElementById('cs-close');
+    const promptsEl = document.getElementById('cs-prompts');
     const promptText = document.getElementById('cs-prompt-text');
+    const body = document.getElementById('cs-body');
+    const suggestSection = document.getElementById('cs-suggest');
+    const suggestList = document.getElementById('cs-suggest-list');
+    const productsSection = document.getElementById('cs-products');
+    const productsGrid = document.getElementById('cs-products-grid');
+    const viewAll = document.getElementById('cs-viewall');
+    const viewAllText = document.getElementById('cs-viewall-text');
+    const none = document.getElementById('cs-none');
 
+    const suggestUrl = overlay.dataset.suggestUrl;
+    const searchUrl = overlay.dataset.searchUrl;
+    const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const SHIFT = { duration: 450, easing: 'cubic-bezier(0.3, 0.7, 0.3, 1)' };
+    const MAX_SUGGESTIONS = 4;
+
+    /** Brands and their models (from the Shop by Silo menu) */
+    let catalog = [];
+    try {
+      catalog = JSON.parse(document.getElementById('cs-catalog').textContent || '[]');
+    } catch (e) {
+      catalog = [];
+    }
+
+    /* ---------- Cycling example searches ---------- */
     const prompts = ['mercurial vapor', 'f50', 'nike tiempo', 'fg studs'];
     let promptIdx = 0;
     let promptTimer = null;
@@ -293,8 +553,6 @@
       }, 300);
     }
 
-    /* Always clear before starting so timers can never stack
-       (stacked intervals were the source of the flickering prompts) */
     function startPrompts() {
       stopPrompts();
       promptIdx = 0;
@@ -304,9 +562,212 @@
     }
 
     function stopPrompts() {
-      if (promptTimer) { clearInterval(promptTimer); promptTimer = null; }
+      if (promptTimer) {
+        clearInterval(promptTimer);
+        promptTimer = null;
+      }
     }
 
+    /* ---------- Category suggestions from product titles ---------- */
+    const clean = (word) => word.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    /**
+     * For each matching product title, the words up to the one you typed give a category
+     * ("Nike Mercurial Vapor"); one word less gives its parent ("Nike Mercurial") and one more a
+     * narrower one ("Nike Mercurial Vapor 15"). Broader first, then the most common.
+     */
+    function buildSuggestions(query, titles) {
+      const queryWords = query.split(/\s+/).map(clean).filter(Boolean);
+      if (!queryWords.length) return [];
+      const found = new Map();
+
+      titles.forEach(function (title, titleIndex) {
+        const words = title.split(/\s+/).filter(Boolean);
+        const lower = words.map(clean);
+        let at = -1;
+        for (const queryWord of queryWords) {
+          const next = lower.findIndex(function (word, index) {
+            return index > at && word.startsWith(queryWord);
+          });
+          if (next === -1) return;
+          at = next;
+        }
+
+        [at, at + 1, at + 2].forEach(function (length) {
+          if (length < 1 || length > words.length) return;
+          const phraseWords = words.slice(0, length);
+          // Stop at nicknames and colourways ('Golden Horizon'), slashes and the like
+          if (phraseWords.some(function (word) { return /['"’‘(\/]/.test(word); })) return;
+          if (!clean(phraseWords[phraseWords.length - 1])) return;
+          const text = phraseWords.join(' ');
+          const key = text.toLowerCase();
+          const entry = found.get(key) || { text: text, length: length, count: 0, first: titleIndex };
+          entry.count += 1;
+          found.set(key, entry);
+        });
+      });
+
+      return Array.from(found.values())
+        .sort(function (a, b) {
+          return a.length - b.length || b.count - a.count || a.first - b.first;
+        })
+        .slice(0, MAX_SUGGESTIONS);
+    }
+
+    /** A brand, or a brand ending in one of its models, links to its collection */
+    function suggestionUrl(text) {
+      const words = text.split(/\s+/).map(clean).filter(Boolean);
+      const brand = catalog.find(function (entry) { return clean(entry.name) === words[0]; });
+      if (brand) {
+        if (words.length === 1) return brand.url;
+        const last = words[words.length - 1];
+        for (const model in brand.models) {
+          if (clean(model) === last) return brand.models[model];
+        }
+      }
+      return searchUrl + '?q=' + encodeURIComponent(text) + '&type=product';
+    }
+
+    function renderSuggestions(query, suggestions) {
+      suggestList.replaceChildren();
+      const typed = query.trim().toLowerCase();
+      suggestions.forEach(function (suggestion) {
+        const item = document.createElement('li');
+        const link = document.createElement('a');
+        link.className = 'cs-suggest__link';
+        link.href = suggestionUrl(suggestion.text);
+        // What you typed in full ink, the rest a shade lighter
+        const lower = suggestion.text.toLowerCase();
+        const start = typed ? lower.indexOf(typed) : -1;
+        if (start > -1) {
+          const before = suggestion.text.slice(0, start);
+          const match = suggestion.text.slice(start, start + typed.length);
+          const after = suggestion.text.slice(start + typed.length);
+          if (before) link.append(rest(before));
+          link.append(match);
+          if (after) link.append(rest(after));
+        } else {
+          link.textContent = suggestion.text;
+        }
+        item.append(link);
+        suggestList.append(item);
+      });
+      suggestSection.hidden = suggestions.length === 0;
+    }
+
+    function rest(text) {
+      const span = document.createElement('span');
+      span.className = 'cs-suggest__rest';
+      span.textContent = text;
+      return span;
+    }
+
+    /* ---------- Fetching results ---------- */
+    const cache = new Map();
+    let controller = null;
+    let timer = null;
+    let shown = '';
+
+    function resultsUrl(query) {
+      return (
+        suggestUrl +
+        '?q=' + encodeURIComponent(query) +
+        '&resources[type]=product&resources[limit]=10&resources[limit_scope]=each' +
+        '&resources[options][unavailable_products]=last' +
+        '&section_id=search-overlay-results'
+      );
+    }
+
+    function fetchResults(query) {
+      if (cache.has(query)) return Promise.resolve(cache.get(query));
+      if (controller) controller.abort();
+      controller = new AbortController();
+      return fetch(resultsUrl(query), { signal: controller.signal })
+        .then(function (response) { return response.text(); })
+        .then(function (html) {
+          const doc = new DOMParser().parseFromString(html, 'text/html');
+          const results = doc.querySelector('[data-cs-results]');
+          let titles = [];
+          try {
+            titles = JSON.parse(results.querySelector('[data-cs-titles]').textContent || '[]');
+          } catch (e) {
+            titles = [];
+          }
+          const grid = results.querySelector('.cs-grid');
+          const data = { titles: titles, grid: grid };
+          cache.set(query, data);
+          return data;
+        });
+    }
+
+    function scheduleSearch() {
+      clearTimeout(timer);
+      const query = input.value.replace(/\*+/g, ' ').replace(/\s+/g, ' ').trim();
+      if (!query) {
+        if (controller) controller.abort();
+        showEmpty();
+        return;
+      }
+      body.classList.add('cs-loading');
+      timer = setTimeout(function () {
+        fetchResults(query)
+          .then(function (data) {
+            // Only the latest query is shown
+            const current = input.value.replace(/\*+/g, ' ').replace(/\s+/g, ' ').trim();
+            if (current !== query) return;
+            showResults(query, data);
+          })
+          .catch(function (error) {
+            if (error && error.name === 'AbortError') return;
+            body.classList.remove('cs-loading');
+          });
+      }, cache.has(query) ? 0 : 140);
+    }
+
+    function showEmpty() {
+      body.classList.remove('cs-loading');
+      suggestSection.hidden = true;
+      productsSection.hidden = true;
+      none.hidden = true;
+      suggestList.replaceChildren();
+      productsGrid.replaceChildren();
+      shown = '';
+    }
+
+    function showResults(query, data) {
+      const firstShow = !shown;
+      const productsTop = productsSection.hidden ? null : productsSection.getBoundingClientRect().top;
+
+      renderSuggestions(query, buildSuggestions(query, data.titles));
+
+      productsGrid.replaceChildren();
+      if (data.grid) productsGrid.append(data.grid.cloneNode(true));
+      productsSection.hidden = !data.grid;
+      viewAll.href = searchUrl + '?q=' + encodeURIComponent(query) + '&type=product';
+      viewAllText.textContent = 'View all results for “' + query + '”';
+
+      none.hidden = !!data.grid;
+      none.textContent = data.grid ? '' : 'No results for “' + query + '”';
+
+      body.classList.remove('cs-loading');
+      shown = query;
+
+      if (reducedMotion()) return;
+      if (firstShow) {
+        // Results arrive: they rise in under the field
+        body.classList.remove('cs-reveal');
+        void body.offsetWidth;
+        body.classList.add('cs-reveal');
+      } else if (productsTop !== null && !productsSection.hidden) {
+        // Fewer or more suggestions: the products glide to their new place instead of jumping
+        const shift = productsTop - productsSection.getBoundingClientRect().top;
+        if (Math.abs(shift) > 1) {
+          productsSection.animate([{ transform: 'translateY(' + shift + 'px)' }, { transform: 'none' }], SHIFT);
+        }
+      }
+    }
+
+    /* ---------- Field state ---------- */
     function syncQueryState() {
       const hasQuery = input.value.length > 0;
       field.classList.toggle('cs-has-query', hasQuery);
@@ -318,51 +779,106 @@
       }
     }
 
-    input.addEventListener('input', syncQueryState);
+    input.addEventListener('input', function () {
+      syncQueryState();
+      scheduleSearch();
+    });
 
-    function openSearch() {
-      if (overlay.classList.contains('cs-open')) return;
-      overlay.classList.add('cs-open');
-      overlay.setAttribute('aria-hidden', 'false');
+    clearBtn.addEventListener('click', function () {
       input.value = '';
       syncQueryState();
-      startPrompts();
-      /* focus synchronously inside the tap gesture so the iOS
-         keyboard opens; preventScroll stops the viewport jump */
-      try { input.focus({ preventScroll: true }); }
-      catch (e) { input.focus(); }
+      scheduleSearch();
+      input.focus();
+    });
+
+    /* ---------- Open / close ---------- */
+    let opener = null;
+
+    function openSearch(initialQuery) {
+      if (overlay.classList.contains('cs-open')) return;
+      opener = document.activeElement;
+      overlay.removeAttribute('inert');
+      overlay.classList.add('cs-open');
+      overlay.setAttribute('aria-hidden', 'false');
+      document.documentElement.classList.add('cs-locked');
+      overlay.scrollTop = 0;
+      input.value = typeof initialQuery === 'string' ? initialQuery : '';
+      showEmpty();
+      syncQueryState();
+      if (input.value) scheduleSearch();
+      // Focus inside the tap itself so the iOS keyboard opens; no scroll jump
+      try {
+        input.focus({ preventScroll: true });
+      } catch (e) {
+        input.focus();
+      }
     }
 
     function closeSearch() {
+      if (!overlay.classList.contains('cs-open')) return;
       overlay.classList.remove('cs-open');
       overlay.setAttribute('aria-hidden', 'true');
+      overlay.setAttribute('inert', '');
+      document.documentElement.classList.remove('cs-locked');
       input.blur();
-      input.value = '';
-      field.classList.remove('cs-has-query');
+      clearTimeout(timer);
+      if (controller) controller.abort();
       stopPrompts();
+      // Back to what opened it, unless that was the header's own search field (it would reopen this)
+      if (opener && opener instanceof HTMLElement && !opener.closest('header-search')) {
+        try {
+          opener.focus({ preventScroll: true });
+        } catch (e) {
+          /* nothing to return to */
+        }
+      }
+      setTimeout(function () {
+        if (!overlay.classList.contains('cs-open')) {
+          input.value = '';
+          field.classList.remove('cs-has-query');
+          showEmpty();
+        }
+      }, 260);
     }
 
-    backdrop.addEventListener('click', closeSearch);
     closeBtn.addEventListener('click', closeSearch);
-    cancelBtn.addEventListener('click', closeSearch);
 
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && overlay.classList.contains('cs-open')) {
+    overlay.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
         closeSearch();
+        return;
+      }
+      // Keep Tab inside the search
+      if (event.key === 'Tab') {
+        const focusable = Array.from(
+          overlay.querySelectorAll('input, button, a[href]')
+        ).filter(function (el) {
+          return !el.closest('[hidden]') && el.getClientRects().length > 0 && getComputedStyle(el).pointerEvents !== 'none';
+        });
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
       }
     });
 
-    form.addEventListener('submit', function (e) {
-      var q = input.value.trim();
-      if (!q) { e.preventDefault(); return; }
-      /* Send exactly what was typed. Shopify already matches partial words on
-         products ("pred" finds "predator"); a trailing "*" turned the search
-         into match-everything. Strip any typed wildcard and tidy the spacing. */
-      input.value = q.replace(/\*+/g, ' ').replace(/\s+/g, ' ').trim();
-      if (!input.value) e.preventDefault();
+    form.addEventListener('submit', function (event) {
+      const query = input.value.replace(/\*+/g, ' ').replace(/\s+/g, ' ').trim();
+      if (!query) {
+        event.preventDefault();
+        return;
+      }
+      input.value = query;
     });
 
-    window.customSearchOpen  = openSearch;
+    window.customSearchOpen = openSearch;
     window.customSearchClose = closeSearch;
   })();
 </script>

@@ -1,0 +1,79 @@
+{%- comment -%}
+  Results for the full-screen search (snippets/custom-search-overlay.liquid), fetched as you type
+  through Shopify's predictive search with section_id=search-overlay-results, so prices come in
+  the shopper's currency and images at the right sizes.
+
+  Outputs product cards (image, title, price) and the matching product titles as JSON, which the
+  overlay turns into category suggestions ("vapor" -> "Nike Mercurial", "Nike Mercurial Vapor").
+  Not for adding to pages: it has no presets.
+{%- endcomment -%}
+
+{%- liquid
+  assign products = predictive_search.resources.products
+-%}
+
+<div
+  class="cs-results"
+  data-cs-results
+  data-count="{{ products.size }}"
+>
+  <script type="application/json" data-cs-titles>
+    {{ products | map: 'title' | json }}
+  </script>
+
+  {%- if products.size > 0 -%}
+    <ul
+      class="cs-grid"
+      role="list"
+    >
+      {%- for product in products limit: 8 -%}
+        {%- liquid
+          assign image = product.featured_media.preview_image | default: product.featured_image
+          assign image_alt = image.alt | default: product.title | escape
+          assign on_sale = false
+          if product.compare_at_price > product.price
+            assign on_sale = true
+          endif
+        -%}
+        <li class="cs-grid__item">
+          <a
+            class="cs-card"
+            href="{{ product.url }}"
+          >
+            <span class="cs-card__media">
+              {%- if image -%}
+                {{
+                  image
+                  | image_url: width: 600
+                  | image_tag:
+                    widths: '200, 300, 400, 600',
+                    sizes: '(min-width: 768px) 340px, 45vw',
+                    loading: 'eager',
+                    class: 'cs-card__image',
+                    alt: image_alt
+                }}
+              {%- endif -%}
+            </span>
+            <span class="cs-card__title">{{ product.title | escape }}</span>
+            <span class="cs-card__price">
+              {%- if product.price_varies -%}
+                <span class="cs-card__from">From</span>
+              {% endif -%}
+              {{- product.price | money -}}
+              {%- if on_sale -%}
+                <s class="cs-card__was">{{ product.compare_at_price | money }}</s>
+              {%- endif -%}
+            </span>
+          </a>
+        </li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Search overlay results",
+  "settings": []
+}
+{% endschema %}

@@ -1,6 +1,9 @@
 /**
  * Desktop header search field (snippets/search.liquid, style: 'bar').
  *
+ * Focusing the field opens the full-screen search (snippets/custom-search-overlay), carrying
+ * over anything already typed; the field's own dropdown is only a fallback if that isn't there.
+ *
  * The field is the theme's predictive-search-component. Outside a dialog it opens its
  * results on focus but has nothing that closes them again, so this wrapper closes them
  * when focus or a click leaves the field, and on Escape.
@@ -13,6 +16,7 @@ class HeaderSearch extends HTMLElement {
   connectedCallback() {
     const { signal } = this.#controller;
 
+    this.addEventListener('focusin', this.#onFocusIn, { signal });
     this.addEventListener('focusout', this.#onFocusOut, { signal });
     document.addEventListener('pointerdown', this.#onPointerDown, { signal });
     // Capture phase: runs before the component's own keydown handlers.
@@ -41,6 +45,16 @@ class HeaderSearch extends HTMLElement {
   #expand() {
     this.#input?.setAttribute('aria-expanded', 'true');
   }
+
+  /** @param {FocusEvent} event */
+  #onFocusIn = (event) => {
+    const input = this.#input;
+    if (event.target !== input || !input || typeof window.customSearchOpen !== 'function') return;
+    const query = input.value;
+    this.#collapse();
+    input.blur();
+    window.customSearchOpen(query);
+  };
 
   /** @param {FocusEvent} event */
   #onFocusOut = (event) => {
