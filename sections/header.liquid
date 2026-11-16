@@ -944,13 +944,40 @@
       text-underline-offset: 3px;
     }
 
-    /* Silo cutouts: the boots from the homepage grid as image tiles, two rows per brand column */
+    /* Silo cutouts: the boots from the homepage grid as image tiles. Each brand column fills two rows,
+       left to right like the homepage grid: half its tiles (rounded up) per row. */
     #header-component .menu-list__submenu .mega-menu__column:has(.mega-menu__link--cutout) > div > ul {
+      --cutout-columns: 1;
+
       display: grid;
-      grid-auto-flow: column;
-      grid-template-rows: repeat(2, auto);
+      grid-template-columns: repeat(var(--cutout-columns), auto);
       gap: 8px 12px;
       column-count: auto !important; /* stylelint-disable-line declaration-no-important */
+    }
+
+    #header-component .menu-list__submenu .mega-menu__column > div > ul:has(> li:nth-child(3)) { --cutout-columns: 2; }
+    #header-component .menu-list__submenu .mega-menu__column > div > ul:has(> li:nth-child(5)) { --cutout-columns: 3; }
+    #header-component .menu-list__submenu .mega-menu__column > div > ul:has(> li:nth-child(7)) { --cutout-columns: 4; }
+    #header-component .menu-list__submenu .mega-menu__column > div > ul:has(> li:nth-child(9)) { --cutout-columns: 5; }
+    #header-component .menu-list__submenu .mega-menu__column > div > ul:has(> li:nth-child(11)) { --cutout-columns: 6; }
+
+    /* Narrower desktops: smaller tiles, and the panel starts at the page edge so all brands fit one row */
+    @media screen and (max-width: 1279px) {
+      html #header-component .menu-list__submenu .mega-menu:has(.mega-menu__link--cutout) {
+        padding-inline-start: var(--header-gutter);
+      }
+
+      html #header-component .menu-list__submenu .mega-menu__list:has(.mega-menu__link--cutout) {
+        column-gap: 40px;
+      }
+
+      html #header-component .menu-list__submenu .mega-menu__column:has(.mega-menu__link--cutout) > div > ul {
+        gap: 4px 8px;
+      }
+
+      html #header-component .menu-list__submenu .mega-menu__link--cutout {
+        width: 84px;
+      }
     }
 
     #header-component .menu-list__submenu .mega-menu__link--cutout {
