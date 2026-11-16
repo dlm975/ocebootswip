@@ -84,10 +84,35 @@ class HeaderDrawer extends Component {
     const details = this.#getDetailsElement(event);
     if (details?.hasAttribute('open')) {
       event.preventDefault();
+      this.#swipeInItemsBelow(details);
       this.#close(details);
     } else {
       this.open(event);
     }
+  }
+
+  /**
+   * The menu items below an open drill-down are hidden; when it closes they swipe up from the
+   * bottom of the menu container as they reappear (CSS: .menu-drawer__menu--returning).
+   * @param {HTMLDetailsElement} details
+   */
+  #swipeInItemsBelow(details) {
+    const item = details.closest('li');
+    const list = item?.parentElement;
+    const container = details.closest('.menu-drawer__navigation') ?? list;
+    if (!item || !list || !container) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const bottom = container.getBoundingClientRect().bottom;
+    const top = item.getBoundingClientRect().bottom;
+    list.style.setProperty('--return-from', `${Math.max(bottom - top, 0)}px`);
+    let index = 0;
+    for (let sibling = item.nextElementSibling; sibling; sibling = sibling.nextElementSibling) {
+      if (sibling instanceof HTMLElement) sibling.style.setProperty('--return-index', String(index++));
+    }
+    list.classList.add('menu-drawer__menu--returning');
+    clearTimeout(this.returnTimer);
+    this.returnTimer = setTimeout(() => list.classList.remove('menu-drawer__menu--returning'), 1200);
   }
 
   /**
