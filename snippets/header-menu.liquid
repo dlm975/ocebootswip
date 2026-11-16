@@ -52,13 +52,27 @@
             style="{% render 'submenu-font-styles', settings: block.settings %}"
           >
             {% assign list_id = 'MegaMenuList-' | append: forloop.index %}
-            {% render 'mega-menu',
-              parent_link: link,
-              id: list_id,
-              menu_content_type: menu_content_type,
-              content_aspect_ratio: ratio,
-              image_border_radius: image_border_radius
-            %}
+            {%- liquid
+              # Three-level links (e.g. Shop by Silo > brand > model) use the brand drill-down list
+              assign has_grandchildren = false
+              for childlink in link.links
+                if childlink.links != blank
+                  assign has_grandchildren = true
+                  break
+                endif
+              endfor
+            -%}
+            {% if has_grandchildren %}
+              {% render 'brand-drill-menu', parent_link: link, variant: 'desktop', id: list_id %}
+            {% else %}
+              {% render 'mega-menu',
+                parent_link: link,
+                id: list_id,
+                menu_content_type: menu_content_type,
+                content_aspect_ratio: ratio,
+                image_border_radius: image_border_radius
+              %}
+            {% endif %}
           </div>
         </div>
       {%- endif -%}

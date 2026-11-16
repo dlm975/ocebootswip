@@ -944,75 +944,9 @@
       text-underline-offset: 3px;
     }
 
-    /* Silo cutouts: the boots from the homepage grid as image tiles. Each brand column fills two rows,
-       left to right like the homepage grid: half its tiles (rounded up) per row. */
-    #header-component .menu-list__submenu .mega-menu__column:has(.mega-menu__link--cutout) > div > ul {
-      --cutout-columns: 1;
-
-      display: grid;
-      grid-template-columns: repeat(var(--cutout-columns), auto);
-      gap: 8px 12px;
-      column-count: auto !important; /* stylelint-disable-line declaration-no-important */
-    }
-
-    #header-component .menu-list__submenu .mega-menu__column > div > ul:has(> li:nth-child(3)) { --cutout-columns: 2; }
-    #header-component .menu-list__submenu .mega-menu__column > div > ul:has(> li:nth-child(5)) { --cutout-columns: 3; }
-    #header-component .menu-list__submenu .mega-menu__column > div > ul:has(> li:nth-child(7)) { --cutout-columns: 4; }
-    #header-component .menu-list__submenu .mega-menu__column > div > ul:has(> li:nth-child(9)) { --cutout-columns: 5; }
-    #header-component .menu-list__submenu .mega-menu__column > div > ul:has(> li:nth-child(11)) { --cutout-columns: 6; }
-
-    /* Narrower desktops: smaller tiles, and the panel starts at the page edge so all brands fit one row */
-    @media screen and (max-width: 1279px) {
-      html #header-component .menu-list__submenu .mega-menu:has(.mega-menu__link--cutout) {
-        padding-inline-start: var(--header-gutter);
-      }
-
-      html #header-component .menu-list__submenu .mega-menu__list:has(.mega-menu__link--cutout) {
-        column-gap: 40px;
-      }
-
-      html #header-component .menu-list__submenu .mega-menu__column:has(.mega-menu__link--cutout) > div > ul {
-        gap: 4px 8px;
-      }
-
-      html #header-component .menu-list__submenu .mega-menu__link--cutout {
-        width: 84px;
-      }
-    }
-
-    #header-component .menu-list__submenu .mega-menu__link--cutout {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      width: 112px;
-      padding: 6px 4px 8px;
-      border-radius: 2px;
-      text-align: center;
-      text-decoration: none;
-    }
-
-    #header-component .menu-list__submenu .mega-menu__link--cutout:is(:hover, :focus-visible) {
-      background: var(--brand-mist, #F1F5F9);
-      text-decoration: none;
-    }
-
-    #header-component .menu-list__submenu .mega-menu__link--cutout:is(:hover, :focus-visible) .mega-menu__link-title {
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-
-    #header-component .menu-list__submenu .mega-menu__cutout {
-      display: block;
-      width: 100%;
-      height: auto;
-      aspect-ratio: 1 / 1;
-      object-fit: contain;
-      transition: transform var(--animation-speed) var(--animation-easing);
-    }
-
-    #header-component .menu-list__submenu .mega-menu__link--cutout:hover .mega-menu__cutout {
-      transform: scale(1.06);
+    /* Brand drill-down (three-level links): same left edge as the other dropdowns, under its category */
+    #header-component .menu-list__submenu .brand-drill--desktop {
+      padding-inline: calc(var(--header-gutter) + var(--submenu-offset, 0px)) var(--header-gutter);
     }
 
     #header-component .menu-list__submenu .mega-menu__link--parent {

@@ -1,0 +1,245 @@
+{%- doc -%}
+  Brand list with drill-down models, for a menu link three levels deep (e.g. Shop by Silo > Nike > Vapor).
+
+  Brands are stacked in bold, each with its product count. Hovering a brand (desktop) or tapping it
+  (touch) blurs the other brands and shows that brand's models stacked to its right, in the same
+  name-and-count format, a little smaller. On touch, the first tap opens a brand; tapping it again
+  follows its link. Behaviour is in assets/brand-drill-menu.js.
+
+  Counts are each collection's total product count. A brand that only groups others (it links to the
+  same collection as its parent, e.g. "Other brands") shows the sum of its models instead.
+
+  @param {object} parent_link - The top-level link (its links are the brands)
+  @param {string} [variant] - 'desktop' (header dropdown) or 'drawer' (mobile menu drawer)
+  @param {string} id - Unique id prefix
+{%- enddoc -%}
+
+{%- liquid
+  assign variant = variant | default: 'desktop'
+  assign max_rows = parent_link.links.size
+  for brand in parent_link.links
+    if brand.links.size > max_rows
+      assign max_rows = brand.links.size
+    endif
+  endfor
+-%}
+
+<script
+  src="{{ 'brand-drill-menu.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+<brand-drill-menu
+  class="brand-drill brand-drill--{{ variant }}"
+  style="--brand-drill-rows: {{ max_rows }};"
+>
+  <ul
+    class="brand-drill__brands list-unstyled"
+    role="list"
+  >
+    {%- for brand in parent_link.links -%}
+      {%- liquid
+        assign brand_count = 0
+        assign sums_children = true
+        if brand.type == 'collection_link' and brand.object.handle != parent_link.object.handle
+          assign sums_children = false
+          assign brand_count = brand.object.all_products_count
+        endif
+        if sums_children
+          for model in brand.links
+            if model.type == 'collection_link'
+              assign brand_count = brand_count | plus: model.object.all_products_count
+            endif
+          endfor
+        endif
+        assign models_id = id | append: '-' | append: forloop.index
+      -%}
+      <li class="brand-drill__brand">
+        <a
+          href="{{ brand.url }}"
+          class="brand-drill__brand-link"
+          {% if brand.links != blank %}
+            aria-controls="{{ models_id }}"
+            aria-expanded="false"
+          {% endif %}
+          data-brand-drill-brand
+        >
+          <span class="brand-drill__name">{{ brand.title | escape }}</span>
+          {%- if brand_count > 0 -%}
+            <span class="brand-drill__count">{{ brand_count }}</span>
+          {%- endif -%}
+        </a>
+
+        {%- if brand.links != blank -%}
+          <ul
+            id="{{ models_id }}"
+            class="brand-drill__models list-unstyled"
+            role="list"
+          >
+            {%- for model in brand.links -%}
+              <li>
+                <a
+                  href="{{ model.url }}"
+                  class="brand-drill__model-link{% if model.current %} brand-drill__model-link--current{% endif %}"
+                  {% if model.current %}
+                    aria-current="page"
+                  {% endif %}
+                >
+                  <span class="brand-drill__name">{{ model.title | escape }}</span>
+                  {%- if model.type == 'collection_link' -%}
+                    <span class="brand-drill__count">{{ model.object.all_products_count }}</span>
+                  {%- endif -%}
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </li>
+    {%- endfor -%}
+  </ul>
+</brand-drill-menu>
+
+{% stylesheet %}
+  .brand-drill {
+    --brand-drill-row: 38px;
+    --brand-drill-model-row: 32px;
+
+    display: block;
+    color: var(--color-foreground);
+  }
+
+  /* The models are positioned beside the brand column; the column is tall enough for the longest list */
+  .brand-drill__brands {
+    position: relative;
+    width: max-content;
+    min-width: 11rem;
+    min-height: calc(var(--brand-drill-rows) * var(--brand-drill-model-row));
+    margin: 0;
+    padding: 0 40px 0 0;
+  }
+
+  .brand-drill__brand-link,
+  .brand-drill__model-link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    color: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: filter var(--animation-speed, 0.2s) var(--animation-easing, ease),
+      opacity var(--animation-speed, 0.2s) var(--animation-easing, ease);
+  }
+
+  .brand-drill__brand-link {
+    min-height: var(--brand-drill-row);
+    align-items: center;
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .brand-drill__model-link {
+    min-height: var(--brand-drill-model-row);
+    align-items: center;
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+
+  .brand-drill__count {
+    align-self: flex-start;
+    margin-block-start: 0.35em;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: rgb(var(--color-foreground-rgb) / 0.55);
+  }
+
+  .brand-drill__model-link .brand-drill__count {
+    font-size: 0.625rem;
+  }
+
+  .brand-drill__model-link:is(:hover, :focus-visible) .brand-drill__name,
+  .brand-drill__brand-link:focus-visible .brand-drill__name {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .brand-drill a:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  /* Models: hidden until their brand is active */
+  .brand-drill__models {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    display: none;
+    min-width: 12rem;
+    margin: 0;
+    padding: 0;
+  }
+
+  .brand-drill__brand.is-active > .brand-drill__models {
+    display: block;
+    animation: brand-drill-in var(--animation-speed, 0.2s) var(--animation-easing, ease);
+  }
+
+  /* Other brands blur while one is active */
+  .brand-drill[data-active] .brand-drill__brand:not(.is-active) > .brand-drill__brand-link {
+    filter: blur(2px);
+    opacity: 0.45;
+  }
+
+  .brand-drill[data-active] .brand-drill__brand:not(.is-active) > .brand-drill__brand-link:focus-visible {
+    filter: none;
+    opacity: 1;
+  }
+
+  @keyframes brand-drill-in {
+    from {
+      opacity: 0;
+      transform: translateX(-6px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .brand-drill__brand.is-active > .brand-drill__models {
+      animation: none;
+    }
+
+    .brand-drill[data-active] .brand-drill__brand:not(.is-active) > .brand-drill__brand-link {
+      filter: none;
+    }
+  }
+
+  /* Drawer (phones): a little smaller so brand and models fit side by side */
+  .brand-drill--drawer {
+    --brand-drill-row: 40px;
+    --brand-drill-model-row: 34px;
+
+    padding-block: 4px 12px;
+  }
+
+  .brand-drill--drawer .brand-drill__brands {
+    min-width: 0;
+    width: 42%;
+    padding-right: 16px;
+  }
+
+  .brand-drill--drawer .brand-drill__brand-link {
+    font-size: 1.0625rem;
+  }
+
+  .brand-drill--drawer .brand-drill__models {
+    /* The brand column is 42% of the drawer; the models take the other 58% (138% of 42%) */
+    width: 138%;
+    min-width: 0;
+  }
+
+  .brand-drill--drawer .brand-drill__model-link {
+    font-size: 0.9375rem;
+  }
+{% endstylesheet %}
