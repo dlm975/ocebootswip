@@ -99,7 +99,7 @@ class HeaderDrawer extends Component {
   #swipeInItemsBelow(details) {
     const item = details.closest('li');
     const list = item?.parentElement;
-    const container = details.closest('.menu-drawer__navigation') ?? list;
+    const container = details.closest('.menu-drawer') ?? list;
     if (!item || !list || !container) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
