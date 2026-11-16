@@ -238,6 +238,17 @@
                   {%- comment -%}
                     Regardless of the Accordion setting, in menus with 3 levels of links, we use a details element to handle the top level of the menu for links that have children.
                   {%- endcomment -%}
+                  {%- liquid
+                    # Brand > model links (e.g. Shop by Silo): brand list with drill-down models
+                    assign has_grandchildren = false
+                    for childlink in link.links
+                      if childlink.links != blank
+                        assign has_grandchildren = true
+                        break
+                      endif
+                    endfor
+                    assign drill_id = 'DrawerDrill-' | append: link.handle
+                  -%}
                   <details
                     id="Details-menu-drawer-menu-item-{{ forloop.index }}"
                     class="menu-drawer__menu-container{% if block.settings.drawer_dividers %} menu-drawer__menu-container--divider{% endif %}"
@@ -245,12 +256,21 @@
                     <summary
                       id="HeaderDrawer-{{ link.handle }}"
                       class="menu-drawer__menu-item menu-drawer__menu-item--mainlist menu-drawer__animated-element focus-inset{% if link.child_active %} menu-drawer__menu-item--active{% endif %}"
-                      on:click="header-drawer/open"
+                      {% if has_grandchildren %}
+                        on:click="header-drawer/toggleSubmenu"
+                      {% else %}
+                        on:click="header-drawer/open"
+                      {% endif %}
                     >
                       <span class="menu-drawer__menu-item-text">{{ link.title | escape }}</span>
                       <span class="svg-wrapper icon-caret icon-caret--forward">
                         {{- 'icon-caret.svg' | inline_asset_content -}}
                       </span>
+                      {%- if has_grandchildren -%}
+                        <span class="svg-wrapper menu-drawer__drill-close" aria-hidden="true">
+                          {{- 'icon-close.svg' | inline_asset_content -}}
+                        </span>
+                      {%- endif -%}
                     </summary>
                     <div
                       id="link-{{ link.handle | escape }}"
@@ -259,6 +279,7 @@
                       style="--menu-drawer-animation-index: {{ animation_index }};"
                     >
                       <div class="menu-drawer__inner-submenu">
+                        {%- unless has_grandchildren -%}
                         <div class="menu-drawer__nav-buttons">
                           <button
                             class="button menu-drawer__back-button focus-inset"
@@ -282,6 +303,7 @@
                             </span>
                           </button>
                         </div>
+                        {%- endunless -%}
                         {% liquid
                           assign render_link_image = false
                           if block.settings.menu_style == 'collection_images'
@@ -291,17 +313,6 @@
                             endif
                           endif
                         %}
-                        {%- liquid
-                          # Brand > model links (e.g. Shop by Silo): brand list with drill-down models
-                          assign has_grandchildren = false
-                          for childlink in link.links
-                            if childlink.links != blank
-                              assign has_grandchildren = true
-                              break
-                            endif
-                          endfor
-                          assign drill_id = 'DrawerDrill-' | append: link.handle
-                        -%}
                         {%- if has_grandchildren -%}
                           <div class="menu-drawer__drill">
                             {% render 'brand-drill-menu', parent_link: link, variant: 'drawer', id: drill_id %}
@@ -638,6 +649,27 @@
 
   /* While the brand drill-down is open, the menu items below it are hidden */
   .menu-drawer__menu > li:has(> details[open] .brand-drill) ~ li {
+    display: none;
+  }
+
+  /* Its row shows an X instead of the arrow while open; tapping the row closes it */
+  .menu-drawer__drill-close {
+    display: none;
+    width: 16px;
+    height: 16px;
+    margin-inline-start: auto;
+  }
+
+  .menu-drawer__drill-close svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  details[open] > summary > .menu-drawer__drill-close {
+    display: inline-flex;
+  }
+
+  details[open] > summary:has(> .menu-drawer__drill-close) > .icon-caret {
     display: none;
   }
 

@@ -77,6 +77,20 @@ class HeaderDrawer extends Component {
   }
 
   /**
+   * Open a submenu, or close it if it's already open (its row shows an X while open)
+   * @param {Event} event
+   */
+  toggleSubmenu(event) {
+    const details = this.#getDetailsElement(event);
+    if (details?.hasAttribute('open')) {
+      event.preventDefault();
+      this.#close(details);
+    } else {
+      this.open(event);
+    }
+  }
+
+  /**
    * Go back or close the main menu drawer
    * @param {Event} [event]
    */
