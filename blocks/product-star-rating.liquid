@@ -5,7 +5,7 @@
 {%- if block.settings.show_stars or stars_text != blank -%}
   <span
     id="psr-{{ block.id }}"
-    class="psr"
+    class="psr{% if block.settings.placement == 'in_place' %} psr--in-place{% endif %}"
     style="--psr-color: {{ block.settings.star_color }}; --psr-fg: {{ block.settings.text_color }}; --psr-size: {{ block.settings.star_size }}px;"
     {{ block.shopify_attributes }}
   >
@@ -43,6 +43,11 @@
     width: fit-content;
     max-width: 100%;
     align-self: center;
+  }
+
+  /* Left where the merchant placed it (Position: where it's placed), e.g. between title and price */
+  .psr--in-place.psr--placed {
+    align-self: flex-start;
   }
 
   .psr__stars {
@@ -99,6 +104,10 @@
     }
 
     function place() {
+      if (el.classList.contains('psr--in-place')) {
+        el.classList.add('psr--placed');
+        return;
+      }
       var price = findPrice();
       if (price && el.parentElement !== price) price.appendChild(el);
       /* Revealed either way — if the price block isn't on the template it
@@ -125,6 +134,22 @@
     {
       "type": "paragraph",
       "content": "Five stars and a line of social proof, shown beside the product price. Add it anywhere in the product details column — it moves itself next to the price."
+    },
+    {
+      "type": "select",
+      "id": "placement",
+      "label": "Position",
+      "options": [
+        {
+          "value": "beside_price",
+          "label": "Beside the price"
+        },
+        {
+          "value": "in_place",
+          "label": "Where it's placed"
+        }
+      ],
+      "default": "beside_price"
     },
     {
       "type": "checkbox",

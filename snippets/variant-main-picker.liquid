@@ -66,7 +66,16 @@
                   assign size_label = size_label | append: ' (US · UK · EU)'
                 endif
               -%}
-              <p class="size-grid__label" id="SizeGridLabel-{{ block.id }}-{{ product_option.position }}">{{ size_label | escape }}</p>
+              <div class="size-grid__head">
+                <p class="size-grid__label" id="SizeGridLabel-{{ block.id }}-{{ product_option.position }}">{{ size_label | escape }}</p>
+                {%- if block.settings.show_stock_urgency -%}
+                  {% render 'urgency-stock',
+                    variant: product_resource.selected_or_first_available_variant,
+                    threshold: block.settings.urgency_threshold,
+                    dot_color: block.settings.urgency_dot_color
+                  %}
+                {%- endif -%}
+              </div>
               <div
                 class="size-grid__grid"
                 role="radiogroup"
@@ -326,8 +335,17 @@
     width: 100%;
   }
 
+  .size-grid__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 16px;
+    row-gap: 4px;
+    margin-block-end: 10px;
+  }
+
   .size-grid__label {
-    margin: 0 0 10px;
+    margin: 0;
     font-size: 14px;
     color: var(--color-foreground-heading, #000);
   }

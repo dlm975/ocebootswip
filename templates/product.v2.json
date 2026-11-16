@@ -167,11 +167,24 @@
                   "type": "product-meta",
                   "settings": {},
                   "blocks": {}
+                },
+                "star_rating_001": {
+                  "type": "product-star-rating",
+                  "settings": {
+                    "show_stars": true,
+                    "text": "1000+ HAPPY CUSTOMERS",
+                    "star_color": "#14b554",
+                    "text_color": "#15803d",
+                    "star_size": 13,
+                    "placement": "in_place"
+                  },
+                  "blocks": {}
                 }
               },
               "block_order": [
                 "product_meta_oce",
                 "text_xrnftG",
+                "star_rating_001",
                 "price_tVjtKg"
               ]
             },
@@ -200,7 +213,10 @@
                 "padding-block-start": 0,
                 "padding-block-end": 8,
                 "padding-inline-start": 0,
-                "padding-inline-end": 0
+                "padding-inline-end": 0,
+                "show_stock_urgency": true,
+                "urgency_threshold": 5,
+                "urgency_dot_color": "orange"
               },
               "blocks": {}
             },
@@ -214,7 +230,8 @@
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
               },
-              "blocks": {}
+              "blocks": {},
+              "disabled": true
             },
             "buy_buttons_pKHp9V": {
               "type": "buy-buttons",
@@ -270,17 +287,6 @@
               "type": "shopify://apps/essential-upsell/blocks/app-block/50627fd9-24fd-4250-8614-accc12826d80",
               "settings": {}
             },
-            "star_rating_001": {
-              "type": "product-star-rating",
-              "settings": {
-                "show_stars": true,
-                "text": "1000+ HAPPY CUSTOMERS",
-                "star_color": "#14b554",
-                "text_color": "#15803d",
-                "star_size": 13
-              },
-              "blocks": {}
-            },
             "addon_offer_001": {
               "type": "product-addons",
               "settings": {
@@ -304,7 +310,6 @@
           "block_order": [
             "group_icgrde",
             "free_shipping_pill_001",
-            "star_rating_001",
             "variant_picker_KALzja",
             "addon_offer_001",
             "urgency_stock_001",

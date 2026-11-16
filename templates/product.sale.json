@@ -175,7 +175,10 @@
                 "padding-block-start": 0,
                 "padding-block-end": 8,
                 "padding-inline-start": 0,
-                "padding-inline-end": 0
+                "padding-inline-end": 0,
+                "show_stock_urgency": true,
+                "urgency_threshold": 5,
+                "urgency_dot_color": "orange"
               },
               "blocks": {}
             },
@@ -189,7 +192,8 @@
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
               },
-              "blocks": {}
+              "blocks": {},
+              "disabled": true
             },
             "buy_buttons_pKHp9V": {
               "type": "buy-buttons",
