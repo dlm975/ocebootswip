@@ -683,9 +683,25 @@
     outline: 0;
   }
 
-  /* ---- Bag quantity: solid circle on the bag's lower-left corner ---- */
+  /* ---- Bag: centred in its 44px target like the account and menu icons ---- */
   #header-component .header-actions__cart-icon {
-    --cart-bubble-size: 18px;
+    --cart-bubble-size: 16px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--header-action);
+  }
+
+  #header-component .header-actions__cart-icon .svg-wrapper {
+    display: flex;
+  }
+
+  /* The bag is a filled glyph that fills more of its box than the outline icons; 22px matches their weight */
+  #header-component .header-actions__cart-icon .svg-wrapper,
+  #header-component .header-actions__cart-icon svg {
+    width: 22px;
+    height: 22px;
   }
 
   #header-component .header-actions__cart-icon .svg-wrapper,
@@ -694,10 +710,11 @@
   }
 
   #header-component .header-actions__cart-icon .cart-bubble {
-    /* cart-icon is 24px wide and 44px tall */
+    /* cart-icon is 44px tall with the 22px bag centred; the bag's lower-left corner is at about
+       (4px, 31px), so the badge's centre sits on it */
     top: auto;
     right: auto;
-    bottom: 7px;
+    bottom: 5px;
     left: -5px;
     width: var(--cart-bubble-size);
     height: var(--cart-bubble-size);
@@ -715,7 +732,7 @@
 
   #header-component .header-actions__cart-icon .cart-bubble__text {
     color: var(--color-background);
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
   }
