@@ -78,7 +78,8 @@
       if keys.size > most_sizes
         assign most_sizes = keys.size
       endif
-      assign panel_id = id | append: '-' | append: system | downcase
+      assign system_handle = system | downcase
+      assign panel_id = id | append: '-' | append: system_handle
     -%}
     <ul
       id="{{ panel_id }}"
@@ -112,6 +113,8 @@
           endif
           assign shown = number | replace: ' 1/3', '⅓' | replace: ' 2/3', '⅔' | replace: ' 1/2', '½'
         -%}
+        {%- comment -%} A size with nothing in it isn't offered {%- endcomment -%}
+        {%- if total == 0 -%}{%- continue -%}{%- endif -%}
         <li>
           <a
             href="{{ url }}"
