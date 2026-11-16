@@ -130,6 +130,7 @@
       role="list"
       aria-label="{{ system }}"
       data-size-system-panel
+      style="--size-drill-index: {{ forloop.index0 }};"
       hidden
     >
       {{- size_items -}}
@@ -319,7 +320,11 @@
     align-items: center;
     column-gap: 12px;
     height: var(--size-drill-size-row);
-    margin-block-start: calc((var(--size-drill-system-row) - var(--size-drill-size-row)) / 2);
+    /* On the same line as its system: US sizes level with US, UK with UK, EU with EU */
+    margin-block-start: calc(
+      var(--size-drill-index, 0) * var(--size-drill-system-row) +
+        (var(--size-drill-system-row) - var(--size-drill-size-row)) / 2
+    );
   }
 
   .size-drill--desktop .size-drill__value {
