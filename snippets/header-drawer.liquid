@@ -125,22 +125,6 @@
                           endif
                         endif
                       %}
-                      {%- liquid
-                        # Three-level links (e.g. Shop by Silo > brand > model): brand drill-down list
-                        assign has_grandchildren = false
-                        for childlink in link.links
-                          if childlink.links != blank
-                            assign has_grandchildren = true
-                            break
-                          endif
-                        endfor
-                        assign drill_id = 'DrawerDrill-' | append: link.handle
-                      -%}
-                      {%- if has_grandchildren -%}
-                        <div class="menu-drawer__drill details-content">
-                          {% render 'brand-drill-menu', parent_link: link, variant: 'drawer', id: drill_id %}
-                        </div>
-                      {%- else -%}
                       <ul
                         class="menu-drawer__menu menu-drawer__menu--childlist menu-drawer__animated-element details-content{% if render_link_image %} menu-drawer__menu--grid{% endif %}"
                         role="list"
@@ -171,7 +155,6 @@
                           </li>
                         {%- endfor -%}
                       </ul>
-                      {%- endif -%}
                     </details>
                   </accordion-custom>
                 {% elsif block.settings.drawer_accordion == false and link.links != blank %}
@@ -308,6 +291,22 @@
                             endif
                           endif
                         %}
+                        {%- liquid
+                          # Brand > model links (e.g. Shop by Silo): brand list with drill-down models
+                          assign has_grandchildren = false
+                          for childlink in link.links
+                            if childlink.links != blank
+                              assign has_grandchildren = true
+                              break
+                            endif
+                          endfor
+                          assign drill_id = 'DrawerDrill-' | append: link.handle
+                        -%}
+                        {%- if has_grandchildren -%}
+                          <div class="menu-drawer__drill">
+                            {% render 'brand-drill-menu', parent_link: link, variant: 'drawer', id: drill_id %}
+                          </div>
+                        {%- else -%}
                         <ul
                           class="menu-drawer__menu menu-drawer__menu--childlist{% if render_link_image and link.levels == 1 %} menu-drawer__menu--grid{% endif %}"
                           role="list"
@@ -480,6 +479,7 @@
                             </li>
                           {%- endfor -%}
                         </ul>
+                        {%- endif -%}
                         {% liquid
                           if block.settings.menu_style == 'featured_collections'
                             assign featured_collections = link.links | where: 'type', 'collection_link'
