@@ -1,0 +1,353 @@
+/*
+  OCE Boots Glass: homepage skin.
+  Restyle only. Everything is scoped to body.oce-glass, which layout/theme.liquid adds when the
+  "Glass design" theme setting covers the current page. Remove the class and the theme is unchanged.
+  Values come from the OCE Boots Glass design system (tokens.json); names keep its vocabulary.
+*/
+
+body.oce-glass {
+  /* ground and glass */
+  --og-ground: #f1f2f4;
+  --og-ground-deep: #e4e6ea;
+  --og-clear: rgba(255, 255, 255, 0.18);
+  --og-tint: rgba(244, 245, 248, 0.5);
+  --og-frost: rgba(255, 255, 255, 0.78);
+  --og-plate-photo: rgba(255, 255, 255, 0.94);
+  --og-smoke-clear: rgba(17, 18, 20, 0.42);
+  --og-smoke: rgba(17, 18, 20, 0.84);
+  --og-rim: rgba(255, 255, 255, 0.95);
+  --og-rim-on-dark: rgba(255, 255, 255, 0.38);
+  --og-edge-shade: rgba(96, 102, 116, 0.3);
+  --og-hairline: rgba(20, 24, 34, 0.14);
+  --og-ground-line: rgba(20, 24, 34, 0.07);
+  --og-ink: #000;
+  --og-green: #14b554;
+  --og-on-green: #04210f;
+
+  /* shape */
+  --og-radius-well: 14px;
+  --og-radius-control: 16px;
+  --og-radius-card: 24px;
+  --og-radius-panel: 28px;
+  --og-bezel-sm: 6px;
+  --og-bezel-md: 8px;
+  --og-edge-sm: 3px;
+
+  /* depth: one quiet shadow under each piece */
+  --og-shadow-sm: 0 1px 2px rgba(20, 24, 34, 0.12), 0 10px 14px -8px rgba(20, 24, 34, 0.36);
+  --og-shadow-md: 0 2px 3px rgba(20, 24, 34, 0.1), 0 30px 40px -16px rgba(20, 24, 34, 0.42);
+  --og-shadow-lg: 0 3px 5px rgba(20, 24, 34, 0.1), 0 46px 60px -22px rgba(20, 24, 34, 0.46);
+  --og-shadow-key: 0 2px 3px rgba(20, 24, 34, 0.2), 0 16px 22px -12px rgba(20, 24, 34, 0.6);
+
+  /* frost */
+  --og-blur-sm: 8px;
+  --og-blur-md: 16px;
+  --og-blur-lg: 28px;
+  --og-saturate: 170%;
+
+  /* read by oce-glass.js */
+  --refract-strength: 3.5;
+  --refract-dispersion: 0.1;
+  --refract-blur: 2;
+
+  background-color: var(--og-ground);
+  background-image: repeating-linear-gradient(115deg, transparent 0 35px, var(--og-ground-line) 35px 36px);
+  background-attachment: fixed;
+}
+
+/* ---------- ground: let it show through the page's white bands ---------- */
+body.oce-glass .section-background.color-scheme-1,
+body.oce-glass .brand-tiles-section,
+body.oce-glass .ccg-section,
+body.oce-glass [class^='tlb-'],
+body.oce-glass .content-for-layout {
+  background-color: transparent;
+}
+
+/* ---------- slab: clear shell, bezel, plate ---------- */
+/* Shell = the element. Plate = ::before, inset by the bezel. The bezel is left clear so the page
+   shows sharply through it; oce-glass.js bends it where the browser can. */
+body.oce-glass .oce-slab-host,
+body.oce-glass .announcement-bar,
+body.oce-glass .header__row--top,
+body.oce-glass [class^='tlb-bar-'],
+body.oce-glass .product-card,
+body.oce-glass .brand-tile {
+  position: relative;
+  z-index: 0;
+  border: 0;
+  background: var(--og-shell, var(--og-clear));
+  border-radius: var(--og-r, var(--og-radius-card));
+  outline: 1px solid var(--og-line, var(--og-rim));
+  outline-offset: -1px;
+  box-shadow: 0 0 0 1px var(--og-edge-shade), inset 1px 1px 0 var(--og-line, var(--og-rim)), var(--og-shadow, var(--og-shadow-md));
+  -webkit-backdrop-filter: blur(0.5px) saturate(var(--og-saturate));
+  backdrop-filter: blur(0.5px) saturate(var(--og-saturate));
+}
+
+body.oce-glass .announcement-bar::before,
+body.oce-glass .header__row--top::before,
+body.oce-glass [class^='tlb-bar-']::before,
+body.oce-glass .product-card::before,
+body.oce-glass .brand-tile::before {
+  content: '';
+  position: absolute;
+  inset: var(--og-bezel, var(--og-bezel-md));
+  z-index: -1;
+  border-radius: calc(var(--og-r, var(--og-radius-card)) - var(--og-bezel, var(--og-bezel-md)));
+  background: var(--og-plate, var(--og-frost));
+  box-shadow: 0 0 0 1px var(--og-line, var(--og-rim));
+  pointer-events: none;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  body.oce-glass .announcement-bar,
+  body.oce-glass .header__row--top,
+  body.oce-glass [class^='tlb-bar-'],
+  body.oce-glass .product-card,
+  body.oce-glass .brand-tile {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--og-solid, var(--og-ground));
+  }
+}
+
+/* ---------- announcement strip: a small clear slab ---------- */
+body.oce-glass .shopify-section-group-header-group > .section-background {
+  background: transparent;
+}
+
+body.oce-glass .announcement-bar {
+  --og-r: 100px;
+  --og-bezel: var(--og-bezel-sm);
+  --og-plate: var(--og-frost);
+  --og-shadow: var(--og-shadow-sm);
+  --bezel: 6px;
+  --color-foreground: var(--og-ink);
+  --color-foreground-rgb: 0 0 0;
+  margin: 10px 16px 0;
+  width: auto;
+  min-height: 36px;
+  color: var(--og-ink);
+}
+
+body.oce-glass .announcement-bar .announcement-bar__text,
+body.oce-glass .announcement-bar a {
+  color: var(--og-ink);
+  font-weight: 700;
+}
+
+/* ---------- header: smoked glass, so the white logo and links keep working ---------- */
+body.oce-glass .header__row--top {
+  --og-r: var(--og-radius-panel);
+  --og-bezel: var(--og-bezel-md);
+  --og-shell: var(--og-smoke-clear);
+  /* Solid black plate: the logo file has a black background, so the plate must match it exactly. */
+  --og-plate: #000;
+  --og-line: var(--og-rim-on-dark);
+  --og-solid: #111214;
+  --og-shadow: var(--og-shadow-lg);
+  --bezel: 8px;
+}
+
+/* ---------- league logos bar ---------- */
+body.oce-glass [class^='tlb-bar-'] {
+  --og-r: var(--og-radius-card);
+  --og-bezel: var(--og-bezel-sm);
+  --og-plate: var(--og-plate-photo);
+  --og-shadow: var(--og-shadow-sm);
+  --bezel: 6px;
+  max-width: min(720px, calc(100% - 32px));
+  margin-inline: auto;
+}
+
+/* ---------- product cards: frosted slab, photo sits on a near-white plate ---------- */
+body.oce-glass .product-card {
+  --og-r: var(--og-radius-card);
+  --og-bezel: var(--og-bezel-sm);
+  --og-plate: var(--og-plate-photo);
+  --og-shadow: var(--og-shadow-sm);
+  display: block;
+  padding: 12px;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+body.oce-glass .resource-list--grid {
+  row-gap: 20px;
+  column-gap: 16px;
+}
+
+@media (max-width: 749px) {
+  body.oce-glass .product-card {
+    --og-r: 18px;
+    --og-bezel: 4px;
+    padding: 8px;
+  }
+
+  body.oce-glass .resource-list--grid {
+    row-gap: 12px;
+    column-gap: 8px;
+  }
+
+  body.oce-glass .announcement-bar {
+    margin: 8px 10px 0;
+  }
+
+  /* The mobile bar is shorter than the logo's black box plus a full bezel, so the bezel thins here. */
+  body.oce-glass .header__row--top {
+    --og-bezel: 3px;
+    --bezel: 3px;
+  }
+
+  /* Trim the logo's black box where it is taller than the bar. */
+  body.oce-glass .header__row--top .header-logo {
+    clip-path: inset(6px 0);
+  }
+
+  body.oce-glass [class^='tlb-bar-'] {
+    max-width: calc(100% - 24px);
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  body.oce-glass .product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 0 1px var(--og-edge-shade), inset 1px 1px 0 var(--og-rim), var(--og-shadow-md);
+  }
+}
+
+body.oce-glass .product-card .card-gallery,
+body.oce-glass .product-card .product-media-container,
+body.oce-glass .product-card .product-media {
+  border-radius: var(--og-radius-well);
+  background-color: transparent;
+}
+
+/* ---------- brand tiles ---------- */
+body.oce-glass .brand-tile {
+  --og-r: var(--og-radius-card);
+  --og-bezel: var(--og-bezel-sm);
+  --og-plate: var(--og-plate-photo);
+  --og-shadow: var(--og-shadow-sm);
+  padding: 10px;
+  overflow: visible;
+  transition: transform 0.2s ease-in-out;
+}
+
+body.oce-glass .brand-tile__img {
+  border-radius: var(--og-radius-well);
+  mix-blend-mode: multiply;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  body.oce-glass .brand-tile:hover {
+    transform: translateY(-3px);
+  }
+}
+
+/* ---------- photo panels: keep the photo, add the glass edge ---------- */
+/* An ::after ring sits above the photo: outer line, then a clear band, like the slab's bezel. */
+/* (No position is set here: these already position themselves, and the carousel depends on its own.) */
+body.oce-glass .ppw__card,
+body.oce-glass .cc-card,
+body.oce-glass .ps-outer {
+  border-radius: var(--og-r, var(--og-radius-card));
+  box-shadow: 0 0 0 1px var(--og-edge-shade), var(--og-shadow-md);
+}
+
+body.oce-glass .ppw__card::after,
+body.oce-glass .cc-card::after,
+body.oce-glass .ps-outer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px var(--og-rim-on-dark), inset 1px 1px 0 var(--og-rim-on-dark),
+    inset 0 0 0 var(--og-bezel-sm) rgba(255, 255, 255, 0.08),
+    inset 0 0 0 calc(var(--og-bezel-sm) + 1px) rgba(255, 255, 255, 0.22);
+}
+
+body.oce-glass .ps-outer {
+  --og-r: var(--og-radius-panel);
+  box-shadow: 0 0 0 1px var(--og-edge-shade), var(--og-shadow-lg);
+}
+
+body.oce-glass .cc-card__media,
+body.oce-glass .cc-card__inner {
+  border-radius: inherit;
+}
+
+/* ---------- product spotlight controls ---------- */
+body.oce-glass .ps__hero-wrap {
+  border-radius: var(--og-radius-card);
+  box-shadow: inset 0 0 0 1px var(--og-rim-on-dark), inset 0 0 0 var(--og-bezel-sm) rgba(255, 255, 255, 0.08);
+}
+
+body.oce-glass .ps__size-btn,
+body.oce-glass .ps__soleplate-btn,
+body.oce-glass .ps__thumb {
+  box-shadow: inset 0 0 0 1px var(--og-rim-on-dark), inset 1px 1px 0 var(--og-rim-on-dark);
+  -webkit-backdrop-filter: blur(var(--og-blur-sm)) saturate(var(--og-saturate));
+  backdrop-filter: blur(var(--og-blur-sm)) saturate(var(--og-saturate));
+}
+
+body.oce-glass .ps__size-btn {
+  border-radius: var(--og-radius-control);
+}
+
+body.oce-glass .ps__buy-btn {
+  border-radius: var(--og-radius-control);
+  box-shadow: inset 0 0 0 1px var(--og-rim), inset 0 0 0 var(--og-edge-sm) rgba(20, 24, 34, 0.08), var(--og-shadow-key);
+}
+
+/* ---------- keys: the theme's buttons, with a glass ring ---------- */
+body.oce-glass main .button:not(.button-unstyled),
+body.oce-glass .cc-card__cta,
+body.oce-glass .bfrh__cta {
+  border-radius: var(--og-radius-control);
+  box-shadow: inset 0 0 0 1px var(--og-rim-on-dark), inset 0 0 0 var(--og-edge-sm) rgba(255, 255, 255, 0.1), var(--og-shadow-key);
+  transition: transform 0.125s ease-in-out, box-shadow 0.125s ease-in-out;
+}
+
+body.oce-glass main .button:not(.button-unstyled):active,
+body.oce-glass .ps__buy-btn:active {
+  transform: scale(0.97);
+  box-shadow: inset 0 0 0 1px rgba(12, 14, 20, 0.25), inset 0 2px 0 rgba(12, 14, 20, 0.3), 0 1px 2px rgba(20, 24, 34, 0.2);
+}
+
+/* carousel arrows: small clear glass keys */
+body.oce-glass .cc-nav {
+  --bezel: 6px;
+  background: var(--og-tint);
+  outline: 1px solid var(--og-rim);
+  outline-offset: -1px;
+  box-shadow: 0 0 0 1px var(--og-edge-shade), inset 1px 1px 0 var(--og-rim), var(--og-shadow-sm);
+  -webkit-backdrop-filter: blur(var(--og-blur-sm)) saturate(var(--og-saturate));
+  backdrop-filter: blur(var(--og-blur-sm)) saturate(var(--og-saturate));
+}
+
+/* ---------- footer: a smoked panel rising from the page ---------- */
+body.oce-glass .shopify-section-group-footer-group > .section-background.color-scheme-5 {
+  background: var(--og-smoke);
+  border-radius: var(--og-radius-panel) var(--og-radius-panel) 0 0;
+  box-shadow: inset 0 1px 0 var(--og-rim-on-dark), inset 1px 0 0 var(--og-rim-on-dark), inset -1px 0 0 rgba(255, 255, 255, 0.12),
+    0 -18px 40px -22px rgba(20, 24, 34, 0.45);
+  -webkit-backdrop-filter: blur(var(--og-blur-lg)) saturate(var(--og-saturate));
+  backdrop-filter: blur(var(--og-blur-lg)) saturate(var(--og-saturate));
+}
+
+/* ---------- refraction: set by oce-glass.js where supported ---------- */
+body.oce-glass .is-refracting::before {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* ---------- focus stays a solid ring outside the glass ---------- */
+body.oce-glass .product-card:focus-within,
+body.oce-glass .brand-tile:focus-visible,
+body.oce-glass .cc-nav:focus-visible {
+  outline: 2px solid var(--og-ink);
+  outline-offset: 3px;
+}
