@@ -44,24 +44,51 @@ class SizeDrillMenu extends HTMLElement {
   }
 
   /**
-   * Desktop: size a size type's numbers so its row fills the full width with the fixed gap.
-   * A row's width grows in a straight line with the type size (the counts and gaps stay fixed),
-   * so two trial sizes give the exact size that fills it. Runs before the row is painted.
-   * If that size would be too small to read, the row wraps onto two lines instead.
+   * Desktop: size a size type's numbers so its row fills the full width with the fixed gap, but
+   * never bigger than US's numbers are when US fills it (so UK, with fewer sizes, doesn't outgrow
+   * US). If the fill size would be too small to read, the row wraps onto two lines instead.
+   * Runs before the row is painted.
    * @param {HTMLElement | null} panel
    */
   #fit(panel) {
     if (this.#isDrawer || !panel || panel.hidden) return;
+
+    const own = this.#fillSize(panel);
+    if (own === null) return;
+    const first = this.querySelector('[data-size-system-panel]');
+    const cap = first instanceof HTMLElement && first !== panel ? this.#fillSize(first) : null;
+    const size = Math.min(MAX_SIZE, own, cap ?? Infinity);
+
+    if (size < MIN_SIZE) {
+      panel.style.fontSize = `${WRAP_SIZE}px`;
+      panel.setAttribute('data-wrap', '');
+    } else {
+      panel.removeAttribute('data-wrap');
+      panel.style.fontSize = `${size}px`;
+    }
+  }
+
+  /**
+   * The type size at which a row of sizes exactly fills the width. A row's width grows in a
+   * straight line with the type size (the counts and gaps stay fixed), so two trial sizes give
+   * it. A hidden row is shown just long enough to measure, within the same frame.
+   * @param {HTMLElement} panel
+   * @returns {number | null}
+   */
+  #fillSize(panel) {
     const items = panel.querySelectorAll(':scope > li');
     const first = items[0];
     const last = items[items.length - 1];
-    if (!(first instanceof HTMLElement) || !(last instanceof HTMLElement)) return;
+    if (!(first instanceof HTMLElement) || !(last instanceof HTMLElement)) return null;
+
+    const wasHidden = panel.hidden;
+    const wasSize = panel.style.fontSize;
+    const wasWrap = panel.hasAttribute('data-wrap');
+    panel.hidden = false;
+    panel.removeAttribute('data-wrap');
 
     // A couple of pixels' margin for rounding, so the last size never crosses the edge
     const available = panel.clientWidth - 2;
-    if (!available) return;
-
-    panel.removeAttribute('data-wrap');
     /** @param {number} size */
     const rowWidth = (size) => {
       panel.style.fontSize = `${size}px`;
@@ -69,16 +96,15 @@ class SizeDrillMenu extends HTMLElement {
     };
     const small = rowWidth(20);
     const large = rowWidth(30);
+
+    panel.hidden = wasHidden;
+    panel.style.fontSize = wasSize;
+    if (wasWrap) panel.setAttribute('data-wrap', '');
+    if (available <= 0) return null;
+
     const perPixel = (large - small) / 10;
     const fixed = small - perPixel * 20;
-    const size = Math.min(MAX_SIZE, Math.floor(((available - fixed) / perPixel) * 10) / 10);
-
-    if (size < MIN_SIZE) {
-      panel.style.fontSize = `${WRAP_SIZE}px`;
-      panel.setAttribute('data-wrap', '');
-    } else {
-      panel.style.fontSize = `${size}px`;
-    }
+    return Math.floor(((available - fixed) / perPixel) * 10) / 10;
   }
 
   get #isDrawer() {
