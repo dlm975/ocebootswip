@@ -4186,8 +4186,6 @@ text-component {
 .bfsale-price-line--pdp:has(.sale-badge) {
   align-items: baseline;
   column-gap: 12px;
-  row-gap: 6px;
-  padding-block-start: 0;
 }
 
 .bfsale-price-line--pdp:has(.sale-badge) .bfsale-now {
@@ -4199,7 +4197,7 @@ text-component {
   font-size: 15px;
 }
 
-.bfsale-price-line--pdp:has(.sale-badge) .sale-badge {
+.bfsale-price-line--pdp:has(.sale-badge) .bfsale-fire {
   order: 3;
   align-self: center;
 }

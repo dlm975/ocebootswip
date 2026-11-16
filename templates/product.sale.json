@@ -189,8 +189,7 @@
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
               },
-              "blocks": {},
-              "disabled": true
+              "blocks": {}
             },
             "buy_buttons_pKHp9V": {
               "type": "buy-buttons",

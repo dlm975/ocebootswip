@@ -188,8 +188,7 @@
                 "background": "#e7f6ee",
                 "text_color": "#15803d"
               },
-              "blocks": {},
-              "disabled": true
+              "blocks": {}
             },
             "variant_picker_KALzja": {
               "type": "variant-picker",
@@ -215,8 +214,7 @@
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
               },
-              "blocks": {},
-              "disabled": true
+              "blocks": {}
             },
             "buy_buttons_pKHp9V": {
               "type": "buy-buttons",
@@ -276,13 +274,12 @@
               "type": "product-star-rating",
               "settings": {
                 "show_stars": true,
-                "text": "1000+ happy customers",
+                "text": "1000+ HAPPY CUSTOMERS",
                 "star_color": "#14b554",
                 "text_color": "#15803d",
                 "star_size": 13
               },
-              "blocks": {},
-              "disabled": true
+              "blocks": {}
             },
             "addon_offer_001": {
               "type": "product-addons",

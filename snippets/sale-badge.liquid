@@ -1,10 +1,9 @@
 {%- doc -%}
-  Flat sale badge: a copy of bfsale-badge restyled for the redesign. Same placement and the same
-  percentage as the original; upright Inter, mixed case ("35% off"), solid accent colour, 2px corners,
-  no flames and no shadow.
+  Sale badge for the redesign: a copy of bfsale-badge with only the font changed. Same flames, colours,
+  outline, shadow and placement; the text is set in the brand font (upright Inter) and reads "35% off".
 
-  On cards it sits in a zero-height anchor placed right after the card image, so it rests on the image's
-  bottom-left corner. With inline: true it renders on its own, for the product page price row.
+  It reuses the original's markup classes (bfsale-fire, bfsale-badge-anchor, bfsale-badge), so the
+  flames, positioning and colours come from snippets/bfsale-badge; .sale-badge only swaps the font.
 
   Chosen with Theme settings > Badges > "Sale badge style". The original stays in snippets/bfsale-badge.
 
@@ -20,64 +19,34 @@
   endif
 -%}
 
-{%- capture sb_badge -%}
-  <span
-    class="sale-badge {% if inline %}sale-badge--inline{% else %}sale-badge--card{% endif %}"
-    {% if sb_percent <= 0 %}
-      hidden
-    {% endif %}
-  >
-    {%- if sb_percent > 0 %}{{ sb_percent }}% off{% endif -%}
+{%- capture sb_fire -%}
+  <span class="bfsale-fire {% if inline %}bfsale-fire--inline{% else %}bfsale-fire--card{% endif %}" data-bfsale-fire{% if sb_percent <= 0 %} hidden{% endif %}>
+    <span class="bfsale-fire__flames" aria-hidden="true">
+      {%- for i in (1..7) -%}<i class="bfsale-fire__flame"></i>{%- endfor -%}
+      {%- for i in (1..3) -%}<i class="bfsale-fire__ember"></i>{%- endfor -%}
+    </span>
+    <span class="bfsale-badge sale-badge" data-bfsale-badge>
+      {%- if sb_percent > 0 %}{{ sb_percent }}% off{% endif -%}
+    </span>
   </span>
 {%- endcapture -%}
 
 {%- if inline -%}
-  {{ sb_badge }}
+  {{ sb_fire }}
 {%- else -%}
-  <div class="sale-badge-anchor">{{ sb_badge }}</div>
+  <div class="bfsale-badge-anchor">{{ sb_fire }}</div>
 {%- endif -%}
 
 {% stylesheet %}
-  .sale-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.3em 0.55em;
-    border-radius: 2px;
-    background: #ba2fff;
-    color: #000;
+  /* Only the font differs from the original badge. The original's padding is tuned for Oswald italic
+     (low capitals, glyphs leaning right); upright Inter sits centred, so the padding evens out. */
+  .bfsale-badge.sale-badge {
     font-family: var(--font-body--family);
     font-style: normal;
-    font-weight: 600;
-    font-size: 0.8125rem;
-    line-height: 1;
+    font-weight: 750;
     letter-spacing: 0;
     font-variant-numeric: tabular-nums;
     text-transform: none;
-    white-space: nowrap;
-  }
-
-  .sale-badge[hidden] {
-    display: none;
-  }
-
-  /* Card: zero-height anchor right after the image; the badge sits on its bottom-left corner */
-  .sale-badge-anchor {
-    position: relative;
-    width: 100%;
-    height: 0;
-    margin-block-start: calc(-1 * var(--bfsale-anchor-gap, 0px));
-    z-index: var(--layer-raised, 2);
-  }
-
-  .sale-badge--card {
-    position: absolute;
-    left: 0;
-    bottom: 6px;
-    font-size: 0.75rem;
-    pointer-events: none;
-  }
-
-  [product-grid-view='zoom-out'] .sale-badge-anchor {
-    display: none;
+    padding: 0.38em 0.85em 0.36em;
   }
 {% endstylesheet %}

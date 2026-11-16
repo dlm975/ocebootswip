@@ -105,7 +105,7 @@
 
     /* Upright, mixed case, one family everywhere. Custom sections pick their own fonts (Oswald,
        Inter Italic) and caps in the editor, so this overrides them; the BFSALE badge is left alone. */
-    body *:not(.bfsale-badge, .bfsale-badge *) {
+    body *:not(.bfsale-badge:not(.sale-badge)) {
       font-family: var(--font-oce) !important; /* stylelint-disable-line declaration-no-important */
       font-style: normal !important; /* stylelint-disable-line declaration-no-important */
       text-transform: none !important; /* stylelint-disable-line declaration-no-important */
@@ -161,10 +161,9 @@
       color: var(--color-foreground-heading, #000);
     }
 
+    /* "Was" price muted; the struck line is the theme's own (a diagonal on sale prices) */
     :root :is(.bfsale-rrp__amount, .compare-at-price) {
       color: rgb(var(--color-foreground-rgb) / 0.5);
-      text-decoration: line-through;
-      text-decoration-color: currentColor;
     }
 
     :root .bfsale-price:not(.price) {
