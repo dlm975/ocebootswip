@@ -10,6 +10,9 @@ import { onAnimationEnd } from '@theme/utilities';
  *
  * @extends {Component<Refs>}
  */
+/** Timing for the menu items sliding in and out */
+const RETURN_TIMING = { duration: 550, easing: 'cubic-bezier(0.3, 0.7, 0.3, 1)' };
+
 class HeaderDrawer extends Component {
   requiredRefs = ['details'];
 
@@ -77,42 +80,67 @@ class HeaderDrawer extends Component {
   }
 
   /**
-   * Open a submenu, or close it if it's already open (its row shows an X while open)
+   * Open a menu item in place, or close it if it's already open (its row shows an X while open).
+   * Opening hides the other items and slides its title up to the top; closing slides the items
+   * above back down from the top of the menu and those below up from the bottom.
    * @param {Event} event
    */
   toggleSubmenu(event) {
     const details = this.#getDetailsElement(event);
-    if (details?.hasAttribute('open')) {
+    if (!details) return;
+    const summary = details.querySelector('summary');
+    const before = summary?.getBoundingClientRect().top ?? 0;
+
+    if (details.hasAttribute('open')) {
       event.preventDefault();
-      this.#swipeInItemsBelow(details);
+      details.addEventListener('toggle', () => this.#revealSiblings(details, before), { once: true });
       this.#close(details);
     } else {
       this.open(event);
+      // The details opens after this click, which hides the other items: slide the title from where it was
+      requestAnimationFrame(() => {
+        if (!summary || this.#reducedMotion) return;
+        const shift = before - summary.getBoundingClientRect().top;
+        if (shift) summary.animate([{ transform: `translateY(${shift}px)` }, { transform: 'none' }], RETURN_TIMING);
+      });
     }
   }
 
-  /**
-   * The menu items below an open drill-down are hidden; when it closes they swipe up from the
-   * bottom of the menu container as they reappear (CSS: .menu-drawer__menu--returning).
-   * @param {HTMLDetailsElement} details
-   */
-  #swipeInItemsBelow(details) {
-    const item = details.closest('li');
-    const list = item?.parentElement;
-    const container = details.closest('.menu-drawer') ?? list;
-    if (!item || !list || !container) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  get #reducedMotion() {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
 
-    const bottom = container.getBoundingClientRect().bottom;
-    const top = (details.querySelector('summary') ?? item).getBoundingClientRect().bottom;
-    list.style.setProperty('--return-from', `${Math.max(bottom - top, 0)}px`);
-    let index = 0;
-    for (let sibling = item.nextElementSibling; sibling; sibling = sibling.nextElementSibling) {
-      if (sibling instanceof HTMLElement) sibling.style.setProperty('--return-index', String(index++));
+  /**
+   * After a menu item closes, its siblings reappear: those above slide down from the top of the
+   * menu, those below slide up from its bottom, and the item's title slides back into place.
+   * @param {HTMLDetailsElement} details
+   * @param {number} titleTop - Where the item's title was while open
+   */
+  #revealSiblings(details, titleTop) {
+    const item = details.closest('li');
+    const container = details.closest('.menu-drawer');
+    if (!item?.parentElement || !container || this.#reducedMotion) return;
+
+    const box = container.getBoundingClientRect();
+    const summary = details.querySelector('summary');
+    if (summary) {
+      const shift = titleTop - summary.getBoundingClientRect().top;
+      if (shift) summary.animate([{ transform: `translateY(${shift}px)` }, { transform: 'none' }], RETURN_TIMING);
     }
-    list.classList.add('menu-drawer__menu--returning');
-    clearTimeout(this.returnTimer);
-    this.returnTimer = setTimeout(() => list.classList.remove('menu-drawer__menu--returning'), 1200);
+
+    const siblings = [...item.parentElement.children].filter((el) => el instanceof HTMLElement);
+    const index = siblings.indexOf(item);
+    siblings.forEach((el, i) => {
+      if (el === item) return;
+      const rect = el.getBoundingClientRect();
+      const from = i < index ? box.top - rect.bottom : box.bottom - rect.top;
+      const distance = Math.abs(i - index) - 1;
+      el.animate([{ transform: `translateY(${from}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }], {
+        ...RETURN_TIMING,
+        delay: distance * 50,
+        fill: 'backwards',
+      });
+    });
   }
 
   /**
