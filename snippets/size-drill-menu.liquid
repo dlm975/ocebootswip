@@ -308,6 +308,8 @@
      longest list), with the type scaled to that pitch. */
   .size-drill--desktop .size-drill__panels {
     display: grid;
+    /* Exactly the width available: a row's own length must never widen it */
+    grid-template-columns: minmax(0, 1fr);
         /* As tall as the US / UK / EU column whichever sizes are open, so the dropdown never resizes */
     height: calc(3 * var(--size-drill-system-row));
   }
@@ -316,6 +318,7 @@
   .size-drill--desktop .size-drill__sizes {
     grid-area: 1 / 1;
     align-self: start;
+    min-width: 0;
     display: flex;
     justify-content: flex-start;
     align-items: center;

@@ -11,7 +11,7 @@ const canHover = () => window.matchMedia('(hover: hover) and (pointer: fine)').m
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const TIMING = { duration: 550, easing: 'cubic-bezier(0.3, 0.7, 0.3, 1)' };
 /** Desktop size type: largest, smallest before wrapping, and wrapped (px) */
-const MAX_SIZE = 44;
+const MAX_SIZE = 64;
 const MIN_SIZE = 18;
 const WRAP_SIZE = 22;
 
