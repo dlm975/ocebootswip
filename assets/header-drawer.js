@@ -97,17 +97,18 @@ class HeaderDrawer extends Component {
       return;
     }
 
-    // Opening: the details opens right after this click and the other items hide. Before that
-    // frame is painted, slide the title up from where it was and ease the panel to its new height.
+    // Opening: open the details here rather than natively after the click, so the other items
+    // hiding, the title sliding up from where it was and the panel easing to its new height all
+    // start in the same frame.
+    event.preventDefault();
     const titleTop = summary.getBoundingClientRect().top;
     const panel = details.closest('.menu-drawer');
     const panelHeight = panel?.getBoundingClientRect().height ?? 0;
+    details.setAttribute('open', '');
     this.open(event);
-    requestAnimationFrame(() => {
-      if (this.#reducedMotion) return;
-      this.#slide(summary, titleTop - summary.getBoundingClientRect().top);
-      this.#easeHeight(panel, panelHeight);
-    });
+    if (this.#reducedMotion) return;
+    this.#slide(summary, titleTop - summary.getBoundingClientRect().top);
+    this.#easeHeight(panel, panelHeight);
   }
 
   get #reducedMotion() {
