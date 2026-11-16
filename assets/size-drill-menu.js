@@ -11,7 +11,7 @@ const canHover = () => window.matchMedia('(hover: hover) and (pointer: fine)').m
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const TIMING = { duration: 550, easing: 'cubic-bezier(0.3, 0.7, 0.3, 1)' };
 /** Desktop size type: largest, smallest before wrapping, and wrapped (px) */
-const MAX_SIZE = 64;
+const MAX_SIZE = 72;
 const MIN_SIZE = 18;
 const WRAP_SIZE = 22;
 
@@ -57,7 +57,8 @@ class SizeDrillMenu extends HTMLElement {
     const last = items[items.length - 1];
     if (!(first instanceof HTMLElement) || !(last instanceof HTMLElement)) return;
 
-    const available = panel.clientWidth;
+    // A couple of pixels' margin for rounding, so the last size never crosses the edge
+    const available = panel.clientWidth - 2;
     if (!available) return;
 
     panel.removeAttribute('data-wrap');
