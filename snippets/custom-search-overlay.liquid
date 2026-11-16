@@ -22,7 +22,7 @@
   aria-modal="true"
   data-suggest-url="{{ routes.predictive_search_url }}"
   data-search-url="{{ routes.search_url }}"
-  inert
+  class="cs-idle"
 >
   <div class="cs-sheet">
     <div class="cs-bar">
@@ -110,14 +110,20 @@
     color: var(--cs-ink);
     font-family: var(--font-body--family);
     opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.25s ease-out, visibility 0s linear 0.25s;
+    pointer-events: none;
+    transition: opacity 0.25s ease-out;
   }
 
   #cs-overlay.cs-open {
     opacity: 1;
-    visibility: visible;
-    transition: opacity 0.25s ease-out, visibility 0s;
+    pointer-events: auto;
+  }
+
+  /* Fully closed (after the fade): out of reach of taps, Tab and screen readers. Removed, and the
+     page made to notice, before the field is focused on opening, so iOS Safari will focus it and
+     bring up the keyboard. */
+  #cs-overlay.cs-idle {
+    visibility: hidden;
   }
 
   html.cs-locked,
@@ -706,11 +712,15 @@
 
     /* ---------- Open / close ---------- */
     let opener = null;
+    let idleTimer = null;
 
     function openSearch(initialQuery) {
       if (overlay.classList.contains('cs-open')) return;
       opener = document.activeElement;
-      overlay.removeAttribute('inert');
+      clearTimeout(idleTimer);
+      overlay.classList.remove('cs-idle');
+      // Make the browser take in that the sheet is visible before focusing inside it
+      void overlay.offsetWidth;
       overlay.classList.add('cs-open');
       overlay.setAttribute('aria-hidden', 'false');
       document.documentElement.classList.add('cs-locked');
@@ -731,7 +741,6 @@
       if (!overlay.classList.contains('cs-open')) return;
       overlay.classList.remove('cs-open');
       overlay.setAttribute('aria-hidden', 'true');
-      overlay.setAttribute('inert', '');
       document.documentElement.classList.remove('cs-locked');
       input.blur();
       clearTimeout(timer);
@@ -745,8 +754,10 @@
           /* nothing to return to */
         }
       }
-      setTimeout(function () {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(function () {
         if (!overlay.classList.contains('cs-open')) {
+          overlay.classList.add('cs-idle');
           input.value = '';
           field.classList.remove('cs-has-query');
           showEmpty();
