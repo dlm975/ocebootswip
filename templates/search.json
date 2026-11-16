@@ -1,48 +1,11 @@
 {
   "sections": {
     "search": {
-      "type": "search-header",
-      "blocks": {
-        "heading": {
-          "type": "_heading",
-          "static": true,
-          "settings": {
-            "type_preset": "h2",
-            "font": "var(--font-primary--family)",
-            "font_size": "",
-            "line_height": "normal",
-            "letter_spacing": "normal",
-            "case": "none",
-            "wrap": "pretty",
-            "color": "",
-            "text": "",
-            "read_only": true,
-            "alignment": "left",
-            "show_alignment": true,
-            "padding-block-start": 0,
-            "padding-block-end": 0,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
-          },
-          "blocks": {}
-        },
-        "search": {
-          "type": "_search-input",
-          "static": true,
-          "settings": {
-            "width": "custom",
-            "custom_width": 50,
-            "inherit_color_scheme": true,
-            "color_scheme": ""
-          },
-          "blocks": {}
-        }
-      },
+      "type": "search-summary",
       "settings": {
-        "alignment": "flex-start",
         "color_scheme": "scheme-1",
         "padding-block-start": 40,
-        "padding-block-end": 0
+        "padding-block-end": 24
       }
     },
     "main": {
