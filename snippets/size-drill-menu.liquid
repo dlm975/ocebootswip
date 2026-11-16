@@ -308,13 +308,11 @@
      longest list), with the type scaled to that pitch. */
   .size-drill--desktop .size-drill__panels {
     display: grid;
-    container-type: inline-size;
-    /* As tall as the US / UK / EU column whichever sizes are open, so the dropdown never resizes */
+        /* As tall as the US / UK / EU column whichever sizes are open, so the dropdown never resizes */
     height: calc(3 * var(--size-drill-system-row));
   }
 
-  /* One row with equal gaps between sizes; the type is as big as the width allows for the longest
-     list (EU) to fit, and every size type uses the same size and gap */
+  /* One row with equal, fixed gaps between sizes, the type scaled so the row fills the width */
   .size-drill--desktop .size-drill__sizes {
     grid-area: 1 / 1;
     align-self: start;
@@ -322,9 +320,10 @@
     justify-content: flex-start;
     align-items: center;
     align-content: flex-start;
-    /* One gap for every size type, scaled with the type */
-    column-gap: 0.5em;
-    font-size: clamp(1rem, calc(100cqi / (var(--size-drill-columns) * 2.9)), 1.75rem);
+    /* The gap stays put; the type is sized (assets/size-drill-menu.js) so each size type's row
+       fills the full width. This is the size before that runs. */
+    column-gap: 12px;
+    font-size: 1.375rem;
     height: var(--size-drill-size-row);
     /* On the same line as its system (US sizes level with US, UK with UK, EU with EU), centred on
        it whether the sizes take one row or wrap onto two */
@@ -344,14 +343,15 @@
     gap: 2px;
   }
 
-  /* Too narrow for one row at a readable size: wrap onto two rows, same gap throughout */
-  @container (max-width: 1100px) {
-    .size-drill--desktop .size-drill__sizes {
-      flex-wrap: wrap;
-      row-gap: 10px;
-      height: auto;
-      font-size: 1.375rem;
-    }
+  .size-drill--desktop .size-drill__sizes > li {
+    flex: none;
+  }
+
+  /* Too narrow to fill one row at a readable size (set by the script): wrap onto two rows */
+  .size-drill--desktop .size-drill__sizes[data-wrap] {
+    flex-wrap: wrap;
+    row-gap: 10px;
+    height: auto;
   }
 
   /* Choosing a system shifts the whole list left (from under "Shop by Size" to the dropdown's

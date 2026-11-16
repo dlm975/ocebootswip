@@ -10,14 +10,27 @@
 const canHover = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const TIMING = { duration: 550, easing: 'cubic-bezier(0.3, 0.7, 0.3, 1)' };
+/** Desktop size type: largest, smallest before wrapping, and wrapped (px) */
+const MAX_SIZE = 44;
+const MIN_SIZE = 18;
+const WRAP_SIZE = 22;
 
 class SizeDrillMenu extends HTMLElement {
   #controller = new AbortController();
   /** @type {Animation | null} */
   #heightAnimation = null;
 
+  /** @type {ResizeObserver | null} */
+  #resizeObserver = null;
+
   connectedCallback() {
     const { signal } = this.#controller;
+
+    // Desktop: keep the open row filling the width as the window changes
+    if (!this.#isDrawer && this.#panels) {
+      this.#resizeObserver = new ResizeObserver(() => this.#fit(this.#openPanel));
+      this.#resizeObserver.observe(this.#panels);
+    }
 
     this.addEventListener('pointerover', this.#onPointerOver, { signal });
     this.addEventListener('pointerleave', this.#onPointerLeave, { signal });
@@ -27,6 +40,44 @@ class SizeDrillMenu extends HTMLElement {
 
   disconnectedCallback() {
     this.#controller.abort();
+    this.#resizeObserver?.disconnect();
+  }
+
+  /**
+   * Desktop: size a size type's numbers so its row fills the full width with the fixed gap.
+   * A row's width grows in a straight line with the type size (the counts and gaps stay fixed),
+   * so two trial sizes give the exact size that fills it. Runs before the row is painted.
+   * If that size would be too small to read, the row wraps onto two lines instead.
+   * @param {HTMLElement | null} panel
+   */
+  #fit(panel) {
+    if (this.#isDrawer || !panel || panel.hidden) return;
+    const items = panel.querySelectorAll(':scope > li');
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (!(first instanceof HTMLElement) || !(last instanceof HTMLElement)) return;
+
+    const available = panel.clientWidth;
+    if (!available) return;
+
+    panel.removeAttribute('data-wrap');
+    /** @param {number} size */
+    const rowWidth = (size) => {
+      panel.style.fontSize = `${size}px`;
+      return last.offsetLeft + last.offsetWidth - first.offsetLeft;
+    };
+    const small = rowWidth(20);
+    const large = rowWidth(30);
+    const perPixel = (large - small) / 10;
+    const fixed = small - perPixel * 20;
+    const size = Math.min(MAX_SIZE, Math.floor(((available - fixed) / perPixel) * 10) / 10);
+
+    if (size < MIN_SIZE) {
+      panel.style.fontSize = `${WRAP_SIZE}px`;
+      panel.setAttribute('data-wrap', '');
+    } else {
+      panel.style.fontSize = `${size}px`;
+    }
   }
 
   get #isDrawer() {
@@ -69,6 +120,8 @@ class SizeDrillMenu extends HTMLElement {
     }
     if (button) this.setAttribute('data-active', '');
     else this.removeAttribute('data-active');
+
+    this.#fit(this.#openPanel);
 
     if (!animate) return;
 
