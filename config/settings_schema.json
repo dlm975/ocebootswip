@@ -330,8 +330,8 @@
       {
         "type": "checkbox",
         "id": "brand_font",
-        "label": "Use Anybody brand font",
-        "info": "Anybody, loaded from Google Fonts, at a different width and weight for headings, product titles, prices, sizes, buttons and body text. Used instead of the fonts picked below.",
+        "label": "Use Inter display brand font",
+        "info": "Inter from Google Fonts with its optical-size axis: upright, mixed case, a single family for every role. Used instead of the fonts picked below.",
         "default": true
       },
       {

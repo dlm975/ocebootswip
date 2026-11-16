@@ -39,7 +39,7 @@
     justify-content: center;
     gap: 8px;
     color: {{ block.settings.text_color }};
-    font-family: {{ block.settings.main_button_font.family }}, {{ block.settings.main_button_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.main_button_font.family }}, {{ block.settings.main_button_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.main_button_font.weight }};
     font-size: {{ block.settings.main_button_font_size }}px;
   }
@@ -76,7 +76,7 @@
     padding: 10px 20px;
     cursor: pointer;
     color: {{ block.settings.text_color }};
-    font-family: {{ block.settings.size_type_font.family }}, {{ block.settings.size_type_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.size_type_font.family }}, {{ block.settings.size_type_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.size_type_font.weight }};
     font-size: {{ block.settings.size_type_font_size }}px;
     transition: all 0.3s ease;
@@ -123,7 +123,7 @@
 
   .ai-sticky-nav-size-list-title-{{ ai_gen_id }} {
     color: {{ block.settings.text_color }};
-    font-family: {{ block.settings.size_type_font.family }}, {{ block.settings.size_type_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.size_type_font.family }}, {{ block.settings.size_type_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.size_type_font.weight }};
     font-size: {{ block.settings.size_type_font_size }}px;
     margin: 0;
@@ -159,7 +159,7 @@
     border-radius: {{ block.settings.size_button_radius }}px;
     color: {{ block.settings.text_color }};
     text-decoration: none;
-    font-family: {{ block.settings.size_type_font.family }}, {{ block.settings.size_type_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.size_type_font.family }}, {{ block.settings.size_type_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.size_type_font.weight }};
     font-size: {{ block.settings.size_type_font_size }}px;
     transition: all 0.3s ease;

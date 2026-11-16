@@ -3,7 +3,7 @@
     "sale_hero": {
       "type": "sale-collection-hero",
       "settings": {
-        "label": "LIMITED TIME",
+        "label": "Limited time",
         "heading": "",
         "subtext": "",
         "image": "",

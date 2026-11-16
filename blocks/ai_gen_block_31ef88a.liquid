@@ -29,14 +29,14 @@
   }
 
   .ai-variant-picker__option-name-{{ ai_gen_id }} {
-    font-family: {{ block.settings.title_font.family }}, {{ block.settings.title_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.title_font.family }}, {{ block.settings.title_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.title_font.weight }};
-    font-style: {{ block.settings.title_font.style }};
+    font-style: {% if settings.brand_font %}normal{% else %}{{ block.settings.title_font.style }}{% endif %};
     font-size: {{ block.settings.title_font_size }}px;
     color: {{ block.settings.title_color }};
     text-align: center;
     {% if block.settings.title_text_transform == 'uppercase' %}
-      text-transform: uppercase;
+      text-transform: none;
     {% endif %}
   }
 
@@ -81,16 +81,16 @@
   }
 
   .ai-variant-picker__value-{{ ai_gen_id }} {
-    font-family: {{ block.settings.label_font.family }}, {{ block.settings.label_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.label_font.family }}, {{ block.settings.label_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.label_font.weight }};
-    font-style: {{ block.settings.label_font.style }};
+    font-style: {% if settings.brand_font %}normal{% else %}{{ block.settings.label_font.style }}{% endif %};
     font-size: {{ block.settings.label_font_size }}px;
     flex: 1;
     text-align: center;
     overflow: hidden;
     text-overflow: ellipsis;
     {% if block.settings.label_text_transform == 'uppercase' %}
-      text-transform: uppercase;
+      text-transform: none;
     {% endif %}
   }
 
@@ -138,9 +138,9 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-family: {{ block.settings.label_font.family }}, {{ block.settings.label_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.label_font.family }}, {{ block.settings.label_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.label_font.weight }};
-    font-style: {{ block.settings.label_font.style }};
+    font-style: {% if settings.brand_font %}normal{% else %}{{ block.settings.label_font.style }}{% endif %};
   }
 
   .ai-variant-picker__dropdown-item-{{ ai_gen_id }}:hover {

@@ -38,9 +38,9 @@
     background: none;
     border: none;
     color: {{ block.settings.text_color }};
-    font-family: {{ block.settings.main_button_font.family }}, {{ block.settings.main_button_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.main_button_font.family }}, {{ block.settings.main_button_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.main_button_font.weight }};
-    font-style: {{ block.settings.main_button_font.style }};
+    font-style: {% if settings.brand_font %}normal{% else %}{{ block.settings.main_button_font.style }}{% endif %};
     font-size: {{ block.settings.font_size }}px;
     cursor: pointer;
     padding: 8px 16px;
@@ -80,9 +80,9 @@
   .ai-sticky-nav-option-btn-{{ ai_gen_id }} {
     background: {{ block.settings.option_bg_color }};
     color: {{ block.settings.option_text_color }};
-    font-family: {{ block.settings.size_type_font.family }}, {{ block.settings.size_type_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.size_type_font.family }}, {{ block.settings.size_type_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.size_type_font.weight }};
-    font-style: {{ block.settings.size_type_font.style }};
+    font-style: {% if settings.brand_font %}normal{% else %}{{ block.settings.size_type_font.style }}{% endif %};
     border: 1px solid {{ block.settings.option_border_color }};
     border-radius: {{ block.settings.option_border_radius }}px;
     padding: 8px 20px;
@@ -130,9 +130,9 @@
 
   .ai-sticky-nav-sizes-title-{{ ai_gen_id }} {
     color: {{ block.settings.text_color }};
-    font-family: {{ block.settings.size_type_font.family }}, {{ block.settings.size_type_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.size_type_font.family }}, {{ block.settings.size_type_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.size_type_font.weight }};
-    font-style: {{ block.settings.size_type_font.style }};
+    font-style: {% if settings.brand_font %}normal{% else %}{{ block.settings.size_type_font.style }}{% endif %};
     font-size: {{ block.settings.font_size }}px;
     margin: 0;
   }

@@ -28,18 +28,18 @@
             "hole_color": "#BA2FFF",
             "hole_glow_color": "#B8B8B8",
             "animate": true,
-            "heading": "SALE IS LIVE",
+            "heading": "Sale is live",
             "heading_font": "oswald_n7",
             "heading_size_desktop": 95,
             "heading_size_mobile": 105,
             "text_color": "#ffffff",
-            "offer_text": "UP TO [x]% OFF",
+            "offer_text": "Up to [x]% off",
             "offer_percent": 90,
             "offer_font": "oswald_n7",
             "offer_size_desktop": 35,
             "offer_size_mobile": 50,
             "offer_color": "#ffffff",
-            "button_text": "SHOP NOW",
+            "button_text": "Shop now",
             "button_font": "oswald_n7",
             "button_link": "shopify://collections/black-friday-2026",
             "button_background": "#ffffff",
@@ -160,7 +160,7 @@
         "trusted_logos_001": {
           "type": "trusted-logos-bar",
           "settings": {
-            "heading_text": "AS WORN IN LEAGUES",
+            "heading_text": "As worn in leagues",
             "label_size": 12,
             "label_color": "#111111",
             "header_gap": 6,
@@ -399,7 +399,7 @@
           "type": "player",
           "settings": {
             "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_20_42_PM.png",
-            "name": "CAMERON ARCHER",
+            "name": "Cameron Archer",
             "club": "Southampton F.C.",
             "club_badge": "shopify://shop_images/FC_Southampton.svg",
             "flag": "shopify://shop_images/Flag_of_England.svg",
@@ -415,7 +415,7 @@
             "club": "FC Schalke 04",
             "club_badge": "shopify://shop_images/FC_Schalke_04_Logo.svg",
             "flag": "shopify://shop_images/Flag_of_France_svg.webp",
-            "boot_name": "HYPERVENOM PHANTOM 3",
+            "boot_name": "Hypervenom Phantom 3",
             "link": ""
           }
         },
@@ -423,11 +423,11 @@
           "type": "player",
           "settings": {
             "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_15_51_PM.png",
-            "name": "NICHOLAS PIERINI",
+            "name": "Nicholas Pierini",
             "club": "US SASSUOLO",
             "club_badge": "shopify://shop_images/US_Sassuolo_Calcio_logo.svg",
             "flag": "shopify://shop_images/Flag_of_Italy.svg",
-            "boot_name": "MERCURIAL VAPOR 8 'CLASH'",
+            "boot_name": "Mercurial Vapor 8 'Clash'",
             "link": ""
           }
         },
@@ -435,11 +435,11 @@
           "type": "player",
           "settings": {
             "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_24_21_PM.png",
-            "name": "LOIS OPENDA",
-            "club": "OLYMPIQUE LYONNAIS",
+            "name": "Lois Openda",
+            "club": "Olympique Lyonnais",
             "club_badge": "shopify://shop_images/Olympique_Lyonnais_logo.svg",
             "flag": "shopify://shop_images/Flag_of_Belgium.svg",
-            "boot_name": "PREDATOR LZ INSTINCT",
+            "boot_name": "Predator LZ Instinct",
             "link": ""
           }
         },
@@ -447,11 +447,11 @@
           "type": "player",
           "settings": {
             "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_30_25_PM.png",
-            "name": "GARANG KUOL",
-            "club": "SPARTA PRAGUE",
+            "name": "Garang Kuol",
+            "club": "Sparta Prague",
             "club_badge": "shopify://shop_images/AC-Sparta-LOGO2021.svg",
             "flag": "shopify://shop_images/Flag_of_Australia__converted.svg",
-            "boot_name": "PHANTOM GT SG-PRO",
+            "boot_name": "Phantom GT SG-Pro",
             "link": ""
           }
         },
@@ -459,11 +459,11 @@
           "type": "player",
           "settings": {
             "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_37_36_PM.png",
-            "name": "CAMERON HARPER",
-            "club": "NEW YORK RED BULLS",
+            "name": "Cameron Harper",
+            "club": "New York Red Bulls",
             "club_badge": "shopify://shop_images/New_York_Red_Bulls_logo.svg",
             "flag": "shopify://shop_images/Flag_of_the_United_States__DDD-F-416E_specifications.svg",
-            "boot_name": "MERCURIAL VAPOR 12",
+            "boot_name": "Mercurial Vapor 12",
             "link": ""
           }
         }
@@ -479,7 +479,7 @@
       "name": "Pro Player Wall",
       "settings": {
         "roster_source": "shared",
-        "heading": "TRUSTED BY THE PRO'S",
+        "heading": "Trusted by the pros",
         "subheading": "",
         "show_stars": true,
         "star_color": "#14b554",

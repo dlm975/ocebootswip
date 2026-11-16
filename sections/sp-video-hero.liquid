@@ -16,7 +16,7 @@
       font-size: {{ section.settings.text_size }}px;
       {% endif %}
       {% if section.settings.override_fonts %}
-      font-family: {{ section.settings.text_font.family }}, {{ section.settings.text_font.fallback_families }};
+      font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ section.settings.text_font.family }}, {{ section.settings.text_font.fallback_families }}{% endif %};
       font-weight: {{ section.settings.text_font.weight }};
       {% endif %}
       {% if section.settings.text_line_height != 'inherit' %}line-height: {{ section.settings.text_line_height }};{% endif %}
@@ -40,7 +40,7 @@
     font-size: {{ section.settings.text_size }}px;
     {% endif %}
     {% if section.settings.override_fonts %}
-    font-family: {{ section.settings.text_font.family }}, {{ section.settings.text_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ section.settings.text_font.family }}, {{ section.settings.text_font.fallback_families }}{% endif %};
     font-weight: {{ section.settings.text_font.weight }};
     {% endif %}
     {% if section.settings.text_line_height != 'inherit' %}line-height: {{ section.settings.text_line_height }};{% endif %}
@@ -82,7 +82,7 @@
       font-size: {{ section.settings.headline_size }}px;
       {% endif %}
       {% if section.settings.override_fonts %}
-      font-family: {{ section.settings.headline_font.family }}, {{ section.settings.headline_font.fallback_families }};
+      font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ section.settings.headline_font.family }}, {{ section.settings.headline_font.fallback_families }}{% endif %};
       font-weight: {{ section.settings.headline_font.weight }};
       {% endif %}
       {% if section.settings.headline_line_height != 'inherit' %}line-height: {{ section.settings.headline_line_height }};{% endif %}

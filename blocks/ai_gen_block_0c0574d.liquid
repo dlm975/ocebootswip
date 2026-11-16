@@ -31,9 +31,9 @@
   }
 
   .ai-featured-collection__title-{{ ai_gen_id }} {
-    font-family: {{ block.settings.heading_font.family }}, {{ block.settings.heading_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.heading_font.family }}, {{ block.settings.heading_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.heading_font.weight }};
-    font-style: {{ block.settings.heading_font.style }};
+    font-style: {% if settings.brand_font %}normal{% else %}{{ block.settings.heading_font.style }}{% endif %};
     font-size: {{ block.settings.heading_size }}px;
     color: {{ block.settings.heading_color }};
     margin: 0 0 12px;

@@ -73,7 +73,7 @@
     border-radius: {{ block.settings.pill_border_radius }}px;
     padding: {{ block.settings.pill_padding_vertical }}px {{ block.settings.pill_padding_horizontal }}px;
     font-size: {{ block.settings.pill_font_size }}px;
-    font-family: {{ block.settings.pill_font.family }}, {{ block.settings.pill_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.pill_font.family }}, {{ block.settings.pill_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.pill_font.weight }};
     white-space: nowrap;
   }

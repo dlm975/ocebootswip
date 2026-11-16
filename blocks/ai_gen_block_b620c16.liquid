@@ -131,9 +131,9 @@
 
   .ai-hero-heading-{{ ai_gen_id }} {
     color: {{ block.settings.text_color }};
-    font-family: {{ block.settings.heading_font.family }}, {{ block.settings.heading_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.heading_font.family }}, {{ block.settings.heading_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.heading_font.weight }};
-    font-style: {{ block.settings.heading_font.style }};
+    font-style: {% if settings.brand_font %}normal{% else %}{{ block.settings.heading_font.style }}{% endif %};
     font-size: {{ block.settings.heading_size }}px;
     margin: 0 0 16px;
     line-height: 1.2;
@@ -141,9 +141,9 @@
 
   .ai-hero-subheading-{{ ai_gen_id }} {
     color: {{ block.settings.text_color }};
-    font-family: {{ block.settings.subheading_font.family }}, {{ block.settings.subheading_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.subheading_font.family }}, {{ block.settings.subheading_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.subheading_font.weight }};
-    font-style: {{ block.settings.subheading_font.style }};
+    font-style: {% if settings.brand_font %}normal{% else %}{{ block.settings.subheading_font.style }}{% endif %};
     font-size: {{ block.settings.subheading_size }}px;
     margin: 0 0 24px;
     line-height: 1.5;
@@ -156,9 +156,9 @@
     color: {{ block.settings.button_text_color }};
     text-decoration: none;
     border-radius: {{ block.settings.button_border_radius }}px;
-    font-family: {{ block.settings.button_font.family }}, {{ block.settings.button_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.button_font.family }}, {{ block.settings.button_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.button_font.weight }};
-    font-style: {{ block.settings.button_font.style }};
+    font-style: {% if settings.brand_font %}normal{% else %}{{ block.settings.button_font.style }}{% endif %};
     font-size: {{ block.settings.button_font_size }}px;
     transition: all 0.3s ease;
     border: none;

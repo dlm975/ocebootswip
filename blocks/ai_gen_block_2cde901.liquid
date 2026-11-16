@@ -14,9 +14,9 @@
   }
 
   .ai-text-block__content-{{ ai_gen_id }} {
-    font-family: {{ block.settings.text_font.family }}, {{ block.settings.text_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.text_font.family }}, {{ block.settings.text_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.text_font.weight }};
-    font-style: {{ block.settings.text_font.style }};
+    font-style: {% if settings.brand_font %}normal{% else %}{{ block.settings.text_font.style }}{% endif %};
     font-size: {{ block.settings.font_size }}px;
     line-height: {{ block.settings.line_height }};
     color: {{ block.settings.text_color }};

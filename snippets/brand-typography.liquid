@@ -1,36 +1,35 @@
 {%- doc -%}
-  OCEBOOTS brand typography: one variable font, Anybody (Google Fonts), used at different widths
-  (font-stretch) and weights for each role. A single woff2 covers widths 50-150% and weights 100-900.
+  OCEBOOTS brand typography: Inter display, upright and mixed case (Option A).
 
-  Rendered in <head> after theme-styles-variables and color-schemes, so the :root variables below
-  replace the ones Horizon builds from Theme settings > Typography. Every theme preset (h1-h6,
-  paragraph, buttons, menus) reads those variables. Horizon has no width variable, so widths are set
-  per role further down, together with the custom sections that pick their own font or weight.
+  Inter is loaded from Google Fonts as a variable font with the optical-size axis (opsz 14-32),
+  which Shopify's built-in Inter doesn't have. Rendered in <head> after theme-styles-variables and
+  color-schemes, so the :root variables below replace the ones Horizon builds from
+  Theme settings > Typography; every preset (h1-h6, paragraph, buttons, menus) reads them.
 
-  Roles (width / weight / case / tracking):
-    Hero headings      55%  900  caps     +0.01em, line-height 0.88, 40-80px
-    Product titles     60%  850  caps     +0.015em, line-height 0.95, 28-34px
-    Prices             70%  700  as typed +0.01em, tabular figures
-    Sizes, variants    75%  700  caps     +0.02em
-    Buttons, badges,   80%  800  caps     +0.08em
-      short labels
-    Nav, filters,     100%  500  as typed 0
-      section headings
-    Body              100%  400  as typed 0, 16px, line-height 1.5
-    Wordmark (text)    60%  900  caps     +0.03em (only when no logo image is set)
+  Weights are a touch under the original Option A spec (800 -> 750, 600 -> 560, 500 -> 480).
 
-  Turned off with Theme settings > Typography > "Use Anybody brand font".
+  Roles:
+    Hero / page headings  750, opsz 32, -0.04em, line-height 0.95
+    Product title (PDP)   750, opsz 32, -0.03em, line-height 1.02, 27px
+    Prices                400, tabular figures, -0.01em (PDP 22px); compare-at muted, struck
+    Size buttons          480
+    Buttons, add to cart  560
+    Collection card titles 460, 13px
+    Body                  400, 15px, line-height 1.55
+
+  Everything is upright and mixed case. The BFSALE "% OFF" badge keeps its Oswald styling.
+  Turned off with Theme settings > Typography > "Use Inter display brand font".
 {%- enddoc -%}
 
 {%- if settings.brand_font -%}
   <link
     rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,100..900&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap"
   >
 
   {% style %}
     :root {
-      --font-oce: 'Anybody', system-ui, sans-serif;
+      --font-oce: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
       /* Horizon's four type families */
       --font-body--family: var(--font-oce);
@@ -38,238 +37,108 @@
       --font-body--weight: 400;
       --font-subheading--family: var(--font-oce);
       --font-subheading--style: normal;
-      --font-subheading--weight: 500;
+      --font-subheading--weight: 400;
       --font-heading--family: var(--font-oce);
       --font-heading--style: normal;
-      --font-heading--weight: 500;
+      --font-heading--weight: 700;
       --font-accent--family: var(--font-oce);
       --font-accent--style: normal;
-      --font-accent--weight: 900;
+      --font-accent--weight: 480;
 
-      /* Body: 16px, 1.5, as typed */
+      /* Body: 15px, 1.55 */
       --font-paragraph--family: var(--font-oce);
       --font-paragraph--style: normal;
       --font-paragraph--weight: 400;
-      --font-paragraph--size: 1rem;
-      --font-paragraph--line-height: 1.5;
-      --font-paragraph--letter-spacing: 0;
+      --font-paragraph--size: 0.9375rem;
+      --font-paragraph--line-height: 1.55;
       --font-paragraph--case: none;
 
-      /* Hero / page headings: 40-48px phones, 56-80px desktop */
+      /* Headings: upright, mixed case; h1 is the hero / page heading */
       --font-h1--family: var(--font-oce);
       --font-h1--style: normal;
-      --font-h1--weight: 900;
-      --font-h1--size: clamp(2.5rem, 1.6rem + 3.7vw, 5rem);
-      --font-h1--line-height: 0.88;
-      --font-h1--letter-spacing: 0.01em;
-      --font-h1--case: uppercase;
-
-      /* Section headings (h2-h6): full width, 500, as typed. Sizes stay as set in Theme settings. */
+      --font-h1--weight: 750;
+      --font-h1--line-height: 0.95;
+      --font-h1--letter-spacing: -0.04em;
+      --font-h1--case: none;
       --font-h2--family: var(--font-oce);
       --font-h2--style: normal;
-      --font-h2--weight: 500;
-      --font-h2--letter-spacing: 0;
+      --font-h2--weight: 700;
+      --font-h2--letter-spacing: -0.02em;
       --font-h2--case: none;
       --font-h3--family: var(--font-oce);
       --font-h3--style: normal;
-      --font-h3--weight: 500;
-      --font-h3--letter-spacing: 0;
+      --font-h3--weight: 700;
+      --font-h3--letter-spacing: -0.02em;
       --font-h3--case: none;
       --font-h4--family: var(--font-oce);
       --font-h4--style: normal;
-      --font-h4--weight: 500;
-      --font-h4--letter-spacing: 0;
+      --font-h4--weight: 650;
+      --font-h4--letter-spacing: -0.01em;
       --font-h4--case: none;
       --font-h5--family: var(--font-oce);
       --font-h5--style: normal;
-      --font-h5--weight: 500;
-      --font-h5--letter-spacing: 0;
+      --font-h5--weight: 650;
+      --font-h5--letter-spacing: -0.01em;
       --font-h5--case: none;
       --font-h6--family: var(--font-oce);
       --font-h6--style: normal;
-      --font-h6--weight: 500;
+      --font-h6--weight: 560;
       --font-h6--letter-spacing: 0;
       --font-h6--case: none;
 
       /* Buttons */
       --button-font-family-primary: var(--font-oce);
       --button-font-family-secondary: var(--font-oce);
-      --button-font-weight-primary: 800;
-      --button-font-weight-secondary: 800;
-      --button-text-case-primary: uppercase;
-      --button-text-case-secondary: uppercase;
+      --button-font-weight-primary: 560;
+      --button-font-weight-secondary: 560;
+      --button-text-case-primary: none;
+      --button-text-case-secondary: none;
 
-      /* No slanted "italic" where the old Inter italics are still asked for */
+      /* No slanted fake italics where the old Inter Italic is still asked for */
       font-synthesis: none;
     }
 
     body {
       font-family: var(--font-oce);
-      font-stretch: 100%;
-      font-style: normal;
-      font-weight: 400;
-      line-height: 1.5;
+      font-optical-sizing: auto;
     }
 
-    /* ---- Wordmark: only when the shop name shows as text (no logo image) ---- */
-    :root .header-logo:not(:has(img)) {
-      font-family: var(--font-oce);
-      font-stretch: 60%;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
-
-    /* ---- Hero headings: 55%, 900 ---- */
-    :root :is(h1, .h1.h1, .text-block.h1 > *),
-    :root:root :is(.bfrh__heading, .bfrh__offer) {
+    /* Upright, mixed case, one family everywhere. Custom sections pick their own fonts (Oswald,
+       Inter Italic) and caps in the editor, so this overrides them; the BFSALE badge is left alone. */
+    body *:not(.bfsale-badge, .bfsale-badge *) {
       font-family: var(--font-oce) !important; /* stylelint-disable-line declaration-no-important */
-      font-stretch: 55%;
-      font-style: normal;
-      font-weight: 900;
-      text-transform: uppercase;
-      line-height: 0.88;
-      letter-spacing: 0.01em;
+      font-style: normal !important; /* stylelint-disable-line declaration-no-important */
+      text-transform: none !important; /* stylelint-disable-line declaration-no-important */
     }
 
-    /* ---- Product titles: 60%, 850 (product page 28-34px; the spotlight keeps its own size) ---- */
-    /* :root:root outranks the hero rule's .h1.h1, which the product page's h1 also matches */
-    :root:root :is(.product-information, .product-details, .view-product-title) h1,
-    :root .ps__title {
-      font-family: var(--font-oce) !important; /* stylelint-disable-line declaration-no-important */
-      font-stretch: 60%;
-      font-style: normal;
-      font-weight: 850;
-      text-transform: uppercase;
+    /* ---- Hero / page headings: 750, opsz 32 ---- */
+    :root:root :is(h1, .h1.h1, .text-block.h1 > *, .bfrh__heading) {
+      font-weight: 750;
+      font-variation-settings: 'opsz' 32;
+      letter-spacing: -0.04em;
       line-height: 0.95;
-      letter-spacing: 0.015em;
     }
 
-    :root:root :is(.product-information, .product-details, .view-product-title) h1 {
-      font-size: clamp(1.75rem, 1.5rem + 0.8vw, 2.125rem);
+    :root:root .bfrh__offer {
+      font-weight: 600;
+      font-variation-settings: 'opsz' 32;
+      letter-spacing: -0.02em;
     }
 
-    /* ---- Section headings: 100%, 500, as typed ---- */
-    :root :is(
-        h2:not(.ps__title),
-        h3,
-        h4,
-        h5,
-        h6,
-        .ppw__heading,
-        .cc-header__title,
-        .pab__heading,
-        .brand-tiles-heading,
-        .sbz-title,
-        .ccg__heading,
-        .ccg__heading > span,
-        .account-actions__title
-      ) {
-      font-family: var(--font-oce) !important; /* stylelint-disable-line declaration-no-important */
-      font-stretch: 100%;
-      font-style: normal;
-      font-weight: 500;
-      text-transform: none;
-      letter-spacing: 0;
+    /* ---- Product title on the product page: 750, opsz 32, 27px ---- */
+    :root:root:root :is(.product-information, .product-details, .view-product-title) h1,
+    :root:root:root .ps__title {
+      font-weight: 750;
+      font-variation-settings: 'opsz' 32;
+      letter-spacing: -0.03em;
+      line-height: 1.02;
     }
 
-    /* ---- Nav, filters, breadcrumbs: 100%, 500, as typed ---- */
-    :root :is(
-        .menu-list__link,
-        .menu-list__link-title,
-        .mega-menu__link,
-        .menu-drawer__menu-item,
-        .breadcrumb__link,
-        .facets__label,
-        .facets__summary,
-        .currency-code
-      ) {
-      font-family: var(--font-oce) !important; /* stylelint-disable-line declaration-no-important */
-      font-stretch: 100%;
-      font-style: normal;
-      font-weight: 500;
-      text-transform: none;
-      letter-spacing: 0;
+    :root:root:root :is(.product-information, .product-details, .view-product-title) h1 {
+      font-size: 27px;
     }
 
-    /* ---- Buttons, badges, short labels: 80%, 800, caps, +0.08em ---- */
-    :root :is(
-        .button,
-        .button-secondary,
-        button.shopify-payment-button__button--unbranded,
-        .add-to-cart-text__content,
-        .bfrh__button,
-        .ps__buy-label,
-        .cc-card__cta,
-        .cc-card__title,
-        .igw-follow-btn,
-        .sbz-shop-btn,
-        .pa__add-label,
-        .pa__heading,
-        .announcement-bar__text,
-        .product-badges__badge,
-        .bfsale-badge,
-        .bfsale-price:not(.price),
-        .fsp__text,
-        .psr__text,
-        .ptb__text,
-        .pab__eyebrow,
-        .ps__soleplate-label,
-        .ps__size-label,
-        .tlb-label,
-        [class^='tlb-label'],
-        .ccg-caption,
-        .ppw__name,
-        .ppw__boot,
-        .urgency-text,
-        .pdp-accordion__summary,
-        .pdp-accordion__summary > span,
-        .details__header,
-        .cart-bubble__text
-      ) {
-      font-family: var(--font-oce) !important; /* stylelint-disable-line declaration-no-important */
-      font-stretch: 80%;
-      font-style: normal;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    /* The floating "Shop by size" button's label has no class; an ID selector kept apart so it can't raise the group above */
-    #sbz-trigger > span {
-      font-family: var(--font-oce);
-      font-stretch: 80%;
-      font-style: normal;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    /* The BFSALE badge was padded for Oswald italic (low caps, glyphs leaning right); upright text sits centred */
-    :root .bfsale-badge {
-      padding: 0.36em 0.8em 0.32em;
-    }
-
-    /* ---- Sizes and variant pickers: 75%, 700, caps, +0.02em ---- */
-    :root :is(
-        .ps__size-btn,
-        .ps__soleplate-btn__label,
-        .sbz-size-btn,
-        .sbz-sys,
-        .pill-option__value,
-        .psb__pill-label,
-        .variant-option__button-label
-      ) {
-      font-family: var(--font-oce) !important; /* stylelint-disable-line declaration-no-important */
-      font-stretch: 75%;
-      font-style: normal;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.02em;
-      font-variant-numeric: tabular-nums;
-    }
-
-    /* ---- Prices: 70%, 700, tabular figures ---- */
+    /* ---- Prices: never bold, tabular figures ---- */
     :root :is(
         .price,
         .compare-at-price,
@@ -281,30 +150,72 @@
         .cart__total-value,
         .announcement-bar__countdown
       ) {
-      font-family: var(--font-oce) !important; /* stylelint-disable-line declaration-no-important */
-      font-stretch: 70%;
-      font-style: normal;
-      font-weight: 700;
-      letter-spacing: 0.01em;
+      font-weight: 400 !important; /* stylelint-disable-line declaration-no-important */
+      letter-spacing: -0.01em;
       font-variant-numeric: tabular-nums;
       font-feature-settings: 'tnum' 1;
     }
 
-    /* ---- Body copy inside custom sections: 100%, 400 ---- */
-    :root :is(.ppw__club, .pip__a, .rte, .product-description) {
-      font-family: var(--font-oce);
-      font-stretch: 100%;
-      font-style: normal;
+    /* Sale price in the foreground colour; "was" price muted and struck; "Now" label muted */
+    :root :is(.bfsale-price.price, .price) {
+      color: var(--color-foreground-heading, #000);
+    }
+
+    :root :is(.bfsale-rrp__amount, .compare-at-price) {
+      color: rgb(var(--color-foreground-rgb) / 0.5);
+      text-decoration: line-through;
+      text-decoration-color: currentColor;
+    }
+
+    :root .bfsale-price:not(.price) {
+      color: rgb(var(--color-foreground-rgb) / 0.6);
+      font-size: 0.85em;
+    }
+
+    /* Product page price: 22px */
+    :root:root :is(.product-information, .product-details) :is(.price, .bfsale-price.price) {
+      font-size: 22px;
+    }
+
+    /* ---- Size buttons and variant pickers: 480 ---- */
+    :root :is(
+        .ps__size-btn,
+        .ps__soleplate-btn__label,
+        .sbz-size-btn,
+        .sbz-sys,
+        .pill-option__value,
+        .psb__pill-label,
+        .variant-option__button-label
+      ) {
+      font-weight: 480;
+      font-variant-numeric: tabular-nums;
       letter-spacing: 0;
     }
 
-    /* Questions and small product names: as typed, a touch heavier than body */
-    :root :is(.pip__q, .pip__q > span, .pa__title) {
-      font-family: var(--font-oce);
-      font-stretch: 100%;
-      font-weight: 500;
-      text-transform: none;
+    /* ---- Buttons and add to cart: 560 ---- */
+    :root :is(
+        .button,
+        .button-secondary,
+        button.shopify-payment-button__button--unbranded,
+        .add-to-cart-text__content,
+        .bfrh__button,
+        .ps__buy-label,
+        .cc-card__cta,
+        .igw-follow-btn,
+        .sbz-shop-btn,
+        .pa__add-label
+      ) {
+      font-weight: 560;
       letter-spacing: 0;
+    }
+
+    /* ---- Collection, search and homepage product cards: 13px, 460 ---- */
+    :root:root .product-card [class*='product_title'],
+    :root:root .product-card [class*='product_title'] > * {
+      font-size: 0.8125rem;
+      font-weight: 460;
+      letter-spacing: -0.005em;
+      line-height: 1.3;
     }
   {% endstyle %}
 {%- endif -%}

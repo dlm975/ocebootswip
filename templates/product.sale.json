@@ -319,7 +319,7 @@
             "sale_countdown_001": {
               "type": "sale-countdown",
               "settings": {
-                "heading": "SALE ENDS IN",
+                "heading": "Sale ends in",
                 "end_date": "",
                 "end_time": "23:59",
                 "tz_offset": "+12:00",
@@ -337,7 +337,7 @@
             "sale_image_badge_001": {
               "type": "sale-image-badge",
               "settings": {
-                "text": "ON SALE",
+                "text": "On sale",
                 "show_percent": false,
                 "only_when_discounted": true,
                 "accent": "#d0021b"

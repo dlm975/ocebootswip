@@ -60,13 +60,13 @@
 
   #csh-{{ section.id }} .csh__heading {
     margin: 0;
-    font-family: {{ section.settings.heading_font.family }}, {{ section.settings.heading_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ section.settings.heading_font.family }}, {{ section.settings.heading_font.fallback_families }}{% endif %};
     font-weight: {{ section.settings.heading_font.weight }};
-    font-style: {{ section.settings.heading_font.style }};
+    font-style: {% if settings.brand_font %}normal{% else %}{{ section.settings.heading_font.style }}{% endif %};
     font-size: clamp(32px, 7vw, {{ section.settings.heading_size }}px);
     line-height: 0.95;
     letter-spacing: {{ section.settings.heading_letter_spacing | divided_by: 100.0 }}em;
-    {% if section.settings.uppercase %}text-transform: uppercase;{% endif %}
+    {% if section.settings.uppercase %}text-transform: none;{% endif %}
     color: var(--csh-text);
     overflow-wrap: anywhere;
     /* Trim the font's empty space above the capitals so the heading sits tight under the header */
@@ -107,9 +107,9 @@
 
   #csh-{{ section.id }} .csh__label {
     font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-transform: none;
   }
 
   /* US / UK / EU toggle switch */
@@ -136,8 +136,8 @@
     padding: 8px 14px;
     text-align: center;
     font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
+    font-weight: 600;
+    letter-spacing: 0.01em;
     border-radius: 999px;
     cursor: pointer;
     color: var(--csh-toggle-text);
@@ -235,7 +235,7 @@
     border: 0;
     padding: 0;
     font: inherit;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--csh-text);
     text-decoration: underline;
     text-underline-offset: 3px;

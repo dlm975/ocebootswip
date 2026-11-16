@@ -26,7 +26,7 @@
   }
 
   .ai-variant-picker__title-{{ ai_gen_id }} {
-    font-family: {{ block.settings.title_font.family }}, {{ block.settings.title_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.title_font.family }}, {{ block.settings.title_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.title_font.weight }};
     font-size: {{ block.settings.title_font_size }}px;
     text-align: center;
@@ -51,7 +51,7 @@
     border-radius: {{ block.settings.pill_border_radius }}px;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-family: {{ block.settings.label_font.family }}, {{ block.settings.label_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.label_font.family }}, {{ block.settings.label_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.label_font.weight }};
     font-size: {{ block.settings.label_font_size }}px;
     text-align: center;
@@ -127,7 +127,7 @@
     padding: {{ block.settings.dropdown_option_padding }}px;
     cursor: pointer;
     transition: background-color 0.2s ease;
-    font-family: {{ block.settings.label_font.family }}, {{ block.settings.label_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.label_font.family }}, {{ block.settings.label_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.label_font.weight }};
     font-size: {{ block.settings.label_font_size }}px;
     color: {{ block.settings.dropdown_text_color }};

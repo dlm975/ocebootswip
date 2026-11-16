@@ -21,7 +21,7 @@
 
   .ai-text-block__content-{{ ai_gen_id }} {
     color: {{ block.settings.text_color }};
-    font-family: {{ block.settings.font_family.family }}, {{ block.settings.font_family.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.font_family.family }}, {{ block.settings.font_family.fallback_families }}{% endif %};
     font-weight: {{ block.settings.font_family.weight }};
     font-size: {{ block.settings.font_size }}px;
     line-height: {{ block.settings.line_height }};

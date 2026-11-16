@@ -236,7 +236,7 @@ For inquiries or permissions, contact daniel@section.store
     display: block;
     text-transform: unset;
     word-wrap: break-word;
-    font-weight: 700;
+    font-weight: 600;
     font-size: {{ title_size_mobile }}px;
     line-height: {{ title_height }}%;
     color: {{ title_color }};
@@ -265,7 +265,7 @@ For inquiries or permissions, contact daniel@section.store
     display: block;
     text-transform: unset;
     word-wrap: break-word;
-    font-weight: 700;
+    font-weight: 600;
     font-size: {{ author_size_mobile }}px;
     line-height: {{ author_height }}%;
     color: {{ author_color }};
@@ -484,9 +484,9 @@ For inquiries or permissions, contact daniel@section.store
 {% if verified_custom %}
   <style>
     .product-reviews-verified-text-{{ section.id }} {
-      font-family: {{ verified_font.family }}, {{ verified_font.fallback_families }};
+      font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ verified_font.family }}, {{ verified_font.fallback_families }}{% endif %};
       font-weight: {{ verified_font.weight }};
-      font-style: {{ verified_font.style }};
+      font-style: {% if settings.brand_font %}normal{% else %}{{ verified_font.style }}{% endif %};
     }
   </style>
 {% endif %}
@@ -494,9 +494,9 @@ For inquiries or permissions, contact daniel@section.store
 {% if title_custom %}
   <style>
     .product-reviews-title-{{ section.id }}  {
-      font-family: {{ title_font.family }}, {{ title_font.fallback_families }};
+      font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ title_font.family }}, {{ title_font.fallback_families }}{% endif %};
       font-weight: {{ title_font.weight }};
-      font-style: {{ title_font.style }};
+      font-style: {% if settings.brand_font %}normal{% else %}{{ title_font.style }}{% endif %};
     }
   </style>
 {% endif %}
@@ -504,9 +504,9 @@ For inquiries or permissions, contact daniel@section.store
 {% if text_custom %}
   <style>
     .product-reviews-text-{{ section.id }} * {
-      font-family: {{ text_font.family }}, {{ text_font.fallback_families }};
+      font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ text_font.family }}, {{ text_font.fallback_families }}{% endif %};
       font-weight: {{ text_font.weight }};
-      font-style: {{ text_font.style }};
+      font-style: {% if settings.brand_font %}normal{% else %}{{ text_font.style }}{% endif %};
     }
   </style>
 {% endif %}
@@ -514,9 +514,9 @@ For inquiries or permissions, contact daniel@section.store
 {% if author_custom %}
   <style>
     .product-reviews-author-{{ section.id }}  {
-      font-family: {{ author_font.family }}, {{ author_font.fallback_families }};
+      font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ author_font.family }}, {{ author_font.fallback_families }}{% endif %};
       font-weight: {{ author_font.weight }};
-      font-style: {{ author_font.style }};
+      font-style: {% if settings.brand_font %}normal{% else %}{{ author_font.style }}{% endif %};
     }
   </style>
 {% endif %}
@@ -524,9 +524,9 @@ For inquiries or permissions, contact daniel@section.store
 {% if time_custom %}
   <style>
     .product-reviews-time-{{ section.id }}  {
-      font-family: {{ time_font.family }}, {{ time_font.fallback_families }};
+      font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ time_font.family }}, {{ time_font.fallback_families }}{% endif %};
       font-weight: {{ time_font.weight }};
-      font-style: {{ time_font.style }};
+      font-style: {% if settings.brand_font %}normal{% else %}{{ time_font.style }}{% endif %};
     }
   </style>
 {% endif %}
@@ -534,9 +534,9 @@ For inquiries or permissions, contact daniel@section.store
 {% if bottom_text_custom %}
   <style>
     .product-reviews-bottom-text-{{ section.id }}  {
-      font-family: {{ bottom_text_font.family }}, {{ bottom_text_font.fallback_families }};
+      font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ bottom_text_font.family }}, {{ bottom_text_font.fallback_families }}{% endif %};
       font-weight: {{ bottom_text_font.weight }};
-      font-style: {{ bottom_text_font.style }};
+      font-style: {% if settings.brand_font %}normal{% else %}{{ bottom_text_font.style }}{% endif %};
     }
   </style>
 {% endif %}

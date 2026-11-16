@@ -268,7 +268,7 @@
               "type": "product-star-rating",
               "settings": {
                 "show_stars": true,
-                "text": "1000+ HAPPY CUSTOMERS",
+                "text": "1000+ happy customers",
                 "star_color": "#14b554",
                 "text_color": "#15803d",
                 "star_size": 13
@@ -326,7 +326,7 @@
           "type": "player",
           "settings": {
             "image": "shopify://shop_images/0bb8d3c0-20c4-4d54-9d95-7deb1180583d.png",
-            "name": "CAMERON ARCHER",
+            "name": "Cameron Archer",
             "club": "Southampton F.C.",
             "club_badge": "shopify://shop_images/FC_Southampton.svg",
             "flag": "shopify://shop_images/Flag_of_England.svg",
@@ -391,7 +391,7 @@
       "name": "Pro Player Wall",
       "settings": {
         "roster_source": "shared",
-        "heading": "TRUSTED BY THE PRO'S",
+        "heading": "Trusted by the pros",
         "subheading": "",
         "show_stars": true,
         "star_color": "#14b554",
@@ -582,7 +582,7 @@
         "photo_16"
       ],
       "settings": {
-        "heading": "WORN BY YOU",
+        "heading": "Worn by you",
         "subtext": "",
         "handle": "@oceboots",
         "show_verified": true,
@@ -606,7 +606,7 @@
       "settings": {
         "image": "shopify://shop_images/IMG_4090_cc0a355e-a54e-47a4-94a2-75934174628e.jpg",
         "image_position": "left",
-        "eyebrow": "ABOUT US",
+        "eyebrow": "About us",
         "heading": "Built for the boot obsessed",
         "body": "<p>We have spent 20+ years around football boots — chasing releases, hunting down retros and knowing a fake on sight. Every pair we list is checked by hand before it ships.</p>",
         "button_label": "",
