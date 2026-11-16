@@ -654,8 +654,8 @@
 
   /* When it closes, the items below swipe up from the bottom of the menu as they reappear */
   .menu-drawer__menu--returning > li:has(> details:not([open]) .brand-drill) ~ li {
-    animation: menu-drawer-return 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-    animation-delay: calc(var(--return-index, 0) * 40ms);
+    animation: menu-drawer-return 0.55s cubic-bezier(0.3, 0.7, 0.3, 1) both;
+    animation-delay: calc(var(--return-index, 0) * 50ms);
   }
 
   @keyframes menu-drawer-return {
