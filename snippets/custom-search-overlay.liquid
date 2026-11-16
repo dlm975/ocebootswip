@@ -475,12 +475,10 @@
     white-space: nowrap;
   }
 
-  /* Phones: the condition sits on its own line under the price on every card, so all cards
-     line up whatever the price length; wider screens keep it beside the price */
+  /* Phones show the price only; the condition tag is for wider screens */
   @media screen and (max-width: 749px) {
-    .cs-card__price {
-      flex-direction: column;
-      align-items: flex-start;
+    .cs-card__condition {
+      display: none;
     }
   }
 
