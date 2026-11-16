@@ -989,6 +989,9 @@
       ) {
       border-end-start-radius: 0;
       border-end-end-radius: 0;
+      /* Square off at once as the dropdown appears (it opens at full size), so its top edge never
+         shows past rounded corners; rounding back after it closes still eases */
+      transition: none;
     }
   }
 {% endstylesheet %}
