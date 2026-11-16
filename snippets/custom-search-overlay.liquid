@@ -11,35 +11,8 @@
   Results come from sections/search-overlay-results through Shopify's predictive search.
 {%- endcomment -%}
 
-{%- liquid
-  # Brands and models from the Shop by Silo menu, so suggestions can link to their collections
-  assign silo_link = nil
-  for link in linklists['header-menu'].links
-    for child in link.links
-      if child.links != blank
-        assign silo_link = link
-        break
-      endif
-    endfor
-    if silo_link
-      break
-    endif
-  endfor
--%}
-
-<script type="application/json" id="cs-catalog">
-  [
-    {%- if silo_link -%}
-      {%- for brand in silo_link.links -%}
-        {"name": {{ brand.title | downcase | json }}, "url": {{ brand.url | json }}, "models": {
-          {%- for model in brand.links -%}
-            {{ model.title | downcase | json }}: {{ model.url | json }}{% unless forloop.last %},{% endunless %}
-          {%- endfor -%}
-        }}{% unless forloop.last %},{% endunless %}
-      {%- endfor -%}
-    {%- endif -%}
-  ]
-</script>
+{% render 'search-catalog', id: 'cs-catalog' %}
+<script src="{{ 'search-suggestions.js' | asset_url }}" defer></script>
 
 <div
   id="cs-overlay"
@@ -566,12 +539,7 @@
     const MAX_SUGGESTIONS = 4;
 
     /** Brands and their models (from the Shop by Silo menu) */
-    let catalog = [];
-    try {
-      catalog = JSON.parse(document.getElementById('cs-catalog').textContent || '[]');
-    } catch (e) {
-      catalog = [];
-    }
+    const catalogId = 'cs-catalog';
 
     /* ---------- Cycling example searches ---------- */
     const prompts = ['mercurial vapor', 'f50', 'nike tiempo', 'fg studs'];
@@ -602,64 +570,17 @@
       }
     }
 
-    /* ---------- Category suggestions from product titles ---------- */
-    const clean = (word) => word.toLowerCase().replace(/[^a-z0-9]/g, '');
-
-    /**
-     * For each matching product title, the words up to the one you typed give a category
-     * ("Nike Mercurial Vapor"); one word less gives its parent ("Nike Mercurial") and one more a
-     * narrower one ("Nike Mercurial Vapor 15"). Broader first, then the most common.
-     */
-    function buildSuggestions(query, titles) {
-      const queryWords = query.split(/\s+/).map(clean).filter(Boolean);
-      if (!queryWords.length) return [];
-      const found = new Map();
-
-      titles.forEach(function (title, titleIndex) {
-        const words = title.split(/\s+/).filter(Boolean);
-        const lower = words.map(clean);
-        let at = -1;
-        for (const queryWord of queryWords) {
-          const next = lower.findIndex(function (word, index) {
-            return index > at && word.startsWith(queryWord);
-          });
-          if (next === -1) return;
-          at = next;
-        }
-
-        [at, at + 1, at + 2].forEach(function (length) {
-          if (length < 1 || length > words.length) return;
-          const phraseWords = words.slice(0, length);
-          // Stop at nicknames and colourways ('Golden Horizon'), slashes and the like
-          if (phraseWords.some(function (word) { return /['"’‘(\/]/.test(word); })) return;
-          if (!clean(phraseWords[phraseWords.length - 1])) return;
-          const text = phraseWords.join(' ');
-          const key = text.toLowerCase();
-          const entry = found.get(key) || { text: text, length: length, count: 0, first: titleIndex };
-          entry.count += 1;
-          found.set(key, entry);
-        });
+    /* ---------- Category suggestions (assets/search-suggestions.js) ---------- */
+    function suggestionsFor(query, titles) {
+      const api = window.OceSearchSuggest;
+      if (!api) return [];
+      const catalog = api.readCatalog(catalogId);
+      const list = api.build(query, titles, MAX_SUGGESTIONS).map(function (suggestion) {
+        return { text: suggestion.text, url: api.url(suggestion.text, catalog, searchUrl) };
       });
-
-      return Array.from(found.values())
-        .sort(function (a, b) {
-          return a.length - b.length || b.count - a.count || a.first - b.first;
-        })
-        .slice(0, MAX_SUGGESTIONS);
-    }
-
-    /** A brand, or a brand ending in one of its models, links to its collection */
-    function suggestionUrl(text) {
-      const words = text.split(/\s+/).map(clean).filter(Boolean);
-      const brand = catalog.find(function (entry) { return clean(entry.name) === words[0]; });
-      if (brand) {
-        if (words.length === 1) return brand.url;
-        const last = words[words.length - 1];
-        for (const model in brand.models) {
-          if (clean(model) === last) return brand.models[model];
-        }
-      }
-      return searchUrl + '?q=' + encodeURIComponent(text) + '&type=product';
+      // Remembered for the visit, so the results page shows them at once if this is submitted
+      api.remember(query, list);
+      return list;
     }
 
     function renderSuggestions(query, suggestions) {
@@ -668,7 +589,7 @@
         const item = document.createElement('li');
         const link = document.createElement('a');
         link.className = 'cs-suggest__link';
-        link.href = suggestionUrl(suggestion.text);
+        link.href = suggestion.url;
         link.textContent = suggestion.text;
         item.append(link);
         suggestList.append(item);
@@ -682,36 +603,14 @@
     let timer = null;
     let shown = '';
 
-    function resultsUrl(query) {
-      return (
-        suggestUrl +
-        '?q=' + encodeURIComponent(query) +
-        '&resources[type]=product&resources[limit]=10&resources[limit_scope]=each' +
-        '&resources[options][unavailable_products]=last' +
-        '&section_id=search-overlay-results'
-      );
-    }
-
     function fetchResults(query) {
       if (cache.has(query)) return Promise.resolve(cache.get(query));
       if (controller) controller.abort();
       controller = new AbortController();
-      return fetch(resultsUrl(query), { signal: controller.signal })
-        .then(function (response) { return response.text(); })
-        .then(function (html) {
-          const doc = new DOMParser().parseFromString(html, 'text/html');
-          const results = doc.querySelector('[data-cs-results]');
-          let titles = [];
-          try {
-            titles = JSON.parse(results.querySelector('[data-cs-titles]').textContent || '[]');
-          } catch (e) {
-            titles = [];
-          }
-          const grid = results.querySelector('.cs-grid');
-          const data = { titles: titles, grid: grid };
-          cache.set(query, data);
-          return data;
-        });
+      return window.OceSearchSuggest.fetchResults(query, suggestUrl, controller.signal).then(function (data) {
+        cache.set(query, data);
+        return data;
+      });
     }
 
     function scheduleSearch() {
@@ -752,7 +651,7 @@
       const firstShow = !shown;
       const productsTop = productsSection.hidden ? null : productsSection.getBoundingClientRect().top;
 
-      renderSuggestions(query, buildSuggestions(query, data.titles));
+      renderSuggestions(query, suggestionsFor(query, data.titles));
 
       productsGrid.replaceChildren();
       if (data.grid) productsGrid.append(data.grid.cloneNode(true));
