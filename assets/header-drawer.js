@@ -104,7 +104,7 @@ class HeaderDrawer extends Component {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     const bottom = container.getBoundingClientRect().bottom;
-    const top = item.getBoundingClientRect().bottom;
+    const top = (details.querySelector('summary') ?? item).getBoundingClientRect().bottom;
     list.style.setProperty('--return-from', `${Math.max(bottom - top, 0)}px`);
     let index = 0;
     for (let sibling = item.nextElementSibling; sibling; sibling = sibling.nextElementSibling) {
