@@ -301,6 +301,21 @@
     padding-block-start: calc((var(--size-drill-system-row) - var(--size-drill-size-row)) / 2);
   }
 
+  /* Choosing a system shifts the whole list left (from under "Shop by Size" to the dropdown's
+     edge) while its sizes slide out to the right from behind it; the sizes area keeps the full
+     width by reaching as far right as the list moved left */
+  .size-drill--desktop {
+    transition: transform var(--size-drill-duration) var(--size-drill-ease);
+  }
+
+  .size-drill--desktop[data-active] {
+    transform: translateX(calc(-1 * var(--submenu-offset, 0px)));
+  }
+
+  .size-drill--desktop[data-active] .size-drill__panels {
+    margin-inline-end: calc(-1 * var(--submenu-offset, 0px));
+  }
+
   .size-drill--desktop .size-drill__sizes:not([hidden]) {
     animation: size-drill-open-out var(--size-drill-duration) var(--size-drill-ease) both;
   }
@@ -312,6 +327,7 @@
   @keyframes size-drill-open-out {
     from {
       opacity: 0;
+      transform: translateX(-48px);
       clip-path: inset(0 100% 0 0);
     }
 
@@ -379,6 +395,10 @@
   @media (prefers-reduced-motion: reduce) {
     .size-drill .size-drill__sizes:not([hidden]) {
       animation: none;
+    }
+
+    .size-drill--desktop {
+      transition: none;
     }
 
     .size-drill[data-active] .size-drill__system[aria-expanded='false'] {
