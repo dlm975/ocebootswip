@@ -57,6 +57,7 @@
             </span>
             <span class="cs-card__title">{{ product.title | escape }}</span>
             <span class="cs-card__price">
+              <span class="cs-card__prices">
               <span class="cs-card__amount">
                 {%- if product.price_varies -%}
                   <span class="cs-card__from">From</span>
@@ -66,6 +67,7 @@
               {%- if on_sale -%}
                 <s class="cs-card__was">{{ product.compare_at_price | money }}</s>
               {%- endif -%}
+              </span>
               {%- if condition != blank -%}
                 <span class="cs-card__condition">{{ condition | escape }}</span>
               {%- endif -%}

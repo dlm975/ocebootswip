@@ -464,8 +464,24 @@
     font-variant-numeric: tabular-nums;
   }
 
+  .cs-card__prices {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 6px;
+  }
+
   .cs-card__amount {
     white-space: nowrap;
+  }
+
+  /* Phones: the condition sits on its own line under the price on every card, so all cards
+     line up whatever the price length; wider screens keep it beside the price */
+  @media screen and (max-width: 749px) {
+    .cs-card__price {
+      flex-direction: column;
+      align-items: flex-start;
+    }
   }
 
   /* Condition (New, Like New, Lightly Worn ...) as a small tag beside the price */
