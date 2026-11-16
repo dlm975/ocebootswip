@@ -320,11 +320,10 @@
     align-items: center;
     column-gap: 12px;
     height: var(--size-drill-size-row);
-    /* On the same line as its system: US sizes level with US, UK with UK, EU with EU */
-    margin-block-start: calc(
-      var(--size-drill-index, 0) * var(--size-drill-system-row) +
-        (var(--size-drill-system-row) - var(--size-drill-size-row)) / 2
-    );
+    /* On the same line as its system (US sizes level with US, UK with UK, EU with EU), centred on
+       it whether the sizes take one row or wrap onto two */
+    margin-block-start: calc((var(--size-drill-index, 0) + 0.5) * var(--size-drill-system-row));
+    translate: 0 -50%;
   }
 
   .size-drill--desktop .size-drill__value {
