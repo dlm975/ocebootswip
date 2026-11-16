@@ -456,12 +456,28 @@
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    gap: 2px 6px;
+    gap: 4px 6px;
     margin-block-start: auto;
     padding-block-start: 6px;
     font-size: 0.875rem;
     font-weight: 400;
     font-variant-numeric: tabular-nums;
+  }
+
+  .cs-card__amount {
+    white-space: nowrap;
+  }
+
+  /* Condition (New, Like New, Lightly Worn ...) as a small tag beside the price */
+  .cs-card__condition {
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgb(18 18 18 / 0.06);
+    color: rgb(18 18 18 / 0.7);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: nowrap;
   }
 
   .cs-card__from {

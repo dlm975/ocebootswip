@@ -30,6 +30,7 @@
         {%- liquid
           assign image = product.featured_media.preview_image | default: product.featured_image
           assign image_alt = image.alt | default: product.title | escape
+          assign condition = product.options_by_name['Condition'].values | first
           assign on_sale = false
           if product.compare_at_price > product.price
             assign on_sale = true
@@ -56,12 +57,17 @@
             </span>
             <span class="cs-card__title">{{ product.title | escape }}</span>
             <span class="cs-card__price">
-              {%- if product.price_varies -%}
-                <span class="cs-card__from">From</span>
-              {% endif -%}
-              {{- product.price | money -}}
+              <span class="cs-card__amount">
+                {%- if product.price_varies -%}
+                  <span class="cs-card__from">From</span>
+                {% endif -%}
+                {{- product.price | money_with_currency -}}
+              </span>
               {%- if on_sale -%}
                 <s class="cs-card__was">{{ product.compare_at_price | money }}</s>
+              {%- endif -%}
+              {%- if condition != blank -%}
+                <span class="cs-card__condition">{{ condition | escape }}</span>
               {%- endif -%}
             </span>
           </a>
