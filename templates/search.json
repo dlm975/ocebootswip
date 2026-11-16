@@ -3,9 +3,9 @@
     "search": {
       "type": "search-summary",
       "settings": {
-        "color_scheme": "scheme-1",
         "padding-block-start": 40,
-        "padding-block-end": 24
+        "padding-block-end": 24,
+        "color_scheme": "scheme-1"
       }
     },
     "main": {
