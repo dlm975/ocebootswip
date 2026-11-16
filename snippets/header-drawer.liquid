@@ -248,6 +248,11 @@
                       endif
                     endfor
                     assign drill_id = 'DrawerDrill-' | append: link.handle
+                    assign is_size_menu = false
+                    assign first_size_title = link.links.first.title | upcase
+                    if first_size_title contains 'US ' and first_size_title contains ' - UK ' and first_size_title contains ' - EU '
+                      assign is_size_menu = true
+                    endif
                   -%}
                   <details
                     id="Details-menu-drawer-menu-item-{{ forloop.index }}"
@@ -286,6 +291,10 @@
                         {%- if has_grandchildren -%}
                           <div class="menu-drawer__drill">
                             {% render 'brand-drill-menu', parent_link: link, variant: 'drawer', id: drill_id %}
+                          </div>
+                        {%- elsif is_size_menu -%}
+                          <div class="menu-drawer__drill">
+                            {% render 'size-drill-menu', parent_link: link, variant: 'drawer', id: drill_id %}
                           </div>
                         {%- else -%}
                         <ul

@@ -61,9 +61,17 @@
                   break
                 endif
               endfor
+              # Size links ("US 8 - UK 7 - EU 41") use the size drill-down
+              assign is_size_menu = false
+              assign first_size_title = link.links.first.title | upcase
+              if first_size_title contains 'US ' and first_size_title contains ' - UK ' and first_size_title contains ' - EU '
+                assign is_size_menu = true
+              endif
             -%}
             {% if has_grandchildren %}
               {% render 'brand-drill-menu', parent_link: link, variant: 'desktop', id: list_id %}
+            {% elsif is_size_menu %}
+              {% render 'size-drill-menu', parent_link: link, variant: 'desktop', id: list_id %}
             {% else %}
               {% render 'mega-menu',
                 parent_link: link,
