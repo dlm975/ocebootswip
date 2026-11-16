@@ -955,6 +955,27 @@
       color: var(--color-foreground);
     }
   }
+
+  /* Desktop: the header bar's bottom corners are rounded. While a dropdown is open the bar's
+     corners square off so the bar and the dropdown read as one panel, and the dropdown carries
+     the rounding (blocks/_header-menu). */
+  @media screen and (min-width: 1024px) {
+    #header-component {
+      --header-radius: 20px;
+    }
+
+    #header-component .header__row--bottom,
+    #header-component .header__row--top:not(:has(~ .header__row--bottom)) {
+      border-end-start-radius: var(--header-radius);
+      border-end-end-radius: var(--header-radius);
+      transition: border-radius var(--submenu-animation-speed, 0.2s) var(--ease-out-cubic, ease);
+    }
+
+    #header-component .header__row:has(.menu-list__link[aria-expanded='true'], .menu-list__submenu:hover) {
+      border-end-start-radius: 0;
+      border-end-end-radius: 0;
+    }
+  }
 {% endstylesheet %}
 
 {% schema %}
