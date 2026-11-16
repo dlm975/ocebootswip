@@ -539,7 +539,7 @@
             "newly-listed-title": {
               "type": "_product-list-text",
               "settings": {
-                "text": "<h1><strong>Newly Listed</strong></h1>",
+                "text": "<h2>Newly Listed</h2>",
                 "width": "fit-content",
                 "max_width": "normal",
                 "alignment": "left",
@@ -548,7 +548,7 @@
                 "font_size": "1.5rem",
                 "line_height": "tight",
                 "letter_spacing": "tight",
-                "case": "uppercase",
+                "case": "none",
                 "wrap": "pretty",
                 "color": "var(--color-foreground)",
                 "background": false,

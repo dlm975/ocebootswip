@@ -1,159 +1,198 @@
 {%- doc -%}
-  OCEBOOTS brand typography: Barlow Condensed (headings, buttons, nav, labels, prices, sizes) and
-  Barlow (body), loaded from Google Fonts.
+  OCEBOOTS brand typography: one variable font, Anybody (Google Fonts), used at different widths
+  (font-stretch) and weights for each role. A single woff2 covers widths 50-150% and weights 100-900.
 
   Rendered in <head> after theme-styles-variables and color-schemes, so the :root variables below
   replace the ones Horizon builds from Theme settings > Typography. Every theme preset (h1-h6,
-  paragraph, buttons, menus) is built from those variables, so it follows automatically. The custom
-  sections that pick their own font in the editor, or name a weight the new families don't have,
-  are listed by class further down.
+  paragraph, buttons, menus) reads those variables. Horizon has no width variable, so widths are set
+  per role further down, together with the custom sections that pick their own font or weight.
 
-  Turned off with Theme settings > Typography > "Use Barlow brand fonts".
+  Roles (width / weight / case / tracking):
+    Hero headings      55%  900  caps     +0.01em, line-height 0.88, 40-80px
+    Product titles     60%  850  caps     +0.015em, line-height 0.95, 28-34px
+    Prices             70%  700  as typed +0.01em, tabular figures
+    Sizes, variants    75%  700  caps     +0.02em
+    Buttons, badges,   80%  800  caps     +0.08em
+      short labels
+    Nav, filters,     100%  500  as typed 0
+      section headings
+    Body              100%  400  as typed 0, 16px, line-height 1.5
+    Wordmark (text)    60%  900  caps     +0.03em (only when no logo image is set)
+
+  Turned off with Theme settings > Typography > "Use Anybody brand font".
 {%- enddoc -%}
 
-{%- if settings.brand_fonts_barlow -%}
+{%- if settings.brand_font -%}
   <link
     rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,100..900&display=swap"
   >
 
   {% style %}
     :root {
-      --font-display: 'Barlow Condensed', 'Arial Narrow', 'Roboto Condensed', Arial, sans-serif;
-      --font-text: 'Barlow', 'Helvetica Neue', Arial, sans-serif;
+      --font-oce: 'Anybody', system-ui, sans-serif;
 
       /* Horizon's four type families */
-      --font-body--family: var(--font-text);
+      --font-body--family: var(--font-oce);
       --font-body--style: normal;
       --font-body--weight: 400;
-      --font-subheading--family: var(--font-display);
+      --font-subheading--family: var(--font-oce);
       --font-subheading--style: normal;
-      --font-subheading--weight: 600;
-      --font-heading--family: var(--font-display);
+      --font-subheading--weight: 500;
+      --font-heading--family: var(--font-oce);
       --font-heading--style: normal;
-      --font-heading--weight: 700;
-      --font-accent--family: var(--font-display);
+      --font-heading--weight: 500;
+      --font-accent--family: var(--font-oce);
       --font-accent--style: normal;
-      --font-accent--weight: 700;
+      --font-accent--weight: 900;
 
-      /* Body: 16px, 1.5, sentence case */
-      --font-paragraph--family: var(--font-text);
+      /* Body: 16px, 1.5, as typed */
+      --font-paragraph--family: var(--font-oce);
       --font-paragraph--style: normal;
       --font-paragraph--weight: 400;
       --font-paragraph--size: 1rem;
       --font-paragraph--line-height: 1.5;
+      --font-paragraph--letter-spacing: 0;
       --font-paragraph--case: none;
 
-      /* Hero / page headings: 36-44px mobile, 48-72px desktop */
-      --font-h1--family: var(--font-display);
+      /* Hero / page headings: 40-48px phones, 56-80px desktop */
+      --font-h1--family: var(--font-oce);
       --font-h1--style: normal;
-      --font-h1--weight: 700;
-      --font-h1--size: clamp(2.25rem, 1.5rem + 3.4vw, 4.5rem);
-      --font-h1--line-height: 0.95;
-      --font-h1--letter-spacing: -0.01em;
+      --font-h1--weight: 900;
+      --font-h1--size: clamp(2.5rem, 1.6rem + 3.7vw, 5rem);
+      --font-h1--line-height: 0.88;
+      --font-h1--letter-spacing: 0.01em;
       --font-h1--case: uppercase;
 
-      /* h2-h5 keep their sizes from Theme settings; they get the display face and caps */
-      --font-h2--family: var(--font-display);
+      /* Section headings (h2-h6): full width, 500, as typed. Sizes stay as set in Theme settings. */
+      --font-h2--family: var(--font-oce);
       --font-h2--style: normal;
-      --font-h2--weight: 700;
-      --font-h2--line-height: 0.95;
-      --font-h2--letter-spacing: -0.01em;
-      --font-h2--case: uppercase;
-      --font-h3--family: var(--font-display);
+      --font-h2--weight: 500;
+      --font-h2--letter-spacing: 0;
+      --font-h2--case: none;
+      --font-h3--family: var(--font-oce);
       --font-h3--style: normal;
-      --font-h3--weight: 700;
-      --font-h3--line-height: 1;
-      --font-h3--letter-spacing: -0.01em;
-      --font-h3--case: uppercase;
-      --font-h4--family: var(--font-display);
+      --font-h3--weight: 500;
+      --font-h3--letter-spacing: 0;
+      --font-h3--case: none;
+      --font-h4--family: var(--font-oce);
       --font-h4--style: normal;
-      --font-h4--weight: 700;
-      --font-h4--line-height: 1;
+      --font-h4--weight: 500;
       --font-h4--letter-spacing: 0;
-      --font-h4--case: uppercase;
-      --font-h5--family: var(--font-display);
+      --font-h4--case: none;
+      --font-h5--family: var(--font-oce);
       --font-h5--style: normal;
-      --font-h5--weight: 700;
-      --font-h5--line-height: 1;
+      --font-h5--weight: 500;
       --font-h5--letter-spacing: 0;
-      --font-h5--case: uppercase;
-
-      /* h6 is the theme's small eyebrow style: a label */
-      --font-h6--family: var(--font-display);
+      --font-h5--case: none;
+      --font-h6--family: var(--font-oce);
       --font-h6--style: normal;
-      --font-h6--weight: 600;
-      --font-h6--letter-spacing: 0.06em;
-      --font-h6--case: uppercase;
+      --font-h6--weight: 500;
+      --font-h6--letter-spacing: 0;
+      --font-h6--case: none;
 
       /* Buttons */
-      --button-font-family-primary: var(--font-display);
-      --button-font-family-secondary: var(--font-display);
-      --button-font-weight-primary: 600;
-      --button-font-weight-secondary: 600;
+      --button-font-family-primary: var(--font-oce);
+      --button-font-family-secondary: var(--font-oce);
+      --button-font-weight-primary: 800;
+      --button-font-weight-secondary: 800;
       --button-text-case-primary: uppercase;
       --button-text-case-secondary: uppercase;
 
-      /* Only real faces: no faux bold on Barlow, no slanted "italic" (the old Inter italics) */
+      /* No slanted "italic" where the old Inter italics are still asked for */
       font-synthesis: none;
     }
 
     body {
-      font-family: var(--font-text);
+      font-family: var(--font-oce);
+      font-stretch: 100%;
       font-style: normal;
+      font-weight: 400;
+      line-height: 1.5;
     }
 
-    /* Emphasis in body copy uses Barlow 500 */
-    :is(p, li, dd, td, .rte) :is(strong, b) {
-      font-weight: 500;
+    /* ---- Wordmark: only when the shop name shows as text (no logo image) ---- */
+    :root .header-logo:not(:has(img)) {
+      font-family: var(--font-oce);
+      font-stretch: 60%;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
     }
 
-    /* ---- Headings in custom sections (these name their own sizes) ---- */
+    /* ---- Hero headings: 55%, 900 ---- */
+    :root :is(h1, .h1.h1, .text-block.h1 > *),
+    :root:root :is(.bfrh__heading, .bfrh__offer) {
+      font-family: var(--font-oce) !important; /* stylelint-disable-line declaration-no-important */
+      font-stretch: 55%;
+      font-style: normal;
+      font-weight: 900;
+      text-transform: uppercase;
+      line-height: 0.88;
+      letter-spacing: 0.01em;
+    }
+
+    /* ---- Product titles: 60%, 850 (product page 28-34px; the spotlight keeps its own size) ---- */
+    /* :root:root outranks the hero rule's .h1.h1, which the product page's h1 also matches */
+    :root:root :is(.product-information, .product-details, .view-product-title) h1,
+    :root .ps__title {
+      font-family: var(--font-oce) !important; /* stylelint-disable-line declaration-no-important */
+      font-stretch: 60%;
+      font-style: normal;
+      font-weight: 850;
+      text-transform: uppercase;
+      line-height: 0.95;
+      letter-spacing: 0.015em;
+    }
+
+    :root:root :is(.product-information, .product-details, .view-product-title) h1 {
+      font-size: clamp(1.75rem, 1.5rem + 0.8vw, 2.125rem);
+    }
+
+    /* ---- Section headings: 100%, 500, as typed ---- */
     :root :is(
-        .bfrh__heading,
-        .bfrh__offer,
+        h2:not(.ps__title),
+        h3,
+        h4,
+        h5,
+        h6,
         .ppw__heading,
-        .ps__title,
         .cc-header__title,
         .pab__heading,
         .brand-tiles-heading,
         .sbz-title,
-        .product-list__title,
         .ccg__heading,
         .ccg__heading > span,
-        .cc-card__title
+        .account-actions__title
       ) {
-      font-family: var(--font-display) !important; /* stylelint-disable-line declaration-no-important */
-      font-style: normal;
-      font-weight: 700;
-      text-transform: uppercase;
-      line-height: 0.95;
-      letter-spacing: -0.01em;
-    }
-
-    /* ---- Product title on the product page: 28-32px ---- */
-    :root .product-information h1,
-    :root .product-details h1,
-    :root .view-product-title h1 {
-      font-family: var(--font-display);
-      font-style: normal;
-      font-weight: 700;
-      font-size: clamp(1.75rem, 1.5rem + 0.6vw, 2rem);
-      line-height: 1;
-      letter-spacing: -0.01em;
-      text-transform: uppercase;
-    }
-
-    /* Product card titles stay in Barlow, sentence case: long names read better that way */
-    :root :is(.product-card, .resource-card, .product-grid__card) :is(.product-title, .product-card__title, .resource-card__title) {
-      font-family: var(--font-text);
+      font-family: var(--font-oce) !important; /* stylelint-disable-line declaration-no-important */
+      font-stretch: 100%;
       font-style: normal;
       font-weight: 500;
-      letter-spacing: 0;
       text-transform: none;
+      letter-spacing: 0;
     }
 
-    /* ---- Buttons, nav, labels, badges: 600, caps, +0.06em ---- */
+    /* ---- Nav, filters, breadcrumbs: 100%, 500, as typed ---- */
+    :root :is(
+        .menu-list__link,
+        .menu-list__link-title,
+        .mega-menu__link,
+        .menu-drawer__menu-item,
+        .breadcrumb__link,
+        .facets__label,
+        .facets__summary,
+        .currency-code
+      ) {
+      font-family: var(--font-oce) !important; /* stylelint-disable-line declaration-no-important */
+      font-stretch: 100%;
+      font-style: normal;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    /* ---- Buttons, badges, short labels: 80%, 800, caps, +0.08em ---- */
     :root :is(
         .button,
         .button-secondary,
@@ -162,13 +201,12 @@
         .bfrh__button,
         .ps__buy-label,
         .cc-card__cta,
+        .cc-card__title,
         .igw-follow-btn,
         .sbz-shop-btn,
         .pa__add-label,
-        .menu-list__link,
-        .menu-drawer__menu-item--mainlist,
+        .pa__heading,
         .announcement-bar__text,
-        .breadcrumb__link,
         .product-badges__badge,
         .bfsale-badge,
         .bfsale-price:not(.price),
@@ -176,13 +214,7 @@
         .psr__text,
         .ptb__text,
         .pab__eyebrow,
-        .pa__heading,
-        .pdp-accordion__summary,
-        .pdp-accordion__summary > span,
-        .details__header,
-        #sbz-trigger > span,
         .ps__soleplate-label,
-        .ps__soleplate-btn__label,
         .ps__size-label,
         .tlb-label,
         [class^='tlb-label'],
@@ -190,46 +222,54 @@
         .ppw__name,
         .ppw__boot,
         .urgency-text,
-        .cart-bubble__text,
-        .facets__label,
-        .facets__summary
+        .pdp-accordion__summary,
+        .pdp-accordion__summary > span,
+        .details__header,
+        .cart-bubble__text
       ) {
-      font-family: var(--font-display) !important; /* stylelint-disable-line declaration-no-important */
+      font-family: var(--font-oce) !important; /* stylelint-disable-line declaration-no-important */
+      font-stretch: 80%;
       font-style: normal;
-      font-weight: 600;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.08em;
     }
 
-    /* Short labels at the spec's 14-15px. Captions inside tiles keep their own size. */
-    :root :is(.button, .button-secondary, .add-to-cart-text__content, .bfrh__button, .ps__buy-label, .sbz-shop-btn) {
-      font-size: 0.9375rem;
+    /* The floating "Shop by size" button's label has no class; an ID selector kept apart so it can't raise the group above */
+    #sbz-trigger > span {
+      font-family: var(--font-oce);
+      font-stretch: 80%;
+      font-style: normal;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
     }
 
-    :root :is(.product-badges__badge, .fsp__text, .psr__text, .ptb__text, .urgency-text) {
-      font-size: 0.875rem;
-    }
-
-    /* The BFSALE badge was padded for Oswald italic (low caps, glyphs leaning right).
-       Barlow Condensed upright sits centred, so the padding evens out. It keeps its own size. */
+    /* The BFSALE badge was padded for Oswald italic (low caps, glyphs leaning right); upright text sits centred */
     :root .bfsale-badge {
       padding: 0.36em 0.8em 0.32em;
-      letter-spacing: 0.04em;
     }
 
-    /* Questions and product names in small UI stay sentence case, in Barlow's emphasis weight */
-    :root :is(.pip__q, .pip__q > span, .pa__title) {
-      font-family: var(--font-text);
-      font-weight: 500;
-    }
-
-    /* Sentence-case label pieces: names keep their capitals, clubs read as body text */
-    :root .ppw__club {
-      font-family: var(--font-text);
+    /* ---- Sizes and variant pickers: 75%, 700, caps, +0.02em ---- */
+    :root :is(
+        .ps__size-btn,
+        .ps__soleplate-btn__label,
+        .sbz-size-btn,
+        .sbz-sys,
+        .pill-option__value,
+        .psb__pill-label,
+        .variant-option__button-label
+      ) {
+      font-family: var(--font-oce) !important; /* stylelint-disable-line declaration-no-important */
+      font-stretch: 75%;
       font-style: normal;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      font-variant-numeric: tabular-nums;
     }
 
-    /* ---- Prices and sizes: 600, tabular figures ---- */
+    /* ---- Prices: 70%, 700, tabular figures ---- */
     :root :is(
         .price,
         .compare-at-price,
@@ -239,20 +279,32 @@
         .pa__now,
         .cart-items__price,
         .cart__total-value,
-        .ps__size-btn,
-        .sbz-size-btn,
-        .sbz-sys,
-        .pill-option__value,
-        .psb__pill-label,
-        .variant-option__button-label,
         .announcement-bar__countdown
       ) {
-      font-family: var(--font-display) !important; /* stylelint-disable-line declaration-no-important */
+      font-family: var(--font-oce) !important; /* stylelint-disable-line declaration-no-important */
+      font-stretch: 70%;
       font-style: normal;
-      font-weight: 600;
+      font-weight: 700;
+      letter-spacing: 0.01em;
       font-variant-numeric: tabular-nums;
       font-feature-settings: 'tnum' 1;
-      letter-spacing: 0.02em;
+    }
+
+    /* ---- Body copy inside custom sections: 100%, 400 ---- */
+    :root :is(.ppw__club, .pip__a, .rte, .product-description) {
+      font-family: var(--font-oce);
+      font-stretch: 100%;
+      font-style: normal;
+      letter-spacing: 0;
+    }
+
+    /* Questions and small product names: as typed, a touch heavier than body */
+    :root :is(.pip__q, .pip__q > span, .pa__title) {
+      font-family: var(--font-oce);
+      font-stretch: 100%;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
     }
   {% endstyle %}
 {%- endif -%}

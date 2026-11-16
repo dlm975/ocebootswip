@@ -329,9 +329,9 @@
       },
       {
         "type": "checkbox",
-        "id": "brand_fonts_barlow",
-        "label": "Use Barlow brand fonts",
-        "info": "Barlow Condensed for headings, buttons, menus, labels, prices and sizes; Barlow for body text. Loaded from Google Fonts and used instead of the fonts picked below.",
+        "id": "brand_font",
+        "label": "Use Anybody brand font",
+        "info": "Anybody, loaded from Google Fonts, at a different width and weight for headings, product titles, prices, sizes, buttons and body text. Used instead of the fonts picked below.",
         "default": true
       },
       {

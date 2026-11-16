@@ -28,8 +28,8 @@
     {%- render 'fonts' -%}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    {%- unless settings.brand_fonts_barlow -%}
-      {%- # Oswald Bold for the BFSALE "% OFF" badge. With the Barlow brand fonts on, the badge uses Barlow Condensed. -%}
+    {%- unless settings.brand_font -%}
+      {%- # Oswald Bold for the BFSALE "% OFF" badge. With the brand font on, the badge uses Anybody. -%}
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap">
     {%- endunless -%}
     {%- # Shrinks sale price lines on product cards to fit one line -%}
