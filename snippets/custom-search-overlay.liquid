@@ -131,7 +131,7 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
-    background: rgb(255 255 255 / 0.9);
+    background: rgb(255 255 255 / 0.94);
     -webkit-backdrop-filter: blur(18px) saturate(140%);
     backdrop-filter: blur(18px) saturate(140%);
     color: var(--cs-ink);
@@ -179,7 +179,16 @@
     align-items: center;
     gap: 12px;
     padding-block: calc(14px + env(safe-area-inset-top, 0px)) 14px;
-    background: linear-gradient(rgb(255 255 255 / 0.96) 75%, rgb(255 255 255 / 0));
+  }
+
+  /* The field's backing runs edge to edge and fades out just below it, so results scrolling
+     underneath never show through behind the field */
+  .cs-bar::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0 calc(50% - 50vw) -18px;
+    background: linear-gradient(rgb(255 255 255) calc(100% - 18px), rgb(255 255 255 / 0));
   }
 
   @media screen and (min-width: 750px) {
@@ -364,11 +373,6 @@
   .cs-suggest__link:focus-visible {
     outline: 2px solid var(--cs-ink);
     outline-offset: 3px;
-  }
-
-  /* The part you haven't typed reads lighter */
-  .cs-suggest__rest {
-    color: rgb(18 18 18 / 0.45);
   }
 
   .cs-label {
@@ -630,36 +634,16 @@
 
     function renderSuggestions(query, suggestions) {
       suggestList.replaceChildren();
-      const typed = query.trim().toLowerCase();
       suggestions.forEach(function (suggestion) {
         const item = document.createElement('li');
         const link = document.createElement('a');
         link.className = 'cs-suggest__link';
         link.href = suggestionUrl(suggestion.text);
-        // What you typed in full ink, the rest a shade lighter
-        const lower = suggestion.text.toLowerCase();
-        const start = typed ? lower.indexOf(typed) : -1;
-        if (start > -1) {
-          const before = suggestion.text.slice(0, start);
-          const match = suggestion.text.slice(start, start + typed.length);
-          const after = suggestion.text.slice(start + typed.length);
-          if (before) link.append(rest(before));
-          link.append(match);
-          if (after) link.append(rest(after));
-        } else {
-          link.textContent = suggestion.text;
-        }
+        link.textContent = suggestion.text;
         item.append(link);
         suggestList.append(item);
       });
       suggestSection.hidden = suggestions.length === 0;
-    }
-
-    function rest(text) {
-      const span = document.createElement('span');
-      span.className = 'cs-suggest__rest';
-      span.textContent = text;
-      return span;
     }
 
     /* ---------- Fetching results ---------- */
