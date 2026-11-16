@@ -1412,6 +1412,23 @@
     "settings": [
       {
         "type": "select",
+        "id": "sale_badge_style",
+        "label": "Sale badge style",
+        "info": "The \"% off\" badge on sale products. Classic is the Oswald badge with flames.",
+        "options": [
+          {
+            "value": "flat",
+            "label": "Flat"
+          },
+          {
+            "value": "classic",
+            "label": "Classic"
+          }
+        ],
+        "default": "flat"
+      },
+      {
+        "type": "select",
         "id": "badge_position",
         "options": [
           {

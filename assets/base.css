@@ -4181,6 +4181,33 @@ text-component {
   flex-basis: 100%;
 }
 
+/* Product page price row (redesign): sale price, then the struck "was" price, then the badge.
+   The "NOW" label is dropped here; the visually hidden "Sale price" label stays for screen readers. */
+.bfsale-price-line--pdp:has(.sale-badge) {
+  align-items: baseline;
+  column-gap: 12px;
+  row-gap: 6px;
+  padding-block-start: 0;
+}
+
+.bfsale-price-line--pdp:has(.sale-badge) .bfsale-now {
+  order: 1;
+}
+
+.bfsale-price-line--pdp:has(.sale-badge) .bfsale-rrp {
+  order: 2;
+  font-size: 15px;
+}
+
+.bfsale-price-line--pdp:has(.sale-badge) .sale-badge {
+  order: 3;
+  align-self: center;
+}
+
+.bfsale-price-line--pdp:has(.sale-badge) .bfsale-now .bfsale-price:not(.price) {
+  display: none;
+}
+
 .bfsale-rrp {
   margin-inline-end: 0.4em;
   color: var(--brand-red);

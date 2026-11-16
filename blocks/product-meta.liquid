@@ -1,0 +1,111 @@
+{%- doc -%}
+  Product meta line above the product title: brand · soleplate · condition, e.g. "Nike · FG · New".
+
+  - Brand: the first word of the title when it is a known boot brand (listings use the shop as vendor),
+    otherwise the vendor unless it is the shop itself.
+  - Soleplate: the first soleplate code in the title (FG, SG-Pro, AG, HG/AG ...).
+  - Condition: the selected variant's value for the option named "Condition".
+  Parts that can't be found are left out.
+{%- enddoc -%}
+
+{%- liquid
+  assign meta_product = closest.product
+  if meta_product == blank
+    assign meta_product = product
+  endif
+
+  assign brands = 'nike,adidas,puma,mizuno,new balance,umbro,diadora,lotto,asics,under armour,joma,kelme,umbro,hummel,kappa,skechers,lotto'
+  assign brand_list = brands | split: ','
+  assign title_words = meta_product.title | split: ' '
+  assign first_word = title_words.first | downcase
+  assign two_words = title_words[0] | append: ' ' | append: title_words[1] | downcase
+
+  assign meta_brand = ''
+  if brand_list contains two_words
+    assign meta_brand = title_words[0] | append: ' ' | append: title_words[1]
+  elsif brand_list contains first_word
+    assign meta_brand = title_words.first
+  elsif meta_product.vendor != blank and meta_product.vendor != shop.name
+    assign meta_brand = meta_product.vendor
+  endif
+  if meta_brand == 'adidas' or meta_brand == 'ADIDAS'
+    assign meta_brand = 'Adidas'
+  endif
+
+  assign soleplates = 'SG-PRO,SG-AC,SG,FG/AG,FG,AG,HG/AG,HG,MG,TF,IC,AG-PRO,FG-AG'
+  assign sole_list = soleplates | split: ','
+  assign meta_sole = ''
+  for word in title_words
+    assign w = word | remove: '(' | remove: ')' | remove: ',' | upcase
+    if sole_list contains w
+      assign meta_sole = word | remove: '(' | remove: ')' | remove: ','
+      break
+    endif
+  endfor
+
+  assign meta_condition = ''
+  assign meta_variant = meta_product.selected_or_first_available_variant
+  for option in meta_product.options_with_values
+    assign option_name = option.name | downcase
+    if option_name contains 'condition'
+      assign meta_condition = option.selected_value
+    endif
+  endfor
+
+  assign meta_text = ''
+  for part in (1..3)
+    case part
+      when 1
+        assign value = meta_brand
+      when 2
+        assign value = meta_sole
+      else
+        assign value = meta_condition
+    endcase
+    if value != blank
+      if meta_text != blank
+        assign meta_text = meta_text | append: ' · '
+      endif
+      assign meta_text = meta_text | append: value
+    endif
+  endfor
+-%}
+
+{%- if meta_text != blank -%}
+  <p
+    class="product-meta"
+    {{ block.shopify_attributes }}
+  >
+    {{ meta_text | escape }}
+  </p>
+{%- endif -%}
+
+{% stylesheet %}
+  .product-meta {
+    margin: 0;
+    font-family: var(--font-body--family);
+    font-size: 12px;
+    line-height: 1.3;
+    font-weight: 400;
+    color: rgb(var(--color-foreground-rgb) / 0.6);
+    letter-spacing: 0.01em;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Product meta line",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Shows brand · soleplate · condition, read from the product title and the selected variant."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product meta line"
+    }
+  ]
+}
+{% endschema %}

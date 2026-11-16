@@ -23,7 +23,11 @@
 {% render 'card-gallery', children: children %}
 
 {% if closest.product != blank and is_bfsale_card %}
-  {% render 'bfsale-badge', product: closest.product %}
+  {% if settings.sale_badge_style == 'classic' %}
+    {% render 'bfsale-badge', product: closest.product %}
+  {% else %}
+    {% render 'sale-badge', product: closest.product %}
+  {% endif %}
 {% endif %}
 
 {% # Title and price for the zoomed out grid view %}

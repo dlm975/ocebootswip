@@ -89,7 +89,11 @@
     </span>
     {%- unless is_bfsale_pdp -%}</price-fit>{%- endunless -%}
     {% if is_bfsale_pdp %}
-      {%- render 'bfsale-badge', product: product_resource, inline: true -%}
+      {%- if settings.sale_badge_style == 'classic' -%}
+        {%- render 'bfsale-badge', product: product_resource, inline: true -%}
+      {%- else -%}
+        {%- render 'sale-badge', product: product_resource, inline: true -%}
+      {%- endif -%}
     {% endif %}
   {% else %}
   {% if show_sale_price_first == false and show_compare_price %}

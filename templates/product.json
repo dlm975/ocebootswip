@@ -90,7 +90,7 @@
                 "align_baseline": false,
                 "horizontal_alignment_flex_direction_column": "flex-start",
                 "vertical_alignment_flex_direction_column": "center",
-                "gap": 12,
+                "gap": 10,
                 "width": "fill",
                 "custom_width": 100,
                 "width_mobile": "fill",
@@ -162,9 +162,15 @@
                     "padding-inline-end": 0
                   },
                   "blocks": {}
+                },
+                "product_meta_oce": {
+                  "type": "product-meta",
+                  "settings": {},
+                  "blocks": {}
                 }
               },
               "block_order": [
+                "product_meta_oce",
                 "text_xrnftG",
                 "price_tVjtKg"
               ]
@@ -182,7 +188,8 @@
                 "background": "#e7f6ee",
                 "text_color": "#15803d"
               },
-              "blocks": {}
+              "blocks": {},
+              "disabled": true
             },
             "star_rating_001": {
               "type": "product-star-rating",
@@ -193,13 +200,14 @@
                 "text_color": "#11602e",
                 "star_size": 13
               },
-              "blocks": {}
+              "blocks": {},
+              "disabled": true
             },
             "variant_picker_KALzja": {
               "type": "variant-picker",
               "name": "t:names.product_variant_picker",
               "settings": {
-                "variant_style": "dropdowns",
+                "variant_style": "size_grid",
                 "show_swatches": false,
                 "alignment": "left",
                 "padding-block-start": 0,
@@ -219,14 +227,15 @@
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
               },
-              "blocks": {}
+              "blocks": {},
+              "disabled": true
             },
             "buy_buttons_pKHp9V": {
               "type": "buy-buttons",
               "name": "t:names.product_buy_buttons",
               "settings": {
                 "urgency_text": "",
-                "stacking": false,
+                "stacking": true,
                 "show_pickup_availability": false,
                 "padding-block-start": 0,
                 "padding-block-end": 0,
@@ -245,7 +254,7 @@
                   "type": "add-to-cart",
                   "static": true,
                   "settings": {
-                    "style_class": "button-secondary"
+                    "style_class": "button"
                   },
                   "blocks": {}
                 },

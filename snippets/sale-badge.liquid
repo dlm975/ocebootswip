@@ -1,0 +1,83 @@
+{%- doc -%}
+  Flat sale badge: a copy of bfsale-badge restyled for the redesign. Same placement and the same
+  percentage as the original; upright Inter, mixed case ("35% off"), solid accent colour, 2px corners,
+  no flames and no shadow.
+
+  On cards it sits in a zero-height anchor placed right after the card image, so it rests on the image's
+  bottom-left corner. With inline: true it renders on its own, for the product page price row.
+
+  Chosen with Theme settings > Badges > "Sale badge style". The original stays in snippets/bfsale-badge.
+
+  @param {product} product - The product to render the badge for
+  @param {boolean} [inline] - Render an inline badge instead of the card-image anchor
+{%- enddoc -%}
+
+{%- liquid
+  assign sb_variant = product.selected_or_first_available_variant
+  assign sb_percent = 0
+  if sb_variant.compare_at_price > sb_variant.price
+    assign sb_percent = sb_variant.compare_at_price | minus: sb_variant.price | times: 100.0 | divided_by: sb_variant.compare_at_price | round | divided_by: 5.0 | ceil | times: 5
+  endif
+-%}
+
+{%- capture sb_badge -%}
+  <span
+    class="sale-badge {% if inline %}sale-badge--inline{% else %}sale-badge--card{% endif %}"
+    {% if sb_percent <= 0 %}
+      hidden
+    {% endif %}
+  >
+    {%- if sb_percent > 0 %}{{ sb_percent }}% off{% endif -%}
+  </span>
+{%- endcapture -%}
+
+{%- if inline -%}
+  {{ sb_badge }}
+{%- else -%}
+  <div class="sale-badge-anchor">{{ sb_badge }}</div>
+{%- endif -%}
+
+{% stylesheet %}
+  .sale-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3em 0.55em;
+    border-radius: 2px;
+    background: #ba2fff;
+    color: #000;
+    font-family: var(--font-body--family);
+    font-style: normal;
+    font-weight: 600;
+    font-size: 0.8125rem;
+    line-height: 1;
+    letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
+    text-transform: none;
+    white-space: nowrap;
+  }
+
+  .sale-badge[hidden] {
+    display: none;
+  }
+
+  /* Card: zero-height anchor right after the image; the badge sits on its bottom-left corner */
+  .sale-badge-anchor {
+    position: relative;
+    width: 100%;
+    height: 0;
+    margin-block-start: calc(-1 * var(--bfsale-anchor-gap, 0px));
+    z-index: var(--layer-raised, 2);
+  }
+
+  .sale-badge--card {
+    position: absolute;
+    left: 0;
+    bottom: 6px;
+    font-size: 0.75rem;
+    pointer-events: none;
+  }
+
+  [product-grid-view='zoom-out'] .sale-badge-anchor {
+    display: none;
+  }
+{% endstylesheet %}
