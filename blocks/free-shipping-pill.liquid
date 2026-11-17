@@ -128,7 +128,8 @@
 
 <script>
   (function () {
-    var pill = document.getElementById('fsp-{{ block.id }}');
+    var id = 'fsp-{{ block.id }}';
+    var pill = document.getElementById(id);
     if (!pill) return;
 
     function gallery() {
@@ -137,6 +138,13 @@
     }
 
     function place() {
+      /* A re-render (choosing another size) draws a fresh pill back in the details column and
+         redraws the gallery without the one moved there: keep the newest and move it again. */
+      var fresh = document.getElementById(id);
+      if (fresh && fresh !== pill) {
+        if (pill.isConnected) pill.remove();
+        pill = fresh;
+      }
       var g = gallery();
       if (g && pill.parentElement !== g) g.appendChild(pill);
       /* Revealed either way — without a gallery it still shows where the
@@ -151,6 +159,15 @@
     }
 
     window.addEventListener('load', place);
+
+    /* Put it back the moment the product area is redrawn. Mutation observers run before the
+       next paint, so the pill never disappears for a frame. */
+    var area = document.querySelector('.product-information') || document.body;
+    new MutationObserver(function () {
+      var g = gallery();
+      var fresh = document.getElementById(id);
+      if (!pill.isConnected || (g && pill.parentElement !== g) || (fresh && fresh !== pill)) place();
+    }).observe(area, { childList: true, subtree: true });
   })();
 </script>
 

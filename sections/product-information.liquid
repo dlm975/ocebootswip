@@ -128,6 +128,12 @@
 
   /* Desktop styles */
   @media screen and (min-width: 750px) {
+    /* The gallery column is only as tall as its own images: opening Details or an FAQ in the
+       right-hand column never resizes or moves it */
+    .product-information__media {
+      align-self: start;
+    }
+
     .product-information__grid {
       grid-column: 2;
     }

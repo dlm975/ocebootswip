@@ -695,6 +695,23 @@
       });
     });
 
+    /* ── Follow the page's size picker straight away ──
+       The size grid and dropdowns drive a hidden <select name="options[Size]">. Reading it
+       directly updates this bar the moment a size is tapped, without waiting for the variant
+       to load (and still updates it if that request is slow or fails). */
+    document.addEventListener('change', function (e) {
+      var select = e.target;
+      if (!(select instanceof HTMLSelectElement) || root.contains(select)) return;
+      var optionName = root.dataset.sizeOption;
+      if (!optionName || select.name !== 'options[' + optionName + ']') return;
+      var text = select.value;
+      var match = opts.filter(function (o) {
+        return o.dataset.label === text;
+      })[0];
+      if (match) applyLocally(match.dataset.variantId, text);
+      else if (label && text) label.textContent = text;
+    });
+
     /* ── Keep in step with the main picker ── */
     document.addEventListener('variant:update', function (e) {
       var resource = e.detail && e.detail.resource;
