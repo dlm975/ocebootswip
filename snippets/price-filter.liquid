@@ -30,7 +30,7 @@
     {% endif %}
   >
     <summary class="facets__summary">
-      <span class="facets__label">{{ filter.label }}</span>
+      <span class="facets__label">{{ filter.label }} ({{ cart.currency.iso_code }})</span>
       <facet-status-component class="facets__status">
         <template ref="moneyFormat">{{ shop.money_format }}</template>
 
@@ -57,7 +57,7 @@
         </span>
       </facet-status-component>
       <span class="svg-wrapper icon-caret icon-animated">
-        {{- 'icon-caret.svg' | inline_asset_content -}}
+        {{- 'icon-dropdown.svg' | inline_asset_content -}}
       </span>
     </summary>
     <floating-panel-component
