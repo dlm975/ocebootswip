@@ -623,6 +623,12 @@
     color: currentColor;
   }
 
+  /* OCEBOOTS: the Filter icon sits as far in from the left edge as the Sort arrow does from the
+     right (both inset by the toolbar padding plus --gap-md) */
+  .facets-toggle .facets-toggle__wrapper {
+    margin-inline-start: var(--gap-md);
+  }
+
   .collection-wrapper {
     @media screen and (min-width: 750px) {
       --facets-vertical-col-width: 6;
