@@ -49,7 +49,7 @@
           {{- product.price | money_with_currency -}}
         </span>
         {%- if on_sale -%}
-          <s class="wl-card__was">{{ product.compare_at_price | money }}</s>
+          <s class="wl-card__was">{% render 'was-price', cents: product.compare_at_price %}</s>
         {%- endif -%}
         {%- if condition != blank -%}
           <span class="wl-card__condition">{{ condition | escape }}</span>

@@ -171,6 +171,12 @@
       font-size: 0.85em;
     }
 
+    /* Card prices: 14px (was 13). The "was" price is rounded to whole units (snippets/was-price.liquid),
+       which frees the room; <price-fit> still shrinks a sale line that doesn't fit its card. */
+    :root product-card [ref='priceContainer'] {
+      font-size: 14px;
+    }
+
     /* Product page price: 22px */
     :root:root :is(.product-information, .product-details) :is(.price, .bfsale-price.price) {
       font-size: 22px;

@@ -66,6 +66,13 @@
     assign price = price | money
     assign compare_at_price = compare_at_price | money
   endif
+
+  # Cards: the "was" price is rounded up to whole units with no decimals (snippets/was-price.liquid)
+  if is_main_product_price == false and show_compare_price and product_resource != blank
+    capture compare_at_price
+      render 'was-price', cents: selected_variant.compare_at_price, with_currency: settings.currency_code_enabled_product_cards
+    endcapture
+  endif
 -%}
 
 <div
