@@ -42,7 +42,7 @@
         {%- endif -%}
         ref="menuitem"
       >
-        <span class="menu-list__link-title">{{- link.title -}}</span>
+        <span class="menu-list__link-title{% assign title_key = link.title | downcase | strip %}{% if title_key == 'sale' %} menu-item--sale{% endif %}">{{- link.title -}}</span>
       </a>
       {%- if link.links != blank -%}
         <div class="menu-list__submenu{{ color_scheme_classes }}" ref="submenu[]">

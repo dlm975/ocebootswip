@@ -111,7 +111,7 @@
                         id="HeaderDrawer-{{ link.handle }}"
                         class="menu-drawer__menu-item menu-drawer__menu-item--mainlist menu-drawer__animated-element focus-inset"
                       >
-                        <span class="menu-drawer__menu-item-text">{{ link.title | escape }}</span>
+                        <span class="menu-drawer__menu-item-text{% assign title_key = link.title | downcase | strip %}{% if title_key == 'sale' %} menu-item--sale{% endif %}">{{ link.title | escape }}</span>
                         <span class="svg-wrapper icon-plus">
                           {{- 'icon-plus.svg' | inline_asset_content -}}
                         </span>
@@ -169,7 +169,7 @@
                       aria-current="page"
                     {% endif %}
                   >
-                    <span class="menu-drawer__menu-item-text">{{ link.title | escape }}</span>
+                    <span class="menu-drawer__menu-item-text{% assign title_key = link.title | downcase | strip %}{% if title_key == 'sale' %} menu-item--sale{% endif %}">{{ link.title | escape }}</span>
                   </a>
                   {% liquid
                     assign render_link_image = false
@@ -218,7 +218,7 @@
                       aria-current="page"
                     {% endif %}
                   >
-                    <span class="menu-drawer__menu-item-text">{{ link.title | escape }}</span>
+                    <span class="menu-drawer__menu-item-text{% assign title_key = link.title | downcase | strip %}{% if title_key == 'sale' %} menu-item--sale{% endif %}">{{ link.title | escape }}</span>
                   </a>
                 {% endif %}
               </li>
@@ -263,7 +263,7 @@
                       class="menu-drawer__menu-item menu-drawer__menu-item--mainlist menu-drawer__animated-element focus-inset{% if link.child_active %} menu-drawer__menu-item--active{% endif %}"
                       on:click="header-drawer/toggleSubmenu"
                     >
-                      <span class="menu-drawer__menu-item-text">{{ link.title | escape }}</span>
+                      <span class="menu-drawer__menu-item-text{% assign title_key = link.title | downcase | strip %}{% if title_key == 'sale' %} menu-item--sale{% endif %}">{{ link.title | escape }}</span>
                       <span class="svg-wrapper icon-caret icon-caret--forward">
                         {{- 'icon-caret.svg' | inline_asset_content -}}
                       </span>
@@ -527,7 +527,7 @@
                       aria-current="page"
                     {% endif %}
                   >
-                    <span class="menu-drawer__menu-item-text">{{ link.title | escape }}</span>
+                    <span class="menu-drawer__menu-item-text{% assign title_key = link.title | downcase | strip %}{% if title_key == 'sale' %} menu-item--sale{% endif %}">{{ link.title | escape }}</span>
                   </a>
                 {%- endif -%}
               </li>
@@ -618,6 +618,14 @@
 </header-drawer>
 
 {% stylesheet %}
+  /* Sale reads as an offer: bold red capitals (also in the desktop menu, snippets/header-menu.liquid) */
+  .menu-item--sale {
+    color: #e8323c;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
   /* Brand drill-down inside the drawer: inset like the child links */
   .menu-drawer__drill {
     padding-inline: var(--padding-xl, 20px);
