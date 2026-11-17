@@ -314,7 +314,7 @@
         >
           {{- 'actions.sort' | t -}}
           <span class="svg-wrapper icon-caret">
-            {{- 'icon-dropdown.svg' | inline_asset_content -}}
+            {{- 'icon-sort-arrow.svg' | inline_asset_content -}}
           </span>
         </label>
         <select
@@ -490,6 +490,23 @@
 {% endif %}
 
 {% stylesheet %}
+  /* OCEBOOTS: Sort and the filter names read exactly like the Filter button (same size, weight
+     and colour), on phones and desktop */
+  .facets-toggle__button,
+  .sort-select__label,
+  .facets__summary .facets__label {
+    font-size: 0.9375rem;
+    font-weight: 560;
+    color: var(--color-foreground);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .sort-select__label .icon-caret,
+  .sorting-filter .facets__summary .icon-caret {
+    color: currentColor;
+  }
+
   .collection-wrapper {
     @media screen and (min-width: 750px) {
       --facets-vertical-col-width: 6;
