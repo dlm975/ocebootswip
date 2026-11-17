@@ -14,6 +14,13 @@
 - House timing: 0.55s `cubic-bezier(0.3, 0.7, 0.3, 1)` for things moving into place; quick
   fades (~0.18–0.25s) on the way out.
 
+## Icons
+- Every icon is a Google Material Symbol (https://fonts.google.com/icons), outlined, weight 400
+  (`-fill` versions where an icon is solid). In templates use
+  `{% render 'gicon', name: 'close', class: '…', size: 16 %}` (`snippets/gicon.liquid`; add new
+  icons to its list from Google's SVG download). `assets/icon-*.svg` and `snippets/icon.liquid`
+  are Material too. Brand logos (social, payment, Shopify, Instagram) stay the brands' own.
+
 ## Working on the theme
 - Branch `claude/funny-euler-txg5jg`; also push to `swatch-test`, which syncs to the unpublished
   theme "ocebootswip/swatch-test" (preview: https://oceboots.com/?preview_theme_id=191381766455).
