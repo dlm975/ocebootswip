@@ -55,7 +55,7 @@
                 }}
               {%- endif -%}
             </span>
-            <span class="cs-card__title">{{ product.title | escape }}</span>
+            <span class="cs-card__title">{% render 'short-product-title', title: product.title %}</span>
             <span class="cs-card__price">
               <span class="cs-card__prices">
               <span class="cs-card__amount">

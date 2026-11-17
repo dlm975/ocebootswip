@@ -39,7 +39,7 @@
           <span class="wl-card__sold">Sold out</span>
         {%- endunless -%}
       </span>
-      <span class="wl-card__title">{{ product.title | escape }}</span>
+      <span class="wl-card__title">{% render 'short-product-title', title: product.title %}</span>
       <span class="wl-card__price">
         <span class="wl-card__amount">
           {%- if product.price_varies -%}
