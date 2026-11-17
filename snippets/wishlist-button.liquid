@@ -1,6 +1,6 @@
 {%- doc -%}
-  Heart that saves a product to the wishlist (assets/wishlist.js). On product cards it sits in the
-  corner of the image as a green circle.
+  Heart that saves a product to the wishlist (assets/wishlist.js): an ink outline that turns red
+  and fills when saved. On product cards it sits in the image's top-right corner.
 
   @param {object} product - The product
   @param {string} [class] - Extra classes, e.g. 'wishlist-toggle--card'
@@ -24,17 +24,19 @@
 </button>
 
 {% stylesheet %}
+  /* Just the heart: ink outline, red and filled once saved */
   .wishlist-toggle {
+    --wishlist-red: #e8323c;
+
     display: inline-grid;
     place-items: center;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     padding: 0;
     border: 0;
     border-radius: 50%;
-    background: var(--brand-green, rgb(37 211 102));
+    background: none;
     color: #121212;
-    box-shadow: 0 4px 20px rgb(18 18 18 / 0.15);
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
@@ -42,13 +44,13 @@
 
   .wishlist-toggle:focus-visible {
     outline: 2px solid #121212;
-    outline-offset: 2px;
+    outline-offset: -2px;
   }
 
   .wishlist-toggle__icon {
     display: grid;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
   }
 
   .wishlist-toggle__heart {
@@ -57,8 +59,9 @@
     height: 100%;
   }
 
-  /* Saved: the filled heart grows in over the outline */
+  /* Saved: a red heart grows in over the outline, which turns red with it */
   .wishlist-toggle__heart--filled {
+    color: var(--wishlist-red);
     opacity: 0;
     transform: scale(0.4);
   }
@@ -68,28 +71,31 @@
     transform: none;
   }
 
+  .wishlist-toggle[aria-pressed='true'] .wishlist-toggle__heart--outline {
+    color: var(--wishlist-red);
+  }
+
   [data-wishlist-ready] .wishlist-toggle__heart--filled {
     transition: opacity 0.2s ease, transform 0.42s cubic-bezier(0.3, 0.7, 0.3, 1);
   }
 
-  /* On product cards: in the image's corner, where the add-to-cart circle was */
+  [data-wishlist-ready] .wishlist-toggle__heart--outline {
+    transition: color 0.2s ease;
+  }
+
+  /* On product cards: the image's top-right corner */
   .wishlist-toggle--card {
-    --wishlist-offset: var(--padding-sm, 12px);
+    --wishlist-offset: 2px;
 
     position: absolute;
-    inset-block-end: calc(var(--wishlist-offset) + var(--padding-block-end, 0px));
+    inset-block-start: calc(var(--wishlist-offset) + var(--padding-block-start, 0px));
     inset-inline-end: calc(var(--wishlist-offset) + var(--padding-inline-end, 0px));
     z-index: var(--layer-raised, 2);
   }
 
-  @media screen and (min-width: 750px) {
-    .wishlist-toggle--card {
-      --wishlist-offset: var(--padding-md, 13px);
-    }
-  }
-
   @media (prefers-reduced-motion: reduce) {
-    [data-wishlist-ready] .wishlist-toggle__heart--filled {
+    [data-wishlist-ready] .wishlist-toggle__heart--filled,
+    [data-wishlist-ready] .wishlist-toggle__heart--outline {
       transition: none;
     }
   }
