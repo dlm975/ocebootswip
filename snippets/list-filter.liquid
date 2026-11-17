@@ -258,7 +258,7 @@
           %}
           <ul
             id="filters-list-{{ sectionId }}-{{ filter.param_name | escape | replace: '.', '-' }}"
-            class="facets__inputs-list{% if should_use_pills %} facets__inputs-list--grid{% endif %} list-unstyled{% if is_swatch %} facets__inputs-list--swatches{% if show_swatch_label %} facets__inputs-list--swatches-grid{% endif %}{% endif %}{% if is_image %} facets__inputs-list--images{% endif %}"
+            class="facets__inputs-list{% if should_use_pills %} facets__inputs-list--grid{% endif %} list-unstyled{% if is_swatch %} facets__inputs-list--swatches{% if show_swatch_label %} facets__inputs-list--swatches-grid{% endif %}{% endif %}{% if is_image %} facets__inputs-list--images{% endif %}{% if is_surface %} facets__inputs-list--surface{% endif %}"
             {% if is_swatch %}
               style="--swatch-columns: {{ swatch_columns }};"
             {% endif %}
@@ -562,8 +562,25 @@
 
 {% stylesheet %}
   /* Surface: a round photo of the ground beside its full name; ringed when chosen */
+  .facets__inputs .facets__inputs-list.facets__inputs-list--surface {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    grid-template-columns: none;
+  }
+
+  .facets__inputs-list--surface > .facets__inputs-list-item {
+    width: auto;
+    min-width: 0;
+  }
+
   .surface-option {
     display: block;
+  }
+
+  .surface-option__name {
+    white-space: nowrap;
   }
 
   .surface-option .checkbox__input {
