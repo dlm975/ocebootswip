@@ -1,0 +1,48 @@
+{%- doc -%}
+  A product title for product cards, without the surface and what follows it: the colourway,
+  pack or edition ("Nike Mercurial Vapor 13 Elite SG-Pro AC MDS" → "Nike Mercurial Vapor 13 Elite",
+  "Nike Mercurial Superfly 8 Elite FG 'Rawdacious'" → "Nike Mercurial Superfly 8 Elite").
+
+  The title is cut at the first surface code (FG, SG, AG, HG, MG, TF, IC, and forms like SG-Pro,
+  SG-AC, FG/AG) or, when there isn't one, at a quoted name, an *aside* or a (bracket). The first
+  two words always stay. Product pages keep the full title.
+
+  @param {string} title - The product title
+{%- enddoc -%}
+
+{%- liquid
+  assign surfaces = 'FG,SG,AG,HG,MG,TF,IC' | split: ','
+  assign openers = "',\",‘,’,“,”,*,(" | split: ','
+  assign words = title | strip | split: ' '
+  assign short = ''
+
+  for word in words
+    if forloop.index > 2
+      assign first_char = word | slice: 0, 1
+      if openers contains first_char
+        break
+      endif
+
+      assign token = word | upcase
+      assign head = token | slice: 0, 2
+      assign joiner = token | slice: 2, 1
+      if surfaces contains head
+        if token.size == 2 or joiner == '-' or joiner == '/'
+          break
+        endif
+      endif
+    endif
+
+    if short == ''
+      assign short = word
+    else
+      assign short = short | append: ' ' | append: word
+    endif
+  endfor
+
+  if short == ''
+    assign short = title
+  endif
+
+  echo short | escape
+-%}
