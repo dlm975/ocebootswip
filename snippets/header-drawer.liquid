@@ -624,7 +624,8 @@
   .menu-drawer__menu-item .menu-drawer__menu-item-text.menu-item--sale {
     color: #e8323c;
     font-weight: 800;
-    text-transform: uppercase;
+    /* The brand typography (snippets/brand-typography.liquid) keeps all other text in normal case */
+    text-transform: uppercase !important; /* stylelint-disable-line declaration-no-important */
     letter-spacing: 0.02em;
   }
 
