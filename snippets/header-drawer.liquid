@@ -619,7 +619,9 @@
 
 {% stylesheet %}
   /* Sale reads as an offer: bold red capitals (also in the desktop menu, snippets/header-menu.liquid) */
-  .menu-item--sale {
+  :is(.menu-list__link, .menu-drawer__menu-item, .menu-list__link-title, .menu-drawer__menu-item-text).menu-item--sale,
+  .menu-list__link .menu-list__link-title.menu-item--sale,
+  .menu-drawer__menu-item .menu-drawer__menu-item-text.menu-item--sale {
     color: #e8323c;
     font-weight: 800;
     text-transform: uppercase;
