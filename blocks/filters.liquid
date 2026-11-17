@@ -534,9 +534,22 @@
       clip-path: inset(var(--header-height, 60px) 0 0 0);
     }
 
+    /* The panel is only as tall as it needs (up to the screen): the filters list scrolls between
+       the fixed title and the results button */
     .facets--drawer .facets__form-wrapper,
     .facets--drawer .facets__form {
-      max-height: inherit;
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    .facets--drawer .facets__form > .facets__filters-wrapper {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
     }
 
     .facets--drawer .facets__title-wrapper {
