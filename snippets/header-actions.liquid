@@ -7,10 +7,22 @@
 <header-actions
   {{- block.shopify_attributes -}}
 >
-  {% if shop.customer_accounts_enabled %}
-    {% render 'account-popover' %}
-    {% render 'account-drawer' %}
-  {% endif %}
+  {% # Wishlist in place of the account (saved hearts: assets/wishlist.js) %}
+  <a
+    href="{{ routes.all_products_collection_url }}?view=wishlist"
+    class="header-actions__action wishlist-link"
+    aria-label="Wishlist"
+  >
+    <span class="svg-wrapper wishlist-link__icon">
+      {%- render 'wishlist-heart-svg' -%}
+    </span>
+    <span
+      class="wishlist-link__count"
+      data-wishlist-count
+      aria-hidden="true"
+      hidden
+    ></span>
+  </a>
 
   {% if settings.cart_type == 'drawer' and template.name != 'cart' %}
     {% render 'cart-drawer' %}
@@ -26,6 +38,39 @@
 </header-actions>
 
 {% stylesheet %}
+  .wishlist-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Same badge as the bag's: on the heart's lower-left */
+  .wishlist-link__count {
+    position: absolute;
+    bottom: 6px;
+    left: 4px;
+    display: grid;
+    place-items: center;
+    min-width: 16px;
+    height: 16px;
+    padding-inline: 3px;
+    border-radius: 999px;
+    background: var(--color-foreground);
+    color: var(--color-background);
+    box-shadow: 0 0 0 2px var(--color-background);
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+
+  .wishlist-link__count[hidden] {
+    display: none;
+  }
+
   .cart-drawer {
     --cart-drawer-padding: var(--padding-lg) var(--padding-xl);
     --cart-drawer-padding-desktop: var(--padding-xl) var(--padding-2xl);

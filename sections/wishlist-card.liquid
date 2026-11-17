@@ -1,0 +1,67 @@
+{%- comment -%}
+  One saved product's card on the wishlist page (sections/wishlist.liquid), fetched from the
+  product's own URL with section_id=wishlist-card so the price comes in the shopper's currency.
+  Not for adding to pages: it has no presets.
+{%- endcomment -%}
+
+{%- liquid
+  assign image = product.featured_media.preview_image | default: product.featured_image
+  assign image_alt = image.alt | default: product.title | escape
+  assign condition = product.options_by_name['Condition'].values | first
+  assign on_sale = false
+  if product.compare_at_price > product.price
+    assign on_sale = true
+  endif
+-%}
+
+{%- if product -%}
+  <li
+    class="wl-grid__item"
+    data-wishlist-item="{{ product.handle }}"
+  >
+    <a
+      class="wl-card"
+      href="{{ product.url }}"
+    >
+      <span class="wl-card__media">
+        {%- if image -%}
+          {{
+            image
+            | image_url: width: 700
+            | image_tag:
+              widths: '300, 400, 550, 700',
+              sizes: '(min-width: 990px) 25vw, (min-width: 750px) 33vw, 50vw',
+              class: 'wl-card__image',
+              alt: image_alt
+          }}
+        {%- endif -%}
+        {%- unless product.available -%}
+          <span class="wl-card__sold">Sold out</span>
+        {%- endunless -%}
+      </span>
+      <span class="wl-card__title">{{ product.title | escape }}</span>
+      <span class="wl-card__price">
+        <span class="wl-card__amount">
+          {%- if product.price_varies -%}
+            <span class="wl-card__from">From</span>
+          {% endif -%}
+          {{- product.price | money_with_currency -}}
+        </span>
+        {%- if on_sale -%}
+          <s class="wl-card__was">{{ product.compare_at_price | money }}</s>
+        {%- endif -%}
+        {%- if condition != blank -%}
+          <span class="wl-card__condition">{{ condition | escape }}</span>
+        {%- endif -%}
+      </span>
+    </a>
+    {% render 'wishlist-button', product: product, class: 'wishlist-toggle--card wl-card__heart' %}
+  </li>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Wishlist card",
+  "settings": []
+}
+{% endschema %}

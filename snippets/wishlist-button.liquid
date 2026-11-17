@@ -1,0 +1,96 @@
+{%- doc -%}
+  Heart that saves a product to the wishlist (assets/wishlist.js). On product cards it sits in the
+  corner of the image as a green circle.
+
+  @param {object} product - The product
+  @param {string} [class] - Extra classes, e.g. 'wishlist-toggle--card'
+{%- enddoc -%}
+<button
+  type="button"
+  class="wishlist-toggle{% if class %} {{ class }}{% endif %}"
+  data-wishlist-toggle
+  data-handle="{{ product.handle }}"
+  data-title="{{ product.title | escape }}"
+  aria-pressed="false"
+  aria-label="Save {{ product.title | escape }} to wishlist"
+>
+  <span
+    class="wishlist-toggle__icon"
+    aria-hidden="true"
+  >
+    {%- render 'wishlist-heart-svg', class: 'wishlist-toggle__heart wishlist-toggle__heart--outline' -%}
+    {%- render 'wishlist-heart-svg', filled: true, class: 'wishlist-toggle__heart wishlist-toggle__heart--filled' -%}
+  </span>
+</button>
+
+{% stylesheet %}
+  .wishlist-toggle {
+    display: inline-grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--brand-green, rgb(37 211 102));
+    color: #121212;
+    box-shadow: 0 4px 20px rgb(18 18 18 / 0.15);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .wishlist-toggle:focus-visible {
+    outline: 2px solid #121212;
+    outline-offset: 2px;
+  }
+
+  .wishlist-toggle__icon {
+    display: grid;
+    width: 20px;
+    height: 20px;
+  }
+
+  .wishlist-toggle__heart {
+    grid-area: 1 / 1;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Saved: the filled heart grows in over the outline */
+  .wishlist-toggle__heart--filled {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+
+  .wishlist-toggle[aria-pressed='true'] .wishlist-toggle__heart--filled {
+    opacity: 1;
+    transform: none;
+  }
+
+  [data-wishlist-ready] .wishlist-toggle__heart--filled {
+    transition: opacity 0.2s ease, transform 0.42s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  /* On product cards: in the image's corner, where the add-to-cart circle was */
+  .wishlist-toggle--card {
+    --wishlist-offset: var(--padding-sm, 12px);
+
+    position: absolute;
+    inset-block-end: calc(var(--wishlist-offset) + var(--padding-block-end, 0px));
+    inset-inline-end: calc(var(--wishlist-offset) + var(--padding-inline-end, 0px));
+    z-index: var(--layer-raised, 2);
+  }
+
+  @media screen and (min-width: 750px) {
+    .wishlist-toggle--card {
+      --wishlist-offset: var(--padding-md, 13px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-wishlist-ready] .wishlist-toggle__heart--filled {
+      transition: none;
+    }
+  }
+{% endstylesheet %}

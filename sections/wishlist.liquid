@@ -1,0 +1,427 @@
+{%- comment -%}
+  The wishlist page (/collections/all?view=wishlist, templates/collection.wishlist.json).
+
+  Saved products live in this browser (assets/wishlist.js). Their cards are fetched from each
+  product's URL with section_id=wishlist-card, drawn in the saved order (newest first) behind
+  placeholders the same size, so nothing jumps as they arrive. Tapping a card's heart removes it:
+  it fades away and the cards after it glide into the gap.
+{%- endcomment -%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<div class="section section--page-width color-{{ section.settings.color_scheme }}">
+  <div
+    class="wl spacing-style"
+    style="{% render 'spacing-style', settings: section.settings %}"
+    data-wishlist-page
+    data-collection-url="{{ routes.all_products_collection_url }}"
+  >
+    <header class="wl__header">
+      <h1 class="wl__title">Wishlist</h1>
+      <p
+        class="wl__count"
+        data-wishlist-page-count
+      ></p>
+    </header>
+
+    <ul
+      class="wl-grid"
+      role="list"
+      data-wishlist-grid
+    ></ul>
+
+    <div
+      class="wl__empty"
+      data-wishlist-empty
+      hidden
+    >
+      <p class="wl__empty-text">Tap the heart on any boot to save it here.</p>
+      <a
+        class="wl__empty-link"
+        href="{{ routes.collections_url }}/all-football-boots"
+      >
+        Browse all football boots
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const page = document.querySelector('[data-wishlist-page]');
+    if (!page) return;
+    const grid = page.querySelector('[data-wishlist-grid]');
+    const empty = page.querySelector('[data-wishlist-empty]');
+    const countText = page.querySelector('[data-wishlist-page-count]');
+    const TIMING = { duration: 550, easing: 'cubic-bezier(0.3, 0.7, 0.3, 1)' };
+    const reducedMotion = function () {
+      return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    };
+    /** @type {Map<string, Promise<Element | null>>} */
+    const cache = new Map();
+
+    function whenReady(callback) {
+      if (window.OceWishlist) return callback();
+      window.addEventListener('DOMContentLoaded', callback, { once: true });
+    }
+
+    function fetchCard(handle) {
+      if (!cache.has(handle)) {
+        const url = '/products/' + encodeURIComponent(handle) + '?section_id=wishlist-card';
+        cache.set(
+          handle,
+          fetch(url)
+            .then(function (response) {
+              return response.ok ? response.text() : '';
+            })
+            .then(function (html) {
+              const doc = new DOMParser().parseFromString(html, 'text/html');
+              return doc.querySelector('[data-wishlist-item]');
+            })
+            .catch(function () {
+              return null;
+            })
+        );
+      }
+      return cache.get(handle);
+    }
+
+    function setCount(count) {
+      countText.textContent = count ? count + (count === 1 ? ' saved boot' : ' saved boots') : '';
+      empty.hidden = count > 0;
+    }
+
+    function placeholder(handle) {
+      const item = document.createElement('li');
+      item.className = 'wl-grid__item wl-grid__item--loading';
+      item.dataset.wishlistItem = handle;
+      item.innerHTML = '<span class="wl-card wl-card--ghost"><span class="wl-card__media"></span><span class="wl-ghost-line"></span><span class="wl-ghost-line wl-ghost-line--short"></span></span>';
+      return item;
+    }
+
+    function render() {
+      const handles = window.OceWishlist ? window.OceWishlist.items() : [];
+      grid.replaceChildren.apply(grid, handles.map(placeholder));
+      setCount(handles.length);
+
+      handles.forEach(function (handle) {
+        fetchCard(handle).then(function (card) {
+          const slot = grid.querySelector('[data-wishlist-item="' + CSS.escape(handle) + '"].wl-grid__item--loading');
+          if (!slot) return;
+          if (!card) {
+            // No longer in the store: drop it quietly
+            slot.remove();
+            window.OceWishlist.set(handle, false);
+            return;
+          }
+          const fresh = card.cloneNode(true);
+          slot.replaceWith(fresh);
+          if (!reducedMotion()) {
+            fresh.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, easing: 'ease-out' });
+          }
+        });
+      });
+    }
+
+    /** Remove a card: it fades and shrinks a little, then the cards after it glide into the gap */
+    function removeCard(handle) {
+      const item = grid.querySelector('[data-wishlist-item="' + CSS.escape(handle) + '"]');
+      if (!item) return;
+      const after = function () {
+        const others = Array.from(grid.children).filter(function (el) {
+          return el !== item;
+        });
+        const before = new Map(
+          others.map(function (el) {
+            return [el, el.getBoundingClientRect()];
+          })
+        );
+        item.remove();
+        setCount(grid.children.length);
+        if (reducedMotion()) return;
+        others.forEach(function (el) {
+          const was = before.get(el);
+          const now = el.getBoundingClientRect();
+          const dx = was.left - now.left;
+          const dy = was.top - now.top;
+          if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+          el.animate([{ transform: 'translate(' + dx + 'px, ' + dy + 'px)' }, { transform: 'none' }], TIMING);
+        });
+      };
+      if (reducedMotion()) return after();
+      item.style.pointerEvents = 'none';
+      item
+        .animate(
+          [
+            { opacity: 1, transform: 'none' },
+            { opacity: 0, transform: 'scale(0.94)' },
+          ],
+          { duration: 220, easing: 'cubic-bezier(0.4, 0, 1, 1)', fill: 'forwards' }
+        )
+        .finished.then(after, after);
+    }
+
+    document.addEventListener('oce-wishlist:change', function (event) {
+      const detail = event.detail || {};
+      // Removed here: animate it out. Anything else (another tab): redraw.
+      if (detail.handle && detail.saved === false) removeCard(detail.handle);
+      else render();
+    });
+
+    whenReady(render);
+  })();
+</script>
+
+{% stylesheet %}
+  .wl__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 14px;
+    margin-block-end: 24px;
+  }
+
+  .wl__title {
+    margin: 0;
+    font-size: clamp(2.5rem, 8vw, 4.5rem);
+    font-weight: 750;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    font-variation-settings: 'opsz' 32;
+  }
+
+  .wl__count {
+    margin: 0;
+    font-size: 0.875rem;
+    color: rgb(var(--color-foreground-rgb) / 0.55);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wl-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media screen and (min-width: 750px) {
+    .wl-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .wl-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .wl-grid__item {
+    position: relative;
+  }
+
+  .wl-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 10px 10px 14px;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgb(18 18 18 / 0.06), 0 6px 20px rgb(18 18 18 / 0.05);
+    color: #121212;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: box-shadow 0.2s ease, transform 0.2s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  @media (hover: hover) {
+    a.wl-card:hover {
+      box-shadow: 0 1px 2px rgb(18 18 18 / 0.08), 0 10px 28px rgb(18 18 18 / 0.09);
+      transform: translateY(-2px);
+    }
+  }
+
+  .wl-card:focus-visible {
+    outline: 2px solid #121212;
+    outline-offset: 2px;
+  }
+
+  .wl-card__media {
+    position: relative;
+    display: block;
+    aspect-ratio: 1;
+    margin-block-end: 10px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #ffffff;
+  }
+
+  .wl-card__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .wl-card__sold {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #121212;
+    color: #ffffff;
+    font-size: 0.6875rem;
+    font-weight: 600;
+  }
+
+  .wl-card__title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 0.8125rem;
+    font-weight: 460;
+    line-height: 1.3;
+  }
+
+  .wl-card__price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 6px;
+    margin-block-start: auto;
+    padding-block-start: 6px;
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wl-card__amount {
+    white-space: nowrap;
+  }
+
+  .wl-card__from,
+  .wl-card__was {
+    color: rgb(18 18 18 / 0.45);
+    font-size: 0.75rem;
+  }
+
+  .wl-card__condition {
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgb(18 18 18 / 0.06);
+    color: rgb(18 18 18 / 0.7);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  @media screen and (max-width: 749px) {
+    .wl-card__condition {
+      display: none;
+    }
+  }
+
+  /* The heart sits in the image's top corner */
+  .wl-card__heart.wishlist-toggle--card {
+    inset: 18px 18px auto auto;
+  }
+
+  /* Placeholders while the cards load, the same size so nothing shifts */
+  .wl-card--ghost .wl-card__media,
+  .wl-ghost-line {
+    background: rgb(18 18 18 / 0.05);
+    animation: wl-ghost 1.2s ease-in-out infinite alternate;
+  }
+
+  .wl-ghost-line {
+    display: block;
+    height: 0.8125rem;
+    margin-block-start: 4px;
+    border-radius: 4px;
+  }
+
+  .wl-ghost-line--short {
+    width: 45%;
+    margin-block-start: 14px;
+  }
+
+  @keyframes wl-ghost {
+    to {
+      opacity: 0.45;
+    }
+  }
+
+  .wl__empty[hidden] {
+    display: none;
+  }
+
+  .wl__empty-text {
+    margin: 0 0 14px;
+    font-size: 1.125rem;
+  }
+
+  .wl__empty-link {
+    display: inline-flex;
+    align-items: center;
+    height: 48px;
+    padding-inline: 24px;
+    border-radius: 999px;
+    background: #121212;
+    color: #ffffff;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wl-card {
+      transition: none;
+    }
+
+    .wl-card--ghost .wl-card__media,
+    .wl-ghost-line {
+      animation: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Wishlist",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 48
+    }
+  ]
+}
+{% endschema %}
