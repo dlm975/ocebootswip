@@ -12,6 +12,10 @@
   type="module"
   fetchpriority="low"
 ></script>
+<script
+  src="{{ 'filter-drawer-focus.js' | asset_url }}"
+  defer
+></script>
 
 {%- liquid
   assign products_count = results_size
@@ -450,7 +454,7 @@
                         assign is_active = true
                       endif
 
-                      render 'price-filter', filter: filter, filter_style: 'vertical', should_render_clear: false, autofocus: should_autofocus
+                      render 'price-filter', filter: filter, filter_style: 'vertical', should_render_clear: false, autofocus: should_autofocus, in_drawer: true
                     -%}
                   {% else %}
                     {% liquid
@@ -621,6 +625,48 @@
   .sort-select__label .icon-caret,
   .sorting-filter .facets__summary .icon-caret {
     color: currentColor;
+  }
+
+  /* OCEBOOTS: filters in the drawer work like the menu drawer's items (assets/filter-drawer-focus.js):
+     closed until tapped, one at a time, the others cleared away while one is open */
+  .facets__filters-wrapper:has(> accordion-custom[data-drawer-focus] > details[open])
+    > :not(:has(> details[open])) {
+    display: none;
+  }
+
+  /* The script animates the options in and out, so the theme's own height/opacity transition is off */
+  accordion-custom[data-drawer-focus] > details > .details-content {
+    transition: none;
+  }
+
+  accordion-custom[data-drawer-focus] > details > summary {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .facets--drawer :is(label, button, a, summary) {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* An open filter's arrow becomes an X; tapping the row closes it */
+  .facets__drill-close {
+    display: none;
+    width: var(--icon-size-xs);
+    height: var(--icon-size-xs);
+    margin-inline-start: var(--margin-2xs);
+    color: var(--color-foreground);
+  }
+
+  .facets__drill-close svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  accordion-custom[data-drawer-focus] > details[open] > summary .facets__drill-close {
+    display: inline-flex;
+  }
+
+  accordion-custom[data-drawer-focus] > details[open] > summary .icon-caret {
+    display: none;
   }
 
   /* OCEBOOTS: the Filter icon sits as far in from the left edge as the Sort arrow does from the

@@ -42,10 +42,14 @@
     data-disable-animation-on-desktop="true"
     data-close-with-escape="true"
   {% endif %}
-  open-by-default-on-mobile
-  {% if filter_style == 'vertical' %}
-    open
-    open-by-default-on-desktop
+  {% if in_drawer %}
+    data-drawer-focus
+  {% else %}
+    open-by-default-on-mobile
+    {% if filter_style == 'vertical' %}
+      open
+      open-by-default-on-desktop
+    {% endif %}
   {% endif %}
   data-filter-param-name="{{ filter.param_name | escape | replace: '.', '-' }}"
 >
@@ -105,6 +109,11 @@
         <span class="svg-wrapper icon-caret icon-animated">
           {{- 'icon-dropdown.svg' | inline_asset_content -}}
         </span>
+        {%- if in_drawer -%}
+          <span class="svg-wrapper facets__drill-close" aria-hidden="true">
+            {{- 'icon-close.svg' | inline_asset_content -}}
+          </span>
+        {%- endif -%}
       </div>
     </summary>
     <floating-panel-component
