@@ -74,10 +74,27 @@
             {% render 'swatch', swatch: value.swatch, mode: 'pill' %}
           {% endif %}
 
+          {%- liquid
+            # Surfaces read in full, as in the Surface filter (snippets/list-filter.liquid)
+            assign pill_label = value.label
+            if filter.param_name contains 'surface'
+              assign surface_code = value.value | downcase | strip
+              case surface_code
+                when 'fg'
+                  assign pill_label = 'Firm-Ground'
+                when 'sg'
+                  assign pill_label = 'Soft-Ground'
+                when 'ag'
+                  assign pill_label = 'Artificial-Grass'
+                when 'hg'
+                  assign pill_label = 'Hard-Ground'
+              endcase
+            endif
+          -%}
           {% if filter.type == 'boolean' or show_filter_label %}
-            {{ filter.label | escape }}: {{ value.label | escape }}
+            {{ filter.label | escape }}: {{ pill_label | escape }}
           {% else %}
-            {{ value.label | escape }}
+            {{ pill_label | escape }}
           {% endif %}
 
           <span class="svg-wrapper svg-wrapper--smaller">

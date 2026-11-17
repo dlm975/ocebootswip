@@ -24,12 +24,13 @@
 
   # OCEBOOTS: filters shown in this order, matched by their names in Search & Discovery; any other
   # filter (e.g. Availability) is left out. If none of these names match, every filter shows.
-  assign filter_order = 'size,brand,condition,surface,price' | split: ','
+  # Price is left out: Shopify only filters by price in NZD, so it vanished for other currencies
+  assign filter_order = 'size,brand,condition,surface' | split: ','
   assign ordered_filters = filters | where: 'param_name', '__none__'
   for wanted in filter_order
     for candidate in filters
       assign candidate_label = candidate.label | downcase | strip
-      if candidate_label == wanted or wanted == 'price' and candidate.type == 'price_range'
+      if candidate_label == wanted
         assign match = filters | where: 'param_name', candidate.param_name
         assign ordered_filters = ordered_filters | concat: match
         break
@@ -38,6 +39,8 @@
   endfor
   if ordered_filters.size > 0
     assign filters = ordered_filters
+  else
+    assign filters = filters | where: 'type', 'list'
   endif
   assign total_active_values = 0
 
