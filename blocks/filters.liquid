@@ -369,7 +369,7 @@
 {% if block.settings.enable_filtering %}
   <dialog-component
     id="filters-drawer"
-    class="facets-block-wrapper facets-block-wrapper--vertical facets-block-wrapper--drawer color-{{ settings.drawer_color_scheme }}"
+    class="facets-block-wrapper facets-block-wrapper--vertical facets-block-wrapper--drawer color-scheme-1"
   >
     <dialog
       ref="dialog"
@@ -493,15 +493,10 @@
   /* OCEBOOTS: on phones and tablets the filter drawer matches the menu drawer: a white panel
      hanging straight off the bottom of the header (square top, rounded bottom corners, soft
      shadow), dropping into place with the same 0.25s fade-down, the page below dimmed but the
-     header left clear, and ink text with the same size and weight as the menu's items */
+     header left clear, and ink text with the same size and weight as the menu's items. The
+     drawer uses the white colour scheme (scheme-1) rather than the dark drawer scheme. */
   @media screen and (max-width: 1023px) {
     .facets--drawer.dialog-drawer {
-      --color-background: #ffffff;
-      --color-background-rgb: 255 255 255;
-      --color-foreground: #121212;
-      --color-foreground-rgb: 18 18 18;
-      --color-foreground-heading: #121212;
-      --color-border: rgb(18 18 18 / 0.08);
       --color-primary-button-background: #121212;
       --color-primary-button-text: #ffffff;
       --color-primary-button-border: #121212;
