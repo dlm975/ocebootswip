@@ -86,13 +86,10 @@
         })();
       </script>
     {%- endif -%}
-    {% if template.name == 'index' or template.name == 'collection' %}
-      {% render 'instagram-widget' %}
-      {%- # The size template has its own size selector in the header -%}
-      {% unless template.suffix == 'size' %}
-        {% render 'size-widget' %}
-      {% endunless %}
-    {% endif %}
+    {%- comment -%}
+      The floating Instagram button (snippets/instagram-widget.liquid) and Shop By Size bar
+      (snippets/size-widget.liquid) are switched off: Shop by Size is in the menu.
+    {%- endcomment -%}
 
     {%- comment -%} Every page, so it lives in the layout rather than a section {%- endcomment -%}
     {% render 'flying-banner' %}
