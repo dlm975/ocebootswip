@@ -490,6 +490,114 @@
 {% endif %}
 
 {% stylesheet %}
+  /* OCEBOOTS: on phones and tablets the filter drawer matches the menu drawer: a white panel
+     hanging straight off the bottom of the header (square top, rounded bottom corners, soft
+     shadow), dropping into place with the same 0.25s fade-down, the page below dimmed but the
+     header left clear, and ink text with the same size and weight as the menu's items */
+  @media screen and (max-width: 1023px) {
+    .facets--drawer.dialog-drawer {
+      --color-background: #ffffff;
+      --color-background-rgb: 255 255 255;
+      --color-foreground: #121212;
+      --color-foreground-rgb: 18 18 18;
+      --color-foreground-heading: #121212;
+      --color-border: rgb(18 18 18 / 0.08);
+      --color-primary-button-background: #121212;
+      --color-primary-button-text: #ffffff;
+      --color-primary-button-border: #121212;
+      --color-primary-button-hover-background: #333333;
+      --color-primary-button-hover-text: #ffffff;
+      --color-primary-button-hover-border: #333333;
+      --dialog-drawer-opening-animation: oce-drawer-drop-in;
+      --dialog-drawer-closing-animation: oce-drawer-drop-out;
+
+      position: fixed;
+      inset: var(--header-height, 60px) 0 auto 0;
+      width: 100%;
+      max-width: none;
+      height: auto;
+      max-height: calc(100dvh - var(--header-height, 60px) - 16px);
+      margin: 0;
+      background-color: #ffffff;
+      color: #121212;
+      border: 0;
+      border-radius: 0 0 20px 20px;
+      box-shadow: 0 14px 36px rgb(0 0 0 / 0.13);
+      overflow: hidden;
+    }
+
+    .facets--drawer.dialog-drawer[open],
+    .facets--drawer.dialog-drawer.dialog-closing {
+      animation-duration: 0.25s;
+      animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Same dim as the menu drawer, over the page only: the header stays clear */
+    .facets--drawer.dialog-drawer::backdrop {
+      background: rgb(0 0 0 / 0.25);
+      backdrop-filter: none;
+      clip-path: inset(var(--header-height, 60px) 0 0 0);
+    }
+
+    .facets--drawer .facets__form-wrapper,
+    .facets--drawer .facets__form {
+      max-height: inherit;
+    }
+
+    .facets--drawer .facets__title-wrapper {
+      background: #ffffff;
+      box-shadow: none;
+    }
+
+    /* Filter names read like the menu drawer's items */
+    .facets--drawer .facets__summary .facets__label {
+      font-family: var(--menu-top-level-font-family);
+      font-size: var(--menu-top-level-font-size);
+      font-weight: var(--menu-top-level-font-weight);
+      line-height: var(--menu-top-level-font-line-height);
+      color: #121212;
+    }
+
+    .facets--drawer .facets__summary .icon-caret {
+      color: #121212;
+    }
+
+    .facets--drawer .facets-drawer__close {
+      color: rgb(0 0 0 / 0.45);
+    }
+  }
+
+  @keyframes oce-drawer-drop-in {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes oce-drawer-drop-out {
+    from {
+      opacity: 1;
+      transform: none;
+    }
+
+    to {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .facets--drawer.dialog-drawer[open],
+    .facets--drawer.dialog-drawer.dialog-closing {
+      animation-duration: 0.01s;
+    }
+  }
+
   /* OCEBOOTS: Sort and the filter names read exactly like the Filter button (same size, weight
      and colour), on phones and desktop */
   .facets-toggle__button,
