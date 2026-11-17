@@ -57,10 +57,12 @@
       const title = button.dataset.title || 'this product';
       button.setAttribute('aria-label', saved ? 'Remove ' + title + ' from wishlist' : 'Save ' + title + ' to wishlist');
     });
+    // Hearts still flying to the header aren't counted until they land
+    const shown = Math.max(0, items.length - flights.size);
     document.querySelectorAll('[data-wishlist-count]').forEach(function (count) {
-      const text = items.length > 99 ? '99+' : String(items.length);
+      const text = shown > 99 ? '99+' : String(shown);
       if (count.textContent !== text) count.textContent = text;
-      count.hidden = items.length === 0;
+      count.hidden = shown === 0;
     });
   }
 
@@ -81,6 +83,124 @@
     count.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.35)', offset: 0.35 }, { transform: 'scale(1)' }], POP);
   }
 
+  // ── Saved hearts fly up to the header heart (Motion, motion.dev) ──
+  /** @type {any} */
+  let motion = null;
+  import('motion')
+    .then(function (module) {
+      motion = module;
+    })
+    .catch(function () {
+      /* no flight: saving still works and the count still updates */
+    });
+
+  /** @type {Map<string, { ghost: HTMLElement, controls: any }>} */
+  const flights = new Map();
+  const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+  /** The header heart, if it's on screen */
+  function headerHeart() {
+    const link = Array.from(document.querySelectorAll('.wishlist-link')).find((el) => el.getClientRects().length);
+    if (!link) return null;
+    const icon = link.querySelector('.wishlist-link__icon') || link;
+    const rect = icon.getBoundingClientRect();
+    if (!rect.width || rect.bottom <= 0 || rect.top >= window.innerHeight) return null;
+    return { icon: icon, rect: rect };
+  }
+
+  /**
+   * A red heart lifts off the button and arcs up into the header heart, shrinking to its size.
+   * @returns {boolean} Whether a heart is flying
+   */
+  function fly(button, handle) {
+    if (!motion || reducedMotion() || flights.has(handle)) return false;
+    const target = headerHeart();
+    const source = button.querySelector('.wishlist-toggle__icon') || button;
+    const filled = button.querySelector('.wishlist-toggle__heart--filled');
+    if (!target || !filled) return false;
+
+    const from = source.getBoundingClientRect();
+    const ghost = document.createElement('span');
+    ghost.setAttribute('aria-hidden', 'true');
+    ghost.style.cssText =
+      'position:fixed;left:' + from.left + 'px;top:' + from.top + 'px;width:' + from.width + 'px;height:' +
+      from.height + 'px;z-index:2147483000;pointer-events:none;color:#e8323c;will-change:transform,opacity;';
+    const heart = filled.cloneNode(true);
+    heart.removeAttribute('class');
+    heart.setAttribute('style', 'display:block;width:100%;height:100%;');
+    ghost.append(heart);
+    document.body.append(ghost);
+
+    // A curve from the button to the header heart: up and over, never dipping below the start
+    const dx = target.rect.left + target.rect.width / 2 - (from.left + from.width / 2);
+    const dy = target.rect.top + target.rect.height / 2 - (from.top + from.height / 2);
+    const lift = Math.min(160, Math.max(56, Math.abs(dy) * 0.3));
+    const cx = dx * 0.2;
+    const cy = Math.min(0, dy) - lift;
+    const endScale = target.rect.width / from.width;
+    const steps = 30;
+    const transform = [];
+    const opacity = [];
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const e = easeInOut(t);
+      const x = 2 * (1 - e) * e * cx + e * e * dx;
+      const y = 2 * (1 - e) * e * cy + e * e * dy;
+      // A quick swell as it lifts off, then it shrinks into the header heart
+      const scale = t < 0.16 ? 1 + 0.3 * (t / 0.16) : 1.3 + (endScale - 1.3) * ((t - 0.16) / 0.84);
+      transform.push('translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) scale(' + scale.toFixed(3) + ')');
+      opacity.push(t < 0.88 ? 1 : Math.max(0, 1 - (t - 0.88) / 0.12));
+    }
+
+    const controls = motion.animate(ghost, { transform: transform, opacity: opacity }, { duration: 0.8, ease: 'linear' });
+    flights.set(handle, { ghost: ghost, controls: controls });
+    Promise.resolve(controls).then(
+      function () {
+        land(handle);
+      },
+      function () {
+        land(handle);
+      }
+    );
+    return true;
+  }
+
+  /** The heart arrives: the header heart pops on a spring and the count goes up */
+  function land(handle) {
+    const flight = flights.get(handle);
+    if (!flight) return;
+    flights.delete(handle);
+    flight.ghost.remove();
+    sync(document);
+    const target = headerHeart();
+    if (target && motion) {
+      motion
+        .animate(target.icon, { transform: ['scale(1)', 'scale(1.3)'] }, { duration: 0.12, ease: [0.3, 0.7, 0.3, 1] })
+        .then(function () {
+          motion.animate(target.icon, { transform: ['scale(1.3)', 'scale(1)'] }, { type: motion.spring, bounce: 0.5, visualDuration: 0.35 });
+        });
+    }
+    document.querySelectorAll('[data-wishlist-count]').forEach(bump);
+  }
+
+  /** Unsaved mid-flight: the flying heart fades where it is */
+  function cancelFlight(handle) {
+    const flight = flights.get(handle);
+    if (!flight) return;
+    flights.delete(handle);
+    if (flight.controls && flight.controls.pause) flight.controls.pause();
+    const ghost = flight.ghost;
+    const fade = ghost.animate([{ opacity: getComputedStyle(ghost).opacity }, { opacity: 0 }], { duration: 180, easing: 'ease-out', fill: 'forwards' });
+    fade.finished.then(
+      function () {
+        ghost.remove();
+      },
+      function () {
+        ghost.remove();
+      }
+    );
+  }
+
   document.addEventListener('click', function (event) {
     const target = event.target;
     if (!(target instanceof Element)) return;
@@ -89,10 +209,14 @@
     // Cards are links: the heart saves, it doesn't open the product
     event.preventDefault();
     event.stopPropagation();
-    const saved = !has(button.dataset.handle || '');
-    set(button.dataset.handle || '', saved);
+    const handle = button.dataset.handle || '';
+    const saved = !has(handle);
+    // The flight starts first, so the count waits for it to land
+    const flying = saved ? fly(button, handle) : false;
+    if (!saved) cancelFlight(handle);
+    set(handle, saved);
     pop(button, saved);
-    document.querySelectorAll('[data-wishlist-count]').forEach(bump);
+    if (!flying) document.querySelectorAll('[data-wishlist-count]').forEach(bump);
   });
 
   window.addEventListener('storage', function (event) {
