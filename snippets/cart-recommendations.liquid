@@ -130,10 +130,10 @@
         <span class="cart-recs__heading">{{ heading }}</span>
         <div class="cart-recs__nav">
           <button type="button" class="cart-recs__arrow" data-cart-recs-prev aria-label="Previous">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+            {%- render 'gicon', name: 'chevron_left', size: 13 -%}
           </button>
           <button type="button" class="cart-recs__arrow" data-cart-recs-next aria-label="Next">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+            {%- render 'gicon', name: 'chevron_right', size: 13 -%}
           </button>
         </div>
       </div>

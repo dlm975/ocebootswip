@@ -131,10 +131,10 @@
 
     <!-- Navigation arrows -->
     <button class="cc-nav cc-nav--prev" id="cc-prev-{{ section.id }}" aria-label="Previous">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+      {%- render 'gicon', name: 'chevron_left' -%}
     </button>
     <button class="cc-nav cc-nav--next" id="cc-next-{{ section.id }}" aria-label="Next">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+      {%- render 'gicon', name: 'chevron_right' -%}
     </button>
   </div>
 

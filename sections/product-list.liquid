@@ -71,9 +71,7 @@
         <div class="resource-list__item resource-list__item--view-all-card">
           <a href="{{ section.settings.collection.url }}" class="plist-view-all-card">
             <span class="plist-view-all-card__icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
+              {%- render 'gicon', name: 'arrow_forward', size: 20 -%}
             </span>
             <span class="plist-view-all-card__label">View All</span>
           </a>

@@ -2424,7 +2424,9 @@ deferred-media[class] :is(.deferred-media__poster-button img, .deferred-media__p
 }
 
 .checkbox .icon-checkmark path {
-  stroke: var(--color-background);
+  /* Google's check is a filled shape, so it's coloured with fill */
+  fill: var(--color-background);
+  stroke: none;
   opacity: var(--checkbox-path-opacity);
   transition: opacity var(--animation-speed) var(--animation-easing);
 }

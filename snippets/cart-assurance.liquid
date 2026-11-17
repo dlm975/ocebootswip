@@ -41,30 +41,21 @@
   <ul class="cart-assure__trust list-unstyled" role="list">
     {%- if trust_1 != blank -%}
       <li>
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12 2.5 4.5 5.8v5.4c0 4.6 3.2 8.9 7.5 10.3 4.3-1.4 7.5-5.7 7.5-10.3V5.8z"/>
-          <polyline points="8.8 11.9 11.2 14.3 15.4 10.1"/>
-        </svg>
+        {%- render 'gicon', name: 'verified_user', size: 13 -%}
         <span>{{ trust_1 }}</span>
       </li>
     {%- endif -%}
 
     {%- if trust_2 != blank -%}
       <li>
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M2.5 13.2 21 4.2l-5 16-4.6-5.2-1.6 4.4-1.6-4.9z"/>
-          <path d="M9.2 14.4 21 4.2"/>
-        </svg>
+        {%- render 'gicon', name: 'send', size: 13 -%}
         <span>{{ trust_2 }}</span>
       </li>
     {%- endif -%}
 
     {%- if trust_3 != blank -%}
       <li>
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect x="4.2" y="10.4" width="15.6" height="10.4" rx="2.2"/>
-          <path d="M8 10.4V7.6a4 4 0 0 1 8 0v2.8"/>
-        </svg>
+        {%- render 'gicon', name: 'lock', size: 13 -%}
         <span>{{ trust_3 }}</span>
       </li>
     {%- endif -%}

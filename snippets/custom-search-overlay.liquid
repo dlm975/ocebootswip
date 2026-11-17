@@ -36,10 +36,7 @@
       >
         <input type="hidden" name="type" value="product">
         <div class="cs-field">
-          <svg class="cs-glass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-            <circle cx="11" cy="11" r="7"/>
-            <line x1="16.5" y1="16.5" x2="21" y2="21"/>
-          </svg>
+          {%- render 'gicon', name: 'search', class: 'cs-glass' -%}
           <input
             id="cs-input"
             class="cs-input"
@@ -56,16 +53,12 @@
             <span id="cs-prompt-text"></span>
           </div>
           <button type="button" class="cs-clear" id="cs-clear" aria-label="Clear search">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="14" height="14" aria-hidden="true">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
+            {%- render 'gicon', name: 'close', size: 14 -%}
           </button>
         </div>
       </form>
       <button type="button" class="cs-close" id="cs-close" aria-label="Close search">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="22" height="22" aria-hidden="true">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
+        {%- render 'gicon', name: 'close', size: 22 -%}
       </button>
     </div>
 
@@ -79,9 +72,7 @@
         <div id="cs-products-grid"></div>
         <a class="cs-viewall" id="cs-viewall" href="{{ routes.search_url }}">
           <span id="cs-viewall-text">View all results</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true">
-            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-          </svg>
+          {%- render 'gicon', name: 'arrow_forward', size: 16 -%}
         </a>
       </section>
 

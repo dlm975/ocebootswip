@@ -79,9 +79,7 @@
             {%- if block.settings.urgency_text != blank -%}
               <div class="cart-urgency-inline" aria-live="polite">
                 <span class="cart-urgency-inline__icon" aria-hidden="true">
-                  <svg viewBox="0 0 10 16" fill="currentColor" width="11" height="11">
-                    <path d="M6 0L0 9h4.5L4 16l6-9H5.5z"/>
-                  </svg>
+                  {%- render 'gicon', name: 'bolt-fill', size: 11 -%}
                 </span>
                 <span>{{ block.settings.urgency_text }}</span>
               </div>

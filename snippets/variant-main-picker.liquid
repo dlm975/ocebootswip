@@ -141,9 +141,7 @@
                 >
                   {{- 'content.product_badge_sold_out' | t -}}
                 </span>
-                <svg class="pill-option__chevron" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" width="10" height="6">
-                  <polyline points="1 1 5 5 9 1"/>
-                </svg>
+                {%- render 'gicon', name: 'keyboard_arrow_down', class: 'pill-option__chevron', size: 16 -%}
               </button>
               <div class="pill-option__dropdown" role="listbox" hidden>
                 {%- for product_option_value in product_option.values -%}
