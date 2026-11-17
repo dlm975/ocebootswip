@@ -104,7 +104,21 @@
             >
               {%- liquid
                 if active_value_count == 1
-                  echo filter.active_values[0].label
+                  assign status_label = filter.active_values[0].label
+                  if is_surface
+                    assign status_code = filter.active_values[0].value | downcase | strip
+                    case status_code
+                      when 'fg'
+                        assign status_label = 'Firm-Ground'
+                      when 'sg'
+                        assign status_label = 'Soft-Ground'
+                      when 'ag'
+                        assign status_label = 'Artificial-Grass'
+                      when 'hg'
+                        assign status_label = 'Hard-Ground'
+                    endcase
+                  endif
+                  echo status_label
                 elsif active_value_count > 1
                   echo active_value_count
                 endif
