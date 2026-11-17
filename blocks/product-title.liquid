@@ -5,7 +5,7 @@
   {% assign product_title = '<p>' | append: text | append: '</p>' %}
   {% render 'text', fallback_text: product_title, block: block %}
 {% elsif closest.product != blank %}
-  {%- # Cards show the model without the surface and colourway (snippets/short-product-title.liquid) -%}
+  {%- # Cards show the model only, without the surface and colourway (snippets/short-product-title.liquid) -%}
   {% capture card_title %}{% render 'short-product-title', title: closest.product.title %}{% endcapture %}
   {% assign product_title = '<p>' | append: card_title | append: '</p>' %}
   {% render 'text', fallback_text: product_title, block: block %}
