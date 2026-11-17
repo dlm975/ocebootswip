@@ -635,7 +635,7 @@
   }
 
   /* The script animates the options in and out, so the theme's own height/opacity transition is off */
-  accordion-custom[data-drawer-focus] > details::details-content,
+  /* (the ::details-content half of this lives in assets/base.css: the stylesheet compiler drops it) */
   accordion-custom[data-drawer-focus] > details > .details-content {
     transition: none;
   }

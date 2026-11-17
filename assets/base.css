@@ -3971,6 +3971,11 @@ accordion-custom {
   }
 }
 
+/* Filters in the filter drawer animate their options in script (assets/filter-drawer-focus.js) */
+accordion-custom[data-drawer-focus] > details::details-content {
+  transition: none;
+}
+
 accordion-custom[data-disable-on-mobile='true'] summary {
   @media screen and (max-width: 749px) {
     cursor: auto;
