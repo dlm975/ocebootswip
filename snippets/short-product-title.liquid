@@ -12,14 +12,15 @@
 
 {%- liquid
   assign surfaces = 'FG,SG,AG,HG,MG,TF,IC' | split: ','
-  assign openers = "',\",‘,’,“,”,*,(" | split: ','
+  assign openers = "',‘,’,“,”,*,(" | split: ','
+  assign double_quote = '"'
   assign words = title | strip | split: ' '
   assign short = ''
 
   for word in words
     if forloop.index > 2
       assign first_char = word | slice: 0, 1
-      if openers contains first_char
+      if openers contains first_char or first_char == double_quote
         break
       endif
 
