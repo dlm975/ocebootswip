@@ -507,15 +507,16 @@
       --color-primary-button-hover-background: #333333;
       --color-primary-button-hover-text: #ffffff;
       --color-primary-button-hover-border: #333333;
-      --dialog-drawer-opening-animation: oce-drawer-drop-in;
-      --dialog-drawer-closing-animation: oce-drawer-drop-out;
+      --dialog-drawer-opening-animation: oce-drawer-slide-in;
+      --dialog-drawer-closing-animation: oce-drawer-slide-out;
 
       position: fixed;
       inset: var(--header-height, 60px) 0 auto 0;
       width: 100%;
       max-width: none;
-      height: auto;
-      max-height: calc(100dvh - var(--header-height, 60px) - 16px);
+      /* Most of the screen below the header, leaving a sliver of page showing underneath */
+      height: calc(100dvh - var(--header-height, 60px) - 16px);
+      max-height: none;
       margin: 0;
       background-color: #ffffff;
       color: #121212;
@@ -525,10 +526,15 @@
       overflow: hidden;
     }
 
-    .facets--drawer.dialog-drawer[open],
+    /* Slides in from the right edge, settling softly; slides back out a little quicker */
+    .facets--drawer.dialog-drawer[open] {
+      animation-duration: 0.45s;
+      animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
     .facets--drawer.dialog-drawer.dialog-closing {
-      animation-duration: 0.25s;
-      animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      animation-duration: 0.3s;
+      animation-timing-function: cubic-bezier(0.4, 0, 1, 1);
     }
 
     /* Same dim as the menu drawer, over the page only: the header stays clear */
@@ -538,8 +544,7 @@
       clip-path: inset(var(--header-height, 60px) 0 0 0);
     }
 
-    /* The panel is only as tall as it needs (up to the screen): the filters list scrolls between
-       the fixed title and the results button */
+    /* The filters list scrolls between the fixed title and the results button */
     .facets--drawer .facets__form-wrapper,
     .facets--drawer .facets__form {
       display: flex;
@@ -565,7 +570,7 @@
     .facets--drawer .facets__summary .facets__label {
       font-family: var(--menu-top-level-font-family);
       font-size: var(--menu-top-level-font-size);
-      font-weight: var(--menu-top-level-font-weight);
+      font-weight: 520;
       line-height: var(--menu-top-level-font-line-height);
       color: #121212;
     }
@@ -579,27 +584,23 @@
     }
   }
 
-  @keyframes oce-drawer-drop-in {
+  @keyframes oce-drawer-slide-in {
     from {
-      opacity: 0;
-      transform: translateY(-10px);
+      transform: translateX(100%);
     }
 
     to {
-      opacity: 1;
       transform: none;
     }
   }
 
-  @keyframes oce-drawer-drop-out {
+  @keyframes oce-drawer-slide-out {
     from {
-      opacity: 1;
       transform: none;
     }
 
     to {
-      opacity: 0;
-      transform: translateY(-10px);
+      transform: translateX(100%);
     }
   }
 
