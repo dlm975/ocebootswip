@@ -168,8 +168,14 @@
         if (event.pointerType !== 'mouse') return;
         clearTimeout(leaveTimer);
         const li = event.target.closest('.menu-list__list-item');
-        if (!isItem(li) || li === current) {
-          if (li === current) clearTimeout(openTimer);
+        if (!isItem(li)) {
+          // Empty space in the row (it runs the full width): as good as leaving the dock
+          clearTimeout(openTimer);
+          leaveTimer = setTimeout(() => setOpen(null), 200);
+          return;
+        }
+        if (li === current) {
+          clearTimeout(openTimer);
           return;
         }
         // Settling after a switch: only a real move hands over to another item
