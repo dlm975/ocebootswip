@@ -4260,8 +4260,8 @@ html.wlq-open {
 */
 :is(.product-form-buttons .add-to-cart-button, .psb .psb__atc, .wlq__add, .wl-card__buy, .pa__add, .cart-recs__add) {
   --key-rim: 2px;
-  --key-edge: 6px;
-  --key-press: 4px;
+  --key-edge: 4px;
+  --key-press: 3px;
   position: relative;
   isolation: isolate;
   border-style: solid !important;
@@ -4270,11 +4270,20 @@ html.wlq-open {
   color: #ffffff !important;
   background:
     linear-gradient(180deg, #34343c 0%, #17171c 55%, #0e0e12 100%) padding-box,
-    linear-gradient(180deg, rgb(0 0 0 / 0) calc(100% - var(--key-edge) - 1px), rgb(30 20 80 / 0.28) calc(100% - var(--key-edge) - 1px)) border-box,
+    linear-gradient(
+      180deg,
+      rgb(0 0 0 / 0) calc(100% - var(--key-edge) - 1px),
+      rgb(255 255 255 / 0.28) calc(100% - var(--key-edge)),
+      rgb(25 15 75 / 0.55) 100%
+    ) border-box,
     #c9c6f5 url('oce-holo.webp') 0 0 / 420px 210px repeat border-box !important;
+  /* Angled for depth: the side catches light at the face and falls away to shadow below (the
+     gradient above), a crease where the face meets it, and a tight contact shadow */
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.14),
-    0 10px 22px rgb(90 70 190 / 0.3);
+    inset 0 1px 0 rgb(255 255 255 / 0.16),
+    inset 0 -1px 0 rgb(0 0 0 / 0.55),
+    0 2px 0 rgb(40 30 100 / 0.35),
+    0 9px 20px rgb(90 70 190 / 0.28);
   transition:
     transform 0.12s ease,
     border-width 0.12s ease,
@@ -4284,14 +4293,14 @@ html.wlq-open {
 
 /* Smaller buttons: a finer rim and side */
 :is(.wl-card__buy) {
-  --key-edge: 4px;
-  --key-press: 3px;
+  --key-edge: 3px;
+  --key-press: 2px;
 }
 
 :is(.pa__add, .cart-recs__add) {
   --key-rim: 1.5px;
-  --key-edge: 3px;
-  --key-press: 2px;
+  --key-edge: 2px;
+  --key-press: 1px;
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.14),
     0 4px 10px rgb(90 70 190 / 0.25);
@@ -4306,8 +4315,10 @@ html.wlq-open {
   transform: translateY(var(--key-press)) !important;
   border-bottom-width: var(--key-rim) !important;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.14),
-    0 4px 10px rgb(90 70 190 / 0.25);
+    inset 0 1px 0 rgb(255 255 255 / 0.16),
+    inset 0 -1px 0 rgb(0 0 0 / 0.55),
+    0 1px 0 rgb(40 30 100 / 0.3),
+    0 4px 10px rgb(90 70 190 / 0.22);
 }
 
 /* The glint, on the face: a bright band that sweeps across, then a pause */
