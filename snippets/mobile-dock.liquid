@@ -1,0 +1,303 @@
+{%- doc -%}
+  Phones: a small floating nav at the bottom middle of the screen with Search and Size.
+  - Search opens the site search (snippets/custom-search-overlay.liquid).
+  - Size slides up a sheet with the size picker (snippets/size-drill-menu.liquid, as in the menu
+    drawer): US / UK / EU, each opening its sizes, each size linking to its boots.
+  Not on product pages, where the floating buy bar sits at the bottom. Animations: Motion.
+{%- enddoc -%}
+
+{%- liquid
+  assign size_link = nil
+  for link in linklists['header-menu'].links
+    assign first_title = link.links.first.title | upcase
+    if first_title contains 'US ' and first_title contains ' - UK ' and first_title contains ' - EU '
+      assign size_link = link
+      break
+    endif
+  endfor
+-%}
+
+{%- unless template.name == 'product' -%}
+  <nav
+    class="mdock"
+    aria-label="Quick navigation"
+    data-mdock
+  >
+    <button
+      type="button"
+      class="mdock__button"
+      data-mdock-search
+    >
+      {%- render 'gicon', name: 'search', size: 22 -%}
+      <span>Search</span>
+    </button>
+    {%- if size_link -%}
+      <span
+        class="mdock__divider"
+        aria-hidden="true"
+      ></span>
+      <button
+        type="button"
+        class="mdock__button"
+        data-mdock-size
+        aria-haspopup="dialog"
+        aria-controls="mdock-sizes"
+      >
+        {%- render 'gicon', name: 'straighten', size: 22 -%}
+        <span>Size</span>
+      </button>
+    {%- endif -%}
+  </nav>
+
+  {%- if size_link -%}
+    <dialog
+      class="mdock-sheet"
+      id="mdock-sizes"
+      aria-labelledby="mdock-sizes-title"
+      data-mdock-sheet
+    >
+      <div
+        class="mdock-sheet__scrim"
+        data-mdock-scrim
+      ></div>
+      <div
+        class="mdock-sheet__panel"
+        data-mdock-panel
+      >
+        <span
+          class="mdock-sheet__grabber"
+          aria-hidden="true"
+        ></span>
+        <div class="mdock-sheet__head">
+          <h2
+            class="mdock-sheet__title"
+            id="mdock-sizes-title"
+          >
+            Shop by size
+          </h2>
+          <button
+            type="button"
+            class="mdock-sheet__close"
+            data-mdock-close
+            aria-label="Close"
+          >
+            {%- render 'gicon', name: 'close', size: 22 -%}
+          </button>
+        </div>
+        <div class="mdock-sheet__body">
+          {% render 'size-drill-menu', parent_link: size_link, variant: 'drawer', id: 'mdock-size' %}
+        </div>
+      </div>
+    </dialog>
+  {%- endif -%}
+
+  <script type="module">
+    import { animate } from 'motion';
+
+    const dock = document.querySelector('[data-mdock]');
+    const sheet = document.querySelector('[data-mdock-sheet]');
+    if (dock) {
+      const EASE = [0.3, 0.7, 0.3, 1];
+      const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      dock.querySelector('[data-mdock-search]').addEventListener('click', () => {
+        if (typeof window.customSearchOpen === 'function') window.customSearchOpen();
+        else window.location.href = '{{ routes.search_url }}';
+      });
+
+      if (sheet) {
+        const panel = sheet.querySelector('[data-mdock-panel]');
+        const scrim = sheet.querySelector('[data-mdock-scrim]');
+        let closing = null;
+
+        const open = () => {
+          if (sheet.open) return;
+          sheet.showModal();
+          document.documentElement.classList.add('mdock-open');
+          if (reduced()) return;
+          animate(scrim, { opacity: [0, 1] }, { duration: 0.3, ease: 'linear' });
+          animate(panel, { transform: ['translateY(100%)', 'translateY(0%)'] }, { duration: 0.55, ease: EASE });
+        };
+
+        const close = () => {
+          if (closing || !sheet.open) return closing;
+          const finish = () => {
+            sheet.close();
+            document.documentElement.classList.remove('mdock-open');
+            [panel, scrim].forEach((el) => {
+              el.getAnimations().forEach((a) => a.cancel());
+              el.style.removeProperty('transform');
+              el.style.removeProperty('opacity');
+            });
+            closing = null;
+          };
+          if (reduced()) return finish();
+          closing = Promise.all([
+            animate(scrim, { opacity: [1, 0] }, { duration: 0.24, ease: 'linear' }),
+            animate(panel, { transform: ['translateY(0%)', 'translateY(100%)'] }, { duration: 0.3, ease: [0.4, 0, 1, 1] }),
+          ]).then(finish, finish);
+          return closing;
+        };
+
+        dock.querySelector('[data-mdock-size]')?.addEventListener('click', open);
+        sheet.querySelector('[data-mdock-close]').addEventListener('click', close);
+        scrim.addEventListener('click', close);
+        sheet.addEventListener('cancel', (event) => {
+          event.preventDefault();
+          close();
+        });
+        // Choosing a size goes to its boots: close the sheet behind it
+        sheet.addEventListener('click', (event) => {
+          if (event.target.closest('a[href]')) close();
+        });
+      }
+    }
+  </script>
+{%- endunless -%}
+
+{% stylesheet %}
+  .mdock,
+  .mdock-sheet {
+    display: none;
+  }
+
+  @media screen and (max-width: 749px) {
+    /* The floating nav: a white pill at the bottom middle */
+    .mdock {
+      position: fixed;
+      left: 50%;
+      bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      padding: 5px;
+      border-radius: 999px;
+      background: #ffffff;
+      box-shadow: 0 0 0 1px rgb(18 18 18 / 0.06), 0 10px 30px rgb(18 18 18 / 0.18);
+      transform: translateX(-50%);
+    }
+
+    /* Room at the foot of the page so the nav never hides the last of it */
+    body:has(.mdock) {
+      padding-block-end: 76px;
+    }
+
+    .mdock__button {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      height: 44px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: #121212;
+      font: inherit;
+      font-size: 0.9375rem;
+      font-weight: 650;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background-color 0.2s ease, transform 0.2s cubic-bezier(0.3, 0.7, 0.3, 1);
+    }
+
+    .mdock__button:active {
+      background: rgb(18 18 18 / 0.06);
+      transform: scale(0.96);
+    }
+
+    .mdock__divider {
+      width: 1px;
+      height: 22px;
+      background: rgb(18 18 18 / 0.12);
+    }
+
+    /* The size sheet */
+    .mdock-sheet[open] {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: flex-end;
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      max-height: none;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    .mdock-sheet__scrim {
+      position: absolute;
+      inset: 0;
+      background: rgb(0 0 0 / 0.45);
+    }
+
+    .mdock-sheet__panel {
+      position: relative;
+      width: 100%;
+      max-height: 88vh;
+      max-height: 88dvh;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding: 18px 0 calc(20px + env(safe-area-inset-bottom, 0px));
+      border-radius: 20px 20px 0 0;
+      background: #ffffff;
+      color: #121212;
+      box-shadow: 0 -10px 40px rgb(0 0 0 / 0.2);
+    }
+
+    .mdock-sheet__grabber {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      width: 40px;
+      height: 4px;
+      margin-left: -20px;
+      border-radius: 2px;
+      background: rgb(18 18 18 / 0.2);
+    }
+
+    .mdock-sheet__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 16px 4px 20px;
+    }
+
+    .mdock-sheet__title {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 750;
+      letter-spacing: -0.02em;
+    }
+
+    .mdock-sheet__close {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: rgb(18 18 18 / 0.06);
+      color: #121212;
+      cursor: pointer;
+    }
+
+    .mdock-sheet__body {
+      padding-inline: 20px;
+    }
+
+    html.mdock-open {
+      overflow: hidden;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mdock__button {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
