@@ -4511,7 +4511,7 @@ html.wlq-open {
 
 /*
   Small extras in the site's newer look (shared):
-  .oce-stars - five stars in the holographic foil (product page, cart, Trusted by the pros)
+  .oce-stars - five stars in WhatsApp green (product page, cart, Trusted by the pros)
   .oce-foil-fill - a strip of the foil, for progress fills
 */
 .oce-stars {
@@ -4520,10 +4520,9 @@ html.wlq-open {
   flex: none;
   width: calc(var(--oce-star) * 5.583);
   height: var(--oce-star);
-  background: #c9c6f5 url('oce-holo.webp') 0 0 / 160px 80px repeat;
+  background: var(--oce-star-color, #25d366);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -960 5360 960'%3E%3Cpath transform='translate%280 0%29' d='m233-80 65-281L80-550l288-25 112-265 112 265 288 25-218 189 65 281-247-149L233-80Z'/%3E%3Cpath transform='translate%281100 0%29' d='m233-80 65-281L80-550l288-25 112-265 112 265 288 25-218 189 65 281-247-149L233-80Z'/%3E%3Cpath transform='translate%282200 0%29' d='m233-80 65-281L80-550l288-25 112-265 112 265 288 25-218 189 65 281-247-149L233-80Z'/%3E%3Cpath transform='translate%283300 0%29' d='m233-80 65-281L80-550l288-25 112-265 112 265 288 25-218 189 65 281-247-149L233-80Z'/%3E%3Cpath transform='translate%284400 0%29' d='m233-80 65-281L80-550l288-25 112-265 112 265 288 25-218 189 65 281-247-149L233-80Z'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -960 5360 960'%3E%3Cpath transform='translate%280 0%29' d='m233-80 65-281L80-550l288-25 112-265 112 265 288 25-218 189 65 281-247-149L233-80Z'/%3E%3Cpath transform='translate%281100 0%29' d='m233-80 65-281L80-550l288-25 112-265 112 265 288 25-218 189 65 281-247-149L233-80Z'/%3E%3Cpath transform='translate%282200 0%29' d='m233-80 65-281L80-550l288-25 112-265 112 265 288 25-218 189 65 281-247-149L233-80Z'/%3E%3Cpath transform='translate%283300 0%29' d='m233-80 65-281L80-550l288-25 112-265 112 265 288 25-218 189 65 281-247-149L233-80Z'/%3E%3Cpath transform='translate%284400 0%29' d='m233-80 65-281L80-550l288-25 112-265 112 265 288 25-218 189 65 281-247-149L233-80Z'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
-  animation: oce-stars-drift 12s linear infinite;
 }
 
 @keyframes oce-stars-drift {
@@ -4545,7 +4544,6 @@ html.wlq-open {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .oce-stars,
   .oce-foil-fill {
     animation: none;
   }
