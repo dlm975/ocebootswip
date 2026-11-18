@@ -336,6 +336,12 @@
     };
     grid.addEventListener('pointerover', warm, { passive: true });
     grid.addEventListener('pointerdown', warm, { passive: true });
+    // Fetch each saved boot's details once the page is quiet, so See Details opens straight away
+    const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 400));
+    const prefetch = () =>
+      idle(() => grid.querySelectorAll('[data-wlq-open]').forEach((button) => load(button.dataset.wlqOpen)));
+    new MutationObserver(prefetch).observe(grid, { childList: true, subtree: true });
+    prefetch();
 
     dialog.querySelector('[data-wlq-close]').addEventListener('click', () => close());
     scrim.addEventListener('click', () => close());
