@@ -20,7 +20,7 @@
         "fade_color": "#ffffff",
         "fade_height": 32,
         "eyebrow": "",
-        "heading": "SALE IS LIVE!",
+        "heading": "Sale is LIVE!",
         "text": "Up to 90% off",
         "text_alignment": "left",
         "content_position": "middle",
@@ -826,6 +826,67 @@
         "padding-block-end": 40
       }
     },
+    "popular_categories_main": {
+      "type": "popular-categories",
+      "blocks": {
+        "cat_1": {
+          "type": "category",
+          "settings": {
+            "title": "Sale",
+            "link": "shopify://collections/black-friday-2026"
+          }
+        },
+        "cat_2": {
+          "type": "category",
+          "settings": {
+            "title": "Football boots",
+            "link": "shopify://collections/all-football-boots"
+          }
+        },
+        "cat_3": {
+          "type": "category",
+          "settings": {
+            "title": "Nike",
+            "link": "shopify://collections/nike"
+          }
+        },
+        "cat_4": {
+          "type": "category",
+          "settings": {
+            "title": "adidas",
+            "link": "shopify://collections/adidas"
+          }
+        },
+        "cat_5": {
+          "type": "category",
+          "settings": {
+            "title": "Puma",
+            "link": "shopify://collections/puma-1"
+          }
+        },
+        "cat_6": {
+          "type": "category",
+          "settings": {
+            "title": "Accessories",
+            "link": "shopify://collections/accessories-services"
+          }
+        }
+      },
+      "block_order": [
+        "cat_1",
+        "cat_2",
+        "cat_3",
+        "cat_4",
+        "cat_5",
+        "cat_6"
+      ],
+      "settings": {
+        "heading": "Popular categories",
+        "color_scheme": "scheme-1",
+        "padding-block-start": 48,
+        "padding-block-end": 56
+      }
+    },
     "newly_listed_fc": {
       "type": "product-list",
       "blocks": {
@@ -1305,67 +1366,6 @@
         "card_aspect_ratio": "3/4",
         "padding-block-start": 4,
         "padding-block-end": 8
-      }
-    },
-    "popular_categories_main": {
-      "type": "popular-categories",
-      "blocks": {
-        "cat_1": {
-          "type": "category",
-          "settings": {
-            "title": "Sale",
-            "link": "shopify://collections/black-friday-2026"
-          }
-        },
-        "cat_2": {
-          "type": "category",
-          "settings": {
-            "title": "Football boots",
-            "link": "shopify://collections/all-football-boots"
-          }
-        },
-        "cat_3": {
-          "type": "category",
-          "settings": {
-            "title": "Nike",
-            "link": "shopify://collections/nike"
-          }
-        },
-        "cat_4": {
-          "type": "category",
-          "settings": {
-            "title": "adidas",
-            "link": "shopify://collections/adidas"
-          }
-        },
-        "cat_5": {
-          "type": "category",
-          "settings": {
-            "title": "Puma",
-            "link": "shopify://collections/puma-1"
-          }
-        },
-        "cat_6": {
-          "type": "category",
-          "settings": {
-            "title": "Accessories",
-            "link": "shopify://collections/accessories-services"
-          }
-        }
-      },
-      "block_order": [
-        "cat_1",
-        "cat_2",
-        "cat_3",
-        "cat_4",
-        "cat_5",
-        "cat_6"
-      ],
-      "settings": {
-        "heading": "Popular categories",
-        "color_scheme": "scheme-1",
-        "padding-block-start": 48,
-        "padding-block-end": 56
       }
     }
   },
