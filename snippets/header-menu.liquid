@@ -265,6 +265,16 @@
       align-items: start;
     }
 
+    #header-component .header__row--bottom:has(.header-menu--dock) {
+      transition: background-color 0.2s ease;
+    }
+
+    /* A menu open from the dock: the row fills in, so the top bar, the dock, the currency tab and
+       the dropdown read as one big white shape */
+    #header-component .header__row--bottom:has(.header-menu--dock .menu-list__link[aria-expanded='true']) {
+      background-color: #ffffff !important;
+    }
+
     #header-component .header__row--bottom:has(.header-menu--dock) .header__column--left {
       align-self: start;
     }
