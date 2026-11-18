@@ -171,7 +171,8 @@
         dock.addEventListener(
           type,
           (event) => {
-            if (driving || event.pointerType !== 'mouse') return;
+            // (events from content moving under the pointer may not say 'mouse': hold back all but touch/pen)
+            if (driving || event.pointerType === 'touch' || event.pointerType === 'pen') return;
             if (event.target instanceof Element && event.target.matches('.menu-list__list-item')) event.stopImmediatePropagation();
           },
           true
