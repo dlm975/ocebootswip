@@ -9,6 +9,11 @@
  * first, then the most common. A suggestion that is a Shop by Silo brand, or a brand ending in one
  * of its models, links to that collection; any other opens the search results for it.
  *
+ * Misspellings are put right first (assets/search-spelling.js, a library of the store's brands,
+ * models and generations and the ways they get misspelt), and the brand, silo and generation
+ * collections matching the corrected words fill any places the product titles leave, so
+ * "mercurail vapr" still offers Nike Mercurial Vapor and its generations.
+ *
  * Suggestions shown in the search are remembered for the visit, so the results page can show
  * them straight away when that search is submitted.
  */
@@ -68,6 +73,9 @@
    * @param {string} searchUrl
    */
   function url(text, catalog, searchUrl) {
+    const spelling = window.OceSearchSpelling;
+    const known = spelling && spelling.collectionUrl(text);
+    if (known) return known;
     const words = text.split(/\s+/).map(clean).filter(Boolean);
     const brand = (catalog || []).find(function (entry) { return clean(entry.name) === words[0]; });
     if (brand) {
@@ -97,6 +105,52 @@
    * @param {AbortSignal} [signal]
    */
   function fetchResults(query, suggestUrl, signal) {
+    const fixed = correct(query);
+    return fetchFor(fixed.query, suggestUrl, signal).then(function (data) {
+      // Nothing for the corrected words: the words as typed, in case they were right after all
+      if (!fixed.changed || data.grid) return Object.assign(data, { query: fixed.query, corrected: fixed.changed });
+      return fetchFor(query, suggestUrl, signal).then(function (original) {
+        return Object.assign(original, { query: query, corrected: false });
+      });
+    });
+  }
+
+  /** @param {string} query @returns {{ query: string, changed: boolean }} */
+  function correct(query) {
+    const spelling = window.OceSearchSpelling;
+    return spelling ? spelling.correct(query) : { query: query, changed: false };
+  }
+
+  /**
+   * Category suggestions for a query: from the matching product titles, then the collections
+   * whose names match it
+   * @param {string} query - as corrected
+   * @param {string[]} titles
+   * @param {{ name: string, url: string, models: Record<string, string> }[]} catalog
+   * @param {string} searchUrl
+   * @param {number} [max]
+   * @returns {{ text: string, url: string }[]}
+   */
+  function suggest(query, titles, catalog, searchUrl, max) {
+    const limit = max || 4;
+    const list = build(query, titles, limit).map(function (suggestion) {
+      return { text: suggestion.text, url: url(suggestion.text, catalog, searchUrl) };
+    });
+    const spelling = window.OceSearchSpelling;
+    if (spelling && list.length < limit) {
+      const seen = new Set(list.map(function (item) { return item.url; }));
+      spelling.collections(query, limit).forEach(function (item) {
+        if (list.length < limit && !seen.has(item.url)) {
+          seen.add(item.url);
+          list.push(item);
+        }
+      });
+    }
+    return list;
+  }
+
+  /** @param {string} query @param {string} suggestUrl @param {AbortSignal} [signal] */
+  function fetchFor(query, suggestUrl, signal) {
     const requestUrl =
       suggestUrl +
       '?q=' + encodeURIComponent(query) +
@@ -142,6 +196,8 @@
   window.OceSearchSuggest = {
     build: build,
     url: url,
+    correct: correct,
+    suggest: suggest,
     readCatalog: readCatalog,
     fetchResults: fetchResults,
     remember: remember,

@@ -52,6 +52,7 @@
 
 {%- if search.performed and term != blank -%}
   {% render 'search-catalog', id: 'search-summary-catalog' %}
+  <script src="{{ 'search-spelling.js' | asset_url }}"></script>
   <script src="{{ 'search-suggestions.js' | asset_url }}"></script>
   <script>
     (function () {
@@ -93,9 +94,7 @@
       api
         .fetchResults(term, box.dataset.suggestUrl)
         .then(function (data) {
-          const suggestions = api.build(term, data.titles, 5).map(function (suggestion) {
-            return { text: suggestion.text, url: api.url(suggestion.text, catalog, box.dataset.searchUrl) };
-          });
+          const suggestions = api.suggest(data.query || term, data.titles, catalog, box.dataset.searchUrl, 5);
           api.remember(term, suggestions);
           if (!render(suggestions) || reducedMotion) return;
           // Ease open, so the products below glide down rather than jump

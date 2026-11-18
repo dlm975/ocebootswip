@@ -12,6 +12,7 @@
 {%- endcomment -%}
 
 {% render 'search-catalog', id: 'cs-catalog' %}
+<script src="{{ 'search-spelling.js' | asset_url }}" defer></script>
 <script src="{{ 'search-suggestions.js' | asset_url }}" defer></script>
 
 <div
@@ -63,6 +64,8 @@
     </div>
 
     <div class="cs-body" id="cs-body" aria-live="polite">
+      <p class="cs-fixed" id="cs-fixed" hidden></p>
+
       <section class="cs-suggest" id="cs-suggest" hidden aria-label="Suggested categories">
         <ul class="cs-suggest__list" id="cs-suggest-list" role="list"></ul>
       </section>
@@ -308,6 +311,12 @@
   }
 
   /* Suggested categories: bold names, stacked */
+  .cs-fixed {
+    margin: 0 0 10px;
+    font-size: 0.8125rem;
+    color: var(--cs-muted, rgb(18 18 18 / 0.55));
+  }
+
   .cs-suggest__list {
     margin: 0 0 28px;
     padding: 0;
@@ -528,6 +537,7 @@
     const viewAll = document.getElementById('cs-viewall');
     const viewAllText = document.getElementById('cs-viewall-text');
     const none = document.getElementById('cs-none');
+    const fixedNote = document.getElementById('cs-fixed');
 
     const suggestUrl = overlay.dataset.suggestUrl;
     const searchUrl = overlay.dataset.searchUrl;
@@ -568,13 +578,10 @@
     }
 
     /* ---------- Category suggestions (assets/search-suggestions.js) ---------- */
-    function suggestionsFor(query, titles) {
+    function suggestionsFor(query, data) {
       const api = window.OceSearchSuggest;
       if (!api) return [];
-      const catalog = api.readCatalog(catalogId);
-      const list = api.build(query, titles, MAX_SUGGESTIONS).map(function (suggestion) {
-        return { text: suggestion.text, url: api.url(suggestion.text, catalog, searchUrl) };
-      });
+      const list = api.suggest(data.query || query, data.titles, api.readCatalog(catalogId), searchUrl, MAX_SUGGESTIONS);
       // Remembered for the visit, so the results page shows them at once if this is submitted
       api.remember(query, list);
       return list;
@@ -639,6 +646,7 @@
       suggestSection.hidden = true;
       productsSection.hidden = true;
       none.hidden = true;
+      fixedNote.hidden = true;
       suggestList.replaceChildren();
       productsGrid.replaceChildren();
       shown = '';
@@ -648,13 +656,17 @@
       const firstShow = !shown;
       const productsTop = productsSection.hidden ? null : productsSection.getBoundingClientRect().top;
 
-      renderSuggestions(query, suggestionsFor(query, data.titles));
+      renderSuggestions(query, suggestionsFor(query, data));
+      // Misspelt: say what was searched instead
+      const searched = data.query || query;
+      fixedNote.hidden = !data.corrected;
+      fixedNote.textContent = data.corrected ? 'Showing results for “' + searched + '”' : '';
 
       productsGrid.replaceChildren();
       if (data.grid) productsGrid.append(data.grid.cloneNode(true));
       productsSection.hidden = !data.grid;
-      viewAll.href = searchUrl + '?q=' + encodeURIComponent(query) + '&type=product';
-      viewAllText.textContent = 'View all results for “' + query + '”';
+      viewAll.href = searchUrl + '?q=' + encodeURIComponent(searched) + '&type=product';
+      viewAllText.textContent = 'View all results for “' + searched + '”';
 
       none.hidden = !!data.grid;
       none.textContent = data.grid ? '' : 'No results for “' + query + '”';
@@ -784,13 +796,23 @@
       }
     });
 
+    // Search key / Enter: no trip to the results page. The suggestions and product cards show here
+    // straight away, and the keyboard steps aside so they can be seen ("View all results" leads on).
     form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      if (!input.value.trim()) return;
+      clearTimeout(timer);
       const query = input.value.replace(/\*+/g, ' ').replace(/\s+/g, ' ').trim();
-      if (!query) {
-        event.preventDefault();
-        return;
-      }
-      input.value = query;
+      body.classList.add('cs-loading');
+      fetchResults(query)
+        .then(function (data) {
+          if (input.value.replace(/\*+/g, ' ').replace(/\s+/g, ' ').trim() === query && shown !== query) showResults(query, data);
+          else body.classList.remove('cs-loading');
+        })
+        .catch(function (error) {
+          if (!error || error.name !== 'AbortError') body.classList.remove('cs-loading');
+        });
+      if (window.matchMedia('(hover: none)').matches) input.blur();
     });
 
     window.customSearchOpen = openSearch;

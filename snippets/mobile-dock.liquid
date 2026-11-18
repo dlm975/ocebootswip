@@ -115,6 +115,11 @@
         data-msearch-results
         aria-live="polite"
       >
+        <p
+          class="cs-fixed"
+          data-msearch-fixed
+          hidden
+        ></p>
         <section
           class="cs-suggest"
           data-msearch-suggest
@@ -298,6 +303,7 @@
       const viewAll = layer.querySelector('[data-msearch-viewall]');
       const viewAllText = layer.querySelector('[data-msearch-viewall-text]');
       const none = layer.querySelector('[data-msearch-none]');
+      const fixedNote = layer.querySelector('[data-msearch-fixed]');
       const suggestUrl = layer.dataset.suggestUrl;
       const searchUrl = layer.dataset.searchUrl;
       const restTop = () => Math.round(window.innerHeight * 0.28); // where the bar rests: upper middle
@@ -405,11 +411,10 @@
         });
       }
 
-      function suggestionsFor(query, titles) {
+      function suggestionsFor(query, data) {
         const api = window.OceSearchSuggest;
         if (!api) return [];
-        const catalog = api.readCatalog('cs-catalog');
-        const list = api.build(query, titles, 4).map((s) => ({ text: s.text, url: api.url(s.text, catalog, searchUrl) }));
+        const list = api.suggest(data.query || query, data.titles, api.readCatalog('cs-catalog'), searchUrl, 4);
         api.remember(query, list);
         return list;
       }
@@ -418,6 +423,7 @@
         suggestSection.hidden = true;
         productsSection.hidden = true;
         none.hidden = true;
+        fixedNote.hidden = true;
         suggestList.replaceChildren();
         grid.replaceChildren();
         shown = '';
@@ -427,7 +433,11 @@
       function showResults(query, data) {
         const first = !shown;
         suggestList.replaceChildren();
-        const suggestions = suggestionsFor(query, data.titles);
+        const suggestions = suggestionsFor(query, data);
+        // Misspelt: say what was searched instead
+        const searched = data.query || query;
+        fixedNote.hidden = !data.corrected;
+        fixedNote.textContent = data.corrected ? 'Showing results for “' + searched + '”' : '';
         suggestions.forEach((s) => {
           const item = document.createElement('li');
           const link = document.createElement('a');
@@ -441,8 +451,8 @@
         grid.replaceChildren();
         if (data.grid) grid.append(data.grid.cloneNode(true));
         productsSection.hidden = !data.grid;
-        viewAll.href = searchUrl + '?q=' + encodeURIComponent(query) + '&type=product';
-        viewAllText.textContent = 'View all results for “' + query + '”';
+        viewAll.href = searchUrl + '?q=' + encodeURIComponent(searched) + '&type=product';
+        viewAllText.textContent = 'View all results for “' + searched + '”';
         none.hidden = !!data.grid;
         none.textContent = data.grid ? '' : 'No results for “' + query + '”';
         shown = query;
@@ -467,6 +477,21 @@
             })
             .catch(() => {});
         }, cache.has(query) ? 0 : 140);
+      });
+
+      // Search key: no trip to the results page. The suggestions and product cards show here at
+      // once, and the keyboard steps aside so they can be seen ("View all results" leads on).
+      bar.addEventListener('submit', (event) => {
+        event.preventDefault();
+        clearTimeout(timer);
+        const query = clean(input.value);
+        input.blur();
+        if (!query || !window.OceSearchSuggest) return;
+        fetchResults(query)
+          .then((data) => {
+            if (clean(input.value) === query && shown !== query) showResults(query, data);
+          })
+          .catch(() => {});
       });
 
       layer.querySelector('[data-msearch-close]').addEventListener('click', () => close());
