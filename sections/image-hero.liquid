@@ -129,6 +129,7 @@
     display: flex;
     flex-direction: column;
     min-height: var(--ih-height-mobile, 82svh);
+    min-height: round(down, var(--ih-height-mobile, 82svh), 1px);
     overflow: hidden;
     isolation: isolate;
     color: #ffffff;
@@ -139,6 +140,7 @@
       --ih-gutter: 40px;
 
       min-height: var(--ih-height, 88vh);
+      min-height: round(down, var(--ih-height, 88vh), 1px);
     }
   }
 
@@ -154,6 +156,13 @@
   .ih__media {
     z-index: -3;
     background: #1b1b1f;
+  }
+
+  /* The photo and its wash stop 2px short of the hero's foot (the white fade covers that strip), so
+     no dark sliver can show as a line where the hero meets the section below, in any browser */
+  .ih__media,
+  .ih__overlay {
+    bottom: 2px;
   }
 
   .ih__image {
