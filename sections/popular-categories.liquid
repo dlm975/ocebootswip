@@ -1,0 +1,213 @@
+{%- comment -%}
+  Popular categories: a small label over a stack of big bold category names, each a link.
+  Pointing at one (desktop) turns it to outline lettering and slides a round arrow button in
+  beside it. Phones: big tappable names. Simple state changes, so CSS transitions (house timing).
+{%- endcomment -%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<div
+  class="section section--page-width color-{{ section.settings.color_scheme }} popcat spacing-style"
+  style="{% render 'spacing-style', settings: section.settings %}"
+>
+  {%- if section.settings.heading != blank -%}
+    <h2 class="popcat__label">{{ section.settings.heading | escape }}</h2>
+  {%- endif -%}
+
+  <ul
+    class="popcat__list"
+    role="list"
+  >
+    {%- for block in section.blocks -%}
+      {%- if block.settings.title != blank -%}
+        <li {{ block.shopify_attributes }}>
+          <a
+            class="popcat__link"
+            href="{{ block.settings.link | default: '#' }}"
+          >
+            <span class="popcat__name">{{ block.settings.title | escape }}</span>
+            <span
+              class="popcat__arrow"
+              aria-hidden="true"
+            >
+              {%- render 'gicon', name: 'arrow_forward', size: 26 -%}
+            </span>
+          </a>
+        </li>
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+</div>
+
+{% stylesheet %}
+  .popcat__label {
+    margin: 0 0 clamp(14px, 2.5vw, 28px);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase !important;
+    color: rgb(var(--color-foreground-rgb) / 0.55);
+  }
+
+  .popcat__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .popcat__link {
+    display: inline-flex;
+    align-items: center;
+    gap: clamp(12px, 2vw, 28px);
+    padding-block: 0.06em;
+    color: var(--color-foreground);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .popcat__name {
+    font-size: clamp(2.5rem, 9.5vw, 7.5rem);
+    font-weight: 800;
+    line-height: 1.04;
+    letter-spacing: -0.025em;
+    text-transform: uppercase !important;
+    color: currentColor;
+    -webkit-text-stroke: 1.5px currentColor;
+    -webkit-text-fill-color: currentColor;
+    transition: -webkit-text-fill-color 0.3s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  /* The round arrow: green to lime, waiting off to the side */
+  .popcat__arrow {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: clamp(40px, 4.2vw, 64px);
+    height: clamp(40px, 4.2vw, 64px);
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1fd33a, #c9f04b);
+    color: #121212;
+    opacity: 0;
+    transform: translateX(-14px) scale(0.85);
+    transition:
+      opacity 0.25s ease,
+      transform 0.55s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  .popcat__arrow svg {
+    width: 55%;
+    height: 55%;
+  }
+
+  /* Pointed at: the name turns to outline, the arrow slides in */
+  @media (hover: hover) {
+    .popcat__link:hover .popcat__name,
+    .popcat__link:focus-visible .popcat__name {
+      -webkit-text-fill-color: transparent;
+    }
+
+    .popcat__link:hover .popcat__arrow,
+    .popcat__link:focus-visible .popcat__arrow {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+  }
+
+  /* Phones: a tap shows the outline for a moment */
+  .popcat__link:active .popcat__name {
+    -webkit-text-fill-color: transparent;
+  }
+
+  .popcat__link:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 6px;
+    border-radius: 6px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .popcat__arrow {
+      display: none;
+    }
+
+    .popcat__name {
+      -webkit-text-stroke-width: 1px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .popcat__name,
+    .popcat__arrow {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Popular categories",
+  "tag": "section",
+  "class": "section-popular-categories",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Label",
+      "default": "Popular categories"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Name",
+          "default": "Football boots"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Popular categories",
+      "blocks": [{ "type": "category" }, { "type": "category" }, { "type": "category" }]
+    }
+  ]
+}
+{% endschema %}
