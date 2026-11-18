@@ -41,21 +41,21 @@
   <ul class="cart-assure__trust list-unstyled" role="list">
     {%- if trust_1 != blank -%}
       <li>
-        {%- render 'gicon', name: 'verified_user', size: 13 -%}
+        <span class="cart-assure__disk oce-disk" aria-hidden="true">{%- render 'gicon', name: 'verified_user', size: 13 -%}</span>
         <span>{{ trust_1 }}</span>
       </li>
     {%- endif -%}
 
     {%- if trust_2 != blank -%}
       <li>
-        {%- render 'gicon', name: 'send', size: 13 -%}
+        <span class="cart-assure__disk oce-disk" aria-hidden="true">{%- render 'gicon', name: 'local_shipping', size: 13 -%}</span>
         <span>{{ trust_2 }}</span>
       </li>
     {%- endif -%}
 
     {%- if trust_3 != blank -%}
       <li>
-        {%- render 'gicon', name: 'lock', size: 13 -%}
+        <span class="cart-assure__disk oce-disk" aria-hidden="true">{%- render 'gicon', name: 'lock', size: 13 -%}</span>
         <span>{{ trust_3 }}</span>
       </li>
     {%- endif -%}
@@ -93,24 +93,37 @@
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 6px 14px;
+    gap: 8px 14px;
     width: 100%;
-    margin: 10px 0 0;
+    margin: 12px 0 0;
     padding: 0;
   }
 
+  /* The site's newer look: each line with a small holographic disk holding its Google icon, and
+     bold text */
   .cart-assure__trust li {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    font-size: 0.66rem;
-    font-weight: 600;
+    gap: 6px;
+    font-size: 0.6875rem;
+    font-weight: 750;
+    letter-spacing: -0.005em;
     line-height: 1.2;
     white-space: nowrap;
   }
 
-  .cart-assure__trust svg {
-    flex-shrink: 0;
-    opacity: 0.75;
+  .cart-assure__disk {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+  }
+
+  .cart-assure__disk svg {
+    position: relative;
+    width: 13px;
+    height: 13px;
   }
 {% endstylesheet %}
