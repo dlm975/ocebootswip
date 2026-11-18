@@ -351,7 +351,7 @@
         this.switchIn(list, target);
         return;
       }
-      this.switchIn(list, null, { scroll: false, duration: SWAP });
+      this.switchIn(list, null, { focus: target, duration: SWAP });
       list.classList.add('has-open');
       target.classList.add('is-next');
       setTimeout(() => {
@@ -359,7 +359,7 @@
       }, SWAP * 1000);
     }
 
-    switchIn(list, target, { scroll = true, duration = MOVE } = {}) {
+    switchIn(list, target, { focus = null, duration = MOVE } = {}) {
       const cards = [...list.children];
       const previous = this.open.get(list) || null;
       cards.forEach((card) => card.classList.remove('is-next'));
@@ -410,8 +410,9 @@
 
       // Scroll to where things end up: the opened card under the header, or the closed one mid-screen
       const nextHeight = target ? next.panel.getBoundingClientRect().height : 0;
-      if (!scroll) {
-        // (part of a swap: the page moves once the new one opens)
+      if (focus) {
+        // First step of a swap: bring the card about to open up under the header as this one closes
+        this.scrollTo(focus.getBoundingClientRect().top + window.scrollY - this.headerOffset(), duration);
       } else if (target) {
         this.scrollTo(target.getBoundingClientRect().top + window.scrollY - this.headerOffset());
       } else if (previous) {
@@ -509,7 +510,7 @@
     }
 
     /** Ease the page to a scroll position, in step with the panels; a touch or wheel takes over */
-    scrollTo(target) {
+    scrollTo(target, duration = MOVE) {
       cancelAnimationFrame(this.scrollFrame);
       const start = window.scrollY;
       const distance = Math.max(0, target) - start;
@@ -523,7 +524,7 @@
       window.addEventListener('touchstart', yieldScroll, { once: true, passive: true });
       const began = performance.now();
       const step = (now) => {
-        const p = Math.min(1, (now - began) / (MOVE * 1000));
+        const p = Math.min(1, (now - began) / (duration * 1000));
         window.scrollTo({ top: start + distance * scrollEase(p), behavior: 'instant' });
         if (p < 1) this.scrollFrame = requestAnimationFrame(step);
       };
