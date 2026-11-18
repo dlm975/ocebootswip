@@ -9,13 +9,13 @@
 {%- enddoc -%}
 
 <div
-  class="product-badges product-badges--{{ settings.badge_position }}"
+  class="product-badges product-badges--top-left"
   style="
     --badge-border-radius: {{ settings.badge_corner_radius }}px;
     --badge-font-family: var(--font-{{ settings.badge_font_family }}--family); --badge-font-weight: var(--font-{{ settings.badge_font_family }}--weight); --badge-text-transform: {{ settings.badge_text_transform }};
   "
 >
-  {%- comment -%} Only "Sold out": sale cards already show their % off badge and the was-price {%- endcomment -%}
+  {%- comment -%} Only "Sold out", top left (the wishlist heart has the top right): sale cards already show their % off badge and the was-price {%- endcomment -%}
   {%- if product.available == false -%}
     <div class="product-badges__badge product-badges__badge--rectangle color-{{ settings.badge_sold_out_color_scheme }}">
       {{ 'content.product_badge_sold_out' | t }}
