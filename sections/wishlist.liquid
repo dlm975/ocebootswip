@@ -194,7 +194,7 @@
           if (condition && button.dataset.condition) condition.textContent = button.dataset.condition;
           full.textContent = button.dataset.full;
           add.disabled = false;
-          addText.textContent = 'Add to cart';
+          addText.textContent = 'Checkout now';
           error.hidden = true;
         })
       );
@@ -202,7 +202,7 @@
       add.addEventListener('click', async () => {
         if (!selected || add.disabled) return;
         add.disabled = true;
-        addText.textContent = 'Adding…';
+        addText.textContent = 'Going to checkout…';
         error.hidden = true;
         const sections = [...document.querySelectorAll('cart-items-component')]
           .map((el) => el.dataset.sectionId)
@@ -215,7 +215,7 @@
           });
           const result = await response.json();
           if (!response.ok || result.status) throw new Error(result.description || result.message || 'Couldn’t add it to your cart.');
-          addText.textContent = 'Added';
+          addText.textContent = 'Going to checkout…';
           // The theme's own event: the cart count, cart drawer and anything else listening update
           dialog.dispatchEvent(
             new CartAddEvent({}, String(selected), {
@@ -225,15 +225,13 @@
               sections: result.sections,
             })
           );
-          const drawer = document.querySelector('cart-drawer-component');
-          close().then(() => {
-            if (drawer && !drawer.hasAttribute('auto-open') && typeof drawer.open === 'function') drawer.open();
-          });
+          // Checkout now: straight on to checkout with it in the cart
+          window.location.assign(window.Theme?.routes?.checkout_url || '/checkout');
         } catch (e) {
           error.textContent = e.message;
           error.hidden = false;
           add.disabled = false;
-          addText.textContent = 'Add to cart';
+          addText.textContent = 'Checkout now';
         }
       });
     }
@@ -384,7 +382,7 @@
       const item = document.createElement('li');
       item.className = 'wl-grid__item wl-grid__item--loading';
       item.dataset.wishlistItem = handle;
-      item.innerHTML = '<span class="wl-card wl-card--ghost"><span class="wl-card__media"></span><span class="wl-ghost-line"></span><span class="wl-ghost-line wl-ghost-line--short"></span></span>';
+      item.innerHTML = '<span class="wl-card wl-card--ghost"><span class="wl-card__media"></span><span class="wl-ghost-line wl-ghost-line--short"></span></span>';
       return item;
     }
 
@@ -615,46 +613,99 @@
     }
   }
 
-  /* Buy: along the foot of the card (the card leaves room for it) */
+  /* See Details: bold words and a holographic coin along the foot of the card (the card leaves
+     room for it); opens the mini product page */
   .wl-card {
-    padding-block-end: 62px;
+    padding-block-end: 58px;
   }
 
-  .wl-card__buy {
+  .wl-card__details {
     position: absolute;
-    inset: auto 10px 12px 10px;
-    height: 40px;
+    inset: auto 14px 14px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
     border: 0;
-    border-radius: 999px;
-    background: #121212;
-    color: #ffffff;
+    background: none;
+    color: #121212;
     font: inherit;
-    font-size: 0.875rem;
-    font-weight: 650;
+    font-size: 1rem;
+    font-weight: 750;
+    letter-spacing: -0.01em;
+    text-align: start;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: background-color 0.2s ease, transform 0.2s cubic-bezier(0.3, 0.7, 0.3, 1);
   }
 
-  .wl-card__buy:disabled {
-    background: rgb(18 18 18 / 0.08);
-    color: rgb(18 18 18 / 0.45);
+  .wl-card__details--sold {
+    min-height: 36px;
+    color: rgb(18 18 18 / 0.4);
     cursor: default;
   }
 
+  .wl-card__disk {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    margin-block-end: 5px;
+    border-radius: 50%;
+    transition: transform 0.25s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  .wl-card__disk svg {
+    position: relative;
+    width: 55%;
+    height: 55%;
+    transition: transform 0.25s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
   @media (hover: hover) {
-    .wl-card__buy:not(:disabled):hover {
-      background: #333333;
+    .wl-card__details:not(.wl-card__details--sold):hover .wl-card__disk {
+      transform: translateY(-1px);
+    }
+
+    .wl-card__details:not(.wl-card__details--sold):hover .wl-card__disk svg {
+      transform: translateX(2px);
+    }
+
+    .wl-card__details:not(.wl-card__details--sold):hover .wl-card__disk::after {
+      animation: wl-disk-glint 0.8s cubic-bezier(0.45, 0, 0.25, 1) 0.1s 1 both;
     }
   }
 
-  .wl-card__buy:not(:disabled):active {
-    transform: scale(0.97);
+  .wl-card__details:active .wl-card__disk {
+    transform: translateY(2px);
   }
 
-  .wl-card__buy:focus-visible {
+  .wl-card__details:focus-visible {
     outline: 2px solid #121212;
-    outline-offset: 2px;
+    outline-offset: 4px;
+    border-radius: 999px;
+  }
+
+  @keyframes wl-disk-glint {
+    from {
+      transform: translateX(-110%);
+    }
+    to {
+      transform: translateX(110%);
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .wl-card__details {
+      font-size: 1.125rem;
+    }
+
+    .wl-card__disk {
+      width: 40px;
+      height: 40px;
+    }
   }
 
   /* ---- Mini product page (Buy) ---- */
@@ -1107,7 +1158,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .wl-card__buy,
+    .wl-card__disk,
+    .wl-card__disk svg,
     .wlq__thumb,
     .wlq__size {
       transition: none;
