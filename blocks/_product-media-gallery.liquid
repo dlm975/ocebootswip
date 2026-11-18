@@ -137,6 +137,11 @@
   endcapture
   assign sizes = sizes | strip
 -%}
+<script
+  src="{{ 'pdp-pinch-zoom.js' | asset_url }}"
+  type="module"
+  defer
+></script>
 {%- if has_image_drop -%}
   <script
     src="{{ 'drag-zoom-wrapper.js' | asset_url }}"

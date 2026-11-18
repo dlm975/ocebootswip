@@ -50,14 +50,12 @@
 {%- if show and block.settings.text != blank -%}
   <span
     id="fsp-{{ block.id }}"
-    class="fsp{% if excluded %} fsp--excluded{% endif %}"
+    class="fsp oce-disk{% if excluded %} fsp--excluded{% endif %}"
     style="--fsp-bg: {{ block.settings.background }}; --fsp-fg: {{ block.settings.text_color }};"
     {{ block.shopify_attributes }}
   >
     {%- if block.settings.show_icon -%}
-      <span class="fsp__disk oce-disk" aria-hidden="true">
-        {%- render 'gicon', name: 'local_shipping', class: 'fsp__icon', size: 14 -%}
-      </span>
+      {%- render 'gicon', name: 'local_shipping', class: 'fsp__icon', size: 16 -%}
     {%- endif -%}
     <span class="fsp__text">{{ block.settings.text }}</span>
     {%- if excluded -%}
@@ -73,23 +71,15 @@
     position: relative;
   }
 
-  /* The site's newer look: frosted glass with a light rim, the truck in a small holographic disk
-     (assets/base.css .oce-disk), and bold text */
+  /* The whole pill in the holographic foil (assets/base.css .oce-disk, the site's disks), with the
+     truck and bold dark text on it */
   .fsp {
     display: none;
     align-items: center;
-    gap: 8px;
-    padding: 4px 14px 4px 4px;
+    gap: 7px;
+    padding: 7px 14px 7px 11px;
     border-radius: 999px;
-    background: rgb(255 255 255 / 0.66);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    backdrop-filter: blur(16px) saturate(180%);
-    box-shadow:
-      inset 0 0 0 1px rgb(255 255 255 / 0.75),
-      inset 0 1px 0 rgb(255 255 255 / 0.95),
-      0 0 0 1px rgb(18 18 18 / 0.06),
-      0 8px 22px rgb(18 18 18 / 0.14);
-    color: var(--fsp-fg, #121212);
+    color: #121212;
     font-size: 0.75rem;
     font-weight: 750;
     line-height: 1.2;
@@ -98,24 +88,16 @@
     box-sizing: border-box;
   }
 
-  .fsp__disk {
-    display: grid;
-    flex: none;
-    place-items: center;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-  }
-
-  .fsp__disk .fsp__icon {
+  .fsp__icon {
     position: relative;
-    width: 15px;
-    height: 15px;
+    flex: none;
+    width: 17px;
+    height: 17px;
   }
 
-  /* No disk (icon turned off): even padding */
-  .fsp:not(:has(.fsp__disk)) {
-    padding: 8px 14px;
+  .fsp__text,
+  .fsp__note {
+    position: relative;
   }
 
   .fsp--placed {

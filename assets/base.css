@@ -4473,3 +4473,18 @@ html.wlq-open {
     animation: none !important;
   }
 }
+
+/*
+  Product page photos: pinch to zoom in place (assets/pdp-pinch-zoom.js). The page itself doesn't
+  zoom when pinching a photo (swiping and scrolling still work), and a zoomed photo stays inside its
+  frame, above its neighbours.
+*/
+.product-information__media media-gallery :is(slideshow-slide, .product-media-container) {
+  touch-action: pan-x pan-y;
+}
+
+.product-information__media media-gallery .is-pinching {
+  position: relative;
+  z-index: 3;
+  overflow: hidden;
+}
