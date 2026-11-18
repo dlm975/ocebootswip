@@ -2,7 +2,7 @@
   Player collections as short looping videos: a row of tall cards, each a muted clip on loop (a
   photo stands in until a video is added), the player's name in bold and a button to their
   collection. Phones swipe through them; desktop shows them side by side.
-  A clip plays only while its card is on screen, and not at all with reduced motion (the poster
+  A clip plays while any part of its card is on screen, and not at all with reduced motion (the poster
   shows instead).
 {%- endcomment -%}
 
@@ -107,7 +107,7 @@
   /*
     Keeping the clips smooth without slowing the page:
     - nothing downloads until a card is about to scroll into view (preload="none" until then);
-    - a clip plays only while its card is on screen, and pauses when it leaves or the tab hides;
+    - a clip plays while any part of its card is on screen (peeking cards too), and pauses when it leaves or the tab hides;
     - with reduced motion, Data Saver or a slow connection, the poster stays and nothing plays.
   */
   class PlayerReels extends HTMLElement {
@@ -138,7 +138,7 @@
         { rootMargin: '300px 300px' }
       );
 
-      // Play while on screen
+      // Play while any part of the card is on screen, the cards peeking in at the sides too
       this.seen = new IntersectionObserver(
         (entries) =>
           entries.forEach((entry) => {
@@ -146,7 +146,7 @@
             else this.visible.delete(entry.target);
             sync(entry.target);
           }),
-        { threshold: 0.35 }
+        { threshold: 0 }
       );
 
       this.videos.forEach((video) => {
