@@ -101,15 +101,6 @@
                       assign silo_image = silo.settings.image | default: silo.settings.collection.featured_image | default: first_image
                     -%}
                     {%- capture silo_face -%}
-                      <span class="ssilo__thumb">
-                        {%- if silo_image -%}
-                          {{
-                            silo_image
-                            | image_url: width: 160
-                            | image_tag: widths: '100, 160', sizes: '52px', loading: 'eager', fetchpriority: 'low', class: 'ssilo__thumb-image', alt: ''
-                          }}
-                        {%- endif -%}
-                      </span>
                       <span class="ssilo__row-text">
                         <span class="ssilo__row-name">{{ silo_label | escape }}</span>
                         <span class="ssilo__row-sub">
@@ -120,6 +111,15 @@
                             {{ silo.settings.collection.products_count | pluralize: 'pair', 'pairs' }}
                           {%- endif -%}
                         </span>
+                      </span>
+                      <span class="ssilo__thumb">
+                        {%- if silo_image -%}
+                          {{
+                            silo_image
+                            | image_url: width: 200
+                            | image_tag: widths: '120, 200', sizes: '76px', loading: 'eager', fetchpriority: 'low', class: 'ssilo__thumb-image', alt: ''
+                          }}
+                        {%- endif -%}
                       </span>
                     {%- endcapture -%}
 
@@ -796,23 +796,18 @@
   }
 
   /* A row per silo: small image and name on one line */
+  /* A line per silo on the white panel: the name on the left, its image on the right */
   .ssilo__silos {
     display: grid;
-    gap: 6px;
   }
 
   .ssilo__silo {
-    border-radius: 14px;
-    background: #f3f3f3;
+    border-block-end: 1px solid rgb(18 18 18 / 0.08);
     transform-origin: 50% 0;
-    transition:
-      background-color 0.25s ease,
-      box-shadow 0.35s ease;
   }
 
-  .ssilo__silo.is-open {
-    background: #ffffff;
-    box-shadow: 0 0 0 1px rgb(18 18 18 / 0.06), 0 12px 30px rgb(18 18 18 / 0.14);
+  .ssilo__silo:last-child {
+    border-block-end: 0;
   }
 
   .ssilo__silos.has-open > .ssilo__silo:not(.is-open) > .ssilo__row {
@@ -824,9 +819,9 @@
     align-items: center;
     gap: 12px;
     width: 100%;
-    min-height: 64px;
+    min-height: 66px;
     margin: 0;
-    padding: 6px 12px 6px 6px;
+    padding: 8px 2px;
     border: 0;
     background: none;
     color: #121212;
@@ -838,18 +833,25 @@
     transition: opacity 0.35s ease;
   }
 
-  .ssilo__silo.is-open .ssilo__plus {
-    background: #f3f3f3;
+  /* A silo's plus is just the icon, no circle */
+  .ssilo__row .ssilo__plus {
+    width: 24px;
+    height: 24px;
+    background: none;
+    color: rgb(18 18 18 / 0.55);
   }
 
   .ssilo__thumb {
     display: block;
     flex: none;
-    width: 52px;
-    height: 52px;
-    border-radius: 10px;
+    width: 76px;
+    height: 50px;
+    border-radius: 8px;
     overflow: hidden;
-    background: #ffffff;
+  }
+
+  .ssilo__thumb .ssilo__thumb-image {
+    object-fit: cover;
   }
 
   .ssilo__thumb-image {
@@ -882,7 +884,7 @@
 
   /* Generations, beneath their silo row */
   .ssilo__inner--silo {
-    padding: 2px 8px 6px;
+    padding: 0 0 8px;
   }
 
   /* Generations: plain lines, the name on the left and a picture on the right */
@@ -978,8 +980,9 @@
       opacity: 0.8;
     }
 
-    .ssilo__silo:not(.is-open):hover {
-      background: #ebebeb;
+    .ssilo__row:hover .ssilo__row-name {
+      text-decoration: underline;
+      text-underline-offset: 3px;
     }
 
     .ssilo__gen:hover .ssilo__gen-name {
