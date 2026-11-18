@@ -101,7 +101,7 @@
                           {{
                             silo_image
                             | image_url: width: 280
-                            | image_tag: widths: '120, 200, 280', sizes: '(min-width: 750px) 104px, 72px', loading: 'eager', fetchpriority: 'low', class: 'ssilo__thumb-image', alt: ''
+                            | image_tag: widths: '120, 200, 280', sizes: '(min-width: 750px) 104px, 60px', loading: 'eager', fetchpriority: 'low', class: 'ssilo__thumb-image', alt: ''
                           }}
                         {%- endif -%}
                       </span>
@@ -147,7 +147,7 @@
                                           {{
                                             generation.featured_image
                                             | image_url: width: 160
-                                            | image_tag: widths: '100, 160', sizes: '(min-width: 750px) 84px, 60px', loading: 'lazy', class: 'ssilo__thumb-image', alt: ''
+                                            | image_tag: widths: '100, 160', sizes: '(min-width: 750px) 76px, 52px', loading: 'lazy', class: 'ssilo__thumb-image', alt: ''
                                           }}
                                         {%- endif -%}
                                       </span>
@@ -402,7 +402,7 @@
       if (target) {
         this.setOpen(target, true);
         // It keeps its own row, at full width; its row-mate moves down
-        const columns = getComputedStyle(list).gridTemplateColumns.split(' ').length;
+        const columns = parseInt(getComputedStyle(list).getPropertyValue('--per-row'), 10) || 1;
         target.style.gridRow = String(Math.floor(cards.indexOf(target) / columns) + 1);
         next.panel.querySelectorAll('img[loading="lazy"]').forEach((img) => (img.loading = 'eager'));
         next.panel.hidden = false;
@@ -561,6 +561,7 @@
   .ssilo__brands {
     --ssilo-gap: 10px;
     --ssilo-cols: 2;
+    --per-row: var(--ssilo-cols);
     --ssilo-ratio: 1;
     display: grid;
     grid-template-columns: repeat(var(--ssilo-cols), minmax(0, 1fr));
@@ -588,7 +589,7 @@
 
   /* One brand open: it comes forward, the others step back */
   .ssilo__brands.has-open > .ssilo__brand:not(.is-open):not(.is-next) {
-    opacity: 0.16;
+    opacity: 0.07;
   }
 
   .ssilo__brand.is-open {
@@ -736,14 +737,26 @@
 
   /* A row per silo: small image and name on one line */
   /* A line per silo on the white panel: the name on the left, its image on the right */
+  /* Columns: name (as wide as the longest), image, then the plus at the far end. Each row uses the
+     list's columns (subgrid), so every image lines up just after the longest name. */
   .ssilo__silos {
+    --per-row: 1;
     display: grid;
+    grid-template-columns: minmax(0, max-content) max-content minmax(24px, 1fr);
+    column-gap: 14px;
   }
 
   .ssilo__silo {
     position: relative;
+    display: grid;
+    grid-column: span 3;
+    grid-template-columns: subgrid;
     background: #ffffff;
     transform-origin: 50% 0;
+  }
+
+  .ssilo__silo > .ssilo__panel {
+    grid-column: 1 / -1;
   }
 
   /* An open silo takes its row at full width (desktop has two a row) */
@@ -752,14 +765,14 @@
   }
 
   .ssilo__silos.has-open > .ssilo__silo:not(.is-open):not(.is-next) > .ssilo__row {
-    opacity: 0.16;
+    opacity: 0.07;
   }
 
   .ssilo__row {
-    display: flex;
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
     align-items: center;
-    gap: 12px;
-    width: 100%;
     min-height: 0;
     margin: 0;
     padding: 3px 2px;
@@ -776,6 +789,8 @@
 
   /* A silo's plus is just the icon, no circle */
   .ssilo__row .ssilo__plus {
+    grid-column: -2 / -1;
+    justify-self: end;
     width: 24px;
     height: 24px;
     background: none;
@@ -785,9 +800,9 @@
   .ssilo__thumb {
     display: block;
     flex: none;
-    width: 72px;
-    height: 44px;
-    border-radius: 8px;
+    width: 60px;
+    height: 36px;
+    border-radius: 7px;
     overflow: hidden;
   }
 
@@ -809,11 +824,13 @@
     min-width: 0;
   }
 
+  /* Names as tall as their images */
   .ssilo__row-name {
-    font-size: 1.0625rem;
+    font-size: 2.125rem;
     font-weight: 750;
-    line-height: 1.15;
-    letter-spacing: -0.015em;
+    line-height: 1.06;
+    letter-spacing: -0.03em;
+    overflow-wrap: break-word;
   }
 
   .ssilo__row-sub {
@@ -831,19 +848,22 @@
   /* Generations: plain lines, the name on the left and a picture on the right */
   .ssilo__gens {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 14px;
+    grid-template-columns: minmax(0, max-content) max-content minmax(0, 1fr);
+    column-gap: 12px;
   }
 
   .ssilo__gens > li {
+    display: grid;
+    grid-column: span 3;
+    grid-template-columns: subgrid;
     transform-origin: 50% 0;
   }
 
   .ssilo__gen {
-    display: flex;
+    display: grid;
+    grid-column: 1 / 3;
+    grid-template-columns: subgrid;
     align-items: center;
-    justify-content: space-between;
-    gap: 8px;
     height: 100%;
     min-height: 0;
     padding: 3px 2px;
@@ -854,15 +874,15 @@
 
   .ssilo__gen-pic {
     display: block;
-    flex: none;
-    width: 60px;
-    height: 40px;
+    width: 52px;
+    height: 30px;
   }
 
   .ssilo__gen-name {
-    font-size: 0.9375rem;
+    font-size: 1.75rem;
     font-weight: 700;
-    line-height: 1.15;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
     overflow-wrap: break-word;
   }
 
@@ -913,11 +933,11 @@
     }
 
     .ssilo__brands.has-open > .ssilo__brand:not(.is-open):not(.is-next):hover {
-      opacity: 0.5;
+      opacity: 0.4;
     }
 
     .ssilo__silos.has-open > .ssilo__silo:not(.is-open):not(.is-next) > .ssilo__row:hover {
-      opacity: 0.5;
+      opacity: 0.4;
     }
 
     .ssilo__row:hover .ssilo__row-name {
@@ -963,6 +983,7 @@
   @media screen and (min-width: 990px) {
     .ssilo__brands {
       --ssilo-cols: 4;
+      --per-row: 4;
       --ssilo-ratio: 0.72;
     }
   }
@@ -985,24 +1006,27 @@
     }
 
     /* Desktop: larger text in the panels */
+    /* Two silos a row, each column lined up on its own longest name */
     .ssilo__silos {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      column-gap: 40px;
+      --per-row: 2;
+      grid-template-columns: repeat(2, minmax(0, max-content) max-content minmax(40px, 1fr));
+      column-gap: 20px;
     }
 
     .ssilo__row {
-      gap: 20px;
       padding-block: 4px;
     }
 
     .ssilo__row-name {
-      font-size: 2.25rem;
-      letter-spacing: -0.025em;
+      font-size: 3.75rem;
+      line-height: 1;
+      letter-spacing: -0.035em;
     }
 
     .ssilo__gen-name {
-      font-size: 1.5rem;
-      letter-spacing: -0.015em;
+      font-size: 2.75rem;
+      line-height: 1;
+      letter-spacing: -0.03em;
     }
 
     .ssilo__row-sub {
@@ -1025,12 +1049,13 @@
     }
 
     .ssilo__gen-pic {
-      width: 84px;
-      height: 50px;
+      width: 76px;
+      height: 44px;
     }
 
+    /* Three generations a row, each column lined up on its own longest name */
     .ssilo__gens {
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      grid-template-columns: repeat(3, minmax(0, max-content) max-content minmax(24px, 1fr));
     }
 
     .ssilo__row .ssilo__plus {
@@ -1044,7 +1069,7 @@
     }
 
     .ssilo__gens {
-      column-gap: 32px;
+      column-gap: 16px;
     }
   }
 
