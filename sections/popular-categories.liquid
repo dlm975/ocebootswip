@@ -1,7 +1,8 @@
 {%- comment -%}
-  Popular categories: a small label over a stack of big bold category names, each a link.
-  Pointing at one (desktop) turns it to outline lettering and slides a round arrow button in
-  beside it. Phones: big tappable names. Simple state changes, so CSS transitions (house timing).
+  Popular categories: a small label over a stack of big category names in the site's heading
+  style, each a link, sized so the whole list fits in one screen's height. Pointing at one
+  (desktop) steps the others back and slides a round iridescent arrow in beside it. Phones: big
+  tappable names. Simple state changes, so CSS transitions (house timing).
 {%- endcomment -%}
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
@@ -16,6 +17,7 @@
   <ul
     class="popcat__list"
     role="list"
+    style="--popcat-count: {{ section.blocks.size | at_least: 1 }};"
   >
     {%- for block in section.blocks -%}
       {%- if block.settings.title != blank -%}
@@ -39,12 +41,6 @@
 </div>
 
 {% stylesheet %}
-  /* Capitals here, like a poster (outranks the site-wide mixed case in snippets/brand-typography) */
-  .popcat .popcat__label,
-  .popcat .popcat__link .popcat__name {
-    text-transform: uppercase !important;
-  }
-
   .popcat__label {
     margin: 0 0 clamp(14px, 2.5vw, 28px);
     font-size: 0.8125rem;
@@ -69,27 +65,41 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* The site's heading style, as big as the screen allows: never wider than the page allows,
+     and the whole list (label and spacing included) within one screen's height */
   .popcat__name {
-    font-size: clamp(2.25rem, 9vw, 7rem);
-    font-weight: 800;
+    font-size: min(
+      clamp(2.25rem, 9vw, 7rem),
+      calc((100vh - 190px) / (var(--popcat-count) * 1.14))
+    );
+    font-size: min(
+      clamp(2.25rem, 9vw, 7rem),
+      calc((100svh - 190px) / (var(--popcat-count) * 1.14))
+    );
+    font-weight: 750;
+    font-variation-settings: 'opsz' 32;
     line-height: 1.04;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.035em;
     color: currentColor;
-    -webkit-text-stroke: 1.5px currentColor;
-    -webkit-text-fill-color: currentColor;
-    transition: -webkit-text-fill-color 0.3s cubic-bezier(0.3, 0.7, 0.3, 1);
+    transition: opacity 0.3s ease;
   }
 
-  /* The round arrow: green to lime, waiting off to the side */
+  /* The round arrow: an iridescent sheen that slowly drifts, waiting off to the side */
   .popcat__arrow {
     display: grid;
     flex: none;
     place-items: center;
-    width: clamp(40px, 4.2vw, 64px);
-    height: clamp(40px, 4.2vw, 64px);
+    width: clamp(40px, 0.62em, 72px);
+    height: clamp(40px, 0.62em, 72px);
+    font-size: min(clamp(2.25rem, 9vw, 7rem), calc((100svh - 190px) / (var(--popcat-count) * 1.14)));
     border-radius: 50%;
-    background: linear-gradient(135deg, #1fd33a, #c9f04b);
+    background:
+      radial-gradient(circle at 30% 25%, rgb(255 255 255 / 0.75), rgb(255 255 255 / 0) 45%),
+      linear-gradient(120deg, #ff9ee8, #b49bff, #7fd8ff, #9effc4, #fff3a1, #ffb3d9, #ff9ee8);
+    background-size: 100% 100%, 300% 300%;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.5), 0 6px 18px rgb(120 110 200 / 0.25);
     color: #121212;
+    animation: popcat-iris 7s linear infinite;
     opacity: 0;
     transform: translateX(-14px) scale(0.85);
     transition:
@@ -102,11 +112,16 @@
     height: 55%;
   }
 
-  /* Pointed at: the name turns to outline, the arrow slides in */
+  @keyframes popcat-iris {
+    to {
+      background-position: 0 0, 300% 0;
+    }
+  }
+
+  /* Pointed at: the others step back, the arrow slides in */
   @media (hover: hover) {
-    .popcat__link:hover .popcat__name,
-    .popcat__link:focus-visible .popcat__name {
-      -webkit-text-fill-color: transparent;
+    .popcat__list:has(.popcat__link:hover) .popcat__link:not(:hover) .popcat__name {
+      opacity: 0.18;
     }
 
     .popcat__link:hover .popcat__arrow,
@@ -116,9 +131,8 @@
     }
   }
 
-  /* Phones: a tap shows the outline for a moment */
   .popcat__link:active .popcat__name {
-    -webkit-text-fill-color: transparent;
+    opacity: 0.6;
   }
 
   .popcat__link:focus-visible {
@@ -132,15 +146,13 @@
       display: none;
     }
 
-    .popcat__name {
-      -webkit-text-stroke-width: 1px;
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .popcat__name,
     .popcat__arrow {
       transition: none;
+      animation: none;
     }
   }
 {% endstylesheet %}
