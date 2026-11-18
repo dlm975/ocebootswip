@@ -92,14 +92,12 @@
     width: clamp(40px, 0.62em, 72px);
     height: clamp(40px, 0.62em, 72px);
     font-size: min(clamp(2.25rem, 9vw, 7rem), calc((100svh - 190px) / (var(--popcat-count) * 1.14)));
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
     border-radius: 50%;
-    background:
-      radial-gradient(circle at 30% 25%, rgb(255 255 255 / 0.75), rgb(255 255 255 / 0) 45%),
-      linear-gradient(120deg, #ff9ee8, #b49bff, #7fd8ff, #9effc4, #fff3a1, #ffb3d9, #ff9ee8);
-    background-size: 100% 100%, 300% 300%;
-    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.5), 0 6px 18px rgb(120 110 200 / 0.25);
+    box-shadow: 0 6px 18px rgb(120 110 200 / 0.25);
     color: #121212;
-    animation: popcat-iris 7s linear infinite;
     opacity: 0;
     transform: translateX(-14px) scale(0.85);
     transition:
@@ -107,14 +105,38 @@
       transform 0.55s cubic-bezier(0.3, 0.7, 0.3, 1);
   }
 
+  /* The sheen: a colour wheel turning slowly (seamless: it starts and ends on the same colour),
+     with a soft highlight on top */
+  .popcat__arrow::before,
+  .popcat__arrow::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .popcat__arrow::before {
+    inset: -25%;
+    background: conic-gradient(#ff9ee8, #b49bff, #7fd8ff, #9effc4, #fff3a1, #ffb3d9, #ff9ee8);
+    filter: blur(6px);
+    animation: popcat-iris 8s linear infinite;
+  }
+
+  .popcat__arrow::after {
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 25%, rgb(255 255 255 / 0.7), rgb(255 255 255 / 0) 50%);
+  }
+
   .popcat__arrow svg {
+    position: relative;
     width: 55%;
     height: 55%;
   }
 
   @keyframes popcat-iris {
     to {
-      background-position: 0 0, 300% 0;
+      transform: rotate(1turn);
     }
   }
 
@@ -150,7 +172,8 @@
 
   @media (prefers-reduced-motion: reduce) {
     .popcat__name,
-    .popcat__arrow {
+    .popcat__arrow,
+    .popcat__arrow::before {
       transition: none;
       animation: none;
     }
