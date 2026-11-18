@@ -11,6 +11,9 @@ const DOUBLE_TAP_DELAY = 300;
 const TAP_SLOP = 10;
 // A one-finger horizontal swipe this long, on an image that isn't zoomed in, moves to the next/previous image.
 const SWIPE_DISTANCE = 50;
+// Once zoomed, the image can be pulled this many pixels past its edges (so a boot's toe or heel at
+// the very edge can be seen whole), and no further: the same as pinching on the product page.
+const EDGE_MARGIN = 24;
 
 export class DragZoomWrapper extends HTMLElement {
   #controller = new AbortController();
@@ -404,8 +407,10 @@ export class DragZoomWrapper extends HTMLElement {
     const excessWidth = Math.max(0, scaledWidth - containerWidth);
     const excessHeight = Math.max(0, scaledHeight - containerHeight);
 
-    const maxTranslateX = excessWidth / (2 * this.#scale);
-    const maxTranslateY = excessHeight / (2 * this.#scale);
+    // A little give past each edge once zoomed in, never more
+    const give = EDGE_MARGIN * clamp((this.#scale - minZoom) / 0.5, 0, 1);
+    const maxTranslateX = (excessWidth / 2 + (excessWidth > 0 ? give : 0)) / this.#scale;
+    const maxTranslateY = (excessHeight / 2 + (excessHeight > 0 ? give : 0)) / this.#scale;
 
     this.#translate.x = clamp(this.#translate.x, -maxTranslateX, maxTranslateX);
     this.#translate.y = clamp(this.#translate.y, -maxTranslateY, maxTranslateY);
