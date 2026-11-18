@@ -20,7 +20,7 @@
         "fade_color": "#ffffff",
         "fade_height": 32,
         "eyebrow": "",
-        "heading": "Sale is live",
+        "heading": "SALE IS LIVE!",
         "text": "Up to 90% off",
         "text_alignment": "left",
         "content_position": "middle",
@@ -251,6 +251,7 @@
           "type": "silo",
           "settings": {
             "title": "Nike Mercurial",
+            "collection": "nike-mercurial",
             "generations": [
               "nike-mercurial-vapor-17",
               "nike-mercurial-vapor-16",
@@ -275,14 +276,14 @@
               "nike-mercurial-superfly-5",
               "nike-mercurial-superfly-4",
               "nike-mercurial-superfly-3"
-            ],
-            "collection": "nike-mercurial"
+            ]
           }
         },
         "silo_02": {
           "type": "silo",
           "settings": {
             "title": "Nike Phantom",
+            "collection": "phantom-1",
             "generations": [
               "nike-phantom-6",
               "nike-phantom-luna",
@@ -293,14 +294,14 @@
               "nike-phantom-vision-2",
               "nike-phantom-vision",
               "nike-phantom-venom"
-            ],
-            "collection": "phantom-1"
+            ]
           }
         },
         "silo_03": {
           "type": "silo",
           "settings": {
             "title": "Nike Tiempo",
+            "collection": "tiempo-1",
             "generations": [
               "nike-tiempo-legend-10",
               "nike-tiempo-maestro",
@@ -311,62 +312,61 @@
               "nike-tiempo-legend-5",
               "nike-tiempo-legend-4",
               "nike-tiempo-legend-3"
-            ],
-            "collection": "tiempo-1"
+            ]
           }
         },
         "silo_07": {
           "type": "silo",
           "settings": {
             "title": "Nike Hypervenom",
+            "collection": "hypervenom-1",
             "generations": [
               "nike-hypervenom-phantom-3",
               "nike-hypervenom-phantom-2",
               "nike-hypervenom-phantom-1"
-            ],
-            "collection": "hypervenom-1"
+            ]
           }
         },
         "silo_08": {
           "type": "silo",
           "settings": {
             "title": "Nike Magista",
+            "collection": "magista-1",
             "generations": [
               "nike-magista-obra-2",
               "nike-magista-opus-2",
               "nike-magista-obra-1",
               "nike-magista-opus-1"
-            ],
-            "collection": "magista-1"
+            ]
           }
         },
         "silo_11": {
           "type": "silo",
           "settings": {
             "title": "Nike CTR360",
+            "collection": "ctr360-1",
             "generations": [
               "nike-ctr360-maestri-3",
               "nike-ctr360-maestri-2",
               "nike-ctr360-maestri-1"
-            ],
-            "collection": "ctr360-1"
+            ]
           }
         },
         "silo_12": {
           "type": "silo",
           "settings": {
             "title": "Nike Total 90",
+            "collection": "total-91",
             "generations": [
               "nike-total-90-laser-4",
               "nike-total-90-laser-3"
-            ],
-            "collection": "total-91"
+            ]
           }
         },
         "brand_adidas": {
           "type": "brand",
           "settings": {
-            "title": "adidas",
+            "title": "Adidas",
             "collection": "adidas"
           }
         },
@@ -374,19 +374,20 @@
           "type": "silo",
           "settings": {
             "title": "adidas Predator",
+            "collection": "predator-1",
             "generations": [
               "adidas-predator-ft",
               "adidas-predator-accuracy",
               "adidas-predator-instinct",
               "adidas-predator-lz"
-            ],
-            "collection": "predator-1"
+            ]
           }
         },
         "silo_05": {
           "type": "silo",
           "settings": {
             "title": "adidas X",
+            "collection": "x",
             "generations": [
               "adidas-x-crazyfast",
               "adidas-x-speedportal",
@@ -397,46 +398,45 @@
               "adidas-x-17",
               "adidas-x-16",
               "adidas-x-15"
-            ],
-            "collection": "x"
+            ]
           }
         },
         "silo_06": {
           "type": "silo",
           "settings": {
             "title": "adidas F50",
+            "collection": "f50",
             "generations": [
               "adidas-f50-elite",
               "adidas-f50-adizero",
               "adidas-f50-itunit",
               "adidas-f50-hyperfast"
-            ],
-            "collection": "f50"
+            ]
           }
         },
         "silo_09": {
           "type": "silo",
           "settings": {
             "title": "adidas Copa",
+            "collection": "copa",
             "generations": [
               "adidas-copa-pure",
               "adidas-copa-sense",
               "adidas-copa-20",
               "adidas-copa-19"
-            ],
-            "collection": "copa"
+            ]
           }
         },
         "silo_10": {
           "type": "silo",
           "settings": {
             "title": "adidas Nemeziz",
+            "collection": "nemeziz",
             "generations": [
               "adidas-nemeziz-19",
               "adidas-nemeziz-18",
               "adidas-nemeziz-17"
-            ],
-            "collection": "nemeziz"
+            ]
           }
         },
         "silo_16": {
@@ -455,6 +455,7 @@
           "type": "silo",
           "settings": {
             "title": "adidas Ace",
+            "collection": "",
             "generations": [
               "adidas-ace-17",
               "adidas-ace-16",
@@ -706,6 +707,7 @@
         "cutout_hEdGq4",
         "cutout_Gbz8K7"
       ],
+      "disabled": true,
       "name": "Collection Cutout Grid",
       "settings": {
         "heading": "",
@@ -715,8 +717,7 @@
         "image_ratio": "1/1",
         "padding-block-start": 0,
         "padding-block-end": 0
-      },
-      "disabled": true
+      }
     },
     "pro_player_wall_hhtJ4x": {
       "type": "pro-player-wall",
@@ -805,7 +806,7 @@
       "name": "Pro Player Wall",
       "settings": {
         "roster_source": "shared",
-        "heading": "Trusted by the pros",
+        "heading": "TRUSTED BY THE PROS",
         "subheading": "",
         "show_stars": true,
         "star_color": "#25d366",
