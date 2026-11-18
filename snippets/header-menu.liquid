@@ -150,12 +150,25 @@
     shows as a label beneath it on hover or focus; the menus still open as usual.
   */
   @media screen and (min-width: 990px) {
+    /* The island is drawn on the items themselves (the list keeps its full width, which the
+       overflow menu measures): a grey pill behind the icons, rounded at the two ends */
     .header-menu--dock .overflow-menu::part(list) {
-      gap: 2px;
-      width: fit-content;
-      padding: 4px;
-      border-radius: 999px;
+      gap: 0;
+    }
+
+    .header-menu--dock .menu-list__list-item:not([slot]) {
+      padding: 4px 1px;
       background: rgb(18 18 18 / 0.05);
+    }
+
+    .header-menu--dock .menu-list__list-item:not([slot]):first-child {
+      padding-inline-start: 4px;
+      border-radius: 999px 0 0 999px;
+    }
+
+    .header-menu--dock .menu-list__list-item:not([slot]):nth-last-child(2) {
+      padding-inline-end: 4px;
+      border-radius: 0 999px 999px 0;
     }
 
     .header-menu--dock .menu-list__link--icon {
