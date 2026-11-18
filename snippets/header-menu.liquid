@@ -167,13 +167,17 @@
         else headerMenu.deactivate?.({ target: li });
         driving = false;
       };
+      // (listening on the document, so it runs before the theme's own listener on its menu element;
+      // events from content moving under the pointer may not say 'mouse': hold back all but touch/pen)
       ['pointerenter', 'pointerleave'].forEach((type) =>
-        dock.addEventListener(
+        document.addEventListener(
           type,
           (event) => {
-            // (events from content moving under the pointer may not say 'mouse': hold back all but touch/pen)
             if (driving || event.pointerType === 'touch' || event.pointerType === 'pen') return;
-            if (event.target instanceof Element && event.target.matches('.menu-list__list-item')) event.stopImmediatePropagation();
+            const target = event.target;
+            if (target instanceof Element && target.matches('.menu-list__list-item') && dock.contains(target)) {
+              event.stopImmediatePropagation();
+            }
           },
           true
         )
@@ -224,6 +228,13 @@
       };
       measure();
       window.addEventListener('resize', measure, { passive: true });
+
+      // The tray behind the dock row grows down to hold an open dropdown: follow the theme's height
+      if (headerMenu && row) {
+        const follow = () => row.style.setProperty('--dock-tray', headerMenu.style.getPropertyValue('--submenu-height') || '0px');
+        new MutationObserver(follow).observe(headerMenu, { attributes: true, attributeFilter: ['style'] });
+        follow();
+      }
 
       dock.addEventListener('pointerleave', (event) => {
         if (event.pointerType !== 'mouse') return;
@@ -312,16 +323,42 @@
       dropdown read as one big white shape. Its edges (--dock-left / --dock-right) are the dock's
       left edge and the currency tab's right edge, measured by the script.
     */
+    /*
+      One white tray behind the dock row and any dropdown: the row's height plus the open dropdown's
+      (--dock-tray, following the theme's --submenu-height), rounded below at all times. Moving to
+      an item without a dropdown, the tray pulls up into itself, its rounded corners riding up.
+    */
     #header-component .header__row--bottom:has(.header-menu--dock)::before {
       content: '';
       position: absolute;
-      inset: 0 var(--dock-right, 32px) 0 var(--dock-left, 32px);
+      top: 0;
+      left: var(--dock-left, 32px);
+      right: var(--dock-right, 32px);
+      height: calc(100% + var(--dock-tray, 0px));
       z-index: 0;
       border-radius: 0 0 22px 22px;
       background: #ffffff;
+      box-shadow: 0 22px 34px -22px rgb(0 0 0 / 0.18);
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.2s ease, border-radius 0.2s ease;
+      transition:
+        height 0.4s cubic-bezier(0.33, 1, 0.68, 1),
+        opacity 0.2s ease;
+    }
+
+    /* The dropdowns ride on the tray: their own backdrop and panel colour step aside, and they
+       open at the tray's pace */
+    header-menu:has(.header-menu--dock) {
+      --submenu-animation-speed: 400ms !important;
+    }
+
+    .header-menu--dock .overflow-menu::after {
+      display: none;
+    }
+
+    #header-component .header__row--bottom:has(.header-menu--dock) .menu-list__submenu {
+      background-color: transparent !important;
+      box-shadow: none !important;
     }
 
     /* Any item pointed at extends the dock to the currency tab; an item without a dropdown gives
@@ -331,9 +368,6 @@
       opacity: 1;
     }
 
-    #header-component .header__row--bottom:has(.header-menu--dock .menu-list__link[aria-haspopup][aria-expanded='true'])::before {
-      border-radius: 0;
-    }
 
     #header-component .header__row--bottom:has(.header-menu--dock) .menu-list__submenu,
     .header-menu--dock .overflow-menu::after {
