@@ -104,7 +104,7 @@
                           {{
                             silo_image
                             | image_url: width: 160
-                            | image_tag: widths: '100, 160', sizes: '52px', loading: 'lazy', class: 'ssilo__thumb-image', alt: ''
+                            | image_tag: widths: '100, 160', sizes: '52px', loading: 'eager', fetchpriority: 'low', class: 'ssilo__thumb-image', alt: ''
                           }}
                         {%- endif -%}
                       </span>
@@ -268,6 +268,15 @@
         else this.openItem(item);
       });
 
+      // Start loading a panel's images as soon as its opener is pointed at or pressed
+      const warm = (event) => {
+        const control = event.target.closest && event.target.closest('[data-toggle]');
+        const panel = control && this.itemOf(control.dataset.toggle)?.querySelector(':scope > [data-panel]');
+        if (panel) panel.querySelectorAll('img[loading="lazy"]').forEach((img) => (img.loading = 'eager'));
+      };
+      this.addEventListener('pointerover', warm, { passive: true });
+      this.addEventListener('pointerdown', warm, { passive: true });
+
       // Theme editor: selecting a Brand or Silo block opens it (and its brand)
       this.onBlockSelect = (event) => {
         const target = event.target.closest && event.target.closest('[data-item]');
@@ -330,8 +339,10 @@
       let headTop = head.getBoundingClientRect().top + window.scrollY;
       if (previous && previous !== item) {
         const other = this.parts(previous).panel;
-        const above = previous.compareDocumentPosition(item) & Node.DOCUMENT_POSITION_FOLLOWING;
-        if (above && !other.hidden) headTop -= other.getBoundingClientRect().height;
+        // Only a panel that is above this header moves it (on desktop the cards sit two a row)
+        if (!other.hidden && other.getBoundingClientRect().top < head.getBoundingClientRect().top) {
+          headTop -= other.getBoundingClientRect().height;
+        }
         this.close(previous, false);
       }
 
