@@ -239,15 +239,16 @@
     toggle(id) {
       const opening = this.open !== id;
       const previous = this.open;
+      const name = this.names.find((n) => n.dataset.siloName === id);
+      // Where the tapped title is now, before anything above it closes
+      const titleTop = name.getBoundingClientRect().top;
       if (previous) this.collapse(previous, opening);
       if (!opening) {
         this.open = null;
         return;
       }
       this.open = id;
-      const name = this.names.find((n) => n.dataset.siloName === id);
       const panel = this.panels.get(id);
-      const titleTop = name.getBoundingClientRect().top;
       name.classList.add('is-active');
       name.setAttribute('aria-expanded', 'true');
       panel.getAnimations().forEach((a) => a.cancel());
