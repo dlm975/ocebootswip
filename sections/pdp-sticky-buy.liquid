@@ -103,7 +103,14 @@
           aria-haspopup="listbox"
           aria-expanded="false"
         >
-          <span class="psb__pill-label" data-psb-label>{{ size_label | split: ' - ' | first }}</span>
+          {%- liquid
+            assign label_parts = size_label | split: ' - '
+            assign label_rest = label_parts | slice: 1, 4 | join: ' · '
+          -%}
+          <span class="psb__pill-label" data-psb-label>
+            <span class="psb__pill-main">{{ label_parts | first }}</span>
+            {%- if label_rest != blank -%}<span class="psb__pill-sub">{{ label_rest }}</span>{%- endif -%}
+          </span>
           {%- render 'gicon', name: 'keyboard_arrow_down', class: 'psb__chev', size: 13 -%}
         </button>
       {%- elsif show_size -%}
@@ -112,7 +119,14 @@
           chevron and nothing to open.
         {%- endcomment -%}
         <span class="psb__pill psb__pill--static">
-          <span class="psb__pill-label" data-psb-label>{{ size_label | split: ' - ' | first }}</span>
+          {%- liquid
+            assign label_parts = size_label | split: ' - '
+            assign label_rest = label_parts | slice: 1, 4 | join: ' · '
+          -%}
+          <span class="psb__pill-label" data-psb-label>
+            <span class="psb__pill-main">{{ label_parts | first }}</span>
+            {%- if label_rest != blank -%}<span class="psb__pill-sub">{{ label_rest }}</span>{%- endif -%}
+          </span>
         </span>
       {%- endif -%}
 
@@ -265,7 +279,7 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    height: 42px;
+    height: 44px;
     margin-block-end: 3px;
     padding: 0 12px 0 14px;
     border: 1px solid #d4d4d8;
@@ -302,11 +316,27 @@
     pointer-events: none;
   }
 
-  /* Just the main size ("US 10.5"); the sheet shows the full US · UK · EU */
+  /* The full size on two lines: the US size in bold, UK · EU smaller beneath */
   .psb__pill-label {
-    overflow: hidden;
-    font-weight: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+    gap: 2px;
+    line-height: 1;
+  }
+
+  .psb__pill-main {
     font-size: 0.9375rem;
+    font-weight: 700;
+  }
+
+  .psb__pill-sub {
+    overflow: hidden;
+    max-width: 100%;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: rgb(18 18 18 / 0.55);
     text-overflow: ellipsis;
   }
 
@@ -586,6 +616,21 @@
     var sheet = root.querySelector('[data-psb-sheet]');
     var scrim = root.querySelector('[data-psb-scrim]');
     var label = root.querySelector('[data-psb-label]');
+    // The full size on two lines: "US 10.5" in bold, "UK 9.5 · EU 44.5" beneath
+    function setLabel(el, text) {
+      var parts = String(text).split(' - ');
+      el.replaceChildren();
+      var main = document.createElement('span');
+      main.className = 'psb__pill-main';
+      main.textContent = parts[0];
+      el.append(main);
+      if (parts.length > 1) {
+        var sub = document.createElement('span');
+        sub.className = 'psb__pill-sub';
+        sub.textContent = parts.slice(1).join(' · ');
+        el.append(sub);
+      }
+    }
     var variantInput = root.querySelector('input[name="id"]');
     var atc = root.querySelector('.psb__atc');
     var opts = [].slice.call(root.querySelectorAll('[data-psb-opt]'));
@@ -664,7 +709,7 @@
        on the page (or its option value has since changed). */
     function applyLocally(id, text) {
       if (variantInput) variantInput.value = id;
-      if (label && text) label.textContent = String(text).split(' - ')[0];
+      if (label && text) setLabel(label, text);
 
       opts.forEach(function (o) {
         o.setAttribute('aria-selected', o.dataset.variantId === String(id) ? 'true' : 'false');
@@ -728,7 +773,7 @@
         return o.dataset.label === text;
       })[0];
       if (match) applyLocally(match.dataset.variantId, text);
-      else if (label && text) label.textContent = String(text).split(' - ')[0];
+      else if (label && text) setLabel(label, text);
     });
 
     /* ── Keep in step with the main picker ── */
