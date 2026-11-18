@@ -299,7 +299,8 @@
       opacity: 1;
     }
 
-    #header-component .header__row--bottom:has(.header-menu--dock) .menu-list__submenu {
+    #header-component .header__row--bottom:has(.header-menu--dock) .menu-list__submenu,
+    .header-menu--dock .overflow-menu::after {
       left: var(--dock-left, 32px) !important;
       right: var(--dock-right, 32px) !important;
       width: auto !important;
