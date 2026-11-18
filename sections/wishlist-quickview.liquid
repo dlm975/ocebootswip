@@ -113,7 +113,7 @@
             class="wlq__was"
             data-wlq-was
           >
-            {%- render 'was-price', cents: shown_variant.compare_at_price -%}
+            {%- render 'was-price', cents: shown_variant.compare_at_price, with_currency: settings.currency_code_enabled_product_cards -%}
           </s>
         {%- else -%}
           <s
@@ -198,7 +198,7 @@
             data-wlq-variant="{{ variant.id }}"
             data-price="{{ variant.price | money_with_currency | escape }}"
             {% if variant.compare_at_price > variant.price %}
-              data-was="{% render 'was-price', cents: variant.compare_at_price %}"
+              data-was="{% render 'was-price', cents: variant.compare_at_price, with_currency: settings.currency_code_enabled_product_cards %}"
             {% endif %}
             data-condition="{{ variant_condition | escape }}"
             data-full="{{ size_value | escape }}"
