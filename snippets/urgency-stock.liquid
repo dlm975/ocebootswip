@@ -26,7 +26,7 @@
     {% if style != blank %}style="{{ style }}"{% endif %}
     {{ attributes }}
   >
-    <span class="urgency-dot urgency-dot--{{ dot }} oce-foil-fill"></span>
+    <span class="urgency-dot urgency-dot--{{ dot }}"></span>
     <span class="urgency-text">
       {% if show_urgency == false or inventory_quantity == 1 %}
         Only 1 left in stock!
@@ -38,7 +38,7 @@
 {% endif %}
 
 {% stylesheet %}
-  /* The site's newer look: bold ink text and a small holographic dot with a soft, slow pulse */
+  /* Orange: bold deep-orange text and an orange dot with a soft, slow pulse */
   .product-urgency-stock {
     display: flex;
     align-items: center;
@@ -55,7 +55,8 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-size: 60px 30px;
+    background: #f97316;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.45);
   }
 
   .urgency-dot::after {
@@ -63,17 +64,17 @@
     position: absolute;
     inset: -1px;
     border-radius: inherit;
-    box-shadow: 0 0 0 0 rgb(140 110 230 / 0.45);
+    box-shadow: 0 0 0 0 rgb(249 115 22 / 0.45);
     animation: urgency-pulse 2.2s cubic-bezier(0.3, 0.7, 0.3, 1) infinite;
   }
 
   @keyframes urgency-pulse {
     0% {
-      box-shadow: 0 0 0 0 rgb(140 110 230 / 0.5);
+      box-shadow: 0 0 0 0 rgb(249 115 22 / 0.5);
     }
     70%,
     100% {
-      box-shadow: 0 0 0 8px rgb(140 110 230 / 0);
+      box-shadow: 0 0 0 8px rgb(249 115 22 / 0);
     }
   }
 
@@ -84,6 +85,6 @@
   }
 
   .urgency-text {
-    color: #121212;
+    color: #c2410c;
   }
 {% endstylesheet %}
