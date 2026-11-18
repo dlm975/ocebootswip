@@ -95,12 +95,6 @@
                     {%- capture silo_face -%}
                       <span class="ssilo__row-text">
                         <span class="ssilo__row-name">{{ silo_label | escape }}</span>
-                        <span class="ssilo__row-sub">
-                          {%- if shown == 0 and silo.settings.collection != blank -%}
-                            {{ silo.settings.collection.products_count }}
-                            {{ silo.settings.collection.products_count | pluralize: 'pair', 'pairs' }}
-                          {%- endif -%}
-                        </span>
                       </span>
                       <span class="ssilo__thumb">
                         {%- if silo_image -%}
@@ -147,10 +141,6 @@
                                     <a class="ssilo__gen" href="{{ generation.url }}">
                                       <span class="ssilo__row-text">
                                         <span class="ssilo__gen-name">{{ label | escape }}</span>
-                                        <span class="ssilo__row-sub">
-                                          {{- generation.products_count }}
-                                          {{ generation.products_count | pluralize: 'pair', 'pairs' -}}
-                                        </span>
                                       </span>
                                       <span class="ssilo__gen-pic">
                                         {%- if generation.featured_image -%}
