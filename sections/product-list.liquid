@@ -49,6 +49,7 @@
     {{ styles }}
   "
 >
+  {%- if section.settings.boxed -%}<div class="plist-box">{%- endif -%}
   <div class="section-resource-list__header">
     {%- content_for 'block', type: '_product-list-content', id: 'static-header' -%}
   </div>
@@ -153,9 +154,40 @@
   >
     {%- content_for 'blocks' -%}
   </div>
+  {%- if section.settings.boxed -%}</div>{%- endif -%}
 </div>
 
 {% stylesheet %}
+  /* In a container: a white rounded card holding the heading, the products and the link below */
+  .plist-box {
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    gap: max(var(--gap, 0px), 16px);
+    min-width: 0;
+    padding: 16px 12px 20px;
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgb(18 18 18 / 0.06), 0 8px 24px rgb(18 18 18 / 0.08);
+  }
+
+  .plist-box > * {
+    min-width: 0;
+  }
+
+  @media screen and (min-width: 750px) {
+    .plist-box {
+      padding: 28px 28px 32px;
+      border-radius: 24px;
+    }
+  }
+
+  /* The link below the products: centred, with room above */
+  .plist-box .section-resource-list__content {
+    align-items: center;
+    padding-block-start: 8px;
+  }
+
   /* Four a row on phones: compact cards, so names and prices fit their narrow column */
   @media screen and (max-width: 749px) {
     .plist--m4 .resource-list {
@@ -357,6 +389,12 @@
       "id": "mobile_view_all_card",
       "label": "Show a View All card after the mobile limit",
       "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "boxed",
+      "label": "Show in a container",
+      "default": false
     },
     {
       "type": "range",
