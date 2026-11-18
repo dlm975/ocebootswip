@@ -4323,7 +4323,7 @@ html.wlq-open {
   }
 
   :is(.product-form-buttons .add-to-cart-button, .psb .psb__atc, .wlq__add, .wl-card__buy, .pa__add, .cart-recs__add):hover:not(:disabled, [disabled], [aria-disabled='true'])::after {
-    animation: oce-face-glint-once 0.7s cubic-bezier(0.45, 0, 0.25, 1) 1 both;
+    animation: oce-face-glint-once 1.8s cubic-bezier(0.4, 0, 0.2, 1) 1 both;
   }
 }
 
