@@ -11,6 +11,12 @@
 const MAX_SCALE = 4;
 const EDGE_MARGIN = 24; // px of give past the photo's edges once zoomed
 const EASE = 'cubic-bezier(0.3, 0.7, 0.3, 1)';
+// Zoom builds more gently than the fingers spread (1 = exactly with them)
+const SENSITIVITY = 0.8;
+// Moving the zoomed photo: it travels this share of the finger's movement, for calmer control
+const PAN_SPEED = 0.75;
+// While a finger is down the photo glides a touch behind it, smoothing out jitter
+const FOLLOW = 'transform 0.16s cubic-bezier(0.25, 0.8, 0.35, 1)';
 
 const distance = (a, b) => Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
 const midpoint = (a, b) => ({ x: (a.clientX + b.clientX) / 2, y: (a.clientY + b.clientY) / 2 });
@@ -27,7 +33,7 @@ function setUp(gallery) {
 
   const apply = (state, animate) => {
     const { target, scale, x, y } = state;
-    target.style.transition = animate ? `transform 0.45s ${EASE}` : 'none';
+    target.style.transition = animate ? `transform 0.55s ${EASE}` : FOLLOW;
     target.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
   };
 
@@ -79,8 +85,12 @@ function setUp(gallery) {
       const [a, b] = event.touches;
       const { box, startDistance, startMid, startScale, startX, startY } = active;
       const mid = midpoint(a, b);
-      const now = { x: mid.x - box.left, y: mid.y - box.top };
-      const scale = clamp((startScale * distance(a, b)) / startDistance, 1, MAX_SCALE);
+      // Both fingers moving together move the photo, a little slower than they travel
+      const now = {
+        x: startMid.x + (mid.x - box.left - startMid.x) * PAN_SPEED,
+        y: startMid.y + (mid.y - box.top - startMid.y) * PAN_SPEED,
+      };
+      const scale = clamp(startScale * Math.pow(distance(a, b) / startDistance, SENSITIVITY), 1, MAX_SCALE);
       // The point of the photo first held between the fingers stays between them
       const px = (startMid.x - startX) / startScale;
       const py = (startMid.y - startY) / startScale;
@@ -89,8 +99,8 @@ function setUp(gallery) {
       active.y = now.y - py * scale;
     } else if (event.touches.length === 1 && active.mode === 'pan') {
       const touch = event.touches[0];
-      active.x = active.startX + (touch.clientX - active.panStart.x);
-      active.y = active.startY + (touch.clientY - active.panStart.y);
+      active.x = active.startX + (touch.clientX - active.panStart.x) * PAN_SPEED;
+      active.y = active.startY + (touch.clientY - active.panStart.y) * PAN_SPEED;
     } else {
       return;
     }
@@ -125,7 +135,7 @@ function setUp(gallery) {
       state.target.style.removeProperty('transform-origin');
       state.slide.classList.remove('is-pinching');
     };
-    setTimeout(done, 480);
+    setTimeout(done, 580);
     // The lift of the last finger isn't a tap: don't open the full-screen view
     setTimeout(() => (suppressClick = false), 400);
   };

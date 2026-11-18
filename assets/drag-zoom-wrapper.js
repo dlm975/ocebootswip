@@ -7,6 +7,10 @@ const DEFAULT_ZOOM = 1;
 // Double-tap toggles between fitted and this zoom level.
 const DOUBLE_TAP_ZOOM = 2.5;
 const DOUBLE_TAP_DELAY = 300;
+// Zoom builds more gently than the fingers spread (1 = exactly with them)
+const PINCH_SENSITIVITY = 0.8;
+// Moving the zoomed image: it travels this share of the finger's movement, for calmer control
+const PAN_SPEED = 0.75;
 // Movement under this many pixels still counts as a tap.
 const TAP_SLOP = 10;
 // A one-finger horizontal swipe this long, on an image that isn't zoomed in, moves to the next/previous image.
@@ -172,7 +176,7 @@ export class DragZoomWrapper extends HTMLElement {
     const oldScale = this.#scale;
 
     // Calculate and apply new scale
-    const newScale = (currentDistance / this.#initialDistance) * this.#startScale;
+    const newScale = Math.pow(currentDistance / this.#initialDistance, PINCH_SENSITIVITY) * this.#startScale;
     this.#scale = clamp(newScale, MIN_ZOOM, MAX_ZOOM);
 
     // Adjust translation to keep the pinch midpoint stationary
@@ -197,8 +201,8 @@ export class DragZoomWrapper extends HTMLElement {
 
     // Two-finger movement: the image follows the fingers as they move together
     if (this.#lastMidpoint) {
-      this.#translate.x += (currentMidpoint.x - this.#lastMidpoint.x) / this.#scale;
-      this.#translate.y += (currentMidpoint.y - this.#lastMidpoint.y) / this.#scale;
+      this.#translate.x += ((currentMidpoint.x - this.#lastMidpoint.x) * PAN_SPEED) / this.#scale;
+      this.#translate.y += ((currentMidpoint.y - this.#lastMidpoint.y) * PAN_SPEED) / this.#scale;
     }
     this.#lastMidpoint = currentMidpoint;
 
@@ -221,8 +225,8 @@ export class DragZoomWrapper extends HTMLElement {
 
     // Calculate new translation
     this.#translate = {
-      x: this.#startTranslate.x + (point.x - this.#startPosition.x) / this.#scale,
-      y: this.#startTranslate.y + (point.y - this.#startPosition.y) / this.#scale,
+      x: this.#startTranslate.x + ((point.x - this.#startPosition.x) * PAN_SPEED) / this.#scale,
+      y: this.#startTranslate.y + ((point.y - this.#startPosition.y) * PAN_SPEED) / this.#scale,
     };
 
     this.#requestUpdateTransform();
@@ -321,7 +325,7 @@ export class DragZoomWrapper extends HTMLElement {
   #animate() {
     this.setAttribute('data-animating', '');
     clearTimeout(this.#animationTimer);
-    this.#animationTimer = setTimeout(() => this.removeAttribute('data-animating'), 300);
+    this.#animationTimer = setTimeout(() => this.removeAttribute("data-animating"), 480);
   }
 
   /** Back to the fitted, centred image */
