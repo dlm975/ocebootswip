@@ -10,11 +10,7 @@
     {{ block.shopify_attributes }}
   >
     {%- if block.settings.show_stars -%}
-      <span class="psr__stars" aria-hidden="true">
-        {%- for i in (1..5) -%}
-          {%- render 'gicon', name: 'star-fill' -%}
-        {%- endfor -%}
-      </span>
+      <span class="psr__stars oce-stars" aria-hidden="true"></span>
     {%- endif -%}
 
     {%- if stars_text != blank -%}
@@ -48,24 +44,16 @@
     align-self: flex-start;
   }
 
+  /* The site's newer look: stars in the holographic foil, bold text */
   .psr__stars {
-    display: inline-flex;
-    gap: 1px;
-    color: var(--psr-color, #25D366);
-    flex-shrink: 0;
-  }
-
-  .psr__stars svg {
-    width: var(--psr-size, 13px);
-    height: var(--psr-size, 13px);
-    display: block;
+    --oce-star: var(--psr-size, 13px);
   }
 
   .psr__text {
     color: var(--psr-fg, #121212);
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
+    font-size: 0.75rem;
+    font-weight: 750;
+    letter-spacing: -0.005em;
     line-height: 1.25;
   }
 
@@ -164,7 +152,7 @@
     {
       "type": "color",
       "id": "star_color",
-      "label": "Star colour",
+      "label": "Star colour (not used: the stars are holographic)",
       "default": "#25D366"
     },
     {

@@ -29,11 +29,7 @@
       --cs-size: {{ star_size }}px;
     "
   >
-    <span class="cart-stars__row" aria-hidden="true">
-      {%- for i in (1..5) -%}
-        {%- render 'gicon', name: 'star-fill' -%}
-      {%- endfor -%}
-    </span>
+    <span class="cart-stars__row oce-stars" aria-hidden="true"></span>
     <span class="cart-stars__text">{{ stars_text }}</span>
   </div>
 {%- endif -%}
@@ -53,22 +49,15 @@
     margin-block-end: 4px;
   }
 
+  /* Stars in the holographic foil (assets/base.css .oce-stars) */
   .cart-stars__row {
-    display: inline-flex;
-    gap: 2px;
-    color: var(--cs-color, #25D366);
-  }
-
-  .cart-stars__row svg {
-    width: var(--cs-size, 15px);
-    height: var(--cs-size, 15px);
-    display: block;
+    --oce-star: var(--cs-size, 15px);
   }
 
   .cart-stars__text {
     color: var(--cs-fg, #121212);
-    font-size: 0.7rem;
-    font-weight: 600;
+    font-size: 0.75rem;
+    font-weight: 750;
     letter-spacing: 0.01em;
     line-height: 1.2;
   }

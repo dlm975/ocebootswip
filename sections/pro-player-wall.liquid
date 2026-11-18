@@ -81,11 +81,7 @@
         <p class="ppw__sub">{{ section.settings.subheading }}</p>
       {%- endif -%}
       {%- if section.settings.show_stars -%}
-        <div class="ppw__stars" aria-hidden="true">
-          {%- for i in (1..5) -%}
-            {%- render 'gicon', name: 'star-fill' -%}
-          {%- endfor -%}
-        </div>
+        <div class="ppw__stars" aria-hidden="true"><span class="oce-stars"></span></div>
       {%- endif -%}
     </div>
   {%- endif -%}
@@ -209,11 +205,9 @@
     margin-top: 8px;
   }
 
-  .ppw__stars svg {
-    width: var(--ppw-star-size, 20px);
-    height: var(--ppw-star-size, 20px);
-    fill: var(--ppw-star-color, #25D366);
-    display: block;
+  /* Stars in the holographic foil (assets/base.css .oce-stars) */
+  .ppw__stars .oce-stars {
+    --oce-star: var(--ppw-star-size, 20px);
   }
 
   /* Viewport is the container: card widths resolve against it, so the
