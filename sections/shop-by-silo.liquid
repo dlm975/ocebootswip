@@ -356,6 +356,11 @@
       }
       target.classList.add('is-next');
       const { panel, inner } = this.parts(previous);
+      // Things still moving from the last choice: go straight into the move from where they are
+      if (panel.getAnimations().length || [...list.children].some((card) => card.getAnimations().length)) {
+        this.switchIn(list, target, { deferOpen: true });
+        return;
+      }
       // Still opening? Hold it where it is, so nothing drifts before the straight move
       if (panel.getAnimations().length) {
         const height = panel.getBoundingClientRect().height;
