@@ -4501,8 +4501,10 @@ html.wlq-open {
     --product-media-fit: contain;
 
     flex: none;
+    display: block;
     width: calc(100% - 32px) !important;
     height: calc(100% - 32px) !important;
+    margin: 16px auto !important;
     object-fit: contain !important;
   }
 }
