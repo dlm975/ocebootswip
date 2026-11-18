@@ -363,7 +363,7 @@
   }
 
   /* Scoped under .size-grid so these win over the dropdown item rules (.pill-option__item ...) further down.
-     Matches the wishlist's mini product page: rounded off-white keys with a grey outline, slightly
+     Matches the wishlist mini product page: rounded off-white keys with a grey outline, slightly
      raised on a grey edge; the chosen size is pressed in with a dark outline. */
   .size-grid .size-grid__item {
     display: flex;
@@ -378,8 +378,8 @@
     background: linear-gradient(180deg, #ffffff 0%, #f7f7f5 100%);
     box-shadow:
       inset 0 1px 0 #ffffff,
-      0 3px 0 #d4d4d8,
-      0 4px 8px rgb(18 18 18 / 0.06);
+      2px 3px 0 #d4d4d8,
+      2px 4px 8px rgb(18 18 18 / 0.06);
     color: #121212;
     font: inherit;
     font-weight: 650;
@@ -387,9 +387,6 @@
     text-align: center;
     white-space: normal;
     cursor: pointer;
-    /* Leaning back very slightly, like a keycap */
-    transform: perspective(420px) rotateX(7deg);
-    transform-origin: 50% 100%;
     transition:
       border-color 0.2s ease,
       box-shadow 0.2s cubic-bezier(0.3, 0.7, 0.3, 1),
@@ -406,21 +403,21 @@
   @media (hover: hover) {
     .size-grid .size-grid__item:hover:not([disabled]) {
       border-color: #b8b8bf;
-      transform: translateY(-1px) perspective(420px) rotateX(7deg);
+      transform: translate(-0.5px, -1px);
       box-shadow:
         inset 0 1px 0 #ffffff,
-        0 4px 0 #c9c9cf,
-        0 6px 12px rgb(18 18 18 / 0.08);
+        2.5px 4px 0 #c9c9cf,
+        2.5px 6px 12px rgb(18 18 18 / 0.08);
     }
   }
 
   .size-grid .size-grid__item:active:not([disabled]),
   .size-grid[data-chosen] .size-grid__item.pill-option__item--selected,
   .size-grid[data-chosen] .size-grid__item.pill-option__item--selected:hover {
-    transform: translateY(2px) perspective(420px) rotateX(7deg);
+    transform: translate(1.5px, 2px);
     box-shadow:
-      inset 0 2px 3px rgb(18 18 18 / 0.08),
-      0 1px 0 #d4d4d8;
+      inset 1px 2px 3px rgb(18 18 18 / 0.08),
+      0.5px 1px 0 #d4d4d8;
   }
 
   .size-grid[data-chosen] .size-grid__item.pill-option__item--selected,
@@ -452,7 +449,6 @@
     border-color: #e4e4e7;
     box-shadow: none;
     text-decoration: line-through;
-    transform: none;
   }
 
   @media (prefers-reduced-motion: reduce) {
