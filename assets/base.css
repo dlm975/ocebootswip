@@ -4488,3 +4488,21 @@ html.wlq-open {
   z-index: 3;
   overflow: hidden;
 }
+
+/* Full-screen photo view (phones): the whole photo fitted inside the screen with a margin all round,
+   never cropped at the sides; assets/drag-zoom-wrapper.js measures this box for its zoom limits */
+@media screen and (max-width: 749px) {
+  .dialog-zoomed-gallery .product-media__drag-zoom-wrapper {
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dialog-zoomed-gallery .product-media__drag-zoom-wrapper .product-media__image {
+    --product-media-fit: contain;
+
+    flex: none;
+    width: calc(100% - 32px) !important;
+    height: calc(100% - 32px) !important;
+    object-fit: contain !important;
+  }
+}

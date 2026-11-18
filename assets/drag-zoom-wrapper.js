@@ -355,25 +355,26 @@ export class DragZoomWrapper extends HTMLElement {
    * @returns {{ width: number, height: number } | null}
    */
   #getImageDimensions = () => {
-    const containerRect = this.getBoundingClientRect();
     if (!this.#image) return null;
     const { naturalWidth, naturalHeight } = this.#image;
-    const containerWidth = this.clientWidth;
-    const containerHeight = this.clientHeight;
+    // The photo is fitted (contain) inside its own box, which sits inside the screen with a margin
+    // all round: measure that box, not the whole screen, so panning reaches every edge exactly
+    const boxWidth = this.#image.clientWidth || this.clientWidth;
+    const boxHeight = this.#image.clientHeight || this.clientHeight;
 
-    if (!naturalWidth || !naturalHeight || !containerWidth || !containerHeight) return null;
+    if (!naturalWidth || !naturalHeight || !boxWidth || !boxHeight) return null;
 
-    const containerAspect = containerRect.width / containerRect.height;
+    const boxAspect = boxWidth / boxHeight;
     const naturalAspect = naturalWidth / naturalHeight;
 
     let imageWidth, imageHeight;
-    if (naturalAspect > containerAspect) {
-      // Image is wider than container (relative to height)
-      imageWidth = containerRect.width;
+    if (naturalAspect > boxAspect) {
+      // Wider than its box: fills the width
+      imageWidth = boxWidth;
       imageHeight = imageWidth / naturalAspect;
     } else {
-      // Image is taller than container (relative to width)
-      imageHeight = containerRect.height;
+      // Taller than its box: fills the height
+      imageHeight = boxHeight;
       imageWidth = imageHeight * naturalAspect;
     }
 
