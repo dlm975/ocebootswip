@@ -197,6 +197,31 @@
   <script type="module">
     import { animate } from 'motion';
 
+    /*
+      Holding the page still under a sheet. Phones (iOS especially) ignore overflow: hidden on the
+      page, so it is pinned in place instead, then put back exactly where it was.
+    */
+    let locks = 0;
+    let lockedAt = 0;
+    const lockPage = (className) => {
+      document.documentElement.classList.add(className);
+      if (locks++ > 0) return;
+      lockedAt = window.scrollY;
+      const body = document.body.style;
+      body.position = 'fixed';
+      body.top = -lockedAt + 'px';
+      body.left = '0';
+      body.right = '0';
+    };
+    const unlockPage = (className) => {
+      document.documentElement.classList.remove(className);
+      if (--locks > 0) return;
+      locks = 0;
+      const body = document.body.style;
+      ['position', 'top', 'left', 'right'].forEach((p) => body.removeProperty(p));
+      window.scrollTo({ top: lockedAt, behavior: 'instant' });
+    };
+
     const dock = document.querySelector('[data-mdock]');
     const sheet = document.querySelector('[data-mdock-sheet]');
     if (dock) {
@@ -210,10 +235,11 @@
         const scrim = sheet.querySelector('[data-mdock-scrim]');
         let closing = null;
 
-        const open = () => {
+        const open = async () => {
+          if (closing) await closing;
           if (sheet.open) return;
           sheet.showModal();
-          document.documentElement.classList.add('mdock-open');
+          lockPage('mdock-open');
           if (reduced()) return;
           animate(scrim, { opacity: [0, 1] }, { duration: 0.3, ease: 'linear' });
           animate(panel, { transform: ['translateY(100%)', 'translateY(0%)'] }, { duration: 0.55, ease: EASE });
@@ -223,7 +249,7 @@
           if (closing || !sheet.open) return closing;
           const finish = () => {
             sheet.close();
-            document.documentElement.classList.remove('mdock-open');
+            unlockPage('mdock-open');
             [panel, scrim].forEach((el) => {
               el.getAnimations().forEach((a) => a.cancel());
               el.style.removeProperty('transform');
@@ -288,7 +314,7 @@
         raised = false;
         // Focus at once, inside the tap, so phones bring the keyboard up
         input.focus({ preventScroll: true });
-        document.documentElement.classList.add('msearch-open');
+        lockPage('msearch-open');
         dock.classList.add('is-searching');
         if (reduced()) return;
         const to = bar.getBoundingClientRect();
@@ -312,7 +338,7 @@
         input.blur();
         const finish = () => {
           layer.hidden = true;
-          document.documentElement.classList.remove('msearch-open');
+          unlockPage('msearch-open');
           dock.classList.remove('is-searching');
           [veil, bar, results].forEach((el) => {
             el.getAnimations().forEach((a) => a.cancel());
@@ -555,6 +581,7 @@
     .mdock-sheet__scrim {
       position: absolute;
       inset: 0;
+      touch-action: none;
       background: rgb(0 0 0 / 0.45);
     }
 
@@ -638,6 +665,7 @@
     .msearch__veil {
       position: absolute;
       inset: 0;
+      touch-action: none;
       background: rgb(255 255 255 / 0.8);
       -webkit-backdrop-filter: blur(14px) saturate(140%);
       backdrop-filter: blur(14px) saturate(140%);
