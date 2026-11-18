@@ -129,7 +129,7 @@
   </li>
 {% endcapture %}
 
-<nav header-menu{% if dock %} class="header-menu--dock"{% endif %}>
+<nav header-menu{% if dock %} class="header-menu--dock" data-dock{% endif %}>
   <div
     class="menu-list"
     style="{% render 'menu-font-styles', settings: block.settings %}"
@@ -138,6 +138,57 @@
     {% render 'overflow-list', class: class, ref: 'overflowMenu', children: children, minimum-items: 2 %}
   </div>
 </nav>
+
+{%- if dock -%}
+  <script type="module">
+    /*
+      The dock's pills open on purposeful pointing, not plain :hover. Opening one slides the others
+      along, which can bring an icon under a pointer that hasn't moved; that mustn't open it. So:
+      - an item opens once the pointer has actually moved onto it and rested a moment;
+      - just after a switch, the pointer must travel a little before another item can take over;
+      - leaving the dock closes the open pill after a short pause (slipping off and back keeps it).
+    */
+    const dock = document.querySelector('nav[data-dock]');
+    if (dock) {
+      const isItem = (li) => li && li.querySelector(':scope > .menu-list__link--icon');
+      let current = null;
+      let openTimer = 0;
+      let leaveTimer = 0;
+      let lastSwitch = { x: 0, y: 0, t: 0 };
+
+      const setOpen = (li, point) => {
+        if (li === current) return;
+        current?.classList.remove('is-dock-open');
+        current = li;
+        li?.classList.add('is-dock-open');
+        if (point) lastSwitch = { x: point.x, y: point.y, t: performance.now() };
+      };
+
+      dock.addEventListener('pointermove', (event) => {
+        if (event.pointerType !== 'mouse') return;
+        clearTimeout(leaveTimer);
+        const li = event.target.closest('.menu-list__list-item');
+        if (!isItem(li) || li === current) {
+          if (li === current) clearTimeout(openTimer);
+          return;
+        }
+        // Settling after a switch: only a real move hands over to another item
+        const settling = performance.now() - lastSwitch.t < 450;
+        if (settling && Math.hypot(event.clientX - lastSwitch.x, event.clientY - lastSwitch.y) < 16) return;
+        clearTimeout(openTimer);
+        const point = { x: event.clientX, y: event.clientY };
+        openTimer = setTimeout(() => setOpen(li, point), current ? 120 : 60);
+      });
+
+      dock.addEventListener('pointerleave', (event) => {
+        if (event.pointerType !== 'mouse') return;
+        clearTimeout(openTimer);
+        clearTimeout(leaveTimer);
+        leaveTimer = setTimeout(() => setOpen(null), 200);
+      });
+    }
+  </script>
+{%- endif -%}
 
 {% stylesheet %}
   /* Icons only show in the collection-page dock (desktop) */
@@ -255,13 +306,12 @@
       padding: 0 10px;
       border-radius: 999px;
       color: #121212;
-      /* Leaving: a short pause before it closes, so slipping off the edge and back doesn't flicker */
       transition:
-        grid-template-columns 0.45s cubic-bezier(0.3, 0.7, 0.3, 1) 0.15s,
-        column-gap 0.45s cubic-bezier(0.3, 0.7, 0.3, 1) 0.15s,
-        padding 0.45s cubic-bezier(0.3, 0.7, 0.3, 1) 0.15s,
-        background-color 0.2s ease 0.15s,
-        box-shadow 0.2s ease 0.15s;
+        grid-template-columns 0.45s cubic-bezier(0.3, 0.7, 0.3, 1),
+        column-gap 0.45s cubic-bezier(0.3, 0.7, 0.3, 1),
+        padding 0.45s cubic-bezier(0.3, 0.7, 0.3, 1),
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
     }
 
     /* A forgiving hover area: reaches past the pill above and below */
@@ -288,18 +338,17 @@
       line-height: 1.2;
       white-space: nowrap;
       opacity: 0;
-      transition: opacity 0.18s ease 0.15s;
+      transition: opacity 0.18s ease;
     }
 
-    .header-menu--dock .menu-list__list-item:where(:hover, :focus-within) .menu-list__link--icon {
-      transition-delay: 0s;
+    .header-menu--dock .menu-list__list-item:where(.is-dock-open, :focus-within) .menu-list__link--icon {
       grid-template-columns: 22px 1fr;
       column-gap: 8px;
       padding-inline-end: 16px;
       background: rgb(18 18 18 / 0.06);
     }
 
-    .header-menu--dock .menu-list__list-item:where(:hover, :focus-within) .menu-list__link-title {
+    .header-menu--dock .menu-list__list-item:where(.is-dock-open, :focus-within) .menu-list__link-title {
       opacity: 1;
       transition: opacity 0.3s ease 0.08s;
     }
@@ -308,7 +357,7 @@
   @media (prefers-reduced-motion: reduce) {
     .header-menu--dock .menu-list__link--icon,
     .header-menu--dock .menu-list__link--icon .menu-list__link-title,
-    .header-menu--dock .menu-list__list-item:where(:hover, :focus-within) .menu-list__link-title {
+    .header-menu--dock .menu-list__list-item:where(.is-dock-open, :focus-within) .menu-list__link-title {
       transition: none;
     }
   }
