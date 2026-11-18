@@ -4291,13 +4291,13 @@ html.wlq-open {
   animation: oce-rim 14s linear infinite;
 }
 
-/* Smaller buttons: a finer rim and side */
-:is(.wl-card__buy) {
+/* Smaller buttons: a finer rim and side (doubled classes to outrank the shared rule above) */
+.wl-card__buy.wl-card__buy {
   --key-edge: 3px;
   --key-press: 2px;
 }
 
-:is(.pa__add, .cart-recs__add) {
+:is(.pa__add.pa__add, .cart-recs__add.cart-recs__add) {
   --key-rim: 1.5px;
   --key-edge: 2px;
   --key-press: 1px;
