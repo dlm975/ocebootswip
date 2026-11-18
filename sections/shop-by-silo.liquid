@@ -211,6 +211,7 @@
 
   const EASE = [0.3, 0.7, 0.3, 1];
   const MOVE = 0.55;
+  const SWAP = 0.4; // the first step of swapping one open card for another
   const OUT = 0.18;
   const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const stop = (el) => el.getAnimations().forEach((a) => a.cancel());
@@ -240,6 +241,7 @@
     connectedCallback() {
       this.brands = this.querySelector('.ssilo__brands');
       this.open = new Map(); // list -> its open item
+      this.pending = new Map(); // list -> the latest choice, so an older swap step can stand down
       this.scrollFrame = 0;
 
       this.addEventListener('click', (event) => {
@@ -248,7 +250,7 @@
         const item = this.itemOf(control.dataset.toggle || control.dataset.close);
         if (!item) return;
         const shut = control.dataset.close || item.classList.contains('is-open');
-        this.switchIn(item.parentElement, shut ? null : item);
+        this.choose(item.parentElement, shut ? null : item);
       });
 
       // Start loading a panel's images as soon as its opener is pointed at or pressed
@@ -268,7 +270,7 @@
         for (let el = target; el && el !== this; el = el.parentElement.closest('[data-item]')) chain.unshift(el);
         chain.forEach((el) => {
           if (!el.querySelector(':scope > [data-panel]') || el.classList.contains('is-open')) return;
-          this.switchIn(el.parentElement, el);
+          this.choose(el.parentElement, el);
         });
       };
       document.addEventListener('shopify:block:select', this.onBlockSelect);
@@ -336,10 +338,35 @@
      * scrolls with it: an opened one up under the header, a closed one to the middle of the screen.
      * Positions are animated from where they are (FLIP), so a tap mid-way carries on smoothly.
      */
-    switchIn(list, target) {
+    /**
+     * Choose one in a list (or none). Swapping one open card for another runs in two steps, so cards
+     * never cross: the open one closes quickly back into the grid, then the new one opens. The others
+     * stay stepped back throughout, and a tap during the swap takes over from wherever it is.
+     */
+    choose(list, target) {
+      const previous = this.open.get(list) || null;
+      const token = {};
+      this.pending.set(list, token);
+      if (!previous || !target || previous === target || reduced()) {
+        this.switchIn(list, target);
+        return;
+      }
+      this.switchIn(list, null, { scroll: false, duration: SWAP });
+      list.classList.add('has-open');
+      target.classList.add('is-next');
+      setTimeout(() => {
+        if (this.pending.get(list) === token) this.switchIn(list, target);
+      }, SWAP * 1000);
+    }
+
+    switchIn(list, target, { scroll = true, duration = MOVE } = {}) {
       const cards = [...list.children];
       const previous = this.open.get(list) || null;
-      if (previous === target) return;
+      cards.forEach((card) => card.classList.remove('is-next'));
+      if (previous === target) {
+        list.classList.toggle('has-open', this.open.has(list));
+        return;
+      }
       const was = previous && this.parts(previous);
       const next = target && this.parts(target);
 
@@ -383,7 +410,9 @@
 
       // Scroll to where things end up: the opened card under the header, or the closed one mid-screen
       const nextHeight = target ? next.panel.getBoundingClientRect().height : 0;
-      if (target) {
+      if (!scroll) {
+        // (part of a swap: the page moves once the new one opens)
+      } else if (target) {
         this.scrollTo(target.getBoundingClientRect().top + window.scrollY - this.headerOffset());
       } else if (previous) {
         const end = previous.getBoundingClientRect();
@@ -414,14 +443,14 @@
         if (Math.abs(b.width - a.width) > 1) {
           // Growing to (or shrinking from) the full row; the closing card stays on top as it shrinks
           card.style.zIndex = card === previous ? '2' : '1';
-          animate(card, { width: [b.width + 'px', a.width + 'px'] }, { duration: MOVE, ease: EASE }).then(() => {
+          animate(card, { width: [b.width + 'px', a.width + 'px'] }, { duration, ease: EASE }).then(() => {
             if (!card.getAnimations().length) clear(card, 'width', 'z-index');
           });
         }
         const dx = b.left - a.left;
         const dy = b.top - a.top;
         if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-          animate(card, { transform: [`translate(${dx}px, ${dy}px)`, 'translate(0px, 0px)'] }, { duration: MOVE, ease: EASE }).then(() => {
+          animate(card, { transform: [`translate(${dx}px, ${dy}px)`, 'translate(0px, 0px)'] }, { duration, ease: EASE }).then(() => {
             if (!card.getAnimations().length) clear(card, 'transform');
           });
         }
@@ -429,7 +458,7 @@
 
       if (was) {
         animate(was.inner, { opacity: [wasOpacity, 0] }, { duration: OUT, ease: 'linear' });
-        animate(was.panel, { height: [wasHeight + 'px', '0px'] }, { duration: MOVE, ease: EASE }).then(() => {
+        animate(was.panel, { height: [wasHeight + 'px', '0px'] }, { duration, ease: EASE }).then(() => {
           if (previous.classList.contains('is-open') || was.panel.getAnimations().length) return;
           was.panel.hidden = true;
           clear(was.panel, 'height', 'overflow');
@@ -443,7 +472,7 @@
         this.ease(p, height, p.getBoundingClientRect().height);
       });
       if (next) {
-        this.ease(next.panel, nextFrom, nextHeight);
+        this.ease(next.panel, nextFrom, nextHeight, duration);
         if (nextOpacity !== null && nextOpacity > 0) {
           if (nextOpacity < 1) {
             animate(next.inner, { opacity: [nextOpacity, 1] }, { duration: 0.25, ease: EASE }).then(() => clear(next.inner, 'opacity'));
@@ -467,13 +496,13 @@
       });
     }
 
-    ease(panel, from, to) {
+    ease(panel, from, to, duration = MOVE) {
       if (Math.abs(to - from) < 1) {
         clear(panel, 'height', 'overflow');
         return;
       }
       panel.style.overflow = 'hidden';
-      animate(panel, { height: [from + 'px', to + 'px'] }, { duration: MOVE, ease: EASE }).then(() => {
+      animate(panel, { height: [from + 'px', to + 'px'] }, { duration, ease: EASE }).then(() => {
         if (panel.getAnimations().length) return;
         clear(panel, 'height', 'overflow');
       });
@@ -557,8 +586,8 @@
   }
 
   /* One brand open: it comes forward, the others step back */
-  .ssilo__brands.has-open > .ssilo__brand:not(.is-open) {
-    opacity: 0.45;
+  .ssilo__brands.has-open > .ssilo__brand:not(.is-open):not(.is-next) {
+    opacity: 0.16;
   }
 
   .ssilo__brand.is-open {
@@ -721,8 +750,8 @@
     grid-column: 1 / -1;
   }
 
-  .ssilo__silos.has-open > .ssilo__silo:not(.is-open) > .ssilo__row {
-    opacity: 0.45;
+  .ssilo__silos.has-open > .ssilo__silo:not(.is-open):not(.is-next) > .ssilo__row {
+    opacity: 0.16;
   }
 
   .ssilo__row {
@@ -882,12 +911,12 @@
       box-shadow: 0 2px 4px rgb(18 18 18 / 0.08), 0 14px 36px rgb(18 18 18 / 0.14);
     }
 
-    .ssilo__brands.has-open > .ssilo__brand:not(.is-open):hover {
-      opacity: 0.8;
+    .ssilo__brands.has-open > .ssilo__brand:not(.is-open):not(.is-next):hover {
+      opacity: 0.5;
     }
 
-    .ssilo__silos.has-open > .ssilo__silo:not(.is-open) > .ssilo__row:hover {
-      opacity: 0.8;
+    .ssilo__silos.has-open > .ssilo__silo:not(.is-open):not(.is-next) > .ssilo__row:hover {
+      opacity: 0.5;
     }
 
     .ssilo__row:hover .ssilo__row-name {
