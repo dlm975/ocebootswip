@@ -156,11 +156,36 @@
       let leaveTimer = 0;
       let lastSwitch = { x: 0, y: 0, t: 0 };
 
+      // The theme opens dropdowns on plain pointerenter/leave, which also fire when an icon slides
+      // under a still pointer. In the dock those are held back; the dock decides, and tells it.
+      const headerMenu = dock.closest('header-menu');
+      let driving = false;
+      const tellMenu = (type, li) => {
+        if (!headerMenu || !li) return;
+        driving = true;
+        if (type === 'open') headerMenu.activate?.({ target: li });
+        else headerMenu.deactivate?.({ target: li });
+        driving = false;
+      };
+      ['pointerenter', 'pointerleave'].forEach((type) =>
+        dock.addEventListener(
+          type,
+          (event) => {
+            if (driving || event.pointerType !== 'mouse') return;
+            if (event.target instanceof Element && event.target.matches('.menu-list__list-item')) event.stopImmediatePropagation();
+          },
+          true
+        )
+      );
+
       const setOpen = (li, point) => {
         if (li === current) return;
-        current?.classList.remove('is-dock-open');
+        const previous = current;
+        previous?.classList.remove('is-dock-open');
         current = li;
         li?.classList.add('is-dock-open');
+        if (li) tellMenu('open', li);
+        else tellMenu('close', previous);
         if (point) lastSwitch = { x: point.x, y: point.y, t: performance.now() };
       };
 
