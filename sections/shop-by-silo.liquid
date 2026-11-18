@@ -96,9 +96,7 @@
                       <span class="ssilo__row-text">
                         <span class="ssilo__row-name">{{ silo_label | escape }}</span>
                         <span class="ssilo__row-sub">
-                          {%- if shown > 0 -%}
-                            {{ shown }} {{ shown | pluralize: 'generation', 'generations' }}
-                          {%- elsif silo.settings.collection != blank -%}
+                          {%- if shown == 0 and silo.settings.collection != blank -%}
                             {{ silo.settings.collection.products_count }}
                             {{ silo.settings.collection.products_count | pluralize: 'pair', 'pairs' }}
                           {%- endif -%}
@@ -108,8 +106,8 @@
                         {%- if silo_image -%}
                           {{
                             silo_image
-                            | image_url: width: 200
-                            | image_tag: widths: '120, 200', sizes: '(min-width: 750px) 96px, 76px', loading: 'eager', fetchpriority: 'low', class: 'ssilo__thumb-image', alt: ''
+                            | image_url: width: 280
+                            | image_tag: widths: '120, 200, 280', sizes: '(min-width: 750px) 136px, 76px', loading: 'eager', fetchpriority: 'low', class: 'ssilo__thumb-image', alt: ''
                           }}
                         {%- endif -%}
                       </span>
@@ -159,7 +157,7 @@
                                           {{
                                             generation.featured_image
                                             | image_url: width: 160
-                                            | image_tag: widths: '100, 160', sizes: '(min-width: 750px) 80px, 64px', loading: 'lazy', class: 'ssilo__thumb-image', alt: ''
+                                            | image_tag: widths: '100, 160', sizes: '(min-width: 750px) 104px, 64px', loading: 'lazy', class: 'ssilo__thumb-image', alt: ''
                                           }}
                                         {%- endif -%}
                                       </span>
@@ -1033,38 +1031,56 @@
 
     /* Desktop: larger text in the panels */
     .ssilo__row {
-      min-height: 76px;
+      min-height: 104px;
+      gap: 20px;
     }
 
     .ssilo__row-name {
-      font-size: 1.375rem;
+      font-size: 2.25rem;
+      letter-spacing: -0.025em;
     }
 
     .ssilo__gen-name {
-      font-size: 1.125rem;
+      font-size: 1.5rem;
+      letter-spacing: -0.015em;
     }
 
     .ssilo__row-sub {
-      font-size: 0.875rem;
+      font-size: 1rem;
     }
 
     .ssilo__all,
     .ssilo__close {
-      font-size: 1rem;
+      font-size: 1.125rem;
     }
 
     .ssilo__gen {
-      min-height: 66px;
+      min-height: 84px;
     }
 
     .ssilo__thumb {
-      width: 96px;
-      height: 62px;
+      width: 136px;
+      height: 88px;
+      border-radius: 10px;
     }
 
     .ssilo__gen-pic {
-      width: 80px;
-      height: 56px;
+      width: 104px;
+      height: 72px;
+    }
+
+    .ssilo__gens {
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    }
+
+    .ssilo__row .ssilo__plus {
+      width: 32px;
+      height: 32px;
+    }
+
+    .ssilo__row .ssilo__plus svg {
+      width: 28px;
+      height: 28px;
     }
 
     .ssilo__gens {
