@@ -39,12 +39,17 @@
 </div>
 
 {% stylesheet %}
+  /* Capitals here, like a poster (outranks the site-wide mixed case in snippets/brand-typography) */
+  .popcat .popcat__label,
+  .popcat .popcat__link .popcat__name {
+    text-transform: uppercase !important;
+  }
+
   .popcat__label {
     margin: 0 0 clamp(14px, 2.5vw, 28px);
     font-size: 0.8125rem;
     font-weight: 600;
     letter-spacing: 0.06em;
-    text-transform: uppercase !important;
     color: rgb(var(--color-foreground-rgb) / 0.55);
   }
 
@@ -65,11 +70,10 @@
   }
 
   .popcat__name {
-    font-size: clamp(2.5rem, 9.5vw, 7.5rem);
+    font-size: clamp(2.25rem, 9vw, 7rem);
     font-weight: 800;
     line-height: 1.04;
     letter-spacing: -0.025em;
-    text-transform: uppercase !important;
     color: currentColor;
     -webkit-text-stroke: 1.5px currentColor;
     -webkit-text-fill-color: currentColor;
