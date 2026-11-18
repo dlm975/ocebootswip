@@ -4285,6 +4285,12 @@ html.wlq-open {
     0 4px 10px rgb(90 70 190 / 0.25);
 }
 
+/* The product page's own button: rounded like Shop Pay's beside it, with room for its edge */
+.product-form-buttons .add-to-cart-button {
+  border-radius: 12px !important;
+  margin-block-end: 5px;
+}
+
 /* The arrows as 3D coins: a domed face lit from the top left, a rim, and a thick edge */
 .popcat__arrow {
   background:
