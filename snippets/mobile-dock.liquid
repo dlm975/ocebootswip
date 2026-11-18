@@ -6,7 +6,8 @@
     and the bar moves to the top to make room for them.
   - Size slides up a sheet with the size picker (snippets/size-drill-menu.liquid, as in the menu
     drawer): US / UK / EU, each opening its sizes, each size linking to its boots.
-  Not on product pages, where the floating buy bar sits at the bottom. Animations: Motion.
+  Not on the home page, nor on product pages (where the floating buy bar sits at the bottom).
+  Animations: Motion.
 {%- enddoc -%}
 
 {%- liquid
@@ -20,7 +21,7 @@
   endfor
 -%}
 
-{%- unless template.name == 'product' -%}
+{%- unless template.name == 'product' or template.name == 'index' -%}
   <nav
     class="mdock"
     aria-label="Quick navigation"
