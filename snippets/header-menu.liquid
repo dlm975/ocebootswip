@@ -167,10 +167,10 @@
         else headerMenu.deactivate?.({ target: li });
         driving = false;
       };
-      // (listening on the document, so it runs before the theme's own listener on its menu element;
+      // (listening on the window, which comes before the document where the theme listens;
       // events from content moving under the pointer may not say 'mouse': hold back all but touch/pen)
       ['pointerenter', 'pointerleave'].forEach((type) =>
-        document.addEventListener(
+        window.addEventListener(
           type,
           (event) => {
             if (driving || event.pointerType === 'touch' || event.pointerType === 'pen') return;
