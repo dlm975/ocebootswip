@@ -1,7 +1,7 @@
 {%- comment -%}
   Player collections as short looping videos: a row of tall cards, each a muted clip on loop (a
-  photo stands in until a video is added), the player's name in bold and a button to their
-  collection. Phones swipe through them; desktop shows them side by side.
+  photo stands in until a video is added), the player's name in bold beside a holographic
+  disk arrow; the whole card opens their collection. Phones swipe through them; desktop shows them side by side.
   A clip plays while any part of its card is on screen, and not at all with reduced motion (the poster
   shows instead).
 {%- endcomment -%}
@@ -91,12 +91,10 @@
         <span class="preels__shade" aria-hidden="true"></span>
         <span class="preels__text">
           <span class="preels__name">{{ name | escape }}</span>
-          <span class="preels__button">
-            <span>{{ block.settings.button_label | escape }}</span>
-            <span class="preels__disk oce-disk" aria-hidden="true">
-              {%- render 'gicon', name: 'arrow_forward', size: 16 -%}
-            </span>
+          <span class="preels__disk oce-disk" aria-hidden="true">
+            {%- render 'gicon', name: 'arrow_forward', size: 20 -%}
           </span>
+          <span class="visually-hidden">{{ block.settings.button_label | default: 'Shop collection' | escape }}</span>
         </span>
       </a>
     {%- endfor -%}
@@ -262,16 +260,18 @@
     pointer-events: none;
   }
 
+  /* The player's name in bold, with the holographic disk beside it */
   .preels__text {
     position: absolute;
-    inset: auto 14px 14px;
+    inset: auto 14px 16px;
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 10px;
   }
 
   .preels__name {
+    min-width: 0;
     font-family: var(--font-heading--family);
     font-size: clamp(1.75rem, 7vw, 2.5rem);
     font-weight: 800;
@@ -282,30 +282,18 @@
 
   @media screen and (min-width: 990px) {
     .preels__name {
-      font-size: clamp(1.75rem, 2.4vw, 2.5rem);
+      font-size: clamp(1.625rem, 2.2vw, 2.375rem);
     }
-  }
-
-  .preels__button {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 5px 5px 5px 14px;
-    border-radius: 999px;
-    background: #ffffff;
-    color: #121212;
-    font-size: 0.875rem;
-    font-weight: 700;
-    transition: transform 0.25s cubic-bezier(0.3, 0.7, 0.3, 1);
   }
 
   .preels__disk {
     display: grid;
     flex: none;
     place-items: center;
-    width: 30px;
-    height: 30px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
+    transition: transform 0.25s cubic-bezier(0.3, 0.7, 0.3, 1);
   }
 
   .preels__disk svg {
@@ -324,7 +312,7 @@
       transform: scale(1.04);
     }
 
-    .preels__card:hover .preels__button {
+    .preels__card:hover .preels__disk {
       transform: translateY(-1px);
     }
 
@@ -337,8 +325,8 @@
     }
   }
 
-  .preels__card:active .preels__button {
-    transform: scale(0.97);
+  .preels__card:active .preels__disk {
+    transform: scale(0.94);
   }
 
   .preels__card:focus-visible {
@@ -358,7 +346,7 @@
   @media (prefers-reduced-motion: reduce) {
     .preels__video,
     .preels__image,
-    .preels__button,
+    .preels__disk,
     .preels__disk svg {
       transition: none;
     }
@@ -443,7 +431,7 @@
         {
           "type": "text",
           "id": "button_label",
-          "label": "Button label",
+          "label": "Link text for screen readers",
           "default": "Shop collection"
         }
       ]
