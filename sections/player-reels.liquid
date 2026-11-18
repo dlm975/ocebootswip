@@ -260,29 +260,33 @@
     pointer-events: none;
   }
 
-  /* The player's name in bold, with the holographic disk beside it */
+  /* The player's name in bold, as tall as the holographic disk beside it, the disk centred on
+     the line */
   .preels__text {
+    --preels-disk: 40px;
     position: absolute;
-    inset: auto 14px 16px;
+    inset: auto 14px 14px;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: space-between;
     gap: 10px;
   }
 
   .preels__name {
     min-width: 0;
+    overflow: hidden;
     font-family: var(--font-heading--family);
-    font-size: clamp(1.75rem, 7vw, 2.5rem);
+    font-size: calc(var(--preels-disk) * 0.9);
     font-weight: 800;
-    line-height: 0.95;
+    line-height: var(--preels-disk);
     letter-spacing: -0.035em;
-    text-wrap: balance;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 
   @media screen and (min-width: 990px) {
-    .preels__name {
-      font-size: clamp(1.625rem, 2.2vw, 2.375rem);
+    .preels__text {
+      --preels-disk: 36px;
     }
   }
 
@@ -290,8 +294,8 @@
     display: grid;
     flex: none;
     place-items: center;
-    width: 42px;
-    height: 42px;
+    width: var(--preels-disk);
+    height: var(--preels-disk);
     border-radius: 50%;
     transition: transform 0.25s cubic-bezier(0.3, 0.7, 0.3, 1);
   }
