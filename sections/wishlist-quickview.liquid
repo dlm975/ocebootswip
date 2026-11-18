@@ -268,7 +268,10 @@
 
       {%- if product.description != blank -%}
         <details class="wlq__details">
-          <summary>Details</summary>
+          <summary>
+            <span>Details</span>
+            {%- render 'gicon', name: 'keyboard_arrow_down', class: 'wlq__details-icon', size: 22 -%}
+          </summary>
           <div class="wlq__description rte">{{ product.description }}</div>
         </details>
       {%- endif -%}
@@ -277,7 +280,7 @@
         class="wlq__more"
         href="{{ product.url }}"
       >
-        View full details
+        View product page
         {%- render 'gicon', name: 'arrow_forward', size: 18 -%}
       </a>
     </div>

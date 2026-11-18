@@ -1063,9 +1063,37 @@
   }
 
   .wlq__details summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     padding-block: 14px;
     font-weight: 650;
+    list-style: none;
     cursor: pointer;
+  }
+
+  .wlq__details summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* The arrow turns over as Details opens */
+  .wlq__details-icon {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    color: rgb(18 18 18 / 0.6);
+    transition: transform 0.35s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  .wlq__details[open] .wlq__details-icon {
+    transform: rotate(180deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wlq__details-icon {
+      transition: none;
+    }
   }
 
   .wlq__description {
