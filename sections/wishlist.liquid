@@ -994,6 +994,9 @@
     font-size: 0.9375rem;
     font-weight: 650;
     cursor: pointer;
+    /* Leaning back very slightly, like a keycap */
+    transform: perspective(420px) rotateX(7deg);
+    transform-origin: 50% 100%;
     transition:
       border-color 0.2s ease,
       box-shadow 0.2s cubic-bezier(0.3, 0.7, 0.3, 1),
@@ -1003,7 +1006,7 @@
   @media (hover: hover) {
     .wlq__size:hover:not(:disabled, .is-selected) {
       border-color: #b8b8bf;
-      transform: translateY(-1px);
+      transform: translateY(-1px) perspective(420px) rotateX(7deg);
       box-shadow:
         inset 0 1px 0 #ffffff,
         0 4px 0 #c9c9cf,
@@ -1013,7 +1016,7 @@
 
   .wlq__size:active:not(:disabled),
   .wlq__size.is-selected {
-    transform: translateY(2px);
+    transform: translateY(2px) perspective(420px) rotateX(7deg);
     box-shadow:
       inset 0 2px 3px rgb(18 18 18 / 0.08),
       0 1px 0 #d4d4d8;
@@ -1032,6 +1035,7 @@
     box-shadow: none;
     cursor: default;
     text-decoration: line-through;
+    transform: none;
   }
 
   /* Each size shows in the chosen system */
