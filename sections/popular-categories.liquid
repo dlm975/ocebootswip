@@ -100,7 +100,26 @@
       transform 0.55s cubic-bezier(0.3, 0.7, 0.3, 1);
   }
 
-  /* Its metallic iridescent finish lives in assets/base.css, shared with the buy buttons */
+  /* Its holographic finish lives in assets/base.css, shared with the buy buttons. Here the glint
+     doesn't loop: it sweeps across once, just after the arrow slides in on hover. */
+  .popcat .popcat__link .popcat__arrow::after {
+    animation: none;
+  }
+
+  @media (hover: hover) {
+    .popcat .popcat__link:hover .popcat__arrow::after {
+      animation: popcat-glint 0.8s cubic-bezier(0.45, 0, 0.25, 1) 0.35s 1 both;
+    }
+  }
+
+  @keyframes popcat-glint {
+    from {
+      transform: translateX(-110%);
+    }
+    to {
+      transform: translateX(110%);
+    }
+  }
 
   .popcat__arrow svg {
     position: relative;
