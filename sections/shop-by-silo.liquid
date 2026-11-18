@@ -441,7 +441,8 @@
       if (target) {
         this.setOpen(target, true);
         // It keeps its own row, at full width; its row-mate moves down
-        target.style.gridRow = String(Math.floor(cards.indexOf(target) / 2) + 1);
+        const columns = getComputedStyle(this.brands).gridTemplateColumns.split(' ').length;
+        target.style.gridRow = String(Math.floor(cards.indexOf(target) / columns) + 1);
         next.panel.querySelectorAll('img[loading="lazy"]').forEach((img) => (img.loading = 'eager'));
         next.panel.hidden = false;
       }
@@ -621,9 +622,10 @@
   /* Brand cards, two a row; an open card takes its row at full width */
   .ssilo__brands {
     --ssilo-gap: 10px;
+    --ssilo-cols: 2;
     --ssilo-ratio: 1;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--ssilo-cols), minmax(0, 1fr));
     gap: var(--ssilo-gap);
     align-items: start;
     container-type: inline-size;
@@ -662,7 +664,7 @@
     margin: 0;
     padding: 0;
     border: 0;
-    background: #121212;
+    background: #ffffff;
     color: #ffffff;
     font: inherit;
     text-align: start;
@@ -673,7 +675,9 @@
   /* The same height closed and open (a column's width x the ratio), so a card can widen smoothly */
   .ssilo__brand-media {
     display: block;
-    height: calc((100cqi - var(--ssilo-gap)) / 2 * var(--ssilo-ratio));
+    height: calc((100cqi - (var(--ssilo-cols) - 1) * var(--ssilo-gap)) / var(--ssilo-cols) * var(--ssilo-ratio));
+    /* A whole number of pixels, so no sliver opens up where the image meets the panel */
+    height: round(down, calc((100cqi - (var(--ssilo-cols) - 1) * var(--ssilo-gap)) / var(--ssilo-cols) * var(--ssilo-ratio)), 1px);
     overflow: hidden;
   }
 
@@ -706,6 +710,7 @@
 
   .ssilo__brand-head::before {
     z-index: 1;
+    bottom: -1px;
     opacity: 0;
     background: linear-gradient(
       to bottom,
@@ -720,7 +725,13 @@
     opacity: 1;
   }
 
+  /* Opening: the dark shade clears quickly, so the join is white from the start */
+  .ssilo__brand.is-open .ssilo__brand-head::before {
+    transition-duration: 0.35s;
+  }
+
   .ssilo__brand.is-open .ssilo__brand-head::after {
+    transition: opacity 0.2s linear;
     opacity: 0;
   }
 
@@ -1017,7 +1028,17 @@
       --ssilo-gap: 16px;
       --ssilo-ratio: 0.4375;
     }
+  }
 
+  /* Desktop: four brands a row */
+  @media screen and (min-width: 990px) {
+    .ssilo__brands {
+      --ssilo-cols: 4;
+      --ssilo-ratio: 0.72;
+    }
+  }
+
+  @media screen and (min-width: 750px) {
     .ssilo__plus--brand {
       right: 16px;
       bottom: 16px;
