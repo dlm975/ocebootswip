@@ -28,18 +28,51 @@
       >
         <span class="preels__media">
           {%- if block.settings.video != blank -%}
-            {{
-              block.settings.video
-              | video_tag:
-                image_size: '720x',
-                autoplay: false,
-                loop: true,
-                muted: true,
-                controls: false,
-                playsinline: true,
-                preload: 'metadata',
-                class: 'preels__video'
-            }}
+            {%- liquid
+              # Light and smooth: HLS first (Safari streams it at the size it can manage), then one
+              # MP4 no taller than 720p for everyone else, never the full-size original
+              assign clip = block.settings.video
+              assign hls = nil
+              assign mp4 = nil
+              assign mp4_height = 0
+              assign smallest = nil
+              for source in clip.sources
+                if source.format == 'm3u8'
+                  assign hls = source
+                elsif source.format == 'mp4'
+                  if smallest == nil or source.height < smallest.height
+                    assign smallest = source
+                  endif
+                  if source.height <= 720 and source.height > mp4_height
+                    assign mp4 = source
+                    assign mp4_height = source.height
+                  endif
+                endif
+              endfor
+              if mp4 == nil
+                assign mp4 = smallest
+              endif
+            -%}
+            <video
+              class="preels__video"
+              muted
+              loop
+              playsinline
+              preload="none"
+              disablepictureinpicture
+              disableremoteplayback
+              aria-hidden="true"
+              {% if clip.preview_image %}
+                poster="{{ clip.preview_image | image_url: width: 720 }}"
+              {% endif %}
+            >
+              {%- if hls -%}
+                <source src="{{ hls.url }}" type="{{ hls.mime_type }}">
+              {%- endif -%}
+              {%- if mp4 -%}
+                <source src="{{ mp4.url }}" type="{{ mp4.mime_type }}">
+              {%- endif -%}
+            </video>
           {%- elsif block.settings.image != blank -%}
             {{
               block.settings.image
@@ -71,38 +104,64 @@
 </div>
 
 <script type="module">
-  // Each clip plays while its card is on screen, and pauses when it leaves (or the tab hides)
+  /*
+    Keeping the clips smooth without slowing the page:
+    - nothing downloads until a card is about to scroll into view (preload="none" until then);
+    - a clip plays only while its card is on screen, and pauses when it leaves or the tab hides;
+    - with reduced motion, Data Saver or a slow connection, the poster stays and nothing plays.
+  */
   class PlayerReels extends HTMLElement {
     connectedCallback() {
       this.videos = [...this.querySelectorAll('video')];
       if (!this.videos.length) return;
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-      this.videos.forEach((video) => {
-        video.muted = true;
-        video.playsInline = true;
-      });
-      this.io = new IntersectionObserver(
+      const connection = navigator.connection;
+      const lean = () =>
+        reduce.matches || !!(connection && (connection.saveData || /(^|-)2g|3g/.test(connection.effectiveType || '')));
+      this.visible = new Set();
+
+      const sync = (video) => {
+        const on = this.visible.has(video) && !document.hidden && !lean();
+        if (on && video.paused) video.play().catch(() => {});
+        else if (!on && !video.paused) video.pause();
+      };
+
+      // Fetch a clip shortly before it's seen
+      this.near = new IntersectionObserver(
         (entries) =>
           entries.forEach((entry) => {
+            if (!entry.isIntersecting || lean()) return;
             const video = entry.target;
-            if (entry.isIntersecting && !reduce.matches && !document.hidden) {
-              video.play().catch(() => {});
-            } else {
-              video.pause();
-            }
+            if (video.preload !== 'auto') video.preload = 'auto';
+            this.near.unobserve(video);
+          }),
+        { rootMargin: '300px 300px' }
+      );
+
+      // Play while on screen
+      this.seen = new IntersectionObserver(
+        (entries) =>
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) this.visible.add(entry.target);
+            else this.visible.delete(entry.target);
+            sync(entry.target);
           }),
         { threshold: 0.35 }
       );
-      this.videos.forEach((video) => this.io.observe(video));
-      this.onVisibility = () => {
-        if (document.hidden) this.videos.forEach((video) => video.pause());
-        else this.videos.forEach((video) => this.io.unobserve(video) || this.io.observe(video));
-      };
+
+      this.videos.forEach((video) => {
+        video.muted = true;
+        this.near.observe(video);
+        this.seen.observe(video);
+      });
+
+      this.onVisibility = () => this.videos.forEach(sync);
       document.addEventListener('visibilitychange', this.onVisibility);
     }
 
     disconnectedCallback() {
-      this.io?.disconnect();
+      this.near?.disconnect();
+      this.seen?.disconnect();
       if (this.onVisibility) document.removeEventListener('visibilitychange', this.onVisibility);
     }
   }
@@ -178,7 +237,16 @@
   .preels__video,
   .preels__image {
     object-fit: cover;
+  }
+
+  .preels__image {
     transition: transform 0.55s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  /* Its own layer, so a playing clip doesn't repaint the card around it */
+  .preels__video {
+    transform: translateZ(0);
+    background: #121212;
   }
 
   .preels__placeholder {
@@ -252,7 +320,7 @@
   }
 
   @media (hover: hover) {
-    .preels__card:hover :is(.preels__video, .preels__image) {
+    .preels__card:hover .preels__image {
       transform: scale(1.04);
     }
 
