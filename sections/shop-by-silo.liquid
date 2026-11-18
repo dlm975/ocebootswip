@@ -355,7 +355,14 @@
         return;
       }
       target.classList.add('is-next');
-      const { inner } = this.parts(previous);
+      const { panel, inner } = this.parts(previous);
+      // Still opening? Hold it where it is, so nothing drifts before the straight move
+      if (panel.getAnimations().length) {
+        const height = panel.getBoundingClientRect().height;
+        stop(panel);
+        panel.style.height = height + 'px';
+        panel.style.overflow = 'hidden';
+      }
       const from = parseFloat(getComputedStyle(inner).opacity);
       stop(inner);
       animate(inner, { opacity: [from, 0] }, { duration: OUT, ease: 'linear' }).then(() => {
