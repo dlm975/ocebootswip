@@ -362,26 +362,31 @@
     }
   }
 
-  /* Scoped under .size-grid so these win over the dropdown item rules (.pill-option__item ...) further down */
+  /* Scoped under .size-grid so these win over the dropdown item rules (.pill-option__item ...) further down.
+     Styled like the wishlist's mini product page: rounded, bold, the chosen size filled black. */
   .size-grid .size-grid__item {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 2px;
-    min-height: 56px;
+    min-height: 50px;
     padding: 6px;
-    border: 1px solid #64748B40;
-    border-radius: 2px;
+    border: 1px solid rgb(18 18 18 / 0.16);
+    border-radius: 12px;
     background: #fff;
     color: #121212;
     font: inherit;
-    font-weight: 400;
+    font-weight: 650;
     line-height: 1.15;
     text-align: center;
     white-space: normal;
     cursor: pointer;
-    transition: border-color var(--animation-speed, 0.15s) ease;
+    transition:
+      border-color 0.2s ease,
+      background-color 0.2s ease,
+      color 0.2s ease,
+      transform 0.2s cubic-bezier(0.3, 0.7, 0.3, 1);
   }
 
   .size-grid .size-grid__item:hover,
@@ -395,35 +400,49 @@
     border-color: #121212;
   }
 
+  .size-grid .size-grid__item:active:not([disabled]) {
+    transform: scale(0.97);
+  }
+
   .size-grid .size-grid__item:focus-visible {
     outline: 2px solid #121212;
     outline-offset: 2px;
   }
 
-  .size-grid[data-chosen] .size-grid__item.pill-option__item--selected {
-    border: 1.5px solid #121212;
+  .size-grid[data-chosen] .size-grid__item.pill-option__item--selected,
+  .size-grid[data-chosen] .size-grid__item.pill-option__item--selected:hover {
+    border-color: #121212;
+    background: #121212;
+    color: #fff;
   }
 
   .size-grid__main {
-    font-size: 14px;
-    font-weight: 480;
+    font-size: 0.9375rem;
+    font-weight: 650;
   }
 
   .size-grid__sub {
-    font-size: 11px;
-    color: #64748B;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: rgb(18 18 18 / 0.6);
+  }
+
+  .size-grid[data-chosen] .pill-option__item--selected .size-grid__sub {
+    color: rgb(255 255 255 / 0.7);
   }
 
   .size-grid .size-grid__item[disabled] {
-    cursor: not-allowed;
-    color: #64748B;
-    background: repeating-linear-gradient(135deg, #fff 0 6px, #F1F5F9 6px 7px);
-    border-color: #64748B40;
+    cursor: default;
+    opacity: 0.4;
+    background: #fff;
+    border-color: rgb(18 18 18 / 0.16);
     text-decoration: line-through;
   }
 
-  .size-grid .size-grid__item[disabled] .size-grid__sub {
-    color: #64748B;
+  @media (prefers-reduced-motion: reduce) {
+    .size-grid .size-grid__item {
+      transition: none;
+    }
   }
 
   /* Low-stock message only once a size is chosen */
