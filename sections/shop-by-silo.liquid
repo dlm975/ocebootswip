@@ -39,13 +39,6 @@
             assign brand_url = block.settings.collection.url
             assign brand_image = block.settings.image | default: block.settings.collection.featured_image
             assign start = forloop.index
-            assign silo_count = 0
-            for silo in section.blocks offset: start
-              if silo.type == 'brand'
-                break
-              endif
-              assign silo_count = silo_count | plus: 1
-            endfor
           -%}
           <li class="ssilo__brand" data-item="{{ block.id }}" {{ block.shopify_attributes }}>
             <button
@@ -71,7 +64,6 @@
               </span>
               <span class="ssilo__brand-text">
                 <span class="ssilo__brand-name">{{ brand_name | escape }}</span>
-                <span class="ssilo__brand-sub">{{ silo_count }} {{ silo_count | pluralize: 'silo', 'silos' }}</span>
               </span>
               <span class="ssilo__plus ssilo__plus--brand" aria-hidden="true">
                 {%- render 'gicon', name: 'add', size: 24 -%}
@@ -117,7 +109,7 @@
                           {{
                             silo_image
                             | image_url: width: 200
-                            | image_tag: widths: '120, 200', sizes: '76px', loading: 'eager', fetchpriority: 'low', class: 'ssilo__thumb-image', alt: ''
+                            | image_tag: widths: '120, 200', sizes: '(min-width: 750px) 96px, 76px', loading: 'eager', fetchpriority: 'low', class: 'ssilo__thumb-image', alt: ''
                           }}
                         {%- endif -%}
                       </span>
@@ -167,7 +159,7 @@
                                           {{
                                             generation.featured_image
                                             | image_url: width: 160
-                                            | image_tag: widths: '100, 160', sizes: '64px', loading: 'lazy', class: 'ssilo__thumb-image', alt: ''
+                                            | image_tag: widths: '100, 160', sizes: '(min-width: 750px) 80px, 64px', loading: 'lazy', class: 'ssilo__thumb-image', alt: ''
                                           }}
                                         {%- endif -%}
                                       </span>
@@ -756,16 +748,6 @@
     white-space: nowrap;
   }
 
-  .ssilo__brand-sub {
-    margin-block-start: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    opacity: 0.8;
-  }
-
-  .ssilo__brand.is-open .ssilo__brand-sub {
-    opacity: 0.55;
-  }
 
   .ssilo__plus {
     display: grid;
@@ -813,12 +795,7 @@
   }
 
   .ssilo__silo {
-    border-block-end: 1px solid rgb(18 18 18 / 0.08);
     transform-origin: 50% 0;
-  }
-
-  .ssilo__silo:last-child {
-    border-block-end: 0;
   }
 
   .ssilo__silos.has-open > .ssilo__silo:not(.is-open) > .ssilo__row {
@@ -917,7 +894,6 @@
     height: 100%;
     min-height: 58px;
     padding: 6px 2px;
-    border-block-end: 1px solid rgb(18 18 18 / 0.08);
     color: #121212;
     text-decoration: none;
     -webkit-tap-highlight-color: transparent;
@@ -1050,12 +1026,45 @@
       inset: auto 72px 16px 18px;
     }
 
-    .ssilo__brand-sub {
-      font-size: 0.8125rem;
-    }
 
     .ssilo__inner--brand {
-      padding: 4px 12px 10px;
+      padding: 4px 16px 12px;
+    }
+
+    /* Desktop: larger text in the panels */
+    .ssilo__row {
+      min-height: 76px;
+    }
+
+    .ssilo__row-name {
+      font-size: 1.375rem;
+    }
+
+    .ssilo__gen-name {
+      font-size: 1.125rem;
+    }
+
+    .ssilo__row-sub {
+      font-size: 0.875rem;
+    }
+
+    .ssilo__all,
+    .ssilo__close {
+      font-size: 1rem;
+    }
+
+    .ssilo__gen {
+      min-height: 66px;
+    }
+
+    .ssilo__thumb {
+      width: 96px;
+      height: 62px;
+    }
+
+    .ssilo__gen-pic {
+      width: 80px;
+      height: 56px;
     }
 
     .ssilo__gens {
