@@ -236,10 +236,26 @@
     }
 
     async function open(handle, from) {
+      if (current === handle) return; // a second tap while it opens
       if (closing) await closing;
       current = handle;
       opener = from;
-      body.replaceChildren(skeleton());
+      // Wait briefly for the product (usually already fetched on hover or press), so the window
+      // opens at its full size with the sizes in place, rather than growing once they arrive.
+      const loading = load(handle);
+      const early = await Promise.race([loading, new Promise((resolve) => setTimeout(() => resolve(undefined), 600))]);
+      if (current !== handle) return;
+      const ready = early !== undefined;
+
+      if (ready && early) {
+        const fresh = early.cloneNode(true);
+        body.replaceChildren(fresh);
+        setUp(fresh);
+      } else if (ready) {
+        body.replaceChildren(failed(handle));
+      } else {
+        body.replaceChildren(skeleton());
+      }
       dialog.showModal();
       document.documentElement.classList.add('wlq-open');
       if (!reduced()) {
@@ -247,22 +263,20 @@
         // Zooms open in the middle of the screen (phones and desktop)
         animate(sheet, { opacity: [0, 1], transform: ['scale(0.86)', 'scale(1)'] }, { duration: MOVE, ease: EASE });
       }
+      if (ready) return;
 
-      const product = await load(handle);
+      // Slow connection: the placeholder shows first, then the product takes its place
+      const product = await loading;
       if (!dialog.open || current !== handle) return;
       const startHeight = sheet.getBoundingClientRect().height;
       if (!product) {
-        const p = document.createElement('p');
-        p.className = 'wlq__failed';
-        p.innerHTML = 'Couldn’t load this boot. <a href="/products/' + encodeURIComponent(handle) + '">Open its page</a>';
-        body.replaceChildren(p);
+        body.replaceChildren(failed(handle));
         return;
       }
       const fresh = product.cloneNode(true);
       body.replaceChildren(fresh);
       setUp(fresh);
       if (reduced()) return;
-      // Ease from the placeholder's height to the product's, and fade the product in
       const endHeight = sheet.getBoundingClientRect().height;
       if (Math.abs(endHeight - startHeight) > 1) {
         sheet.style.overflow = 'hidden';
@@ -272,6 +286,13 @@
         });
       }
       animate(fresh, { opacity: [0, 1] }, { duration: 0.3, ease: 'linear' });
+    }
+
+    function failed(handle) {
+      const p = document.createElement('p');
+      p.className = 'wlq__failed';
+      p.innerHTML = 'Couldn’t load this boot. <a href="/products/' + encodeURIComponent(handle) + '">Open its page</a>';
+      return p;
     }
 
     function close() {
