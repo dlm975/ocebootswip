@@ -4406,7 +4406,7 @@ html.wlq-open {
   isolation: isolate;
   color: #121212 !important;
   /* A lens, convex on both faces: a bright highlight up top, a softer reflected one below, and
-     the foil darkening evenly towards the rim. No shadow and no edge underneath. */
+     the foil darkening evenly towards the rim; no shadow and no edge underneath. */
   background:
     radial-gradient(ellipse 70% 46% at 50% 18%, rgb(255 255 255 / 0.85) 0%, rgb(255 255 255 / 0) 70%) 0 0 / 100% 100% no-repeat,
     radial-gradient(ellipse 60% 36% at 50% 86%, rgb(255 255 255 / 0.4) 0%, rgb(255 255 255 / 0) 70%) 0 0 / 100% 100% no-repeat,

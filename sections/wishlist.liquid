@@ -244,7 +244,7 @@
       document.documentElement.classList.add('wlq-open');
       if (!reduced()) {
         animate(scrim, { opacity: [0, 1] }, { duration: 0.3, ease: 'linear' });
-        // Zooms open in the middle of the screen
+        // Zooms open in the middle of the screen (phones and desktop)
         animate(sheet, { opacity: [0, 1], transform: ['scale(0.86)', 'scale(1)'] }, { duration: MOVE, ease: EASE });
       }
 
