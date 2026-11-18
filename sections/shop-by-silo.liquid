@@ -372,6 +372,8 @@
 
       this.current.set(host, id);
       this.mark(id, true);
+      // Load this level's images now, and those of the levels it can open, so they're ready
+      to.querySelectorAll('img[loading="lazy"]').forEach((img) => (img.loading = 'eager'));
       to.hidden = false;
       clear(host, 'height');
       const endHeight = host.getBoundingClientRect().height;
@@ -697,7 +699,7 @@
     font-weight: 700;
     line-height: 1.2;
     letter-spacing: -0.01em;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 
   .ssilo__pill-sub {
@@ -728,6 +730,29 @@
   .ssilo__all:focus-visible {
     outline: 2px solid #121212;
     outline-offset: 3px;
+  }
+
+  /* Phones: two pills a row, so the name gets the room (no arrow, smaller image) */
+  @media screen and (max-width: 749px) {
+    .ssilo__pill {
+      gap: 8px;
+      min-height: 56px;
+      padding: 5px 8px 5px 5px;
+    }
+
+    .ssilo__thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: 9px;
+    }
+
+    .ssilo__pill-name {
+      font-size: 0.875rem;
+    }
+
+    .ssilo__pill .ssilo__toggle {
+      display: none;
+    }
   }
 
   @media screen and (min-width: 750px) {
