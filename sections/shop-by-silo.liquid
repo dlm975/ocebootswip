@@ -101,7 +101,7 @@
                           {{
                             silo_image
                             | image_url: width: 280
-                            | image_tag: widths: '120, 200, 280', sizes: '(min-width: 750px) 104px, 60px', loading: 'eager', fetchpriority: 'low', class: 'ssilo__thumb-image', alt: ''
+                            | image_tag: widths: '120, 200, 280', sizes: '(min-width: 750px) 104px, 54px', loading: 'eager', fetchpriority: 'low', class: 'ssilo__thumb-image', alt: ''
                           }}
                         {%- endif -%}
                       </span>
@@ -147,7 +147,7 @@
                                           {{
                                             generation.featured_image
                                             | image_url: width: 160
-                                            | image_tag: widths: '100, 160', sizes: '(min-width: 750px) 88px, 60px', loading: 'lazy', class: 'ssilo__thumb-image', alt: ''
+                                            | image_tag: widths: '100, 160', sizes: '(min-width: 750px) 88px, 44px', loading: 'lazy', class: 'ssilo__thumb-image', alt: ''
                                           }}
                                         {%- endif -%}
                                       </span>
@@ -800,15 +800,12 @@
   .ssilo__thumb {
     display: block;
     flex: none;
-    width: 60px;
-    height: 36px;
+    width: 54px;
+    height: 32px;
     border-radius: 7px;
     overflow: hidden;
   }
 
-  .ssilo__thumb .ssilo__thumb-image {
-    object-fit: cover;
-  }
 
   .ssilo__thumb-image {
     display: block;
@@ -826,7 +823,7 @@
 
   /* Names as tall as their images */
   .ssilo__row-name {
-    font-size: 2.125rem;
+    font-size: 1.875rem;
     font-weight: 750;
     line-height: 1.06;
     letter-spacing: -0.03em;
@@ -848,8 +845,8 @@
   /* Generations: plain lines, the name on the left and a picture on the right */
   .ssilo__gens {
     display: grid;
-    grid-template-columns: minmax(0, max-content) max-content minmax(0, 1fr);
-    column-gap: 12px;
+    grid-template-columns: repeat(2, minmax(0, max-content) max-content minmax(0, 1fr));
+    column-gap: 8px;
   }
 
   .ssilo__gens > li {
@@ -874,21 +871,17 @@
 
   .ssilo__gen-pic {
     display: block;
-    width: 60px;
-    height: 32px;
+    width: 44px;
+    height: 26px;
   }
 
-  /* Product photos have a lot of white around the boot: crop it so the boot fills the frame */
-  .ssilo__gen-pic .ssilo__thumb-image {
-    object-fit: cover;
-    transform: scale(1.15);
-  }
+
 
   .ssilo__gen-name {
-    font-size: 1.75rem;
+    font-size: 1.125rem;
     font-weight: 700;
-    line-height: 1.08;
-    letter-spacing: -0.025em;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
     overflow-wrap: break-word;
   }
 
@@ -1020,18 +1013,18 @@
     }
 
     .ssilo__row {
-      padding-block: 4px;
+      padding-block: 8px;
     }
 
     .ssilo__row-name {
       font-size: 3.75rem;
-      line-height: 1;
+      line-height: 1.05;
       letter-spacing: -0.035em;
     }
 
     .ssilo__gen-name {
       font-size: 2.75rem;
-      line-height: 1;
+      line-height: 1.05;
       letter-spacing: -0.03em;
     }
 
@@ -1045,7 +1038,7 @@
     }
 
     .ssilo__gen {
-      padding-block: 2px;
+      padding-block: 6px;
     }
 
     .ssilo__thumb {
