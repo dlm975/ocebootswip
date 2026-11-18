@@ -240,6 +240,13 @@
     "shop_by_silo_main": {
       "type": "shop-by-silo",
       "blocks": {
+        "brand_nike": {
+          "type": "brand",
+          "settings": {
+            "title": "Nike",
+            "collection": "nike"
+          }
+        },
         "silo_01": {
           "type": "silo",
           "settings": {
@@ -296,6 +303,7 @@
             "title": "Nike Tiempo",
             "generations": [
               "nike-tiempo-legend-10",
+              "nike-tiempo-maestro",
               "nike-tiempo-legend-9",
               "nike-tiempo-legend-8",
               "nike-tiempo-legend-7",
@@ -305,6 +313,61 @@
               "nike-tiempo-legend-3"
             ],
             "collection": "tiempo-1"
+          }
+        },
+        "silo_07": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike Hypervenom",
+            "generations": [
+              "nike-hypervenom-phantom-3",
+              "nike-hypervenom-phantom-2",
+              "nike-hypervenom-phantom-1"
+            ],
+            "collection": "hypervenom-1"
+          }
+        },
+        "silo_08": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike Magista",
+            "generations": [
+              "nike-magista-obra-2",
+              "nike-magista-opus-2",
+              "nike-magista-obra-1",
+              "nike-magista-opus-1"
+            ],
+            "collection": "magista-1"
+          }
+        },
+        "silo_11": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike CTR360",
+            "generations": [
+              "nike-ctr360-maestri-3",
+              "nike-ctr360-maestri-2",
+              "nike-ctr360-maestri-1"
+            ],
+            "collection": "ctr360-1"
+          }
+        },
+        "silo_12": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike Total 90",
+            "generations": [
+              "nike-total-90-laser-4",
+              "nike-total-90-laser-3"
+            ],
+            "collection": "total-91"
+          }
+        },
+        "brand_adidas": {
+          "type": "brand",
+          "settings": {
+            "title": "adidas",
+            "collection": "adidas"
           }
         },
         "silo_04": {
@@ -351,31 +414,6 @@
             "collection": "f50"
           }
         },
-        "silo_07": {
-          "type": "silo",
-          "settings": {
-            "title": "Nike Hypervenom",
-            "generations": [
-              "nike-hypervenom-phantom-3",
-              "nike-hypervenom-phantom-2",
-              "nike-hypervenom-phantom-1"
-            ],
-            "collection": "hypervenom-1"
-          }
-        },
-        "silo_08": {
-          "type": "silo",
-          "settings": {
-            "title": "Nike Magista",
-            "generations": [
-              "nike-magista-obra-2",
-              "nike-magista-opus-2",
-              "nike-magista-obra-1",
-              "nike-magista-opus-1"
-            ],
-            "collection": "magista-1"
-          }
-        },
         "silo_09": {
           "type": "silo",
           "settings": {
@@ -401,27 +439,16 @@
             "collection": "nemeziz"
           }
         },
-        "silo_11": {
+        "silo_16": {
           "type": "silo",
           "settings": {
-            "title": "Nike CTR360",
+            "title": "adidas 11Pro",
+            "collection": "11pro",
             "generations": [
-              "nike-ctr360-maestri-3",
-              "nike-ctr360-maestri-2",
-              "nike-ctr360-maestri-1"
-            ],
-            "collection": "ctr360-1"
-          }
-        },
-        "silo_12": {
-          "type": "silo",
-          "settings": {
-            "title": "Nike Total 90",
-            "generations": [
-              "nike-total-90-laser-4",
-              "nike-total-90-laser-3"
-            ],
-            "collection": "total-91"
+              "adidas-11pro-elite",
+              "adidas-11pro",
+              "adidas-adipure-11pro"
+            ]
           }
         },
         "silo_13": {
@@ -435,44 +462,75 @@
             ]
           }
         },
+        "brand_puma": {
+          "type": "brand",
+          "settings": {
+            "title": "Puma",
+            "collection": "puma-1"
+          }
+        },
         "silo_14": {
           "type": "silo",
           "settings": {
-            "title": "Puma",
-            "generations": [
-              "puma-future",
-              "puma-ultra",
-              "puma-evopower"
-            ],
-            "collection": "puma-1"
+            "title": "Puma Future",
+            "collection": "puma-future",
+            "generations": []
+          }
+        },
+        "silo_17": {
+          "type": "silo",
+          "settings": {
+            "title": "Puma Ultra",
+            "collection": "puma-ultra",
+            "generations": []
+          }
+        },
+        "silo_18": {
+          "type": "silo",
+          "settings": {
+            "title": "Puma evoPOWER",
+            "collection": "puma-evopower",
+            "generations": []
+          }
+        },
+        "brand_mizuno": {
+          "type": "brand",
+          "settings": {
+            "title": "Mizuno",
+            "collection": "mizuno"
           }
         },
         "silo_15": {
           "type": "silo",
           "settings": {
-            "title": "Mizuno",
-            "generations": [
-              "mizuno-morelia"
-            ],
-            "collection": "mizuno"
+            "title": "Mizuno Morelia",
+            "collection": "mizuno-morelia",
+            "generations": []
           }
         }
       },
       "block_order": [
+        "brand_nike",
         "silo_01",
         "silo_02",
         "silo_03",
+        "silo_07",
+        "silo_08",
+        "silo_11",
+        "silo_12",
+        "brand_adidas",
         "silo_04",
         "silo_05",
         "silo_06",
-        "silo_07",
-        "silo_08",
         "silo_09",
         "silo_10",
-        "silo_11",
-        "silo_12",
+        "silo_16",
         "silo_13",
+        "brand_puma",
         "silo_14",
+        "silo_17",
+        "silo_18",
+        "brand_mizuno",
         "silo_15"
       ],
       "settings": {
