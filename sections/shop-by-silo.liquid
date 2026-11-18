@@ -147,7 +147,7 @@
                                           {{
                                             generation.featured_image
                                             | image_url: width: 160
-                                            | image_tag: widths: '100, 160', sizes: '(min-width: 750px) 76px, 52px', loading: 'lazy', class: 'ssilo__thumb-image', alt: ''
+                                            | image_tag: widths: '100, 160', sizes: '(min-width: 750px) 88px, 60px', loading: 'lazy', class: 'ssilo__thumb-image', alt: ''
                                           }}
                                         {%- endif -%}
                                       </span>
@@ -874,8 +874,14 @@
 
   .ssilo__gen-pic {
     display: block;
-    width: 52px;
-    height: 30px;
+    width: 60px;
+    height: 32px;
+  }
+
+  /* Product photos have a lot of white around the boot: crop it so the boot fills the frame */
+  .ssilo__gen-pic .ssilo__thumb-image {
+    object-fit: cover;
+    transform: scale(1.15);
   }
 
   .ssilo__gen-name {
@@ -1049,8 +1055,8 @@
     }
 
     .ssilo__gen-pic {
-      width: 76px;
-      height: 44px;
+      width: 88px;
+      height: 46px;
     }
 
     /* Three generations a row, each column lined up on its own longest name */
