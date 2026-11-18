@@ -237,6 +237,251 @@
         "padding-block-end": 0
       }
     },
+    "shop_by_silo_main": {
+      "type": "shop-by-silo",
+      "blocks": {
+        "silo_01": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike Mercurial",
+            "generations": [
+              "nike-mercurial-vapor-17",
+              "nike-mercurial-vapor-16",
+              "nike-mercurial-vapor-15",
+              "nike-mercurial-vapor-14",
+              "nike-mercurial-vapor-13",
+              "nike-mercurial-vapor-12",
+              "nike-mercurial-vapor-11",
+              "nike-mercurial-vapor-10",
+              "nike-mercurial-vapor-9",
+              "nike-mercurial-vapor-8",
+              "nike-mercurial-vapor-7",
+              "nike-mercurial-vapor-5",
+              "nike-mercurial-vapor-3",
+              "nike-mercurial-vapor-1",
+              "nike-mercurial-superfly-11",
+              "nike-mercurial-superfly-10",
+              "nike-mercurial-superfly-9",
+              "nike-mercurial-superfly-8",
+              "nike-mercurial-superfly-7",
+              "nike-mercurial-superfly-6",
+              "nike-mercurial-superfly-5",
+              "nike-mercurial-superfly-4",
+              "nike-mercurial-superfly-3"
+            ],
+            "collection": "nike-mercurial"
+          }
+        },
+        "silo_02": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike Phantom",
+            "generations": [
+              "nike-phantom-6",
+              "nike-phantom-luna",
+              "nike-phantom-gx-2",
+              "nike-phantom-gx",
+              "nike-phantom-gt-2",
+              "nike-phantom-gt",
+              "nike-phantom-vision-2",
+              "nike-phantom-vision",
+              "nike-phantom-venom"
+            ],
+            "collection": "phantom-1"
+          }
+        },
+        "silo_03": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike Tiempo",
+            "generations": [
+              "nike-tiempo-legend-10",
+              "nike-tiempo-legend-9",
+              "nike-tiempo-legend-8",
+              "nike-tiempo-legend-7",
+              "nike-tiempo-legend-6",
+              "nike-tiempo-legend-5",
+              "nike-tiempo-legend-4",
+              "nike-tiempo-legend-3"
+            ],
+            "collection": "tiempo-1"
+          }
+        },
+        "silo_04": {
+          "type": "silo",
+          "settings": {
+            "title": "adidas Predator",
+            "generations": [
+              "adidas-predator-ft",
+              "adidas-predator-accuracy",
+              "adidas-predator-instinct",
+              "adidas-predator-lz"
+            ],
+            "collection": "predator-1"
+          }
+        },
+        "silo_05": {
+          "type": "silo",
+          "settings": {
+            "title": "adidas X",
+            "generations": [
+              "adidas-x-crazyfast",
+              "adidas-x-speedportal",
+              "adidas-x-speedflow",
+              "adidas-x-ghosted",
+              "adidas-x-19",
+              "adidas-x-18",
+              "adidas-x-17",
+              "adidas-x-16",
+              "adidas-x-15"
+            ],
+            "collection": "x"
+          }
+        },
+        "silo_06": {
+          "type": "silo",
+          "settings": {
+            "title": "adidas F50",
+            "generations": [
+              "adidas-f50-elite",
+              "adidas-f50-adizero",
+              "adidas-f50-itunit",
+              "adidas-f50-hyperfast"
+            ],
+            "collection": "f50"
+          }
+        },
+        "silo_07": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike Hypervenom",
+            "generations": [
+              "nike-hypervenom-phantom-3",
+              "nike-hypervenom-phantom-2",
+              "nike-hypervenom-phantom-1"
+            ],
+            "collection": "hypervenom-1"
+          }
+        },
+        "silo_08": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike Magista",
+            "generations": [
+              "nike-magista-obra-2",
+              "nike-magista-opus-2",
+              "nike-magista-obra-1",
+              "nike-magista-opus-1"
+            ],
+            "collection": "magista-1"
+          }
+        },
+        "silo_09": {
+          "type": "silo",
+          "settings": {
+            "title": "adidas Copa",
+            "generations": [
+              "adidas-copa-pure",
+              "adidas-copa-sense",
+              "adidas-copa-20",
+              "adidas-copa-19"
+            ],
+            "collection": "copa"
+          }
+        },
+        "silo_10": {
+          "type": "silo",
+          "settings": {
+            "title": "adidas Nemeziz",
+            "generations": [
+              "adidas-nemeziz-19",
+              "adidas-nemeziz-18",
+              "adidas-nemeziz-17"
+            ],
+            "collection": "nemeziz"
+          }
+        },
+        "silo_11": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike CTR360",
+            "generations": [
+              "nike-ctr360-maestri-3",
+              "nike-ctr360-maestri-2",
+              "nike-ctr360-maestri-1"
+            ],
+            "collection": "ctr360-1"
+          }
+        },
+        "silo_12": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike Total 90",
+            "generations": [
+              "nike-total-90-laser-4",
+              "nike-total-90-laser-3"
+            ],
+            "collection": "total-91"
+          }
+        },
+        "silo_13": {
+          "type": "silo",
+          "settings": {
+            "title": "adidas Ace",
+            "generations": [
+              "adidas-ace-17",
+              "adidas-ace-16",
+              "adidas-ace-15"
+            ]
+          }
+        },
+        "silo_14": {
+          "type": "silo",
+          "settings": {
+            "title": "Puma",
+            "generations": [
+              "puma-future",
+              "puma-ultra",
+              "puma-evopower"
+            ],
+            "collection": "puma-1"
+          }
+        },
+        "silo_15": {
+          "type": "silo",
+          "settings": {
+            "title": "Mizuno",
+            "generations": [
+              "mizuno-morelia"
+            ],
+            "collection": "mizuno"
+          }
+        }
+      },
+      "block_order": [
+        "silo_01",
+        "silo_02",
+        "silo_03",
+        "silo_04",
+        "silo_05",
+        "silo_06",
+        "silo_07",
+        "silo_08",
+        "silo_09",
+        "silo_10",
+        "silo_11",
+        "silo_12",
+        "silo_13",
+        "silo_14",
+        "silo_15"
+      ],
+      "settings": {
+        "heading": "Shop by silo",
+        "color_scheme": "scheme-1",
+        "padding-block-start": 32,
+        "padding-block-end": 32
+      }
+    },
     "collection_cutout_grid_gidTf3": {
       "type": "collection-cutout-grid",
       "blocks": {
@@ -412,7 +657,8 @@
         "image_ratio": "1/1",
         "padding-block-start": 0,
         "padding-block-end": 0
-      }
+      },
+      "disabled": true
     },
     "pro_player_wall_hhtJ4x": {
       "type": "pro-player-wall",
@@ -1008,6 +1254,7 @@
     "bf_ripped_hero_section",
     "1770583639efe53d54",
     "17706063529fca8395",
+    "shop_by_silo_main",
     "collection_cutout_grid_gidTf3",
     "pro_player_wall_hhtJ4x",
     "newly_listed_fc",
