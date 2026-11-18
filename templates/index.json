@@ -1068,8 +1068,8 @@
         "horizontal_alignment": "flex-start",
         "gap": 0,
         "color_scheme": "scheme-1",
-        "padding-block-start": 0,
-        "padding-block-end": 40,
+        "padding-block-start": 8,
+        "padding-block-end": 48,
         "mobile_view_all_card": false,
         "boxed": true
       },
