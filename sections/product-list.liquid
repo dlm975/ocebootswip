@@ -35,6 +35,7 @@
     section--{{ section.settings.section_width }}
     color-{{ section.settings.color_scheme }}
     section-resource-list
+    {% if section.settings.mobile_columns == '4' %}plist--m4{% endif %}
     spacing-style
     gap-style
     {% if request.design_mode == false and section.settings.collection == blank %}
@@ -155,6 +156,42 @@
 </div>
 
 {% stylesheet %}
+  /* Four a row on phones: compact cards, so names and prices fit their narrow column */
+  @media screen and (max-width: 749px) {
+    .plist--m4 .resource-list {
+      column-gap: 6px;
+      row-gap: 14px;
+    }
+
+    .plist--m4 .product-card__content > :not(.card-gallery, .bfsale-badge-anchor),
+    .plist--m4 .product-card__content > :not(.card-gallery, .bfsale-badge-anchor) * {
+      font-size: 0.6875rem !important;
+      line-height: 1.25 !important;
+      letter-spacing: 0 !important;
+    }
+
+    /* Names to two lines */
+    .plist--m4 .product-card__content > :not(.card-gallery, .bfsale-badge-anchor):has(+ * + *) :is(p, h3, h4, a) {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .plist--m4 .wishlist-toggle--card {
+      --wishlist-offset: 2px;
+      zoom: 0.6;
+    }
+
+    .plist--m4 .bfsale-badge-anchor {
+      zoom: 0.55;
+    }
+
+    .plist--m4 .slideshow-control {
+      display: none;
+    }
+  }
+
   /* Mobile cap: hide products beyond the mobile_max threshold */
   @media screen and (max-width: 749px) {
     .resource-list__item--mobile-hidden {
