@@ -207,8 +207,8 @@
   .psb {
     --psb-ease: cubic-bezier(0.3, 0.7, 0.3, 1);
     --psb-key-face: linear-gradient(180deg, #ffffff 0%, #f7f7f5 100%);
-    --psb-key-raised: inset 0 1px 0 #ffffff, 2px 3px 0 #d4d4d8, 2px 4px 8px rgb(18 18 18 / 0.06);
-    --psb-key-pressed: inset 1px 2px 3px rgb(18 18 18 / 0.08), 0.5px 1px 0 #d4d4d8;
+    --psb-key-raised: inset 0 1px 0 #ffffff, -2px 3px 0 #d4d4d8, -2px 4px 8px rgb(18 18 18 / 0.06);
+    --psb-key-pressed: inset -1px 2px 3px rgb(18 18 18 / 0.08), -0.5px 1px 0 #d4d4d8;
 
     position: fixed;
     z-index: 40;
@@ -288,7 +288,7 @@
 
   .psb__pill:active,
   .psb__pill[aria-expanded='true'] {
-    transform: translate(1.5px, 2px);
+    transform: translate(-1.5px, 2px);
     box-shadow: var(--psb-key-pressed);
   }
 
@@ -465,13 +465,13 @@
   @media (hover: hover) {
     .psb__opt:hover:not([disabled], [aria-selected='true']) {
       border-color: #b8b8bf;
-      transform: translate(-0.5px, -1px);
+      transform: translate(0.5px, -1px);
     }
   }
 
   .psb__opt:active:not([disabled]),
   .psb__opt[aria-selected='true'] {
-    transform: translate(1.5px, 2px);
+    transform: translate(-1.5px, 2px);
     box-shadow: var(--psb-key-pressed);
   }
 
