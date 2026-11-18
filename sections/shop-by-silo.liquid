@@ -240,7 +240,7 @@
       const opening = this.open !== id;
       const previous = this.open;
       const name = this.names.find((n) => n.dataset.siloName === id);
-      // Where the tapped title is now, before anything above it closes
+      // Where the tapped title is now, before anything above it closes (v2)
       const titleTop = name.getBoundingClientRect().top;
       if (previous) this.collapse(previous, opening);
       if (!opening) {
@@ -254,7 +254,8 @@
       panel.getAnimations().forEach((a) => a.cancel());
       panel.hidden = false;
       // Keep the tapped title where it was on screen when one above closes at the same time
-      if (previous) window.scrollBy(0, name.getBoundingClientRect().top - titleTop);
+      // (instant: the theme scrolls smoothly by default, which would show the jump)
+      if (previous) window.scrollBy({ top: name.getBoundingClientRect().top - titleTop, behavior: 'instant' });
       if (reduced()) return;
       const height = panel.getBoundingClientRect().height;
       panel.style.overflow = 'hidden';
