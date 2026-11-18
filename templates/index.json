@@ -948,10 +948,18 @@
                 "padding-inline-end": 0
               },
               "blocks": {}
+            },
+            "shop-new-link": {
+              "type": "_product-list-link",
+              "settings": {
+                "label": "Shop new",
+                "link": "shopify://collections/shop-new"
+              }
             }
           },
           "block_order": [
-            "newly-listed-title"
+            "newly-listed-title",
+            "shop-new-link"
           ]
         },
         "static-product-card": {
@@ -1045,13 +1053,13 @@
         }
       },
       "settings": {
-        "collection": "all-football-boots",
+        "collection": "shop-new",
         "layout_type": "grid",
         "carousel_on_mobile": false,
         "max_products": 12,
         "mobile_max": 8,
         "columns": 6,
-        "mobile_columns": "3",
+        "mobile_columns": "4",
         "mobile_card_size": "60cqw",
         "columns_gap": 0,
         "rows_gap": 8,
@@ -1062,7 +1070,8 @@
         "gap": 0,
         "color_scheme": "scheme-1",
         "padding-block-start": 0,
-        "padding-block-end": 40
+        "padding-block-end": 40,
+        "mobile_view_all_card": false
       }
     },
     "brand_tiles_main": {
