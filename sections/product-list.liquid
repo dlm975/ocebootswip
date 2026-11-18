@@ -175,6 +175,11 @@
     min-width: 0;
   }
 
+  /* Photo-only cards: room under the photo for a sale badge that sits on its edge */
+  .plist-box .product-card__content:not(:has(> :not(.card-gallery, .bfsale-badge-anchor))):has(.bfsale-badge-anchor) {
+    padding-block-end: 12px;
+  }
+
   @media screen and (min-width: 750px) {
     .plist-box {
       padding: 28px 28px 32px;
