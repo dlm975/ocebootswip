@@ -103,7 +103,7 @@
           aria-haspopup="listbox"
           aria-expanded="false"
         >
-          <span class="psb__pill-label" data-psb-label>{{ size_label }}</span>
+          <span class="psb__pill-label" data-psb-label>{{ size_label | split: ' - ' | first }}</span>
           {%- render 'gicon', name: 'keyboard_arrow_down', class: 'psb__chev', size: 13 -%}
         </button>
       {%- elsif show_size -%}
@@ -112,7 +112,7 @@
           chevron and nothing to open.
         {%- endcomment -%}
         <span class="psb__pill psb__pill--static">
-          <span class="psb__pill-label" data-psb-label>{{ size_label }}</span>
+          <span class="psb__pill-label" data-psb-label>{{ size_label | split: ' - ' | first }}</span>
         </span>
       {%- endif -%}
 
@@ -302,8 +302,11 @@
     pointer-events: none;
   }
 
+  /* Just the main size ("US 10.5"); the sheet shows the full US · UK · EU */
   .psb__pill-label {
     overflow: hidden;
+    font-weight: inherit;
+    font-size: 0.9375rem;
     text-overflow: ellipsis;
   }
 
@@ -661,7 +664,7 @@
        on the page (or its option value has since changed). */
     function applyLocally(id, text) {
       if (variantInput) variantInput.value = id;
-      if (label && text) label.textContent = text;
+      if (label && text) label.textContent = String(text).split(' - ')[0];
 
       opts.forEach(function (o) {
         o.setAttribute('aria-selected', o.dataset.variantId === String(id) ? 'true' : 'false');
@@ -725,7 +728,7 @@
         return o.dataset.label === text;
       })[0];
       if (match) applyLocally(match.dataset.variantId, text);
-      else if (label && text) label.textContent = text;
+      else if (label && text) label.textContent = String(text).split(' - ')[0];
     });
 
     /* ── Keep in step with the main picker ── */
