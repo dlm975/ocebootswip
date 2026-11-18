@@ -1,6 +1,9 @@
 {%- doc -%}
-  Phones: a small floating nav at the bottom middle of the screen with Search and Size.
-  - Search opens the site search (snippets/custom-search-overlay.liquid).
+  Phones: a small floating nav at the bottom middle of the screen: a search icon and a size icon.
+  - Search: the nav grows into a search bar that glides up to the upper-middle of the screen, the
+    page fading behind a white blur. Typing shows suggested collections and product cards, as the
+    main search does (it uses the same helpers, assets/search-suggestions.js, and result section),
+    and the bar moves to the top to make room for them.
   - Size slides up a sheet with the size picker (snippets/size-drill-menu.liquid, as in the menu
     drawer): US / UK / EU, each opening its sizes, each size linking to its boots.
   Not on product pages, where the floating buy bar sits at the bottom. Animations: Motion.
@@ -27,9 +30,9 @@
       type="button"
       class="mdock__button"
       data-mdock-search
+      aria-label="Search"
     >
       {%- render 'gicon', name: 'search', size: 22 -%}
-      <span>Search</span>
     </button>
     {%- if size_link -%}
       <span
@@ -42,12 +45,112 @@
         data-mdock-size
         aria-haspopup="dialog"
         aria-controls="mdock-sizes"
+        aria-label="Shop by size"
       >
         {%- render 'gicon', name: 'straighten', size: 22 -%}
-        <span>Size</span>
       </button>
     {%- endif -%}
   </nav>
+
+  <div
+    class="msearch"
+    data-msearch
+    data-suggest-url="{{ routes.predictive_search_url }}"
+    data-search-url="{{ routes.search_url }}"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Search"
+    hidden
+  >
+    <div
+      class="msearch__veil"
+      data-msearch-veil
+    ></div>
+    <div
+      class="msearch__stage"
+      data-msearch-stage
+    >
+      <div
+        class="msearch__spacer"
+        data-msearch-spacer
+      ></div>
+      <form
+        class="msearch__bar"
+        data-msearch-bar
+        action="{{ routes.search_url }}"
+        method="get"
+        autocomplete="off"
+        role="search"
+      >
+        <input
+          type="hidden"
+          name="type"
+          value="product"
+        >
+        {%- render 'gicon', name: 'search', class: 'msearch__glass', size: 22 -%}
+        <input
+          class="msearch__input"
+          data-msearch-input
+          type="search"
+          name="q"
+          placeholder="Search boots"
+          enterkeyhint="search"
+          spellcheck="false"
+          autocapitalize="off"
+          autocorrect="off"
+          aria-label="Search"
+        >
+        <button
+          type="button"
+          class="msearch__close"
+          data-msearch-close
+          aria-label="Close search"
+        >
+          {%- render 'gicon', name: 'close', size: 20 -%}
+        </button>
+      </form>
+      <div
+        class="msearch__results"
+        data-msearch-results
+        aria-live="polite"
+      >
+        <section
+          class="cs-suggest"
+          data-msearch-suggest
+          hidden
+          aria-label="Suggested categories"
+        >
+          <ul
+            class="cs-suggest__list"
+            data-msearch-suggest-list
+            role="list"
+          ></ul>
+        </section>
+        <section
+          class="cs-products"
+          data-msearch-products
+          hidden
+          aria-label="Products"
+        >
+          <h2 class="cs-label">Products</h2>
+          <div data-msearch-grid></div>
+          <a
+            class="cs-viewall"
+            data-msearch-viewall
+            href="{{ routes.search_url }}"
+          >
+            <span data-msearch-viewall-text>View all results</span>
+            {%- render 'gicon', name: 'arrow_forward', size: 16 -%}
+          </a>
+        </section>
+        <p
+          class="cs-none"
+          data-msearch-none
+          hidden
+        ></p>
+      </div>
+    </div>
+  </div>
 
   {%- if size_link -%}
     <dialog
@@ -100,10 +203,7 @@
       const EASE = [0.3, 0.7, 0.3, 1];
       const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      dock.querySelector('[data-mdock-search]').addEventListener('click', () => {
-        if (typeof window.customSearchOpen === 'function') window.customSearchOpen();
-        else window.location.href = '{{ routes.search_url }}';
-      });
+      setUpSearch(dock, EASE, reduced);
 
       if (sheet) {
         const panel = sheet.querySelector('[data-mdock-panel]');
@@ -152,6 +252,206 @@
         });
       }
     }
+
+    /** The nav's search: grows into a bar mid-screen, results like the main search's */
+    function setUpSearch(dock, EASE, reduced) {
+      const layer = document.querySelector('[data-msearch]');
+      const button = dock.querySelector('[data-mdock-search]');
+      if (!layer || !button) return;
+      const veil = layer.querySelector('[data-msearch-veil]');
+      const stage = layer.querySelector('[data-msearch-stage]');
+      const spacer = layer.querySelector('[data-msearch-spacer]');
+      const bar = layer.querySelector('[data-msearch-bar]');
+      const input = layer.querySelector('[data-msearch-input]');
+      const results = layer.querySelector('[data-msearch-results]');
+      const suggestSection = layer.querySelector('[data-msearch-suggest]');
+      const suggestList = layer.querySelector('[data-msearch-suggest-list]');
+      const productsSection = layer.querySelector('[data-msearch-products]');
+      const grid = layer.querySelector('[data-msearch-grid]');
+      const viewAll = layer.querySelector('[data-msearch-viewall]');
+      const viewAllText = layer.querySelector('[data-msearch-viewall-text]');
+      const none = layer.querySelector('[data-msearch-none]');
+      const suggestUrl = layer.dataset.suggestUrl;
+      const searchUrl = layer.dataset.searchUrl;
+      const restTop = () => Math.round(window.innerHeight * 0.28); // where the bar rests: upper middle
+      let raised = false; // results showing: bar at the top
+      let closing = null;
+
+      const clean = (query) => query.replace(/\*+/g, ' ').replace(/\s+/g, ' ').trim();
+
+      /* ---------- Opening and closing ---------- */
+      function open() {
+        if (!layer.hidden) return;
+        const from = dock.getBoundingClientRect();
+        layer.hidden = false;
+        spacer.style.height = restTop() + 'px';
+        raised = false;
+        // Focus at once, inside the tap, so phones bring the keyboard up
+        input.focus({ preventScroll: true });
+        document.documentElement.classList.add('msearch-open');
+        dock.classList.add('is-searching');
+        if (reduced()) return;
+        const to = bar.getBoundingClientRect();
+        animate(veil, { opacity: [0, 1] }, { duration: 0.35, ease: 'linear' });
+        // The nav itself grows into the bar: same centre line, so it rises and widens
+        animate(
+          bar,
+          {
+            width: [from.width + 'px', to.width + 'px'],
+            height: [from.height + 'px', to.height + 'px'],
+            transform: ['translateY(' + (from.top - to.top) + 'px)', 'translateY(0px)'],
+          },
+          { duration: 0.55, ease: EASE }
+        ).then(() => {
+          ['width', 'height', 'transform'].forEach((p) => bar.style.removeProperty(p));
+        });
+      }
+
+      function close() {
+        if (layer.hidden || closing) return closing;
+        input.blur();
+        const finish = () => {
+          layer.hidden = true;
+          document.documentElement.classList.remove('msearch-open');
+          dock.classList.remove('is-searching');
+          [veil, bar, results].forEach((el) => {
+            el.getAnimations().forEach((a) => a.cancel());
+            ['opacity', 'width', 'height', 'transform'].forEach((p) => el.style.removeProperty(p));
+          });
+          input.value = '';
+          showEmpty();
+          closing = null;
+        };
+        if (reduced()) {
+          finish();
+          return Promise.resolve();
+        }
+        const from = bar.getBoundingClientRect();
+        dock.classList.remove('is-searching');
+        const to = dock.getBoundingClientRect();
+        dock.classList.add('is-searching');
+        closing = Promise.all([
+          animate(veil, { opacity: [1, 0] }, { duration: 0.3, ease: 'linear' }),
+          animate(results, { opacity: [1, 0] }, { duration: 0.18, ease: 'linear' }),
+          animate(
+            bar,
+            {
+              width: [from.width + 'px', to.width + 'px'],
+              height: [from.height + 'px', to.height + 'px'],
+              transform: ['translateY(0px)', 'translateY(' + (to.top - from.top) + 'px)'],
+            },
+            { duration: 0.45, ease: EASE }
+          ),
+        ]).then(finish, finish);
+        return closing;
+      }
+
+      /** Bar to the top when there are results, back to the upper middle when there aren't */
+      function raise(up) {
+        if (up === raised) return;
+        raised = up;
+        const from = spacer.getBoundingClientRect().height;
+        const to = up ? 0 : restTop();
+        spacer.getAnimations().forEach((a) => a.cancel());
+        if (reduced()) {
+          spacer.style.height = to + 'px';
+          return;
+        }
+        animate(spacer, { height: [from + 'px', to + 'px'] }, { duration: 0.5, ease: EASE }).then(() => {
+          if (!spacer.getAnimations().length) spacer.style.height = to + 'px';
+        });
+      }
+
+      /* ---------- Results (as the main search) ---------- */
+      const cache = new Map();
+      let controller = null;
+      let timer = null;
+      let shown = '';
+
+      function fetchResults(query) {
+        if (cache.has(query)) return Promise.resolve(cache.get(query));
+        if (controller) controller.abort();
+        controller = new AbortController();
+        return window.OceSearchSuggest.fetchResults(query, suggestUrl, controller.signal).then((data) => {
+          cache.set(query, data);
+          return data;
+        });
+      }
+
+      function suggestionsFor(query, titles) {
+        const api = window.OceSearchSuggest;
+        if (!api) return [];
+        const catalog = api.readCatalog('cs-catalog');
+        const list = api.build(query, titles, 4).map((s) => ({ text: s.text, url: api.url(s.text, catalog, searchUrl) }));
+        api.remember(query, list);
+        return list;
+      }
+
+      function showEmpty() {
+        suggestSection.hidden = true;
+        productsSection.hidden = true;
+        none.hidden = true;
+        suggestList.replaceChildren();
+        grid.replaceChildren();
+        shown = '';
+        raise(false);
+      }
+
+      function showResults(query, data) {
+        const first = !shown;
+        suggestList.replaceChildren();
+        const suggestions = suggestionsFor(query, data.titles);
+        suggestions.forEach((s) => {
+          const item = document.createElement('li');
+          const link = document.createElement('a');
+          link.className = 'cs-suggest__link';
+          link.href = s.url;
+          link.textContent = s.text;
+          item.append(link);
+          suggestList.append(item);
+        });
+        suggestSection.hidden = suggestions.length === 0;
+        grid.replaceChildren();
+        if (data.grid) grid.append(data.grid.cloneNode(true));
+        productsSection.hidden = !data.grid;
+        viewAll.href = searchUrl + '?q=' + encodeURIComponent(query) + '&type=product';
+        viewAllText.textContent = 'View all results for “' + query + '”';
+        none.hidden = !!data.grid;
+        none.textContent = data.grid ? '' : 'No results for “' + query + '”';
+        shown = query;
+        raise(true);
+        if (first && !reduced()) {
+          animate(results, { opacity: [0, 1], transform: ['translateY(12px)', 'translateY(0px)'] }, { duration: 0.45, ease: EASE });
+        }
+      }
+
+      input.addEventListener('input', () => {
+        clearTimeout(timer);
+        const query = clean(input.value);
+        if (!query || !window.OceSearchSuggest) {
+          if (controller) controller.abort();
+          showEmpty();
+          return;
+        }
+        timer = setTimeout(() => {
+          fetchResults(query)
+            .then((data) => {
+              if (clean(input.value) === query) showResults(query, data);
+            })
+            .catch(() => {});
+        }, cache.has(query) ? 0 : 140);
+      });
+
+      layer.querySelector('[data-msearch-close]').addEventListener('click', () => close());
+      // A tap on the blur (not the bar or a result) closes
+      stage.addEventListener('click', (event) => {
+        if (event.target === stage || event.target === spacer || event.target === results) close();
+      });
+      layer.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') close();
+      });
+      button.addEventListener('click', open);
+    }
   </script>
 {%- endunless -%}
 
@@ -182,12 +482,23 @@
       padding-block-end: 76px;
     }
 
+    .mdock {
+      transition: opacity 0.15s linear;
+    }
+
+    /* While searching, the nav has become the search bar */
+    .mdock.is-searching {
+      opacity: 0;
+      pointer-events: none;
+    }
+
     .mdock__button {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
+      justify-content: center;
+      width: 52px;
       height: 44px;
-      padding: 0 18px;
+      padding: 0;
       border: 0;
       border-radius: 999px;
       background: transparent;
@@ -296,8 +607,110 @@
       padding-inline: 20px;
     }
 
-    html.mdock-open {
+    html.mdock-open,
+    html.msearch-open {
       overflow: hidden;
+    }
+
+    /* ---- Search: a bar mid-screen over a white blur ---- */
+    .msearch {
+      --cs-ink: #121212;
+      --cs-muted: rgb(18 18 18 / 0.55);
+      --cs-ease: cubic-bezier(0.3, 0.7, 0.3, 1);
+      --cs-gutter: 16px;
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      color: #121212;
+    }
+
+    .msearch[hidden] {
+      display: none;
+    }
+
+    .msearch__veil {
+      position: absolute;
+      inset: 0;
+      background: rgb(255 255 255 / 0.8);
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+      backdrop-filter: blur(14px) saturate(140%);
+    }
+
+    .msearch__stage {
+      position: absolute;
+      inset: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 40px;
+    }
+
+    .msearch__spacer {
+      height: 28vh;
+    }
+
+    .msearch__bar {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      height: 56px;
+      margin: 0 auto;
+      padding: 0 8px 0 18px;
+      border-radius: 999px;
+      background: #ffffff;
+      box-shadow: 0 0 0 1px rgb(18 18 18 / 0.06), 0 12px 36px rgb(18 18 18 / 0.18);
+      overflow: hidden;
+    }
+
+    .msearch__glass {
+      flex: none;
+      width: 22px;
+      height: 22px;
+    }
+
+    .msearch__input {
+      flex: 1 1 auto;
+      min-width: 0;
+      height: 100%;
+      padding: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: #121212;
+      font: inherit;
+      font-size: 1.0625rem;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .msearch__input::-webkit-search-cancel-button {
+      display: none;
+    }
+
+    .msearch__close {
+      display: grid;
+      flex: none;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: rgb(18 18 18 / 0.06);
+      color: #121212;
+      cursor: pointer;
+    }
+
+    .msearch__close svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .msearch__results {
+      padding-block-start: 18px;
     }
   }
 
