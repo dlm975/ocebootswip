@@ -9,6 +9,27 @@
  */
 {
   "sections": {
+    "image_hero_main": {
+      "type": "image-hero",
+      "settings": {
+        "image": "shopify://shop_images/IMG_7628.jpg",
+        "height_desktop": 88,
+        "height_mobile": 82,
+        "overlay_color": "#000000",
+        "overlay_opacity": 45,
+        "fade_color": "#ffffff",
+        "fade_height": 32,
+        "eyebrow": "",
+        "heading": "Sale is live",
+        "text": "Up to 90% off",
+        "text_alignment": "left",
+        "content_position": "middle",
+        "button_label": "Shop now",
+        "button_link": "shopify://collections/black-friday-2026",
+        "button2_label": "All boots",
+        "button2_link": "shopify://collections/all-football-boots"
+      }
+    },
     "bf_ripped_hero_section": {
       "type": "_blocks",
       "blocks": {
@@ -80,7 +101,8 @@
         "gradient_direction": "to top",
         "padding-block-start": 0,
         "padding-block-end": 0
-      }
+      },
+      "disabled": true
     },
     "1770583639efe53d54": {
       "type": "_blocks",
@@ -982,6 +1004,7 @@
     }
   },
   "order": [
+    "image_hero_main",
     "bf_ripped_hero_section",
     "1770583639efe53d54",
     "17706063529fca8395",
