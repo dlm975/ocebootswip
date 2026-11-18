@@ -1058,7 +1058,7 @@
       "settings": {
         "heading": "Player collections",
         "color_scheme": "scheme-1",
-        "padding-block-start": 24,
+        "padding-block-start": 28,
         "padding-block-end": 48
       }
     }
