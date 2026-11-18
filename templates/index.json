@@ -24,7 +24,7 @@
         "text": "Up to 90% off",
         "text_alignment": "left",
         "content_position": "middle",
-        "button_label": "Shop now",
+        "button_label": "Shop SALE",
         "button_link": "shopify://collections/black-friday-2026",
         "button2_label": "All boots",
         "button2_link": "shopify://collections/all-football-boots"
@@ -46,8 +46,8 @@
             "roughness": 90,
             "flap_count": 0,
             "seed": 43,
-            "hole_color": "#3897F0",
-            "hole_glow_color": "#64748B",
+            "hole_color": "#3897f0",
+            "hole_glow_color": "#64748b",
             "animate": true,
             "heading": "Sale is live",
             "heading_font": "oswald_n7",
@@ -65,7 +65,7 @@
             "button_link": "shopify://collections/black-friday-2026",
             "button_background": "#ffffff",
             "button_text_color": "#121212",
-            "button_hover_background": "#64748B40",
+            "button_hover_background": "#64748b40",
             "button_hover_text_color": "#121212",
             "button_border_radius": 14
           },
@@ -75,6 +75,7 @@
       "block_order": [
         "bf_ripped_hero_BF26"
       ],
+      "disabled": true,
       "settings": {
         "content_direction": "column",
         "vertical_on_mobile": true,
@@ -101,8 +102,7 @@
         "gradient_direction": "to top",
         "padding-block-start": 0,
         "padding-block-end": 0
-      },
-      "disabled": true
+      }
     },
     "1770583639efe53d54": {
       "type": "_blocks",
@@ -129,10 +129,10 @@
             "button_text": "Shop Now",
             "button_link": "shopify://collections/all-football-boots",
             "button_font": "inter_i9",
-            "button_background": "#64748B40",
+            "button_background": "#64748b40",
             "button_text_color": "#121212",
-            "button_hover_background": "#F1F5F9",
-            "button_hover_text_color": "#1F2937",
+            "button_hover_background": "#f1f5f9",
+            "button_hover_text_color": "#1f2937",
             "button_font_size": 16,
             "button_border_radius": 14,
             "button_shadow_enabled": true,
@@ -188,8 +188,8 @@
             "header_gap": 6,
             "section_background": "#ffffff",
             "section_padding": 0,
-            "bar_background": "#F1F5F9",
-            "bar_border_color": "#64748B40",
+            "bar_background": "#f1f5f9",
+            "bar_border_color": "#64748b40",
             "bar_padding": 14,
             "logo_height": 32,
             "logo_gap": 56,
@@ -504,7 +504,7 @@
         "heading": "Trusted by the pros",
         "subheading": "",
         "show_stars": true,
-        "star_color": "#25D366",
+        "star_color": "#25d366",
         "star_size": 20,
         "aspect_ratio": "4 / 5",
         "cards_mobile": 3,
