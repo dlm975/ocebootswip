@@ -101,7 +101,7 @@
                           {{
                             silo_image
                             | image_url: width: 280
-                            | image_tag: widths: '120, 200, 280', sizes: '(min-width: 750px) 136px, 76px', loading: 'eager', fetchpriority: 'low', class: 'ssilo__thumb-image', alt: ''
+                            | image_tag: widths: '120, 200, 280', sizes: '(min-width: 750px) 104px, 72px', loading: 'eager', fetchpriority: 'low', class: 'ssilo__thumb-image', alt: ''
                           }}
                         {%- endif -%}
                       </span>
@@ -147,7 +147,7 @@
                                           {{
                                             generation.featured_image
                                             | image_url: width: 160
-                                            | image_tag: widths: '100, 160', sizes: '(min-width: 750px) 104px, 64px', loading: 'lazy', class: 'ssilo__thumb-image', alt: ''
+                                            | image_tag: widths: '100, 160', sizes: '(min-width: 750px) 84px, 60px', loading: 'lazy', class: 'ssilo__thumb-image', alt: ''
                                           }}
                                         {%- endif -%}
                                       </span>
@@ -248,9 +248,7 @@
         const item = this.itemOf(control.dataset.toggle || control.dataset.close);
         if (!item) return;
         const shut = control.dataset.close || item.classList.contains('is-open');
-        if (item.parentElement === this.brands) this.switchBrand(shut ? null : item);
-        else if (shut) this.close(item);
-        else this.openItem(item);
+        this.switchIn(item.parentElement, shut ? null : item);
       });
 
       // Start loading a panel's images as soon as its opener is pointed at or pressed
@@ -270,8 +268,7 @@
         for (let el = target; el && el !== this; el = el.parentElement.closest('[data-item]')) chain.unshift(el);
         chain.forEach((el) => {
           if (!el.querySelector(':scope > [data-panel]') || el.classList.contains('is-open')) return;
-          if (el.parentElement === this.brands) this.switchBrand(el);
-          else this.openItem(el);
+          this.switchIn(el.parentElement, el);
         });
       };
       document.addEventListener('shopify:block:select', this.onBlockSelect);
@@ -288,7 +285,7 @@
 
     parts(item) {
       const panel = item.querySelector(':scope > [data-panel]');
-      return { head: item.querySelector(':scope > [data-toggle]'), panel, inner: panel.firstElementChild };
+      return { head: item.querySelector(':scope > [data-toggle]'), panel, inner: panel ? panel.firstElementChild : null };
     }
 
     /** What rolls in when a panel opens: its own rows, not those of panels inside it */
@@ -309,57 +306,6 @@
     headerOffset() {
       const header = document.querySelector('#header-component[sticky]');
       return (header ? Math.max(0, header.getBoundingClientRect().bottom) : 0) + 12;
-    }
-
-    openItem(item) {
-      const list = item.parentElement;
-      const previous = this.open.get(list);
-      const { head, panel, inner } = this.parts(item);
-
-      // Panels around this one that are still easing: carry them to their new height too
-      const outer = [];
-      for (let p = panel.parentElement.closest('[data-panel]'); p; p = p.parentElement.closest('[data-panel]')) {
-        if (p.getAnimations().length) outer.push([p, p.getBoundingClientRect().height]);
-      }
-
-      // Where this card's header will sit once any open one above it has closed
-      let headTop = head.getBoundingClientRect().top + window.scrollY;
-      if (previous && previous !== item) {
-        const other = this.parts(previous).panel;
-        // Only a panel that is above this header moves it (on desktop the cards sit two a row)
-        if (!other.hidden && other.getBoundingClientRect().top < head.getBoundingClientRect().top) {
-          headTop -= other.getBoundingClientRect().height;
-        }
-        this.close(previous, false);
-      }
-
-      const startHeight = panel.hidden ? 0 : panel.getBoundingClientRect().height;
-      const returning = panel.hidden ? null : parseFloat(getComputedStyle(inner).opacity);
-      stop(panel);
-      stop(inner);
-      this.setOpen(item, true);
-      panel.querySelectorAll('img[loading="lazy"]').forEach((img) => (img.loading = 'eager'));
-      panel.hidden = false;
-      clear(panel, 'height', 'overflow');
-      clear(inner, 'opacity');
-      const endHeight = panel.getBoundingClientRect().height;
-
-      this.scrollTo(headTop - this.headerOffset());
-      if (reduced()) return;
-
-      this.ease(panel, startHeight, endHeight);
-      outer.forEach(([p, before]) => {
-        stop(p);
-        clear(p, 'height');
-        this.ease(p, before, p.getBoundingClientRect().height);
-      });
-
-      // Caught while closing: bring the content back from where it is
-      if (returning !== null && returning > 0) {
-        animate(inner, { opacity: [returning, 1] }, { duration: 0.25, ease: EASE }).then(() => clear(inner, 'opacity'));
-        return;
-      }
-      this.roll(panel);
     }
 
     /** A panel's rows roll down into place, one after another */
@@ -385,13 +331,14 @@
     }
 
     /**
-     * Brands: open one (or none). The open card takes its row at full width, the others slide to their
-     * new places, its panel eases open as the one it replaces eases shut, and the page scrolls with it.
+     * Open one brand or silo in its list (or none). The open one takes its row at full width, the others
+     * slide to their new places, its panel eases open as the one it replaces eases shut, and the page
+     * scrolls with it: an opened one up under the header, a closed one to the middle of the screen.
      * Positions are animated from where they are (FLIP), so a tap mid-way carries on smoothly.
      */
-    switchBrand(target) {
-      const cards = [...this.brands.children];
-      const previous = this.open.get(this.brands) || null;
+    switchIn(list, target) {
+      const cards = [...list.children];
+      const previous = this.open.get(list) || null;
       if (previous === target) return;
       const was = previous && this.parts(previous);
       const next = target && this.parts(target);
@@ -402,11 +349,18 @@
       const nextFrom = next && !next.panel.hidden ? next.panel.getBoundingClientRect().height : 0;
       const nextOpacity = next && !next.panel.hidden ? parseFloat(getComputedStyle(next.inner).opacity) : null;
 
+      // Panels around this list that are still easing open: carry them to their new height too
+      const outer = [];
+      for (let p = list.parentElement.closest('[data-panel]'); p; p = p.parentElement.closest('[data-panel]')) {
+        if (p.getAnimations().length) outer.push([p, p.getBoundingClientRect().height]);
+      }
+
       // Settle everything into its end state, without animation
       cards.forEach((card) => {
         stop(card);
         clear(card, 'transform', 'width', 'z-index', 'grid-row');
         const { panel, inner } = this.parts(card);
+        if (!panel) return; // a silo that is just a link
         stop(panel);
         stop(inner);
         clear(panel, 'height', 'overflow');
@@ -421,7 +375,7 @@
       if (target) {
         this.setOpen(target, true);
         // It keeps its own row, at full width; its row-mate moves down
-        const columns = getComputedStyle(this.brands).gridTemplateColumns.split(' ').length;
+        const columns = getComputedStyle(list).gridTemplateColumns.split(' ').length;
         target.style.gridRow = String(Math.floor(cards.indexOf(target) / columns) + 1);
         next.panel.querySelectorAll('img[loading="lazy"]').forEach((img) => (img.loading = 'eager'));
         next.panel.hidden = false;
@@ -483,6 +437,11 @@
           this.resetInside(was.panel);
         });
       }
+      outer.forEach(([p, height]) => {
+        stop(p);
+        clear(p, 'height');
+        this.ease(p, height, p.getBoundingClientRect().height);
+      });
       if (next) {
         this.ease(next.panel, nextFrom, nextHeight);
         if (nextOpacity !== null && nextOpacity > 0) {
@@ -493,37 +452,6 @@
           this.roll(next.panel);
         }
       }
-    }
-
-    /** Silos: fade the content and ease the panel shut, bringing its row to the middle of the screen */
-    close(item, settle = true) {
-      const { head, panel, inner } = this.parts(item);
-      this.setOpen(item, false);
-      if (panel.hidden) return;
-      const opacity = parseFloat(getComputedStyle(inner).opacity);
-      const height = panel.getBoundingClientRect().height;
-      stop(panel);
-      stop(inner);
-
-      // The row stays where it is in the page as its panel closes below it
-      if (settle) {
-        const row = head.getBoundingClientRect();
-        this.centre(row.top + window.scrollY, row.height);
-      }
-
-      const done = () => {
-        panel.hidden = true;
-        clear(panel, 'height', 'overflow');
-        clear(inner, 'opacity');
-        this.resetInside(panel);
-      };
-      if (reduced()) return done();
-
-      panel.style.overflow = 'hidden';
-      animate(inner, { opacity: [opacity, 0] }, { duration: OUT, ease: 'linear' });
-      animate(panel, { height: [height + 'px', '0px'] }, { duration: MOVE, ease: EASE }).then(() => {
-        if (!item.classList.contains('is-open') && !panel.getAnimations().length) done();
-      });
     }
 
     /** Anything left open inside a closed panel is shut, out of sight */
@@ -783,7 +711,14 @@
   }
 
   .ssilo__silo {
+    position: relative;
+    background: #ffffff;
     transform-origin: 50% 0;
+  }
+
+  /* An open silo takes its row at full width (desktop has two a row) */
+  .ssilo__silo.is-open {
+    grid-column: 1 / -1;
   }
 
   .ssilo__silos.has-open > .ssilo__silo:not(.is-open) > .ssilo__row {
@@ -795,9 +730,9 @@
     align-items: center;
     gap: 12px;
     width: 100%;
-    min-height: 66px;
+    min-height: 0;
     margin: 0;
-    padding: 8px 2px;
+    padding: 3px 2px;
     border: 0;
     background: none;
     color: #121212;
@@ -820,8 +755,8 @@
   .ssilo__thumb {
     display: block;
     flex: none;
-    width: 76px;
-    height: 50px;
+    width: 72px;
+    height: 44px;
     border-radius: 8px;
     overflow: hidden;
   }
@@ -880,8 +815,8 @@
     justify-content: space-between;
     gap: 8px;
     height: 100%;
-    min-height: 58px;
-    padding: 6px 2px;
+    min-height: 0;
+    padding: 3px 2px;
     color: #121212;
     text-decoration: none;
     -webkit-tap-highlight-color: transparent;
@@ -890,8 +825,8 @@
   .ssilo__gen-pic {
     display: block;
     flex: none;
-    width: 64px;
-    height: 46px;
+    width: 60px;
+    height: 40px;
   }
 
   .ssilo__gen-name {
@@ -1020,9 +955,14 @@
     }
 
     /* Desktop: larger text in the panels */
+    .ssilo__silos {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 40px;
+    }
+
     .ssilo__row {
-      min-height: 104px;
       gap: 20px;
+      padding-block: 4px;
     }
 
     .ssilo__row-name {
@@ -1045,18 +985,18 @@
     }
 
     .ssilo__gen {
-      min-height: 84px;
+      padding-block: 2px;
     }
 
     .ssilo__thumb {
-      width: 136px;
-      height: 88px;
+      width: 104px;
+      height: 60px;
       border-radius: 10px;
     }
 
     .ssilo__gen-pic {
-      width: 104px;
-      height: 72px;
+      width: 84px;
+      height: 50px;
     }
 
     .ssilo__gens {
