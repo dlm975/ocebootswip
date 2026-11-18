@@ -144,7 +144,7 @@
     /*
       The dock's pills open on purposeful pointing, not plain :hover. Opening one slides the others
       along, which can bring an icon under a pointer that hasn't moved; that mustn't open it. So:
-      - an item opens once the pointer has actually moved onto it and rested a moment;
+      - an item opens as soon as the pointer actually moves onto it;
       - just after a switch, the pointer must travel a little before another item can take over;
       - leaving the dock closes the open pill after a short pause (slipping off and back keeps it).
     */
@@ -182,9 +182,22 @@
         const settling = performance.now() - lastSwitch.t < 450;
         if (settling && Math.hypot(event.clientX - lastSwitch.x, event.clientY - lastSwitch.y) < 16) return;
         clearTimeout(openTimer);
-        const point = { x: event.clientX, y: event.clientY };
-        openTimer = setTimeout(() => setOpen(li, point), current ? 120 : 60);
+        setOpen(li, { x: event.clientX, y: event.clientY });
       });
+
+      // The big shape's edges: the dock's left edge and the currency tab's right edge
+      const row = dock.closest('.header__row');
+      const measure = () => {
+        const first = dock.querySelector('.menu-list__list-item');
+        const currency = row?.querySelector('.header__column--right');
+        if (!row || !first) return;
+        const flare = parseFloat(getComputedStyle(dock).getPropertyValue('--dock-flare')) || 0;
+        const rowBox = row.getBoundingClientRect();
+        row.style.setProperty('--dock-left', Math.round(first.getBoundingClientRect().left - rowBox.left + flare) + 'px');
+        if (currency) row.style.setProperty('--dock-right', Math.round(rowBox.right - currency.getBoundingClientRect().right) + 'px');
+      };
+      measure();
+      window.addEventListener('resize', measure, { passive: true });
 
       dock.addEventListener('pointerleave', (event) => {
         if (event.pointerType !== 'mouse') return;
@@ -265,14 +278,31 @@
       align-items: start;
     }
 
-    #header-component .header__row--bottom:has(.header-menu--dock) {
-      transition: background-color 0.2s ease;
+    /*
+      A menu open from the dock: the row fills in between the dock and the currency tab, and the
+      dropdown below spans the same width, so the top bar, the dock, the currency tab and the
+      dropdown read as one big white shape. Its edges (--dock-left / --dock-right) are the dock's
+      left edge and the currency tab's right edge, measured by the script.
+    */
+    #header-component .header__row--bottom:has(.header-menu--dock)::before {
+      content: '';
+      position: absolute;
+      inset: 0 var(--dock-right, 32px) 0 var(--dock-left, 32px);
+      z-index: -1;
+      background: #ffffff;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
     }
 
-    /* A menu open from the dock: the row fills in, so the top bar, the dock, the currency tab and
-       the dropdown read as one big white shape */
-    #header-component .header__row--bottom:has(.header-menu--dock .menu-list__link[aria-expanded='true']) {
-      background-color: #ffffff !important;
+    #header-component .header__row--bottom:has(.header-menu--dock .menu-list__link[aria-expanded='true'])::before {
+      opacity: 1;
+    }
+
+    #header-component .header__row--bottom:has(.header-menu--dock) .menu-list__submenu {
+      left: var(--dock-left, 32px) !important;
+      right: var(--dock-right, 32px) !important;
+      width: auto !important;
     }
 
     #header-component .header__row--bottom:has(.header-menu--dock) .header__column--left {
@@ -322,10 +352,11 @@
       padding: 0 10px;
       border-radius: 999px;
       color: #121212;
+      /* Closing: the pill tightens slowly, so hovering a shorter item doesn't snap the dock along */
       transition:
-        grid-template-columns 0.45s cubic-bezier(0.3, 0.7, 0.3, 1),
-        column-gap 0.45s cubic-bezier(0.3, 0.7, 0.3, 1),
-        padding 0.45s cubic-bezier(0.3, 0.7, 0.3, 1),
+        grid-template-columns 0.8s cubic-bezier(0.3, 0.7, 0.3, 1),
+        column-gap 0.8s cubic-bezier(0.3, 0.7, 0.3, 1),
+        padding 0.8s cubic-bezier(0.3, 0.7, 0.3, 1),
         background-color 0.2s ease,
         box-shadow 0.2s ease;
     }
@@ -358,6 +389,13 @@
     }
 
     .header-menu--dock .menu-list__list-item:where(.is-dock-open, :focus-within) .menu-list__link--icon {
+      /* Opening: house timing */
+      transition:
+        grid-template-columns 0.45s cubic-bezier(0.3, 0.7, 0.3, 1),
+        column-gap 0.45s cubic-bezier(0.3, 0.7, 0.3, 1),
+        padding 0.45s cubic-bezier(0.3, 0.7, 0.3, 1),
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
       grid-template-columns: 22px 1fr;
       column-gap: 8px;
       padding-inline-end: 16px;
