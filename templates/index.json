@@ -923,36 +923,8 @@
             "padding-inline-start": 0,
             "padding-inline-end": 0
           },
-          "blocks": {
-            "newly-listed-title": {
-              "type": "_product-list-text",
-              "settings": {
-                "text": "<h2>Newly Listed</h2>",
-                "width": "fit-content",
-                "max_width": "normal",
-                "alignment": "left",
-                "type_preset": "custom",
-                "font": "var(--font-heading--family)",
-                "font_size": "1.5rem",
-                "line_height": "tight",
-                "letter_spacing": "tight",
-                "case": "none",
-                "wrap": "pretty",
-                "color": "var(--color-foreground)",
-                "background": false,
-                "background_color": "#12121226",
-                "corner_radius": 0,
-                "padding-block-start": 4,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            }
-          },
-          "block_order": [
-            "newly-listed-title"
-          ]
+          "blocks": {},
+          "block_order": []
         },
         "static-product-card": {
           "type": "_product-card",
@@ -1046,7 +1018,7 @@
         "see-all-new": {
           "type": "plist-link",
           "settings": {
-            "label": "See all NEW boots",
+            "label": "See all new boots",
             "link": "shopify://collections/shop-new"
           }
         }
