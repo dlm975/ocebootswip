@@ -138,7 +138,7 @@
         { rootMargin: '300px 300px' }
       );
 
-      // Play while any part of the card is on screen, the cards peeking in at the sides too
+      // Play while any part of the card is on screen, including cards peeking in at the sides
       this.seen = new IntersectionObserver(
         (entries) =>
           entries.forEach((entry) => {
