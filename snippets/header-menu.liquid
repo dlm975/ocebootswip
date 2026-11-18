@@ -22,8 +22,33 @@
   endif
 %}
 
+{%- liquid
+  # Collection pages (not the wishlist): on desktop the menu becomes a small dock of icons
+  assign dock = false
+  if template.name == 'collection' and template.suffix != 'wishlist'
+    assign dock = true
+  endif
+-%}
+
 {% capture children %}
   {% for link in block.settings.menu.links %}
+    {%- liquid
+      assign title_key = link.title | downcase | strip
+      case title_key
+        when 'all football boots', 'all boots', 'shop all'
+          assign dock_icon = 'storefront'
+        when 'shop by silo'
+          assign dock_icon = 'widgets'
+        when 'shop by size'
+          assign dock_icon = 'straighten'
+        when 'accessories'
+          assign dock_icon = 'more'
+        when 'sale'
+          assign dock_icon = 'percent_discount'
+        else
+          assign dock_icon = ''
+      endcase
+    -%}
     <li
       role="presentation"
       class="menu-list__list-item"
@@ -34,7 +59,7 @@
     >
       <a
         href="{{ link.url }}"
-        class="menu-list__link{% if link.active %} menu-list__link--active{% endif %}"
+        class="menu-list__link{% if link.active %} menu-list__link--active{% endif %}{% if dock_icon != '' %} menu-list__link--icon{% endif %}"
         {%- if link.links != blank -%}
           aria-controls="submenu-{{ forloop.index }}"
           aria-haspopup="true"
@@ -42,7 +67,10 @@
         {%- endif -%}
         ref="menuitem"
       >
-        <span class="menu-list__link-title{% assign title_key = link.title | downcase | strip %}{% if title_key == 'sale' %} menu-item--sale{% endif %}">{{- link.title -}}</span>
+        {%- if dock_icon != '' -%}
+          {%- render 'gicon', name: dock_icon, class: 'menu-list__icon', size: 22 -%}
+        {%- endif -%}
+        <span class="menu-list__link-title{% if title_key == 'sale' %} menu-item--sale{% endif %}">{{- link.title -}}</span>
       </a>
       {%- if link.links != blank -%}
         <div class="menu-list__submenu{{ color_scheme_classes }}" ref="submenu[]">
@@ -101,7 +129,7 @@
   </li>
 {% endcapture %}
 
-<nav header-menu>
+<nav header-menu{% if dock %} class="header-menu--dock"{% endif %}>
   <div
     class="menu-list"
     style="{% render 'menu-font-styles', settings: block.settings %}"
@@ -110,3 +138,89 @@
     {% render 'overflow-list', class: class, ref: 'overflowMenu', children: children, minimum-items: 2 %}
   </div>
 </nav>
+
+{% stylesheet %}
+  /* Icons only show in the collection-page dock */
+  .menu-list__icon {
+    display: none;
+  }
+
+  /*
+    Collection pages, desktop: the menu becomes a small island of icons, top left. Each icon's name
+    shows as a label beneath it on hover or focus; the menus still open as usual.
+  */
+  @media screen and (min-width: 990px) {
+    .header-menu--dock .overflow-menu::part(list) {
+      gap: 2px;
+      width: fit-content;
+      padding: 4px;
+      border-radius: 999px;
+      background: rgb(18 18 18 / 0.05);
+    }
+
+    .header-menu--dock .menu-list__link--icon {
+      position: relative;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      min-height: 42px;
+      padding: 0;
+      border-radius: 50%;
+      color: #121212;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .header-menu--dock .menu-list__link--icon .menu-list__icon {
+      display: block;
+    }
+
+    .header-menu--dock .menu-list__link--icon:has(.menu-item--sale) {
+      color: #e8323c;
+    }
+
+    .header-menu--dock .menu-list__list-item:where(:hover, :focus-within) .menu-list__link--icon,
+    .header-menu--dock .menu-list__link--icon.menu-list__link--active {
+      background: #ffffff;
+      box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+    }
+
+    /* The name, as a small label under the icon */
+    .header-menu--dock .menu-list__link--icon .menu-list__link-title {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 50%;
+      z-index: 5;
+      padding: 4px 9px;
+      border-radius: 6px;
+      background: #121212;
+      color: #ffffff !important;
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1.3;
+      letter-spacing: 0;
+      text-transform: none !important;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, -4px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .header-menu--dock .menu-list__link--icon:where(:hover, :focus-visible) .menu-list__link-title {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    /* Hide the label once that item's menu is open beneath it */
+    .header-menu--dock .menu-list__link--icon[aria-expanded='true'] .menu-list__link-title {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .header-menu--dock .menu-list__link--icon,
+    .header-menu--dock .menu-list__link--icon .menu-list__link-title {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
