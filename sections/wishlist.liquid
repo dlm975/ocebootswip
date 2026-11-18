@@ -45,6 +45,296 @@
   </div>
 </div>
 
+{%- comment -%}
+  Mini product page for the Buy buttons: a sheet from the bottom on phones, a window on desktop.
+  Its content is sections/wishlist-quickview.liquid, fetched per product.
+{%- endcomment -%}
+<dialog
+  class="wlq"
+  data-wlq
+  aria-labelledby="wlq-title"
+>
+  <div
+    class="wlq__scrim"
+    data-wlq-scrim
+  ></div>
+  <div
+    class="wlq__sheet"
+    data-wlq-sheet
+  >
+    <span
+      class="wlq__grabber"
+      aria-hidden="true"
+    ></span>
+    <button
+      type="button"
+      class="wlq__close"
+      data-wlq-close
+      aria-label="Close"
+    >
+      {%- render 'gicon', name: 'close', size: 22 -%}
+    </button>
+    <div
+      class="wlq__body"
+      data-wlq-body
+    ></div>
+  </div>
+</dialog>
+
+<script type="module">
+  import { animate } from 'motion';
+  import { CartAddEvent } from '@theme/events';
+
+  const dialog = document.querySelector('[data-wlq]');
+  const grid = document.querySelector('[data-wishlist-grid]');
+  if (dialog && grid) {
+    const sheet = dialog.querySelector('[data-wlq-sheet]');
+    const body = dialog.querySelector('[data-wlq-body]');
+    const scrim = dialog.querySelector('[data-wlq-scrim]');
+    const EASE = [0.3, 0.7, 0.3, 1];
+    const MOVE = 0.55;
+    const desktop = window.matchMedia('(min-width: 750px)');
+    const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const SYSTEMS = ['us', 'uk', 'eu'];
+    const SYSTEM_KEY = 'csh-size-system'; // shared with the collection pages' size switch
+    const cache = new Map();
+    let current = null;
+    let opener = null;
+    let closing = null;
+
+    const load = (handle) => {
+      if (!cache.has(handle)) {
+        cache.set(
+          handle,
+          fetch('/products/' + encodeURIComponent(handle) + '?section_id=wishlist-quickview')
+            .then((response) => (response.ok ? response.text() : ''))
+            .then((html) => new DOMParser().parseFromString(html, 'text/html').querySelector('[data-wlq-product]'))
+            .catch(() => null)
+        );
+      }
+      return cache.get(handle);
+    };
+
+    const skeleton = () => {
+      const el = document.createElement('div');
+      el.className = 'wlq__product wlq__product--ghost';
+      el.innerHTML =
+        '<div class="wlq__gallery"><div class="wlq__ghost wlq__ghost--image"></div></div>' +
+        '<div class="wlq__info"><div class="wlq__ghost wlq__ghost--line"></div><div class="wlq__ghost wlq__ghost--line wlq__ghost--short"></div><div class="wlq__ghost wlq__ghost--sizes"></div><div class="wlq__ghost wlq__ghost--button"></div></div>';
+      return el;
+    };
+
+    const savedSystem = () => {
+      try {
+        const saved = localStorage.getItem(SYSTEM_KEY);
+        if (SYSTEMS.includes(saved)) return saved;
+      } catch (e) {}
+      return 'us';
+    };
+
+    /** Wire up a freshly loaded product: photos, size system, sizes and the add button */
+    function setUp(root) {
+      // Photos: a swipeable track, with a counter and thumbnails that follow it
+      const track = root.querySelector('[data-wlq-track]');
+      const thumbs = [...root.querySelectorAll('[data-wlq-thumb]')];
+      const counter = root.querySelector('[data-wlq-counter]');
+      const total = root.querySelectorAll('[data-wlq-slide]').length;
+      let frame = 0;
+      track.addEventListener(
+        'scroll',
+        () => {
+          cancelAnimationFrame(frame);
+          frame = requestAnimationFrame(() => {
+            const index = Math.round(track.scrollLeft / track.clientWidth);
+            if (counter) counter.textContent = index + 1 + ' / ' + total;
+            thumbs.forEach((thumb, i) => thumb.classList.toggle('is-active', i === index));
+          });
+        },
+        { passive: true }
+      );
+      thumbs.forEach((thumb) =>
+        thumb.addEventListener('click', () => {
+          track.scrollTo({ left: Number(thumb.dataset.wlqThumb) * track.clientWidth, behavior: reduced() ? 'instant' : 'smooth' });
+        })
+      );
+
+      // Size system (US / UK / EU), remembered with the collection pages' switch
+      const setSystem = (sys, remember) => {
+        root.dataset.sys = sys;
+        root.querySelectorAll('[data-wlq-sys]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.wlqSys === sys)));
+        if (!remember) return;
+        try {
+          localStorage.setItem(SYSTEM_KEY, sys);
+        } catch (e) {}
+        document.dispatchEvent(new CustomEvent('size-system:change', { detail: sys }));
+      };
+      setSystem(savedSystem(), false);
+      root.querySelectorAll('[data-wlq-sys]').forEach((b) => b.addEventListener('click', () => setSystem(b.dataset.wlqSys, true)));
+
+      // Sizes
+      const add = root.querySelector('[data-wlq-add]');
+      const addText = root.querySelector('[data-wlq-add-text]');
+      const error = root.querySelector('[data-wlq-error]');
+      const price = root.querySelector('[data-wlq-price]');
+      const was = root.querySelector('[data-wlq-was]');
+      const condition = root.querySelector('[data-wlq-condition]');
+      const full = root.querySelector('[data-wlq-full]');
+      let selected = root.querySelector('.wlq__size.is-selected')?.dataset.wlqVariant || null;
+      root.querySelectorAll('[data-wlq-variant]').forEach((button) =>
+        button.addEventListener('click', () => {
+          root.querySelectorAll('[data-wlq-variant]').forEach((b) => {
+            const on = b === button;
+            b.classList.toggle('is-selected', on);
+            b.setAttribute('aria-checked', String(on));
+          });
+          selected = button.dataset.wlqVariant;
+          price.textContent = button.dataset.price;
+          was.textContent = button.dataset.was || '';
+          was.hidden = !button.dataset.was;
+          if (condition && button.dataset.condition) condition.textContent = button.dataset.condition;
+          full.textContent = button.dataset.full;
+          add.disabled = false;
+          addText.textContent = 'Add to cart';
+          error.hidden = true;
+        })
+      );
+
+      add.addEventListener('click', async () => {
+        if (!selected || add.disabled) return;
+        add.disabled = true;
+        addText.textContent = 'Adding…';
+        error.hidden = true;
+        const sections = [...document.querySelectorAll('cart-items-component')]
+          .map((el) => el.dataset.sectionId)
+          .filter(Boolean);
+        try {
+          const response = await fetch((window.Theme?.routes?.cart_add_url || '/cart/add') + '.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({ id: Number(selected), quantity: 1, sections: sections.join(',') }),
+          });
+          const result = await response.json();
+          if (!response.ok || result.status) throw new Error(result.description || result.message || 'Couldn’t add it to your cart.');
+          addText.textContent = 'Added';
+          // The theme's own event: the cart count, cart drawer and anything else listening update
+          dialog.dispatchEvent(
+            new CartAddEvent({}, String(selected), {
+              source: 'product-form-component',
+              itemCount: 1,
+              productId: root.dataset.productId,
+              sections: result.sections,
+            })
+          );
+          const drawer = document.querySelector('cart-drawer-component');
+          close().then(() => {
+            if (drawer && !drawer.hasAttribute('auto-open') && typeof drawer.open === 'function') drawer.open();
+          });
+        } catch (e) {
+          error.textContent = e.message;
+          error.hidden = false;
+          add.disabled = false;
+          addText.textContent = 'Add to cart';
+        }
+      });
+    }
+
+    async function open(handle, from) {
+      if (closing) await closing;
+      current = handle;
+      opener = from;
+      body.replaceChildren(skeleton());
+      dialog.showModal();
+      document.documentElement.classList.add('wlq-open');
+      if (!reduced()) {
+        animate(scrim, { opacity: [0, 1] }, { duration: 0.3, ease: 'linear' });
+        if (desktop.matches) {
+          animate(sheet, { opacity: [0, 1], transform: ['translateY(18px) scale(0.98)', 'translateY(0px) scale(1)'] }, { duration: MOVE, ease: EASE });
+        } else {
+          animate(sheet, { transform: ['translateY(100%)', 'translateY(0%)'] }, { duration: MOVE, ease: EASE });
+        }
+      }
+
+      const product = await load(handle);
+      if (!dialog.open || current !== handle) return;
+      const startHeight = sheet.getBoundingClientRect().height;
+      if (!product) {
+        const p = document.createElement('p');
+        p.className = 'wlq__failed';
+        p.innerHTML = 'Couldn’t load this boot. <a href="/products/' + encodeURIComponent(handle) + '">Open its page</a>';
+        body.replaceChildren(p);
+        return;
+      }
+      const fresh = product.cloneNode(true);
+      body.replaceChildren(fresh);
+      setUp(fresh);
+      if (reduced()) return;
+      // Ease from the placeholder's height to the product's, and fade the product in
+      const endHeight = sheet.getBoundingClientRect().height;
+      if (Math.abs(endHeight - startHeight) > 1) {
+        sheet.style.overflow = 'hidden';
+        animate(sheet, { height: [startHeight + 'px', endHeight + 'px'] }, { duration: 0.45, ease: EASE }).then(() => {
+          sheet.style.removeProperty('height');
+          sheet.style.removeProperty('overflow');
+        });
+      }
+      animate(fresh, { opacity: [0, 1] }, { duration: 0.3, ease: 'linear' });
+    }
+
+    function close() {
+      if (closing) return closing;
+      if (!dialog.open) return Promise.resolve();
+      current = null;
+      const finish = () => {
+        dialog.close();
+        document.documentElement.classList.remove('wlq-open');
+        [sheet, scrim].forEach((el) => {
+          el.getAnimations().forEach((a) => a.cancel());
+          el.style.removeProperty('opacity');
+          el.style.removeProperty('transform');
+          el.style.removeProperty('height');
+          el.style.removeProperty('overflow');
+        });
+        body.replaceChildren();
+        closing = null;
+        if (opener && document.contains(opener)) opener.focus({ preventScroll: true });
+      };
+      if (reduced()) {
+        finish();
+        return Promise.resolve();
+      }
+      const out = [0.4, 0, 1, 1];
+      const scrimOpacity = parseFloat(getComputedStyle(scrim).opacity);
+      const fades = [animate(scrim, { opacity: [scrimOpacity, 0] }, { duration: 0.24, ease: 'linear' })];
+      if (desktop.matches) {
+        fades.push(animate(sheet, { opacity: [1, 0], transform: ['translateY(0px) scale(1)', 'translateY(10px) scale(0.98)'] }, { duration: 0.2, ease: out }));
+      } else {
+        fades.push(animate(sheet, { transform: ['translateY(0%)', 'translateY(100%)'] }, { duration: 0.3, ease: out }));
+      }
+      closing = Promise.all(fades).then(finish, finish);
+      return closing;
+    }
+
+    grid.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-wlq-open]');
+      if (button) open(button.dataset.wlqOpen, button);
+    });
+    // Start fetching as soon as a Buy button is pointed at or pressed
+    const warm = (event) => {
+      const button = event.target.closest && event.target.closest('[data-wlq-open]');
+      if (button) load(button.dataset.wlqOpen);
+    };
+    grid.addEventListener('pointerover', warm, { passive: true });
+    grid.addEventListener('pointerdown', warm, { passive: true });
+
+    dialog.querySelector('[data-wlq-close]').addEventListener('click', () => close());
+    scrim.addEventListener('click', () => close());
+    dialog.addEventListener('cancel', (event) => {
+      event.preventDefault();
+      close();
+    });
+  }
+</script>
+
 <script>
   (function () {
     const page = document.querySelector('[data-wishlist-page]');
@@ -322,6 +612,509 @@
   @media screen and (max-width: 749px) {
     .wl-card__condition {
       display: none;
+    }
+  }
+
+  /* Buy: along the foot of the card (the card leaves room for it) */
+  .wl-card {
+    padding-block-end: 62px;
+  }
+
+  .wl-card__buy {
+    position: absolute;
+    inset: auto 10px 12px 10px;
+    height: 40px;
+    border: 0;
+    border-radius: 999px;
+    background: #121212;
+    color: #ffffff;
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 650;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.2s ease, transform 0.2s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  .wl-card__buy:disabled {
+    background: rgb(18 18 18 / 0.08);
+    color: rgb(18 18 18 / 0.45);
+    cursor: default;
+  }
+
+  @media (hover: hover) {
+    .wl-card__buy:not(:disabled):hover {
+      background: #333333;
+    }
+  }
+
+  .wl-card__buy:not(:disabled):active {
+    transform: scale(0.97);
+  }
+
+  .wl-card__buy:focus-visible {
+    outline: 2px solid #121212;
+    outline-offset: 2px;
+  }
+
+  /* ---- Mini product page (Buy) ---- */
+  .wlq {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: hidden;
+    color: #121212;
+  }
+
+  .wlq[open] {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .wlq__scrim {
+    position: absolute;
+    inset: 0;
+    background: rgb(0 0 0 / 0.45);
+  }
+
+  .wlq__sheet {
+    position: relative;
+    width: 100%;
+    max-height: 92vh;
+    max-height: 92dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: 20px 20px 0 0;
+    background: #ffffff;
+    box-shadow: 0 -10px 40px rgb(0 0 0 / 0.2);
+  }
+
+  .wlq__grabber {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    z-index: 3;
+    width: 40px;
+    height: 4px;
+    margin-left: -20px;
+    border-radius: 2px;
+    background: rgb(18 18 18 / 0.2);
+  }
+
+  .wlq__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.92);
+    color: #121212;
+    box-shadow: 0 2px 10px rgb(0 0 0 / 0.12);
+    cursor: pointer;
+  }
+
+  .wlq__gallery {
+    position: relative;
+  }
+
+  .wlq__track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    background: #ffffff;
+  }
+
+  .wlq__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .wlq__slide {
+    flex: 0 0 100%;
+    aspect-ratio: 1;
+    margin: 0;
+    scroll-snap-align: start;
+  }
+
+  .wlq__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .wlq__counter {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgb(18 18 18 / 0.7);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wlq__thumbs {
+    display: flex;
+    gap: 6px;
+    padding: 8px 16px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .wlq__thumb {
+    flex: none;
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f4f4f4;
+    opacity: 0.55;
+    cursor: pointer;
+    box-shadow: inset 0 0 0 1px rgb(18 18 18 / 0.06);
+    transition: opacity 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .wlq__thumb.is-active {
+    opacity: 1;
+    box-shadow: inset 0 0 0 2px #121212;
+  }
+
+  .wlq__thumb-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+  }
+
+  .wlq__info {
+    display: flex;
+    flex-direction: column;
+    padding: 16px 16px 24px;
+  }
+
+  .wlq__title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 750;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .wlq__price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 8px;
+    margin-block-start: 6px;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wlq__was {
+    color: rgb(18 18 18 / 0.45);
+    font-size: 0.875rem;
+    font-weight: 400;
+  }
+
+  .wlq__label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgb(18 18 18 / 0.55);
+  }
+
+  .wlq__condition {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 14px 0 0;
+  }
+
+  .wlq__condition-value {
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgb(18 18 18 / 0.06);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .wlq__sizes-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-block-start: 18px;
+  }
+
+  .wlq__systems {
+    display: inline-flex;
+    padding: 3px;
+    border-radius: 999px;
+    background: rgb(18 18 18 / 0.06);
+  }
+
+  .wlq__systems button {
+    min-width: 42px;
+    height: 28px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: rgb(18 18 18 / 0.6);
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .wlq__systems button[aria-pressed='true'] {
+    background: #ffffff;
+    color: #121212;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+  }
+
+  .wlq__sizes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+    gap: 8px;
+    margin-block-start: 10px;
+  }
+
+  .wlq__size {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 50px;
+    padding: 6px;
+    border: 1px solid rgb(18 18 18 / 0.16);
+    border-radius: 12px;
+    background: #ffffff;
+    color: #121212;
+    font: inherit;
+    font-size: 0.9375rem;
+    font-weight: 650;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .wlq__size.is-selected {
+    border-color: #121212;
+    background: #121212;
+    color: #ffffff;
+  }
+
+  .wlq__size:disabled {
+    opacity: 0.4;
+    cursor: default;
+    text-decoration: line-through;
+  }
+
+  /* Each size shows in the chosen system */
+  .wlq__size-label[data-sys] {
+    display: none;
+  }
+
+  .wlq__product[data-sys='us'] .wlq__size-label[data-sys='us'],
+  .wlq__product[data-sys='uk'] .wlq__size-label[data-sys='uk'],
+  .wlq__product[data-sys='eu'] .wlq__size-label[data-sys='eu'] {
+    display: block;
+  }
+
+  .wlq__size-label--plain {
+    font-size: 0.8125rem;
+  }
+
+  .wlq__size-note {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    opacity: 0.7;
+  }
+
+  .wlq__size-full {
+    min-height: 1.2em;
+    margin: 8px 0 0;
+    font-size: 0.8125rem;
+    color: rgb(18 18 18 / 0.55);
+  }
+
+  .wlq__add {
+    height: 52px;
+    margin-block-start: 14px;
+    border: 0;
+    border-radius: 999px;
+    background: #121212;
+    color: #ffffff;
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 650;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .wlq__add:disabled {
+    background: rgb(18 18 18 / 0.1);
+    color: rgb(18 18 18 / 0.5);
+    cursor: default;
+  }
+
+  .wlq__error {
+    margin: 10px 0 0;
+    color: #c4232e;
+    font-size: 0.875rem;
+  }
+
+  .wlq__details {
+    margin-block-start: 18px;
+    border-block-start: 1px solid rgb(18 18 18 / 0.1);
+  }
+
+  .wlq__details summary {
+    padding-block: 14px;
+    font-weight: 650;
+    cursor: pointer;
+  }
+
+  .wlq__description {
+    padding-block-end: 8px;
+    font-size: 0.875rem;
+    line-height: 1.55;
+  }
+
+  .wlq__more {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-block-start: 12px;
+    color: #121212;
+    font-weight: 650;
+    text-decoration: none;
+  }
+
+  .wlq__more:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .wlq__failed {
+    padding: 64px 24px;
+    text-align: center;
+  }
+
+  /* Placeholder while the product loads, about its size */
+  .wlq__ghost {
+    border-radius: 10px;
+    background: rgb(18 18 18 / 0.06);
+    animation: wl-ghost 1.2s ease-in-out infinite alternate;
+  }
+
+  .wlq__ghost--image {
+    aspect-ratio: 1;
+    border-radius: 0;
+  }
+
+  .wlq__ghost--line {
+    height: 22px;
+    margin-block-end: 10px;
+  }
+
+  .wlq__ghost--short {
+    width: 40%;
+  }
+
+  .wlq__ghost--sizes {
+    height: 108px;
+    margin-block: 18px 14px;
+  }
+
+  .wlq__ghost--button {
+    height: 52px;
+    border-radius: 999px;
+  }
+
+  /* Desktop: a window, photos on the left and details on the right */
+  @media screen and (min-width: 750px) {
+    .wlq[open] {
+      align-items: center;
+    }
+
+    .wlq__sheet {
+      width: min(980px, calc(100vw - 48px));
+      max-height: min(760px, calc(100vh - 48px));
+      border-radius: 20px;
+      box-shadow: 0 24px 80px rgb(0 0 0 / 0.3);
+    }
+
+    .wlq__grabber {
+      display: none;
+    }
+
+    .wlq__product {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      align-items: start;
+    }
+
+    .wlq__gallery {
+      position: sticky;
+      top: 0;
+      padding: 16px 0 16px 16px;
+    }
+
+    .wlq__track {
+      border-radius: 14px;
+    }
+
+    .wlq__counter {
+      top: 28px;
+      left: 28px;
+    }
+
+    .wlq__thumbs {
+      flex-wrap: wrap;
+      padding: 10px 0 0;
+    }
+
+    .wlq__info {
+      padding: 28px 28px 28px 24px;
+    }
+
+    .wlq__title {
+      padding-inline-end: 44px;
+      font-size: 1.625rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wl-card__buy,
+    .wlq__thumb,
+    .wlq__size {
+      transition: none;
+    }
+
+    .wlq__ghost {
+      animation: none;
     }
   }
 

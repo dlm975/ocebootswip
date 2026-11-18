@@ -4237,3 +4237,12 @@ text-component {
     transparent calc(50% + 0.75px)
   );
 }
+
+/* Wishlist mini product page (sections/wishlist.liquid): its own scrim, and the page stays still */
+dialog.wlq::backdrop {
+  background: transparent;
+}
+
+html.wlq-open {
+  overflow: hidden;
+}

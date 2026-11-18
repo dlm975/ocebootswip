@@ -56,6 +56,24 @@
         {%- endif -%}
       </span>
     </a>
+    {%- if product.available -%}
+      <button
+        type="button"
+        class="wl-card__buy"
+        data-wlq-open="{{ product.handle }}"
+        aria-haspopup="dialog"
+      >
+        Buy
+      </button>
+    {%- else -%}
+      <button
+        type="button"
+        class="wl-card__buy"
+        disabled
+      >
+        Sold out
+      </button>
+    {%- endif -%}
     {% render 'wishlist-button', product: product, class: 'wishlist-toggle--card wl-card__heart' %}
   </li>
 {%- endif -%}
