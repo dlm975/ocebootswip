@@ -346,6 +346,7 @@
      * The others stay stepped back throughout, and a tap at any point takes over from there.
      */
     choose(list, target) {
+      // (one pending choice per list)
       const previous = this.open.get(list) || null;
       const token = {};
       this.pending.set(list, token);
