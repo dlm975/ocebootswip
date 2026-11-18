@@ -46,7 +46,7 @@
 </div>
 
 {%- comment -%}
-  Mini product page for the Buy buttons: a sheet from the bottom on phones, a window on desktop.
+  Mini product page for the See Details buttons: a window that zooms open in the middle of the screen.
   Its content is sections/wishlist-quickview.liquid, fetched per product.
 {%- endcomment -%}
 <dialog
@@ -93,7 +93,6 @@
     const scrim = dialog.querySelector('[data-wlq-scrim]');
     const EASE = [0.3, 0.7, 0.3, 1];
     const MOVE = 0.55;
-    const desktop = window.matchMedia('(min-width: 750px)');
     const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const SYSTEMS = ['us', 'uk', 'eu'];
     const SYSTEM_KEY = 'csh-size-system'; // shared with the collection pages' size switch
@@ -245,11 +244,8 @@
       document.documentElement.classList.add('wlq-open');
       if (!reduced()) {
         animate(scrim, { opacity: [0, 1] }, { duration: 0.3, ease: 'linear' });
-        if (desktop.matches) {
-          animate(sheet, { opacity: [0, 1], transform: ['translateY(18px) scale(0.98)', 'translateY(0px) scale(1)'] }, { duration: MOVE, ease: EASE });
-        } else {
-          animate(sheet, { transform: ['translateY(100%)', 'translateY(0%)'] }, { duration: MOVE, ease: EASE });
-        }
+        // Zooms open in the middle of the screen
+        animate(sheet, { opacity: [0, 1], transform: ['scale(0.86)', 'scale(1)'] }, { duration: MOVE, ease: EASE });
       }
 
       const product = await load(handle);
@@ -303,11 +299,7 @@
       const out = [0.4, 0, 1, 1];
       const scrimOpacity = parseFloat(getComputedStyle(scrim).opacity);
       const fades = [animate(scrim, { opacity: [scrimOpacity, 0] }, { duration: 0.24, ease: 'linear' })];
-      if (desktop.matches) {
-        fades.push(animate(sheet, { opacity: [1, 0], transform: ['translateY(0px) scale(1)', 'translateY(10px) scale(0.98)'] }, { duration: 0.2, ease: out }));
-      } else {
-        fades.push(animate(sheet, { transform: ['translateY(0%)', 'translateY(100%)'] }, { duration: 0.3, ease: out }));
-      }
+      fades.push(animate(sheet, { opacity: [1, 0], transform: ['scale(1)', 'scale(0.92)'] }, { duration: 0.2, ease: out }));
       closing = Promise.all(fades).then(finish, finish);
       return closing;
     }
@@ -652,7 +644,6 @@
     place-items: center;
     width: 36px;
     height: 36px;
-    margin-block-end: 5px;
     border-radius: 50%;
     transition: transform 0.25s cubic-bezier(0.3, 0.7, 0.3, 1);
   }
@@ -724,9 +715,10 @@
     color: #121212;
   }
 
+  /* A window in the middle of the screen, on phones too */
   .wlq[open] {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
   }
 
@@ -738,17 +730,19 @@
 
   .wlq__sheet {
     position: relative;
-    width: 100%;
-    max-height: 92vh;
-    max-height: 92dvh;
+    width: calc(100% - 24px);
+    max-height: calc(100vh - 48px);
+    max-height: calc(100dvh - 48px);
     overflow-y: auto;
     overscroll-behavior: contain;
-    border-radius: 20px 20px 0 0;
+    border-radius: 20px;
     background: #ffffff;
-    box-shadow: 0 -10px 40px rgb(0 0 0 / 0.2);
+    box-shadow: 0 24px 80px rgb(0 0 0 / 0.3);
+    transform-origin: 50% 50%;
   }
 
   .wlq__grabber {
+    display: none !important;
     position: absolute;
     top: 8px;
     left: 50%;
