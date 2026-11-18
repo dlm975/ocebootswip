@@ -1,12 +1,12 @@
 {%- comment -%}
-  Shop by silo, in three steps inside one container:
-  1. Brand image tiles (Nike, adidas, Puma, Mizuno).
-  2. Choosing a brand opens its silos below the tiles, as pills: a small image and the silo's name on
-     one line (Mercurial, Phantom, Predator ...).
-  3. Choosing a silo opens its generations below, as pills in the same style, each linking to that
-     generation's collection (product tag gen:<brand>-<model>-<generation>).
-  Each choice brings the step it opens up to the top of the screen. Choosing the open brand or silo
-  again closes it; choosing another swaps it. The same on desktop and phones.
+  Shop by silo: a card per brand (full-width image, name over it, a plus to open).
+  - Opening a brand brings its card forward (the others step back) and rolls its silos down in a
+    panel joined to the card: one row per silo, a small image and the name on one line.
+  - Opening a silo does the same inside the brand: the row comes forward and its generations roll
+    down beneath it, each linking to that generation's collection (tag gen:<brand>-<model>-<gen>).
+  - The plus turns into an X to close; each open panel also ends with Close. One brand, and one silo
+    per brand, open at a time. Opening scrolls the card or row up under the header; closing keeps
+    the card's header on screen.
 
   Blocks are flat in the editor: each Silo belongs to the Brand block above it.
   A silo with no generations is a plain link to its collection.
@@ -24,116 +24,93 @@
     id="{{ section_id }}"
     style="{% render 'spacing-style', settings: section.settings %}"
   >
-    <div class="ssilo__box">
-      {%- if section.settings.heading != blank -%}
-        <h2 class="ssilo__heading">{{ section.settings.heading | escape }}</h2>
-      {%- endif -%}
+    {%- if section.settings.heading != blank -%}
+      <h2 class="ssilo__heading">{{ section.settings.heading | escape }}</h2>
+    {%- endif -%}
 
-      {%- comment -%} Step 1: brand tiles {%- endcomment -%}
-      <ul class="ssilo__brands" role="list">
-        {%- for block in section.blocks -%}
-          {%- if block.type == 'brand' -%}
-            {%- liquid
-              assign brand_image = block.settings.image | default: block.settings.collection.featured_image
-            -%}
-            <li class="ssilo__brand-item" data-block="{{ block.id }}" {{ block.shopify_attributes }}>
-              <button
-                type="button"
-                class="ssilo__brand"
-                data-pick="{{ block.id }}"
-                aria-expanded="false"
-                aria-controls="{{ section_id }}-{{ block.id }}"
-              >
-                <span class="ssilo__brand-media">
-                  {%- if brand_image -%}
-                    {{
-                      brand_image
-                      | image_url: width: 600
-                      | image_tag:
-                        widths: '240, 360, 480, 600',
-                        sizes: '(min-width: 990px) 22vw, 45vw',
-                        loading: 'lazy',
-                        class: 'ssilo__image',
-                        alt: ''
-                    }}
-                  {%- endif -%}
-                </span>
-                <span class="ssilo__brand-foot">
-                  <span class="ssilo__brand-name">{{ block.settings.title | escape }}</span>
-                  <span class="ssilo__toggle" aria-hidden="true">
-                    {%- render 'gicon', name: 'keyboard_arrow_down', class: 'ssilo__chevron', size: 22 -%}
-                    {%- render 'gicon', name: 'close', class: 'ssilo__close', size: 20 -%}
-                  </span>
-                </span>
-              </button>
-            </li>
-          {%- endif -%}
-        {%- endfor -%}
-      </ul>
-
-      {%- comment -%} Step 2: each brand's silos (one shown at a time) {%- endcomment -%}
-      <div class="ssilo__host" data-host>
-        {%- for block in section.blocks -%}
-          {%- if block.type == 'brand' -%}
-            {%- liquid
-              assign brand_name = block.settings.title | strip
-              assign brand_prefix = brand_name | append: ' '
-              assign brand_url = block.settings.collection.url
-              assign start = forloop.index
-            -%}
-            <div class="ssilo__level" id="{{ section_id }}-{{ block.id }}" data-level="{{ block.id }}" hidden>
-              <div class="ssilo__level-head" data-anim>
-                <span class="ssilo__level-title">{{ brand_name | escape }} silos</span>
-                {%- if brand_url != blank -%}
-                  <a class="ssilo__all" href="{{ brand_url }}">
-                    Shop all {{ brand_name | escape }}
-                    {%- render 'gicon', name: 'arrow_forward', size: 18 -%}
-                  </a>
+    <ul class="ssilo__brands" role="list">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'brand' -%}
+          {%- liquid
+            assign brand_name = block.settings.title | strip
+            assign brand_prefix = brand_name | append: ' '
+            assign brand_url = block.settings.collection.url
+            assign brand_image = block.settings.image | default: block.settings.collection.featured_image
+            assign start = forloop.index
+            assign silo_count = 0
+            for silo in section.blocks offset: start
+              if silo.type == 'brand'
+                break
+              endif
+              assign silo_count = silo_count | plus: 1
+            endfor
+          -%}
+          <li class="ssilo__brand" data-item="{{ block.id }}" {{ block.shopify_attributes }}>
+            <button
+              type="button"
+              class="ssilo__brand-head"
+              data-toggle="{{ block.id }}"
+              aria-expanded="false"
+              aria-controls="{{ section_id }}-{{ block.id }}"
+            >
+              <span class="ssilo__brand-media">
+                {%- if brand_image -%}
+                  {{
+                    brand_image
+                    | image_url: width: 1400
+                    | image_tag:
+                      widths: '480, 720, 960, 1200, 1400',
+                      sizes: '(min-width: 990px) 46vw, 92vw',
+                      loading: 'lazy',
+                      class: 'ssilo__brand-image',
+                      alt: ''
+                  }}
                 {%- endif -%}
-              </div>
+              </span>
+              <span class="ssilo__brand-text">
+                <span class="ssilo__brand-name">{{ brand_name | escape }}</span>
+                <span class="ssilo__brand-sub">{{ silo_count }} {{ silo_count | pluralize: 'silo', 'silos' }}</span>
+              </span>
+              <span class="ssilo__plus ssilo__plus--brand" aria-hidden="true">
+                {%- render 'gicon', name: 'add', size: 24 -%}
+              </span>
+            </button>
 
-              <ul class="ssilo__pills" role="list">
-                {%- for silo in section.blocks offset: start -%}
-                  {%- if silo.type == 'brand' -%}{%- break -%}{%- endif -%}
-                  {%- liquid
-                    assign silo_title = silo.settings.title | strip
-                    assign silo_label = silo_title | remove_first: brand_prefix
-                    assign shown = 0
-                    assign first_image = nil
-                    for generation in silo.settings.generations
-                      if generation.products_count > 0
-                        assign shown = shown | plus: 1
-                        if first_image == nil
-                          assign first_image = generation.featured_image
+            <div class="ssilo__panel" id="{{ section_id }}-{{ block.id }}" data-panel hidden>
+              <div class="ssilo__inner ssilo__inner--brand">
+                <ul class="ssilo__silos" role="list">
+                  {%- for silo in section.blocks offset: start -%}
+                    {%- if silo.type == 'brand' -%}{%- break -%}{%- endif -%}
+                    {%- liquid
+                      assign silo_title = silo.settings.title | strip
+                      assign silo_prefix = silo_title | append: ' '
+                      assign silo_label = silo_title | remove_first: brand_prefix
+                      assign last_word = silo_title | split: ' ' | last
+                      assign shown = 0
+                      assign first_image = nil
+                      for generation in silo.settings.generations
+                        if generation.products_count > 0
+                          assign shown = shown | plus: 1
+                          if first_image == nil
+                            assign first_image = generation.featured_image
+                          endif
                         endif
-                      endif
-                    endfor
-                    assign silo_image = silo.settings.image | default: silo.settings.collection.featured_image | default: first_image
-                  -%}
-                  <li class="ssilo__pill-item" data-block="{{ silo.id }}" data-anim {{ silo.shopify_attributes }}>
-                    {%- if shown > 0 -%}
-                      <button
-                        type="button"
-                        class="ssilo__pill"
-                        data-pick="{{ silo.id }}"
-                        aria-expanded="false"
-                        aria-controls="{{ section_id }}-{{ silo.id }}"
-                      >
-                    {%- else -%}
-                      <a class="ssilo__pill" href="{{ silo.settings.collection.url | default: brand_url | default: '#' }}">
-                    {%- endif -%}
+                      endfor
+                      assign silo_image = silo.settings.image | default: silo.settings.collection.featured_image | default: first_image
+                    -%}
+                    {%- capture silo_face -%}
                       <span class="ssilo__thumb">
                         {%- if silo_image -%}
                           {{
                             silo_image
                             | image_url: width: 160
-                            | image_tag: widths: '96, 160', sizes: '56px', loading: 'lazy', class: 'ssilo__image', alt: ''
+                            | image_tag: widths: '100, 160', sizes: '52px', loading: 'lazy', class: 'ssilo__thumb-image', alt: ''
                           }}
                         {%- endif -%}
                       </span>
-                      <span class="ssilo__pill-text">
-                        <span class="ssilo__pill-name">{{ silo_label | escape }}</span>
-                        <span class="ssilo__pill-sub">
+                      <span class="ssilo__row-text">
+                        <span class="ssilo__row-name">{{ silo_label | escape }}</span>
+                        <span class="ssilo__row-sub">
                           {%- if shown > 0 -%}
                             {{ shown }} {{ shown | pluralize: 'generation', 'generations' }}
                           {%- elsif silo.settings.collection != blank -%}
@@ -142,97 +119,108 @@
                           {%- endif -%}
                         </span>
                       </span>
-                      {%- if shown > 0 -%}
-                        <span class="ssilo__toggle" aria-hidden="true">
-                          {%- render 'gicon', name: 'keyboard_arrow_down', class: 'ssilo__chevron', size: 22 -%}
-                          {%- render 'gicon', name: 'close', class: 'ssilo__close', size: 20 -%}
-                        </span>
-                      </button>
-                    {%- else -%}
-                      <span class="ssilo__toggle" aria-hidden="true">
-                        {%- render 'gicon', name: 'arrow_forward', size: 20 -%}
-                      </span>
-                      </a>
-                    {%- endif -%}
-                  </li>
-                {%- endfor -%}
-              </ul>
+                    {%- endcapture -%}
 
-              {%- comment -%} Step 3: each silo's generations (one shown at a time) {%- endcomment -%}
-              <div class="ssilo__host" data-host>
-                {%- for silo in section.blocks offset: start -%}
-                  {%- if silo.type == 'brand' -%}{%- break -%}{%- endif -%}
-                  {%- liquid
-                    assign silo_title = silo.settings.title | strip
-                    assign silo_prefix = silo_title | append: ' '
-                    assign silo_label = silo_title | remove_first: brand_prefix
-                    assign last_word = silo_title | split: ' ' | last
-                    assign shown = 0
-                    for generation in silo.settings.generations
-                      if generation.products_count > 0
-                        assign shown = shown | plus: 1
-                      endif
-                    endfor
-                  -%}
-                  {%- if shown > 0 -%}
-                    <div class="ssilo__level" id="{{ section_id }}-{{ silo.id }}" data-level="{{ silo.id }}" hidden>
-                      <div class="ssilo__level-head" data-anim>
-                        <span class="ssilo__level-title">{{ silo_label | escape }} generations</span>
-                        {%- if silo.settings.collection != blank -%}
-                          <a class="ssilo__all" href="{{ silo.settings.collection.url }}">
-                            Shop all {{ silo_label | escape }}
+                    <li class="ssilo__silo" data-item="{{ silo.id }}" data-anim {{ silo.shopify_attributes }}>
+                      {%- if shown > 0 -%}
+                        <button
+                          type="button"
+                          class="ssilo__row"
+                          data-toggle="{{ silo.id }}"
+                          aria-expanded="false"
+                          aria-controls="{{ section_id }}-{{ silo.id }}"
+                        >
+                          {{ silo_face }}
+                          <span class="ssilo__plus" aria-hidden="true">
+                            {%- render 'gicon', name: 'add', size: 20 -%}
+                          </span>
+                        </button>
+
+                        <div class="ssilo__panel" id="{{ section_id }}-{{ silo.id }}" data-panel hidden>
+                          <div class="ssilo__inner ssilo__inner--silo">
+                            <ul class="ssilo__gens" role="list">
+                              {%- for generation in silo.settings.generations -%}
+                                {%- if generation.products_count > 0 -%}
+                                  {%- liquid
+                                    assign label = generation.title | remove_first: silo_prefix | strip
+                                    if label == generation.title
+                                      assign label = generation.title | remove_first: brand_prefix
+                                    endif
+                                    # A bare number or code reads with its model ("6" -> "Phantom 6", "19" -> "X 19")
+                                    if label.size <= 2
+                                      assign label = last_word | append: ' ' | append: label
+                                    endif
+                                  -%}
+                                  <li data-anim>
+                                    <a class="ssilo__gen" href="{{ generation.url }}">
+                                      <span class="ssilo__thumb ssilo__thumb--gen">
+                                        {%- if generation.featured_image -%}
+                                          {{
+                                            generation.featured_image
+                                            | image_url: width: 140
+                                            | image_tag: widths: '90, 140', sizes: '44px', loading: 'lazy', class: 'ssilo__thumb-image', alt: ''
+                                          }}
+                                        {%- endif -%}
+                                      </span>
+                                      <span class="ssilo__row-text">
+                                        <span class="ssilo__gen-name">{{ label | escape }}</span>
+                                        <span class="ssilo__row-sub">
+                                          {{- generation.products_count }}
+                                          {{ generation.products_count | pluralize: 'pair', 'pairs' -}}
+                                        </span>
+                                      </span>
+                                    </a>
+                                  </li>
+                                {%- endif -%}
+                              {%- endfor -%}
+                            </ul>
+                            <div class="ssilo__foot" data-anim>
+                              {%- if silo.settings.collection != blank -%}
+                                <a class="ssilo__all" href="{{ silo.settings.collection.url }}">
+                                  Shop all {{ silo_label | escape }}
+                                  {%- render 'gicon', name: 'arrow_forward', size: 16 -%}
+                                </a>
+                              {%- else -%}
+                                <span></span>
+                              {%- endif -%}
+                              <button type="button" class="ssilo__close" data-close="{{ silo.id }}">
+                                Close
+                                {%- render 'gicon', name: 'keyboard_arrow_up', size: 18 -%}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      {%- else -%}
+                        <a class="ssilo__row" href="{{ silo.settings.collection.url | default: brand_url | default: '#' }}">
+                          {{ silo_face }}
+                          <span class="ssilo__plus" aria-hidden="true">
                             {%- render 'gicon', name: 'arrow_forward', size: 18 -%}
-                          </a>
-                        {%- endif -%}
-                      </div>
-                      <ul class="ssilo__pills" role="list">
-                        {%- for generation in silo.settings.generations -%}
-                          {%- if generation.products_count > 0 -%}
-                            {%- liquid
-                              assign label = generation.title | remove_first: silo_prefix | strip
-                              if label == generation.title
-                                assign label = generation.title | remove_first: brand_prefix
-                              endif
-                              # A bare number or code reads with its model ("6" -> "Phantom 6", "19" -> "X 19")
-                              if label.size <= 2
-                                assign label = last_word | append: ' ' | append: label
-                              endif
-                            -%}
-                            <li class="ssilo__pill-item" data-anim>
-                              <a class="ssilo__pill" href="{{ generation.url }}">
-                                <span class="ssilo__thumb">
-                                  {%- if generation.featured_image -%}
-                                    {{
-                                      generation.featured_image
-                                      | image_url: width: 160
-                                      | image_tag: widths: '96, 160', sizes: '56px', loading: 'lazy', class: 'ssilo__image', alt: ''
-                                    }}
-                                  {%- endif -%}
-                                </span>
-                                <span class="ssilo__pill-text">
-                                  <span class="ssilo__pill-name">{{ label | escape }}</span>
-                                  <span class="ssilo__pill-sub">
-                                    {{- generation.products_count }}
-                                    {{ generation.products_count | pluralize: 'pair', 'pairs' -}}
-                                  </span>
-                                </span>
-                                <span class="ssilo__toggle" aria-hidden="true">
-                                  {%- render 'gicon', name: 'arrow_forward', size: 20 -%}
-                                </span>
-                              </a>
-                            </li>
-                          {%- endif -%}
-                        {%- endfor -%}
-                      </ul>
-                    </div>
+                          </span>
+                        </a>
+                      {%- endif -%}
+                    </li>
+                  {%- endfor -%}
+                </ul>
+                <div class="ssilo__foot" data-anim>
+                  {%- if brand_url != blank -%}
+                    <a class="ssilo__all" href="{{ brand_url }}">
+                      Shop all {{ brand_name | escape }}
+                      {%- render 'gicon', name: 'arrow_forward', size: 16 -%}
+                    </a>
+                  {%- else -%}
+                    <span></span>
                   {%- endif -%}
-                {%- endfor -%}
+                  <button type="button" class="ssilo__close" data-close="{{ block.id }}">
+                    Close
+                    {%- render 'gicon', name: 'keyboard_arrow_up', size: 18 -%}
+                  </button>
+                </div>
               </div>
             </div>
-          {%- endif -%}
-        {%- endfor -%}
-      </div>
-    </div>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
   </shop-by-silo>
 </div>
 
@@ -268,21 +256,27 @@
 
   class ShopBySilo extends HTMLElement {
     connectedCallback() {
-      this.current = new Map(); // host -> open level id
+      this.open = new Map(); // list -> its open item
       this.scrollFrame = 0;
 
-      this.querySelectorAll('[data-pick]').forEach((button) => {
-        button.addEventListener('click', () => this.pick(button.dataset.pick));
+      this.addEventListener('click', (event) => {
+        const control = event.target.closest('[data-toggle], [data-close]');
+        if (!control || !this.contains(control)) return;
+        const item = this.itemOf(control.dataset.toggle || control.dataset.close);
+        if (!item) return;
+        if (control.dataset.close || item.classList.contains('is-open')) this.close(item);
+        else this.openItem(item);
       });
 
-      // Theme editor: selecting a Brand or Silo block opens it
+      // Theme editor: selecting a Brand or Silo block opens it (and its brand)
       this.onBlockSelect = (event) => {
-        const item = event.target.closest && event.target.closest('[data-block]');
-        if (!item || !this.contains(item)) return;
-        const level = item.closest('[data-level]');
-        if (level && this.current.get(level.parentElement) !== level.dataset.level) this.pick(level.dataset.level, false);
-        const own = item.querySelector('[data-pick]');
-        if (own && this.current.get(this.levelOf(own.dataset.pick).parentElement) !== own.dataset.pick) this.pick(own.dataset.pick, false);
+        const target = event.target.closest && event.target.closest('[data-item]');
+        if (!target || !this.contains(target)) return;
+        const chain = [];
+        for (let el = target; el && el !== this; el = el.parentElement.closest('[data-item]')) chain.unshift(el);
+        chain.forEach((el) => {
+          if (el.querySelector(':scope > [data-panel]') && !el.classList.contains('is-open')) this.openItem(el);
+        });
       };
       document.addEventListener('shopify:block:select', this.onBlockSelect);
     }
@@ -292,187 +286,161 @@
       cancelAnimationFrame(this.scrollFrame);
     }
 
-    levelOf(id) {
-      return this.querySelector(`[data-level="${id}"]`);
+    itemOf(id) {
+      return this.querySelector(`[data-item="${id}"]`);
     }
 
-    buttonsFor(id) {
-      return [...this.querySelectorAll(`[data-pick="${id}"]`)];
+    parts(item) {
+      const panel = item.querySelector(':scope > [data-panel]');
+      return { head: item.querySelector(':scope > [data-toggle]'), panel, inner: panel.firstElementChild };
     }
 
-    /** Things in a level that drift in, skipping any inside a closed level below it */
-    items(level) {
-      return [...level.querySelectorAll('[data-anim]')].filter((el) => el.closest('[data-level]') === level);
+    /** What rolls in when a panel opens: its own rows, not those of panels inside it */
+    rollers(panel) {
+      return [...panel.querySelectorAll('[data-anim]')].filter((el) => el.closest('[data-panel]') === panel);
     }
 
-    mark(id, on) {
-      this.buttonsFor(id).forEach((b) => {
-        b.classList.toggle('is-active', on);
-        b.setAttribute('aria-expanded', String(on));
-      });
-      // The other choices step back while one is open
-      const list = this.buttonsFor(id)[0]?.closest('ul');
-      if (list) list.classList.toggle('has-active', on);
+    setOpen(item, on) {
+      const list = item.parentElement;
+      item.classList.toggle('is-open', on);
+      item.querySelector(':scope > [data-toggle]')?.setAttribute('aria-expanded', String(on));
+      if (on) this.open.set(list, item);
+      else if (this.open.get(list) === item) this.open.delete(list);
+      // The other cards or rows step back while one is open
+      list.classList.toggle('has-open', this.open.has(list));
     }
 
-    /** Close every level inside this one, without animation (it's already out of sight) */
-    resetInside(level) {
-      level.querySelectorAll('[data-host]').forEach((host) => {
-        const id = this.current.get(host);
-        if (id) this.mark(id, false);
-        this.current.delete(host);
-        stop(host);
-        clear(host, 'height', 'overflow');
-        host.querySelectorAll('[data-level]').forEach((l) => {
-          stop(l);
-          l.hidden = true;
-          l.classList.remove('is-leaving');
-          clear(l, 'opacity');
-        });
-      });
+    headerOffset() {
+      const header = document.querySelector('#header-component[sticky]');
+      return (header ? Math.max(0, header.getBoundingClientRect().bottom) : 0) + 12;
     }
 
-    pick(id, scroll = true) {
-      const to = this.levelOf(id);
-      if (!to) return;
-      const host = to.parentElement;
-      const open = this.current.get(host);
-      if (open === id) return this.close(host);
+    openItem(item) {
+      const list = item.parentElement;
+      const previous = this.open.get(list);
+      const { head, panel, inner } = this.parts(item);
 
-      // Hosts above this one that are still easing open: carry them to their new height too
+      // Panels around this one that are still easing: carry them to their new height too
       const outer = [];
-      for (let h = host.parentElement.closest('[data-host]'); h; h = h.parentElement.closest('[data-host]')) {
-        if (h.getAnimations().length) outer.push([h, h.getBoundingClientRect().height]);
+      for (let p = panel.parentElement.closest('[data-panel]'); p; p = p.parentElement.closest('[data-panel]')) {
+        if (p.getAnimations().length) outer.push([p, p.getBoundingClientRect().height]);
       }
 
-      const from = open ? this.levelOf(open) : null;
-      const startHeight = host.getBoundingClientRect().height;
-      // Choosing a level that is fading shut: bring it back from where it is
-      const returning = !to.hidden ? parseFloat(getComputedStyle(to).opacity) : null;
-
-      stop(host);
-      [...host.children].forEach((level) => {
-        if (level === to || level === from) return;
-        if (level.classList.contains('is-leaving') || !level.hidden) {
-          stop(level);
-          level.classList.remove('is-leaving');
-          clear(level, 'opacity');
-          level.hidden = true;
-          this.resetInside(level);
-        }
-      });
-      stop(to);
-      to.classList.remove('is-leaving');
-      clear(to, 'opacity');
-      if (from) {
-        stop(from);
-        this.mark(open, false);
-        from.hidden = true;
+      // Where this card's header will sit once any open one above it has closed
+      let headTop = head.getBoundingClientRect().top + window.scrollY;
+      if (previous && previous !== item) {
+        const other = this.parts(previous).panel;
+        const above = previous.compareDocumentPosition(item) & Node.DOCUMENT_POSITION_FOLLOWING;
+        if (above && !other.hidden) headTop -= other.getBoundingClientRect().height;
+        this.close(previous, false);
       }
 
-      this.current.set(host, id);
-      this.mark(id, true);
-      // Load this level's images now, and those of the levels it can open, so they're ready
-      to.querySelectorAll('img[loading="lazy"]').forEach((img) => (img.loading = 'eager'));
-      to.hidden = false;
-      clear(host, 'height');
-      const endHeight = host.getBoundingClientRect().height;
+      const startHeight = panel.hidden ? 0 : panel.getBoundingClientRect().height;
+      const returning = panel.hidden ? null : parseFloat(getComputedStyle(inner).opacity);
+      stop(panel);
+      stop(inner);
+      this.setOpen(item, true);
+      panel.querySelectorAll('img[loading="lazy"]').forEach((img) => (img.loading = 'eager'));
+      panel.hidden = false;
+      clear(panel, 'height', 'overflow');
+      clear(inner, 'opacity');
+      const endHeight = panel.getBoundingClientRect().height;
 
-      if (scroll) this.bringUp(to);
-      if (reduced()) {
-        clear(host, 'overflow');
-        if (from) this.resetInside(from);
-        return;
-      }
+      this.scrollTo(headTop - this.headerOffset());
+      if (reduced()) return;
 
-      // The old level fades out over the new one while the host eases to the new height
-      if (from) {
-        from.hidden = false;
-        from.classList.add('is-leaving');
-        animate(from, { opacity: [1, 0] }, { duration: OUT, ease: 'linear' }).then(() => {
-          if (!from.classList.contains('is-leaving')) return;
-          from.classList.remove('is-leaving');
-          from.hidden = true;
-          clear(from, 'opacity');
-          this.resetInside(from);
-        });
-      }
-
-      this.ease(host, startHeight, endHeight);
-      outer.forEach(([h, before]) => {
-        stop(h);
-        clear(h, 'height');
-        this.ease(h, before, h.getBoundingClientRect().height);
+      this.ease(panel, startHeight, endHeight);
+      outer.forEach(([p, before]) => {
+        stop(p);
+        clear(p, 'height');
+        this.ease(p, before, p.getBoundingClientRect().height);
       });
 
-      if (returning !== null && returning < 1 && !from) {
-        animate(to, { opacity: [returning, 1] }, { duration: 0.25, ease: EASE }).then(() => clear(to, 'opacity'));
+      // Caught while closing: bring the content back from where it is
+      if (returning !== null && returning > 0) {
+        animate(inner, { opacity: [returning, 1] }, { duration: 0.25, ease: EASE }).then(() => clear(inner, 'opacity'));
         return;
       }
-      const items = this.items(to);
-      if (items.length) {
-        animate(
-          items,
-          { opacity: [0, 1], transform: ['translateY(-12px)', 'translateY(0px)'] },
-          { duration: MOVE, ease: EASE, delay: stagger(Math.min(0.03, 0.3 / items.length)) }
-        );
-      }
+      const rows = this.rollers(panel);
+      if (!rows.length) return;
+      rows.forEach(stop);
+      animate(
+        rows,
+        {
+          opacity: [0, 1],
+          transform: ['perspective(700px) translateY(-14px) rotateX(-32deg)', 'perspective(700px) translateY(0px) rotateX(0deg)'],
+        },
+        { duration: MOVE, ease: EASE, delay: stagger(Math.min(0.04, 0.4 / rows.length), { startDelay: 0.06 }) }
+      ).then(() => rows.forEach((row) => clear(row, 'opacity', 'transform')));
     }
 
-    /** The open level fades, then its host eases shut */
-    close(host) {
-      const id = this.current.get(host);
-      const level = this.levelOf(id);
-      this.current.delete(host);
-      this.mark(id, false);
-      stop(host);
-      stop(level);
+    /** Fade the content and ease the panel shut, keeping the card's header on screen */
+    close(item, keepInView = true) {
+      const { head, panel, inner } = this.parts(item);
+      this.setOpen(item, false);
+      if (panel.hidden) return;
+      const opacity = parseFloat(getComputedStyle(inner).opacity);
+      const height = panel.getBoundingClientRect().height;
+      stop(panel);
+      stop(inner);
+
+      if (keepInView) {
+        // Closed from its foot with the header scrolled away: bring the header back down into view
+        const top = head.getBoundingClientRect().top;
+        const offset = this.headerOffset();
+        if (top < offset) this.scrollTo(top + window.scrollY - offset);
+      }
+
       const done = () => {
-        level.hidden = true;
-        clear(level, 'opacity');
-        clear(host, 'height', 'overflow');
-        this.resetInside(level);
+        panel.hidden = true;
+        clear(panel, 'height', 'overflow');
+        clear(inner, 'opacity');
+        this.resetInside(panel);
       };
       if (reduced()) return done();
-      const height = host.getBoundingClientRect().height;
-      host.style.height = height + 'px';
-      host.style.overflow = 'hidden';
-      animate(level, { opacity: [1, 0] }, { duration: OUT, ease: 'linear' })
-        .then(() => {
-          if (this.current.get(host)) return null; // something reopened meanwhile
-          return animate(host, { height: [height + 'px', '0px'] }, { duration: 0.35, ease: EASE });
-        })
-        .then(() => {
-          if (!this.current.get(host)) done();
-        });
-    }
 
-    ease(host, from, to) {
-      if (Math.abs(to - from) < 1) {
-        clear(host, 'height', 'overflow');
-        return;
-      }
-      host.style.overflow = 'hidden';
-      animate(host, { height: [from + 'px', to + 'px'] }, { duration: MOVE, ease: EASE }).then(() => {
-        if (host.getAnimations().length) return;
-        clear(host, 'height', 'overflow');
+      panel.style.overflow = 'hidden';
+      animate(inner, { opacity: [opacity, 0] }, { duration: OUT, ease: 'linear' });
+      animate(panel, { height: [height + 'px', '0px'] }, { duration: MOVE, ease: EASE }).then(() => {
+        if (!item.classList.contains('is-open') && !panel.getAnimations().length) done();
       });
     }
 
-    /** Scroll so the level just opened sits at the top of the screen, under the sticky header */
-    bringUp(level) {
-      cancelAnimationFrame(this.scrollFrame);
-      const header = document.querySelector('#header-component[sticky]');
-      const offset = (header ? Math.max(0, header.getBoundingClientRect().bottom) : 0) + 12;
-      const start = window.scrollY;
-      const target = start + level.getBoundingClientRect().top - offset;
-      const distance = target - start;
-      if (Math.abs(distance) < 8) return;
-      if (reduced()) {
-        window.scrollTo({ top: target, behavior: 'instant' });
+    /** Anything left open inside a closed panel is shut, out of sight */
+    resetInside(panel) {
+      panel.querySelectorAll('[data-item].is-open').forEach((child) => {
+        this.setOpen(child, false);
+        const parts = this.parts(child);
+        stop(parts.panel);
+        stop(parts.inner);
+        parts.panel.hidden = true;
+        clear(parts.panel, 'height', 'overflow');
+        clear(parts.inner, 'opacity');
+      });
+    }
+
+    ease(panel, from, to) {
+      if (Math.abs(to - from) < 1) {
+        clear(panel, 'height', 'overflow');
         return;
       }
-      // A touch or wheel takes the scroll back from us
+      panel.style.overflow = 'hidden';
+      animate(panel, { height: [from + 'px', to + 'px'] }, { duration: MOVE, ease: EASE }).then(() => {
+        if (panel.getAnimations().length) return;
+        clear(panel, 'height', 'overflow');
+      });
+    }
+
+    /** Ease the page to a scroll position, in step with the panels; a touch or wheel takes over */
+    scrollTo(target) {
+      cancelAnimationFrame(this.scrollFrame);
+      const start = window.scrollY;
+      const distance = Math.max(0, target) - start;
+      if (Math.abs(distance) < 4) return;
+      if (reduced()) {
+        window.scrollTo({ top: start + distance, behavior: 'instant' });
+        return;
+      }
       const yieldScroll = () => cancelAnimationFrame(this.scrollFrame);
       window.addEventListener('wheel', yieldScroll, { once: true, passive: true });
       window.addEventListener('touchstart', yieldScroll, { once: true, passive: true });
@@ -492,189 +460,203 @@
 {% stylesheet %}
   .ssilo {
     display: block;
-  }
-
-  .ssilo__box {
-    padding: 14px;
-    border-radius: 22px;
-    background: #f3f3f3;
-    color: #121212;
+    --ssilo-ease: cubic-bezier(0.3, 0.7, 0.3, 1);
   }
 
   .ssilo__heading {
-    margin: 2px 4px 14px;
-    font-size: clamp(1.5rem, 6vw, 2.25rem);
+    margin: 0 0 16px;
+    font-size: clamp(1.75rem, 6.5vw, 2.5rem);
     font-weight: 750;
     line-height: 1.1;
     letter-spacing: -0.03em;
-    color: #121212;
   }
 
   .ssilo__brands,
-  .ssilo__pills {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+  .ssilo__silos,
+  .ssilo__gens {
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  /* Step 1: brand tiles */
-  .ssilo__brand,
-  .ssilo__pill {
-    display: flex;
+  .ssilo__brands {
+    display: grid;
+    gap: 12px;
+    align-items: start;
+  }
+
+  /* A card per brand */
+  .ssilo__brand {
+    border-radius: 20px;
+    overflow: hidden;
+    background: #ffffff;
+    color: #121212;
+    box-shadow: 0 1px 2px rgb(18 18 18 / 0.06), 0 8px 24px rgb(18 18 18 / 0.06);
+    transform-origin: 50% 0;
+    transition:
+      opacity 0.35s ease,
+      transform 0.55s var(--ssilo-ease),
+      box-shadow 0.35s ease;
+  }
+
+  /* One brand open: it comes forward, the others step back */
+  .ssilo__brands.has-open > .ssilo__brand:not(.is-open) {
+    opacity: 0.45;
+    transform: scale(0.97);
+  }
+
+  .ssilo__brand.is-open {
+    box-shadow: 0 2px 4px rgb(18 18 18 / 0.08), 0 20px 48px rgb(18 18 18 / 0.18);
+  }
+
+  .ssilo__brand-head {
+    position: relative;
+    display: block;
     width: 100%;
     margin: 0;
     padding: 0;
     border: 0;
+    background: #121212;
+    color: #ffffff;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ssilo__brand-media {
+    display: block;
+    aspect-ratio: 16 / 8;
+    overflow: hidden;
+  }
+
+  .ssilo__brand-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.9s var(--ssilo-ease);
+  }
+
+  .ssilo__brand.is-open .ssilo__brand-head .ssilo__brand-image {
+    transform: scale(1.06);
+  }
+
+  /* Darkens the foot of the image so the white name reads */
+  .ssilo__brand-head::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgb(0 0 0 / 0.68), rgb(0 0 0 / 0.18) 55%, rgb(0 0 0 / 0.05));
+    pointer-events: none;
+  }
+
+  .ssilo__brand-text {
+    position: absolute;
+    inset: auto 72px 16px 18px;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ssilo__brand-name {
+    font-size: clamp(1.75rem, 8vw, 2.5rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .ssilo__brand-sub {
+    margin-block-start: 4px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: rgb(255 255 255 / 0.8);
+  }
+
+  .ssilo__plus {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
     background: #ffffff;
+    color: #121212;
+    transition: background-color 0.25s ease;
+  }
+
+  .ssilo__plus svg {
+    transition: transform 0.45s var(--ssilo-ease);
+  }
+
+  .ssilo__plus--brand {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    z-index: 1;
+    width: 42px;
+    height: 42px;
+    box-shadow: 0 4px 14px rgb(0 0 0 / 0.25);
+  }
+
+  /* The plus turns into an X while open */
+  .is-open > [data-toggle] .ssilo__plus svg {
+    transform: rotate(45deg);
+  }
+
+  .ssilo__panel[hidden] {
+    display: none !important;
+  }
+
+  .ssilo__inner--brand {
+    padding: 10px 10px 8px;
+  }
+
+  /* A row per silo: small image and name on one line */
+  .ssilo__silos {
+    display: grid;
+    gap: 6px;
+  }
+
+  .ssilo__silo {
+    border-radius: 14px;
+    background: #f3f3f3;
+    transform-origin: 50% 0;
+    transition:
+      background-color 0.25s ease,
+      box-shadow 0.35s ease;
+  }
+
+  .ssilo__silo.is-open {
+    background: #ffffff;
+    box-shadow: 0 0 0 1px rgb(18 18 18 / 0.06), 0 12px 30px rgb(18 18 18 / 0.14);
+  }
+
+  .ssilo__silos.has-open > .ssilo__silo:not(.is-open) > .ssilo__row {
+    opacity: 0.45;
+  }
+
+  .ssilo__row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 64px;
+    margin: 0;
+    padding: 6px 12px 6px 6px;
+    border: 0;
+    background: none;
     color: #121212;
     font: inherit;
     text-align: start;
     text-decoration: none;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    box-shadow: 0 1px 2px rgb(18 18 18 / 0.06), 0 6px 18px rgb(18 18 18 / 0.05);
-    transition: box-shadow 0.2s ease, opacity 0.25s ease, background-color 0.2s ease, color 0.2s ease;
+    transition: opacity 0.35s ease;
   }
 
-  .ssilo__brand {
-    flex-direction: column;
-    height: 100%;
-    padding: 6px;
-    border-radius: 16px;
-  }
-
-  .ssilo__brand-media {
-    display: block;
-    aspect-ratio: 4 / 3;
-    border-radius: 11px;
-    overflow: hidden;
-    background: #ffffff;
-  }
-
-  .ssilo__image {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-
-  .ssilo__brand-foot {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 8px 6px 4px;
-  }
-
-  .ssilo__brand-name {
-    font-size: clamp(1.125rem, 4.6vw, 1.5rem);
-    font-weight: 750;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-  }
-
-  /* One choice open: the others step back; the chosen one is ringed (tiles) or inked (pills) */
-  .has-active .ssilo__brand:not(.is-active),
-  .has-active .ssilo__pill:not(.is-active) {
-    opacity: 0.5;
-  }
-
-  .ssilo__brand.is-active {
-    box-shadow: 0 0 0 2px #121212, 0 6px 18px rgb(18 18 18 / 0.08);
-  }
-
-  .ssilo__pill.is-active {
-    background: #121212;
-    color: #ffffff;
-  }
-
-  .ssilo__toggle {
-    display: grid;
-    flex: none;
-    width: 22px;
-    height: 22px;
-  }
-
-  .ssilo__toggle svg {
-    grid-area: 1 / 1;
-    width: 100%;
-    height: 100%;
-  }
-
-  .ssilo__close,
-  .is-active .ssilo__chevron {
-    display: none;
-  }
-
-  .is-active .ssilo__close {
-    display: block;
-  }
-
-  /* Steps 2 and 3: open below, one level at a time */
-  .ssilo__host {
-    position: relative;
-  }
-
-  .ssilo__level[hidden] {
-    display: none !important;
-  }
-
-  .ssilo__level {
-    padding-block-start: 18px;
-  }
-
-  .ssilo__level.is-leaving {
-    position: absolute;
-    inset: 0 0 auto 0;
-    pointer-events: none;
-  }
-
-  .ssilo__level-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-    margin: 0 4px 10px;
-  }
-
-  .ssilo__level-title {
-    font-size: 0.8125rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    color: rgb(18 18 18 / 0.55);
-  }
-
-  .ssilo__all {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    flex: none;
-    color: #121212;
-    font-size: 0.8125rem;
-    font-weight: 650;
-    text-decoration: none;
-  }
-
-  .ssilo__all svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  .ssilo__all:hover {
-    text-decoration: underline;
-    text-underline-offset: 4px;
-  }
-
-  /* Pills: a small image and the name on one line */
-  .ssilo__pill {
-    align-items: center;
-    gap: 10px;
-    min-height: 64px;
-    padding: 6px 10px 6px 6px;
-    border-radius: 14px;
+  .ssilo__silo.is-open .ssilo__plus {
+    background: #f3f3f3;
   }
 
   .ssilo__thumb {
@@ -687,103 +669,185 @@
     background: #ffffff;
   }
 
-  .ssilo__pill-text {
+  .ssilo__thumb-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .ssilo__row-text {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
     min-width: 0;
   }
 
-  .ssilo__pill-name {
-    font-size: 0.9375rem;
-    font-weight: 700;
-    line-height: 1.2;
-    letter-spacing: -0.01em;
-    overflow-wrap: break-word;
+  .ssilo__row-name {
+    font-size: 1.0625rem;
+    font-weight: 750;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
   }
 
-  .ssilo__pill-sub {
+  .ssilo__row-sub {
     margin-block-start: 2px;
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     color: rgb(18 18 18 / 0.5);
     font-variant-numeric: tabular-nums;
   }
 
-  .ssilo__pill.is-active .ssilo__pill-sub {
-    color: rgb(255 255 255 / 0.65);
+  /* Generations, beneath their silo row */
+  .ssilo__inner--silo {
+    padding: 2px 8px 6px;
+  }
+
+  .ssilo__gens {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .ssilo__gens > li {
+    transform-origin: 50% 0;
+  }
+
+  .ssilo__gen {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 100%;
+    min-height: 54px;
+    padding: 5px 8px 5px 5px;
+    border-radius: 11px;
+    background: #f3f3f3;
+    color: #121212;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.2s ease;
+  }
+
+  .ssilo__thumb--gen {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+  }
+
+  .ssilo__gen-name {
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1.15;
+    overflow-wrap: break-word;
+  }
+
+  .ssilo__silo [data-anim],
+  .ssilo__foot {
+    transform-origin: 50% 0;
+  }
+
+  .ssilo__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 4px 4px;
+  }
+
+  .ssilo__all,
+  .ssilo__close {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 36px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #121212;
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 650;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .ssilo__close {
+    color: rgb(18 18 18 / 0.6);
+  }
+
+  .ssilo__all svg,
+  .ssilo__close svg {
+    width: 18px;
+    height: 18px;
   }
 
   @media (hover: hover) {
-    .ssilo__brand:hover,
-    .ssilo__pill:hover {
-      opacity: 1;
-      box-shadow: 0 1px 2px rgb(18 18 18 / 0.08), 0 10px 26px rgb(18 18 18 / 0.1);
+    .ssilo__brand:hover {
+      box-shadow: 0 2px 4px rgb(18 18 18 / 0.08), 0 14px 36px rgb(18 18 18 / 0.14);
     }
 
-    .ssilo__brand.is-active:hover {
-      box-shadow: 0 0 0 2px #121212, 0 10px 26px rgb(18 18 18 / 0.1);
+    .ssilo__brands.has-open > .ssilo__brand:not(.is-open):hover {
+      opacity: 0.8;
+    }
+
+    .ssilo__silos.has-open > .ssilo__silo:not(.is-open) > .ssilo__row:hover {
+      opacity: 0.8;
+    }
+
+    .ssilo__silo:not(.is-open):hover {
+      background: #ebebeb;
+    }
+
+    .ssilo__gen:hover {
+      background: #e8e8e8;
+    }
+
+    .ssilo__all:hover,
+    .ssilo__close:hover {
+      text-decoration: underline;
+      text-underline-offset: 4px;
     }
   }
 
-  .ssilo__brand:focus-visible,
-  .ssilo__pill:focus-visible,
-  .ssilo__all:focus-visible {
+  .ssilo__brand-head:focus-visible,
+  .ssilo__row:focus-visible,
+  .ssilo__gen:focus-visible,
+  .ssilo__all:focus-visible,
+  .ssilo__close:focus-visible {
     outline: 2px solid #121212;
-    outline-offset: 3px;
+    outline-offset: -2px;
+    border-radius: 12px;
   }
 
-  /* Phones: two pills a row, so the name gets the room (no arrow, smaller image) */
-  @media screen and (max-width: 749px) {
-    .ssilo__pill {
-      gap: 8px;
-      min-height: 56px;
-      padding: 5px 8px 5px 5px;
-    }
-
-    .ssilo__thumb {
-      width: 44px;
-      height: 44px;
-      border-radius: 9px;
-    }
-
-    .ssilo__pill-name {
-      font-size: 0.875rem;
-    }
-
-    .ssilo__pill .ssilo__toggle {
-      display: none;
-    }
+  .ssilo__brand-head:focus-visible {
+    outline-color: #ffffff;
+    outline-offset: -6px;
   }
 
   @media screen and (min-width: 750px) {
-    .ssilo__box {
-      padding: 20px;
-      border-radius: 28px;
-    }
-
     .ssilo__brands {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
     }
 
-    .ssilo__pills {
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 10px;
+    .ssilo__brand-media {
+      aspect-ratio: 16 / 7;
     }
 
-    .ssilo__level {
-      padding-block-start: 24px;
+    .ssilo__inner--brand {
+      padding: 12px 12px 10px;
     }
 
-    .ssilo__level-title,
-    .ssilo__all {
-      font-size: 0.875rem;
+    .ssilo__gens {
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .ssilo__brand,
-    .ssilo__pill {
+    .ssilo__brand-image,
+    .ssilo__plus svg,
+    .ssilo__row {
       transition: none;
     }
   }
@@ -852,12 +916,12 @@
           "type": "collection",
           "id": "collection",
           "label": "Brand collection",
-          "info": "For 'Shop all', and the tile's image if none is chosen."
+          "info": "For 'Shop all', and the card's image if none is chosen."
         },
         {
           "type": "image_picker",
           "id": "image",
-          "label": "Tile image"
+          "label": "Card image"
         }
       ]
     },
@@ -881,7 +945,7 @@
         {
           "type": "image_picker",
           "id": "image",
-          "label": "Pill image",
+          "label": "Row image",
           "info": "Defaults to the silo collection's image."
         },
         {
