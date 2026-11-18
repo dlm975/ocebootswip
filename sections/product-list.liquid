@@ -178,6 +178,19 @@
       overflow: hidden;
     }
 
+    /* Sale prices: the was-price above, the new price below, without the "NOW" */
+    .plist--m4 .bfsale-fit {
+      white-space: normal;
+    }
+
+    .plist--m4 :is(.bfsale-rrp, .bfsale-now) {
+      display: block;
+    }
+
+    .plist--m4 .bfsale-now > .bfsale-price[aria-hidden] {
+      display: none;
+    }
+
     .plist--m4 .wishlist-toggle--card {
       --wishlist-offset: 2px;
       zoom: 0.6;
