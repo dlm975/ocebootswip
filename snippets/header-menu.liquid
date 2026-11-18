@@ -156,9 +156,15 @@
       gap: 0;
     }
 
-    /* The dock hangs from the top bar like a tab: white, square at the top, rounded below */
-    .header-menu--dock .overflow-menu::part(list) {
-      filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.08));
+    /*
+      The dock is part of the top bar: one white piece hanging from it, rounded below, with reverse
+      curves where it meets the bar (like the corners of a phone's notch). The shape is painted as
+      backgrounds on the end items, so it needs no extra elements:
+      --dock-flare: the reverse curve's radius; --dock-round: the rounded bottom corners.
+    */
+    .header-menu--dock {
+      --dock-flare: 14px;
+      --dock-round: 22px;
     }
 
     .header-menu--dock .menu-list__list-item:not([slot='more']) {
@@ -167,13 +173,26 @@
     }
 
     .header-menu--dock .menu-list__list-item:not([slot='more']):first-child {
-      padding-inline-start: 6px;
-      border-radius: 0 0 0 22px;
+      padding-inline-start: calc(6px + var(--dock-flare));
+      background:
+        radial-gradient(circle at 0 100%, #fff0 calc(var(--dock-flare) - 0.5px), #fff var(--dock-flare)) 0 0 / var(--dock-flare) var(--dock-flare) no-repeat,
+        radial-gradient(circle at 100% 0, #fff calc(var(--dock-round) - 0.5px), #fff0 var(--dock-round)) var(--dock-flare) 100% / var(--dock-round) var(--dock-round) no-repeat,
+        linear-gradient(#fff, #fff) var(--dock-flare) 0 / calc(100% - var(--dock-flare)) calc(100% - var(--dock-round)) no-repeat,
+        linear-gradient(#fff, #fff) calc(var(--dock-flare) + var(--dock-round)) 100% / calc(100% - var(--dock-flare) - var(--dock-round)) var(--dock-round) no-repeat;
     }
 
     .header-menu--dock .menu-list__list-item:not([slot='more']):nth-last-child(2) {
-      padding-inline-end: 6px;
-      border-radius: 0 0 22px 0;
+      padding-inline-end: calc(6px + var(--dock-flare));
+      background:
+        radial-gradient(circle at 100% 100%, #fff0 calc(var(--dock-flare) - 0.5px), #fff var(--dock-flare)) 100% 0 / var(--dock-flare) var(--dock-flare) no-repeat,
+        radial-gradient(circle at 0 0, #fff calc(var(--dock-round) - 0.5px), #fff0 var(--dock-round)) calc(100% - var(--dock-flare)) 100% / var(--dock-round) var(--dock-round) no-repeat,
+        linear-gradient(#fff, #fff) 0 0 / calc(100% - var(--dock-flare)) calc(100% - var(--dock-round)) no-repeat,
+        linear-gradient(#fff, #fff) 0 100% / calc(100% - var(--dock-flare) - var(--dock-round)) var(--dock-round) no-repeat;
+    }
+
+    /* The dock starts where the menu did: pull it left by the reverse curve */
+    .header-menu--dock .overflow-menu::part(list) {
+      margin-inline-start: calc(-1 * var(--dock-flare));
     }
 
     /* The rest of the menu row is see-through: only the dock (and the currency tab) show */
@@ -193,14 +212,34 @@
       align-self: start;
     }
 
-    /* The currency switch: a small tab of its own on the right */
+    /* The currency switch: a small tab of its own on the right, the same shape */
     #header-component .header__row--bottom:has(.header-menu--dock) .header__column--right {
+      position: relative;
       align-self: start;
       height: 50px;
       padding: 0 16px;
       border-radius: 0 0 18px 18px;
       background: #ffffff;
-      filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.08));
+    }
+
+    #header-component .header__row--bottom:has(.header-menu--dock) .header__column--right::before,
+    #header-component .header__row--bottom:has(.header-menu--dock) .header__column--right::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 14px;
+      height: 14px;
+      pointer-events: none;
+    }
+
+    #header-component .header__row--bottom:has(.header-menu--dock) .header__column--right::before {
+      right: 100%;
+      background: radial-gradient(circle at 0 100%, #fff0 13.5px, #fff 14px);
+    }
+
+    #header-component .header__row--bottom:has(.header-menu--dock) .header__column--right::after {
+      left: 100%;
+      background: radial-gradient(circle at 100% 100%, #fff0 13.5px, #fff 14px);
     }
 
     /* Each item is an icon that opens into a pill on hover: the name unrolls beside it (the
