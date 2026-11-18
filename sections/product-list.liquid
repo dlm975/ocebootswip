@@ -67,7 +67,7 @@
         {% content_for 'block', type: '_product-card', id: 'static-product-card', closest.product: product %}
       </div>
 
-      {% if mobile_max > 0 and forloop.index == mobile_max %}
+      {% if mobile_max > 0 and forloop.index == mobile_max and section.settings.mobile_view_all_card != false %}
         <div class="resource-list__item resource-list__item--view-all-card">
           <a href="{{ section.settings.collection.url }}" class="plist-view-all-card">
             <span class="plist-view-all-card__icon">
@@ -303,6 +303,12 @@
       "info": "Caps visible products on mobile and inserts a View All card in the next slot."
     },
     {
+      "type": "checkbox",
+      "id": "mobile_view_all_card",
+      "label": "Show a View All card after the mobile limit",
+      "default": true
+    },
+    {
       "type": "range",
       "id": "columns",
       "label": "t:settings.columns",
@@ -328,6 +334,10 @@
         {
           "value": "3",
           "label": "3"
+        },
+        {
+          "value": "4",
+          "label": "4"
         }
       ],
       "default": "2",

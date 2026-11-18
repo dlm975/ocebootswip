@@ -4400,7 +4400,7 @@ html.wlq-open {
   2. The home page's Popular categories arrows: foil coins (a domed face, a rim, a thick edge). The
      foil drifts; the glint is set in sections/popular-categories.liquid (once, after hover).
 */
-.popcat__arrow {
+:is(.popcat__arrow, .oce-disk) {
   position: relative;
   overflow: hidden;
   isolation: isolate;
@@ -4418,7 +4418,7 @@ html.wlq-open {
   animation: oce-foil-disk 16s linear infinite;
 }
 
-.popcat__arrow::before {
+:is(.popcat__arrow, .oce-disk)::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -4430,7 +4430,7 @@ html.wlq-open {
   animation: oce-foil-back 24s linear infinite;
 }
 
-.popcat__arrow::after {
+:is(.popcat__arrow, .oce-disk)::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -4455,9 +4455,9 @@ html.wlq-open {
 @media (prefers-reduced-motion: reduce) {
   :is(.product-form-buttons .add-to-cart-button, .psb .psb__atc, .wlq__add, .wl-card__buy, .pa__add, .cart-recs__add),
   :is(.product-form-buttons .add-to-cart-button, .psb .psb__atc, .wlq__add, .wl-card__buy, .pa__add, .cart-recs__add)::after,
-  .popcat__arrow,
-  .popcat__arrow::before,
-  .popcat__arrow::after {
+  :is(.popcat__arrow, .oce-disk),
+  :is(.popcat__arrow, .oce-disk)::before,
+  :is(.popcat__arrow, .oce-disk)::after {
     animation: none !important;
   }
 }
