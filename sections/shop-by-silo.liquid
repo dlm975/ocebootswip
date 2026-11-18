@@ -211,7 +211,6 @@
 
   const EASE = [0.3, 0.7, 0.3, 1];
   const MOVE = 0.55;
-  const SWAP = 0.4; // the first step of swapping one open card for another
   const OUT = 0.18;
   const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const stop = (el) => el.getAnimations().forEach((a) => a.cancel());
@@ -339,9 +338,12 @@
      * Positions are animated from where they are (FLIP), so a tap mid-way carries on smoothly.
      */
     /**
-     * Choose one in a list (or none). Swapping one open card for another runs in two steps, so cards
-     * never cross: the open one closes quickly back into the grid, then the new one opens. The others
-     * stay stepped back throughout, and a tap during the swap takes over from wherever it is.
+     * Choose one in a list (or none). Swapping one open card for another goes in three beats:
+     * 1. the open one's contents fade where they are;
+     * 2. everything moves in one straight line to where it ends up (the chosen one up under the
+     *    header, at full width) as the old panel closes;
+     * 3. then the chosen one's contents roll out.
+     * The others stay stepped back throughout, and a tap at any point takes over from there.
      */
     choose(list, target) {
       const previous = this.open.get(list) || null;
@@ -351,15 +353,18 @@
         this.switchIn(list, target);
         return;
       }
-      this.switchIn(list, null, { focus: target, duration: SWAP });
-      list.classList.add('has-open');
       target.classList.add('is-next');
-      setTimeout(() => {
-        if (this.pending.get(list) === token) this.switchIn(list, target);
-      }, SWAP * 1000);
+      const { inner } = this.parts(previous);
+      const from = parseFloat(getComputedStyle(inner).opacity);
+      stop(inner);
+      animate(inner, { opacity: [from, 0] }, { duration: OUT, ease: 'linear' }).then(() => {
+        if (this.pending.get(list) !== token) return;
+        inner.style.opacity = '0';
+        this.switchIn(list, target, { deferOpen: true });
+      });
     }
 
-    switchIn(list, target, { focus = null, duration = MOVE } = {}) {
+    switchIn(list, target, { focus = null, duration = MOVE, deferOpen = false } = {}) {
       const cards = [...list.children];
       const previous = this.open.get(list) || null;
       cards.forEach((card) => card.classList.remove('is-next'));
@@ -472,7 +477,18 @@
         clear(p, 'height');
         this.ease(p, height, p.getBoundingClientRect().height);
       });
-      if (next) {
+      if (next && deferOpen) {
+        // Its contents wait until it has arrived, then roll out
+        setTimeout(() => {
+          if (this.open.get(list) !== target || next.panel.getAnimations().length) return;
+          if (next.panel.style.height !== '0px') return;
+          clear(next.panel, 'height');
+          const height = next.panel.getBoundingClientRect().height;
+          next.panel.style.height = '0px';
+          this.ease(next.panel, 0, height);
+          this.roll(next.panel);
+        }, duration * 1000);
+      } else if (next) {
         this.ease(next.panel, nextFrom, nextHeight, duration);
         if (nextOpacity !== null && nextOpacity > 0) {
           if (nextOpacity < 1) {
