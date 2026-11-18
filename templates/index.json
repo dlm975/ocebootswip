@@ -948,18 +948,10 @@
                 "padding-inline-end": 0
               },
               "blocks": {}
-            },
-            "shop-new-link": {
-              "type": "_product-list-link",
-              "settings": {
-                "label": "SHOP NEW",
-                "link": "shopify://collections/shop-new"
-              }
             }
           },
           "block_order": [
-            "newly-listed-title",
-            "shop-new-link"
+            "newly-listed-title"
           ]
         },
         "static-product-card": {
@@ -1050,6 +1042,13 @@
             "product_title",
             "price"
           ]
+        },
+        "see-all-new": {
+          "type": "plist-link",
+          "settings": {
+            "label": "See all NEW boots",
+            "link": "shopify://collections/shop-new"
+          }
         }
       },
       "settings": {
@@ -1071,8 +1070,12 @@
         "color_scheme": "scheme-1",
         "padding-block-start": 0,
         "padding-block-end": 40,
-        "mobile_view_all_card": false
-      }
+        "mobile_view_all_card": false,
+        "boxed": true
+      },
+      "block_order": [
+        "see-all-new"
+      ]
     },
     "brand_tiles_main": {
       "type": "brand-tiles",
