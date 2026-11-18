@@ -156,19 +156,51 @@
       gap: 0;
     }
 
+    /* The dock hangs from the top bar like a tab: white, square at the top, rounded below */
+    .header-menu--dock .overflow-menu::part(list) {
+      filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.08));
+    }
+
     .header-menu--dock .menu-list__list-item:not([slot='more']) {
-      padding: 4px 1px;
-      background: rgb(18 18 18 / 0.05);
+      padding: 2px 1px 6px;
+      background: #ffffff;
     }
 
     .header-menu--dock .menu-list__list-item:not([slot='more']):first-child {
-      padding-inline-start: 4px;
-      border-radius: 999px 0 0 999px;
+      padding-inline-start: 6px;
+      border-radius: 0 0 0 22px;
     }
 
     .header-menu--dock .menu-list__list-item:not([slot='more']):nth-last-child(2) {
-      padding-inline-end: 4px;
-      border-radius: 0 999px 999px 0;
+      padding-inline-end: 6px;
+      border-radius: 0 0 22px 0;
+    }
+
+    /* The rest of the menu row is see-through: only the dock (and the currency tab) show */
+    #header-component:has(.header-menu--dock),
+    #header-component .header__row--bottom:has(.header-menu--dock),
+    #header-component .header__row--bottom:has(.header-menu--dock) .header__columns {
+      background: transparent !important;
+      box-shadow: none !important;
+      border-block-end: 0 !important;
+    }
+
+    #header-component .header__row--bottom:has(.header-menu--dock) .header__columns {
+      align-items: start;
+    }
+
+    #header-component .header__row--bottom:has(.header-menu--dock) .header__column--left {
+      align-self: start;
+    }
+
+    /* The currency switch: a small tab of its own on the right */
+    #header-component .header__row--bottom:has(.header-menu--dock) .header__column--right {
+      align-self: start;
+      height: 50px;
+      padding: 0 16px;
+      border-radius: 0 0 18px 18px;
+      background: #ffffff;
+      filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.08));
     }
 
     /* Each item is an icon that opens into a pill on hover: the name unrolls beside it (the
@@ -225,8 +257,7 @@
       grid-template-columns: 22px 1fr;
       column-gap: 8px;
       padding-inline-end: 16px;
-      background: #ffffff;
-      box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+      background: rgb(18 18 18 / 0.06);
     }
 
     .header-menu--dock .menu-list__list-item:where(:hover, :focus-within) .menu-list__link-title {
