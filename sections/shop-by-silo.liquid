@@ -391,6 +391,7 @@
       const before = new Map(cards.map((card) => [card, card.getBoundingClientRect()]));
       const wasHeight = was && !was.panel.hidden ? was.panel.getBoundingClientRect().height : 0;
       const wasOpacity = was && !was.panel.hidden ? parseFloat(getComputedStyle(was.inner).opacity) : 1;
+      const wasWidth = was && !was.panel.hidden ? was.inner.getBoundingClientRect().width : 0;
       const nextFrom = next && !next.panel.hidden ? next.panel.getBoundingClientRect().height : 0;
       const nextOpacity = next && !next.panel.hidden ? parseFloat(getComputedStyle(next.inner).opacity) : null;
 
@@ -409,7 +410,7 @@
         stop(panel);
         stop(inner);
         clear(panel, 'height', 'overflow');
-        clear(inner, 'opacity');
+        clear(inner, 'opacity', 'width');
         if (card === target) return;
         if (!panel.hidden) {
           panel.hidden = true;
@@ -456,6 +457,19 @@
       }
       const after = new Map(cards.map((card) => [card, card.getBoundingClientRect()]));
 
+      // While a card widens or narrows, its contents keep the width they have at the end (or had at
+      // the start, for the one closing) and are clipped by it, so the names never re-wrap mid-way:
+      // no list ballooning to the height of the screen and snapping back.
+      const pin = (card, inner, width) => {
+        if (!inner || !width || Math.abs(before.get(card).width - after.get(card).width) <= 1) return;
+        inner.style.width = width + 'px';
+        setTimeout(() => {
+          if (!card.getAnimations().some((a) => a.effect && a.effect.getKeyframes().some((k) => 'width' in k))) clear(inner, 'width');
+        }, duration * 1000 + 30);
+      };
+      if (next) pin(target, next.inner, next.inner.getBoundingClientRect().width);
+      if (was) pin(previous, was.inner, wasWidth);
+
       cards.forEach((card) => {
         const b = before.get(card);
         const a = after.get(card);
@@ -481,7 +495,7 @@
           if (previous.classList.contains('is-open') || was.panel.getAnimations().length) return;
           was.panel.hidden = true;
           clear(was.panel, 'height', 'overflow');
-          clear(was.inner, 'opacity');
+          clear(was.inner, 'opacity', 'width');
           this.resetInside(was.panel);
         });
       }
