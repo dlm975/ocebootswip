@@ -289,14 +289,22 @@
       position: absolute;
       inset: 0 var(--dock-right, 32px) 0 var(--dock-left, 32px);
       z-index: -1;
+      border-radius: 0 0 22px 22px;
       background: #ffffff;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.2s ease, border-radius 0.2s ease;
+    }
+
+    /* Any item pointed at extends the dock to the currency tab; an item without a dropdown gives
+       it rounded corners of its own, one with a dropdown runs it square into the dropdown */
+    #header-component .header__row--bottom:has(.header-menu--dock .is-dock-open)::before,
+    #header-component .header__row--bottom:has(.header-menu--dock .menu-list__link[aria-expanded='true'])::before {
+      opacity: 1;
     }
 
     #header-component .header__row--bottom:has(.header-menu--dock .menu-list__link[aria-expanded='true'])::before {
-      opacity: 1;
+      border-radius: 0;
     }
 
     #header-component .header__row--bottom:has(.header-menu--dock) .menu-list__submenu,
