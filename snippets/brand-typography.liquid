@@ -173,7 +173,8 @@
 
     /* Card prices: 12px, a step under the bold name. The "was" price is rounded to whole units
        (snippets/was-price.liquid); <price-fit> still shrinks a sale line that doesn't fit its card. */
-    :root product-card [ref='priceContainer'] {
+    :root:root product-card [ref='priceContainer'],
+    :root:root product-card [ref='priceContainer'] :is(.price, .compare-at-price, .card-sale-price, .card-sale-price__label) {
       font-size: 12px;
     }
 
