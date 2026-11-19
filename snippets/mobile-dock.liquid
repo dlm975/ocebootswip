@@ -33,8 +33,8 @@
       data-mdock-search
       aria-label="Search"
     >
-      {%- render 'gicon', name: 'search', size: 22 -%}
-      <span class="mdock__label" aria-hidden="true">Search</span>
+      {%- render 'gicon', name: 'search', class: 'mdock__icon--search', size: 22 -%}
+      <span class="mdock__label mdock__label--search" aria-hidden="true">Search</span>
     </button>
     {%- if size_link -%}
       <span
@@ -623,6 +623,17 @@
     .mdock__button:active {
       background: rgb(255 255 255 / 0.6);
       transform: scale(0.96);
+    }
+
+    /* The magnifier fills more of its box than the ruler, and "Search" is the longer word: both a
+       touch smaller, so the two buttons read the same size */
+    .mdock__button svg.mdock__icon--search {
+      width: 19px;
+      height: 19px;
+    }
+
+    .mdock__label--search {
+      font-size: 0.875rem !important;
     }
 
     .mdock__label {
