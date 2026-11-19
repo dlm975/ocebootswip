@@ -493,65 +493,14 @@
         "padding-block-end": 48
       }
     },
-    "17706063529fca8395": {
-      "type": "_blocks",
-      "blocks": {
-        "trusted_logos_001": {
-          "type": "trusted-logos-bar",
-          "settings": {
-            "heading_text": "Worn by",
-            "label_size": 12,
-            "label_color": "#121212",
-            "header_gap": 6,
-            "section_background": "#ffffff",
-            "section_padding": 0,
-            "bar_background": "#f1f5f9",
-            "bar_border_color": "#64748b40",
-            "bar_padding": 14,
-            "logo_height": 32,
-            "logo_gap": 56,
-            "scroll_speed": 25,
-            "logo_opacity": 85,
-            "logo_filter": "none",
-            "logo_1": "shopify://shop_images/Bundesliga_logo__2017.svg",
-            "logo_2": "shopify://shop_images/Premier_League_Logo.svg",
-            "logo_3": "shopify://shop_images/Major_League_Soccer_logo.svg",
-            "logo_4": "shopify://shop_images/LaLiga_EA_Sports_2023_Vertical_Logo.svg",
-            "logo_5": "shopify://shop_images/Serie_A_ENILIVE_logo.svg",
-            "logo_6": "shopify://shop_images/Roshn_Saudi_League_Logo.svg"
-          },
-          "blocks": {}
-        }
-      },
-      "block_order": [
-        "trusted_logos_001"
-      ],
+    "worn_by_pros_main": {
+      "type": "worn-by-pros",
       "settings": {
-        "content_direction": "column",
-        "vertical_on_mobile": true,
-        "horizontal_alignment": "flex-start",
-        "vertical_alignment": "center",
-        "align_baseline": false,
-        "horizontal_alignment_flex_direction_column": "center",
-        "vertical_alignment_flex_direction_column": "center",
-        "gap": 8,
-        "section_width": "full-width",
-        "section_height": "",
-        "section_height_custom": 50,
+        "heading": "Who we've worked with",
+        "hint": "Tap a club to meet the player",
         "color_scheme": "scheme-1",
-        "background_media": "none",
-        "video_position": "cover",
-        "background_image_position": "cover",
-        "border": "none",
-        "border_width": 1,
-        "border_opacity": 100,
-        "border_radius": 0,
-        "toggle_overlay": false,
-        "overlay_color": "#12121226",
-        "overlay_style": "solid",
-        "gradient_direction": "to top",
-        "padding-block-start": 0,
-        "padding-block-end": 0
+        "padding-block-start": 24,
+        "padding-block-end": 24
       }
     },
     "collection_cutout_grid_gidTf3": {
@@ -730,113 +679,6 @@
         "image_ratio": "1/1",
         "padding-block-start": 0,
         "padding-block-end": 0
-      }
-    },
-    "pro_player_wall_hhtJ4x": {
-      "type": "pro-player-wall",
-      "blocks": {
-        "player_mDfxBi": {
-          "type": "player",
-          "settings": {
-            "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_20_42_PM.png",
-            "name": "Cameron Archer",
-            "club": "Southampton F.C.",
-            "club_badge": "shopify://shop_images/FC_Southampton.svg",
-            "flag": "shopify://shop_images/Flag_of_England.svg",
-            "boot_name": "F50 Adizero 2014",
-            "link": ""
-          }
-        },
-        "player_YGwxeH": {
-          "type": "player",
-          "settings": {
-            "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_19_21_PM.png",
-            "name": "Bryan Lasme",
-            "club": "FC Schalke 04",
-            "club_badge": "shopify://shop_images/FC_Schalke_04_Logo.svg",
-            "flag": "shopify://shop_images/Flag_of_France_svg.webp",
-            "boot_name": "Hypervenom Phantom 3",
-            "link": ""
-          }
-        },
-        "player_Nr4hyn": {
-          "type": "player",
-          "settings": {
-            "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_15_51_PM.png",
-            "name": "Nicholas Pierini",
-            "club": "US SASSUOLO",
-            "club_badge": "shopify://shop_images/US_Sassuolo_Calcio_logo.svg",
-            "flag": "shopify://shop_images/Flag_of_Italy.svg",
-            "boot_name": "Mercurial Vapor 8 'Clash'",
-            "link": ""
-          }
-        },
-        "player_GFgXXb": {
-          "type": "player",
-          "settings": {
-            "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_24_21_PM.png",
-            "name": "Lois Openda",
-            "club": "Olympique Lyonnais",
-            "club_badge": "shopify://shop_images/Olympique_Lyonnais_logo.svg",
-            "flag": "shopify://shop_images/Flag_of_Belgium.svg",
-            "boot_name": "Predator LZ Instinct",
-            "link": ""
-          }
-        },
-        "player_nfExFK": {
-          "type": "player",
-          "settings": {
-            "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_30_25_PM.png",
-            "name": "Garang Kuol",
-            "club": "Sparta Prague",
-            "club_badge": "shopify://shop_images/AC-Sparta-LOGO2021.svg",
-            "flag": "shopify://shop_images/Flag_of_Australia__converted.svg",
-            "boot_name": "Phantom GT SG-Pro",
-            "link": ""
-          }
-        },
-        "player_Mk4T4B": {
-          "type": "player",
-          "settings": {
-            "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_37_36_PM.png",
-            "name": "Cameron Harper",
-            "club": "New York Red Bulls",
-            "club_badge": "shopify://shop_images/New_York_Red_Bulls_logo.svg",
-            "flag": "shopify://shop_images/Flag_of_the_United_States__DDD-F-416E_specifications.svg",
-            "boot_name": "Mercurial Vapor 12",
-            "link": ""
-          }
-        }
-      },
-      "block_order": [
-        "player_mDfxBi",
-        "player_YGwxeH",
-        "player_Nr4hyn",
-        "player_GFgXXb",
-        "player_nfExFK",
-        "player_Mk4T4B"
-      ],
-      "name": "Pro Player Wall",
-      "settings": {
-        "roster_source": "shared",
-        "heading": "TRUSTED BY THE PROS",
-        "subheading": "",
-        "show_stars": true,
-        "star_color": "#25d366",
-        "star_size": 20,
-        "aspect_ratio": "4 / 5",
-        "cards_mobile": 3,
-        "cards_desktop": 6,
-        "gap_mobile": 8,
-        "gap_desktop": 12,
-        "corner_radius": 16,
-        "attach_to": "none",
-        "blur_strength": 16,
-        "tint_opacity": 30,
-        "cross_seconds": 30,
-        "pause_on_hover": true,
-        "padding-block-start": 40,
-        "padding-block-end": 40
       }
     },
     "popular_categories_main": {
@@ -1087,9 +929,8 @@
     "1770583639efe53d54",
     "shop_by_silo_main",
     "instagram_feed_main",
-    "17706063529fca8395",
+    "worn_by_pros_main",
     "collection_cutout_grid_gidTf3",
-    "pro_player_wall_hhtJ4x",
     "popular_categories_main",
     "newly_listed_fc",
     "player_reels_main"
