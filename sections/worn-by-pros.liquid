@@ -455,15 +455,18 @@
   }
 
   /* The field the badges float in */
+  /* Phones: the badges take the same height as the heading and prompt beside them */
   .wbp__stage {
-    --wbp-logo: 70px;
+    --wbp-logo: 58px;
     position: relative;
-    height: 430px;
+    align-self: stretch;
+    min-height: 200px;
   }
 
   @media screen and (min-width: 750px) {
     .wbp__stage {
       --wbp-logo: 150px;
+      align-self: center;
       height: 520px;
     }
   }
