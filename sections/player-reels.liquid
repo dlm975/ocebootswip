@@ -29,26 +29,23 @@
         <span class="preels__media">
           {%- if block.settings.video != blank -%}
             {%- liquid
-              # Light and quick to start: HLS first (Safari streams the size it can manage), then
-              # one MP4 at 480p (its shorter side at most 480px), never the full-size original
+              # Light and quick to start: Shopify's 480p copy of the clip (an MP4 no taller than 480px,
+              # e.g. 270x480 portrait) for every browser, else its smallest MP4; never the full size
               assign clip = block.settings.video
-              assign hls = nil
               assign mp4 = nil
-              assign mp4_side = 0
+              assign mp4_height = 0
               assign smallest = nil
-              assign smallest_side = 100000
+              assign smallest_height = 100000
               for source in clip.sources
-                if source.format == 'm3u8'
-                  assign hls = source
-                elsif source.format == 'mp4'
-                  assign side = source.width | at_most: source.height
-                  if side < smallest_side
+                if source.format == 'mp4'
+                  assign h = source.height | plus: 0
+                  if h < smallest_height
                     assign smallest = source
-                    assign smallest_side = side
+                    assign smallest_height = h
                   endif
-                  if side <= 480 and side > mp4_side
+                  if h <= 480 and h > mp4_height
                     assign mp4 = source
-                    assign mp4_side = side
+                    assign mp4_height = h
                   endif
                 endif
               endfor
@@ -85,9 +82,6 @@
                 poster="{{ still | image_url: width: 720 }}"
               {% endif %}
             >
-              {%- if hls -%}
-                <source src="{{ hls.url }}" type="{{ hls.mime_type }}">
-              {%- endif -%}
               {%- if mp4 -%}
                 <source src="{{ mp4.url }}" type="{{ mp4.mime_type }}">
               {%- endif -%}
@@ -459,7 +453,7 @@
           "type": "video",
           "id": "video",
           "label": "Video",
-          "info": "A short clip, played muted on loop. Portrait (9:16) works best. Shopify makes a 480p copy, which is what plays, so any size can be uploaded."
+          "info": "A short clip, played muted on loop. Portrait (9:16) works best. Shopify makes a 480p copy, which is what plays (quick to start), so any size can be uploaded."
         },
         {
           "type": "image_picker",
