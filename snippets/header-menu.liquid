@@ -224,10 +224,27 @@
         const flare = parseFloat(getComputedStyle(dock).getPropertyValue('--dock-flare')) || 0;
         const rowBox = row.getBoundingClientRect();
         row.style.setProperty('--dock-left', Math.round(first.getBoundingClientRect().left - rowBox.left + flare) + 'px');
+        const items = dock.querySelectorAll('.menu-list__list-item:not([slot="more"])');
+        const last = items[items.length - 1];
+        if (last) {
+          const lastBox = last.getBoundingClientRect();
+          row.style.setProperty('--dock-width', Math.round(lastBox.right - flare - first.getBoundingClientRect().left - flare) + 'px');
+          row.style.setProperty('--dock-height', Math.round(lastBox.bottom - rowBox.top) + 'px');
+        }
         if (currency) row.style.setProperty('--dock-right', Math.round(rowBox.right - currency.getBoundingClientRect().right) + 'px');
       };
       measure();
       window.addEventListener('resize', measure, { passive: true });
+      // The pills widen the dock as they open: keep the shadow under it, measured once a frame
+      let measuring = 0;
+      const resized = new ResizeObserver(() => {
+        if (measuring) return;
+        measuring = requestAnimationFrame(() => {
+          measuring = 0;
+          measure();
+        });
+      });
+      dock.querySelectorAll('.menu-list__list-item').forEach((li) => resized.observe(li));
 
       // The tray behind the dock row grows down to hold an open dropdown: follow the theme's height
       if (headerMenu && row) {
@@ -300,9 +317,6 @@
     /* The dock starts where the menu did: pull it left by the reverse curve */
     .header-menu--dock .overflow-menu::part(list) {
       margin-inline-start: calc(-1 * var(--dock-flare));
-      /* A soft shadow under the dock only: pulled in past the reverse curves, rounded like it */
-      border-radius: 0 0 calc(var(--dock-flare) + var(--dock-round)) calc(var(--dock-flare) + var(--dock-round));
-      box-shadow: 0 14px 18px -14px rgb(18 18 18 / 0.22);
     }
 
     /* The rest of the menu row is see-through: only the dock (and the currency tab) show */
@@ -312,6 +326,21 @@
       background: transparent !important;
       box-shadow: none !important;
       border-block-end: 0 !important;
+    }
+
+    /* A soft shadow under the dock only (its edges measured by the script, following the pills
+       as they open), rounded like it */
+    #header-component .header__row--bottom:has(.header-menu--dock)::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: var(--dock-left, 0px);
+      width: var(--dock-width, 0px);
+      height: var(--dock-height, 0px);
+      z-index: 0;
+      border-radius: 0 0 22px 22px;
+      box-shadow: 0 14px 18px -12px rgb(18 18 18 / 0.22);
+      pointer-events: none;
     }
 
     #header-component .header__row--bottom:has(.header-menu--dock) .header__columns {
