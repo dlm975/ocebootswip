@@ -1,5 +1,5 @@
 {%- comment -%}
-  "What's new on @oceboots ✓": the newest Instagram posts as cards, from the "Instagram post"
+  "What's new on @oceboots ✓": the newest Instagram photo and carousel posts (not reels) as cards, from the "Instagram post"
   metaobjects (Shopify admin: Content > Metaobjects), newest first by Posted at. Posts are added by
   hand, or by the automatic Instagram sync once it is connected. Hidden on the storefront until
   there is at least one post.
@@ -48,21 +48,22 @@
 
     {%- if keys.size > 0 -%}
       <ul class="igf__track" role="list">
-        {%- for key in keys limit: limit -%}
+        {%- assign shown = 0 -%}
+        {%- for key in keys -%}
           {%- liquid
+            if shown >= limit
+              break
+            endif
             assign post_handle = key | split: '|' | last
             assign post = shop.metaobjects.instagram_post[post_handle]
             assign media = post.media.value
+            # Photo and carousel posts only: reels are left out
+            if post.is_video.value == true or media.media_type == 'video'
+              continue
+            endif
             assign is_video = false
-            if media.media_type == 'video'
-              assign is_video = true
-              assign still = media.preview_image
-            else
-              assign still = media
-            endif
-            if post.is_video.value == true
-              assign is_video = true
-            endif
+            assign still = media
+            assign shown = shown | plus: 1
             assign link = post.permalink.value | default: profile_url
           -%}
           {%- liquid
