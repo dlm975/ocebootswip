@@ -67,18 +67,6 @@
           -%}
           <li class="igf__item">
             <article class="igf__card">
-              <header class="igf__card-head">
-                <span class="igf__avatar" aria-hidden="true">
-                  {%- if section.settings.avatar != blank -%}
-                    {{ section.settings.avatar | image_url: width: 64 | image_tag: loading: 'lazy', alt: '' }}
-                  {%- else -%}
-                    {{ handle | slice: 0 | upcase }}
-                  {%- endif -%}
-                </span>
-                <span class="igf__card-name">{{ handle | escape }}</span>
-                {%- render 'gicon', name: 'verified-fill', class: 'igf__card-tick', size: 14 -%}
-                <time class="igf__card-date" datetime="{{ post.posted_at.value | date: '%Y-%m-%d' }}">{{ post.posted_at.value | date: '%-d %b' }}</time>
-              </header>
               <a class="igf__media" href="{{ link }}" target="_blank" rel="noopener" aria-label="Open this post on Instagram">
                 {%- if still -%}
                   {{
@@ -99,25 +87,18 @@
                 {%- endif -%}
               </a>
               <div class="igf__actions">
-                <a class="igf__action" href="{{ link }}" target="_blank" rel="noopener" aria-label="Like on Instagram">
+                <a class="igf__action" href="{{ link }}" target="_blank" rel="noopener" aria-label="Like on Instagram{% if likes > 0 %}, {{ likes }} likes{% endif %}">
                   {%- render 'gicon', name: 'favorite', size: 24 -%}
+                  {%- if likes > 0 -%}<span class="igf__count" data-igf-count="{{ likes }}">{{ likes }}</span>{%- endif -%}
                 </a>
-                <a class="igf__action" href="{{ link }}" target="_blank" rel="noopener" aria-label="Comment on Instagram">
+                <a class="igf__action" href="{{ link }}" target="_blank" rel="noopener" aria-label="Comment on Instagram{% if comments > 0 %}, {{ comments }} comments{% endif %}">
                   {%- render 'gicon', name: 'chat_bubble', size: 22 -%}
+                  {%- if comments > 0 -%}<span class="igf__count" data-igf-count="{{ comments }}">{{ comments }}</span>{%- endif -%}
                 </a>
                 <button class="igf__action" type="button" data-igf-share="{{ link }}" aria-label="Share this post">
                   {%- render 'gicon', name: 'send', size: 22 -%}
                 </button>
               </div>
-              {%- if likes > 0 -%}
-                <p class="igf__likes"><span data-igf-count="{{ likes }}">{{ likes }}</span> {% if likes == 1 %}like{% else %}likes{% endif %}</p>
-              {%- endif -%}
-              {%- if post.caption.value != blank -%}
-                <p class="igf__caption"><strong>{{ handle | escape }}</strong> {{ post.caption.value | strip_newlines | escape }}</p>
-              {%- endif -%}
-              {%- if comments > 0 -%}
-                <a class="igf__comments" href="{{ link }}" target="_blank" rel="noopener">View {% if comments == 1 %}1 comment{% else %}all <span data-igf-count="{{ comments }}">{{ comments }}</span> comments{% endif %}</a>
-              {%- endif -%}
             </article>
           </li>
         {%- endfor -%}
@@ -289,7 +270,7 @@
     scroll-snap-align: start;
   }
 
-  /* Instagram-style post card: name row, 3:4 photo, heart / comment / share, likes, caption */
+  /* Instagram-style post card: just the 3:4 photo and heart / comment / share, with the counts */
   .igf__card {
     display: flex;
     flex-direction: column;
@@ -387,9 +368,11 @@
   }
 
   .igf__action {
-    display: grid;
-    place-items: center;
-    width: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-width: 38px;
     height: 38px;
     margin: 0;
     padding: 0;
@@ -404,6 +387,16 @@
   .igf__action svg {
     width: 24px;
     height: 24px;
+  }
+
+  .igf__count {
+    font-size: 0.875rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .igf__action:has(.igf__count) {
+    padding-inline-end: 6px;
   }
 
   .igf__action:active {
