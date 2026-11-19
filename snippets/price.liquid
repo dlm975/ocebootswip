@@ -83,7 +83,13 @@
     class="bfsale-price-line bfsale-price-line--card"
   {% endif %}
 >
-  {% if show_bfsale_rrp %}
+  {% if show_bfsale_rrp and is_bfsale_pdp == false %}
+    {%- comment -%} Cards: just "Sale:" and the new price (no compare-at); the red "% off" is on the image {%- endcomment -%}
+    <span role="group" class="card-sale-price">
+      <span class="card-sale-price__label">Sale:</span>
+      <span class="price">{{ price }}</span>
+    </span>
+  {% elsif show_bfsale_rrp %}
     {%- unless is_bfsale_pdp -%}<price-fit class="bfsale-fit">{%- endunless -%}
     <span role="group" class="bfsale-rrp">
       <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>

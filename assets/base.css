@@ -4559,3 +4559,46 @@ html.wlq-open {
     animation: none;
   }
 }
+
+/*
+  Product cards on sale: a bold red "30% off" on the image's bottom-left (no pill, no flames) and the
+  price as "Sale: $269.90" with no compare-at price (snippets/price.liquid, snippets/bfsale-badge.liquid)
+*/
+.bfsale-fire.bfsale-fire--card {
+  top: 0;
+  left: 0;
+  transform: translateY(calc(-100% - 6px));
+}
+
+.bfsale-fire--card .bfsale-fire__flames {
+  display: none;
+}
+
+.bfsale-fire--card .bfsale-badge.bfsale-badge {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  -webkit-text-stroke: 0;
+  color: #e8323c;
+  font-family: var(--font-oce, 'Inter', system-ui, sans-serif);
+  font-size: 0.9375rem;
+  font-style: normal;
+  font-weight: 850;
+  font-variation-settings: 'opsz' 32;
+  letter-spacing: -0.01em;
+  text-transform: lowercase;
+  text-shadow: 0 0 6px rgb(255 255 255 / 0.9);
+}
+
+.card-sale-price {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.3em;
+}
+
+.card-sale-price__label {
+  color: #e8323c;
+  font-weight: 750;
+}
