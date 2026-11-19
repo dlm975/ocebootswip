@@ -229,6 +229,7 @@
   .preels__card {
     position: relative;
     display: block;
+    /* Tall 9:16 on phones, 3:4 on desktop */
     aspect-ratio: 9 / 16;
     overflow: hidden;
     border-radius: 20px;
@@ -238,6 +239,12 @@
     scroll-snap-align: start;
     isolation: isolate;
     -webkit-tap-highlight-color: transparent;
+  }
+
+  @media screen and (min-width: 750px) {
+    .preels__card {
+      aspect-ratio: 3 / 4;
+    }
   }
 
   .preels__media,
