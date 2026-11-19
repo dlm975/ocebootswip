@@ -128,8 +128,10 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    min-height: var(--ih-height-mobile, 82svh);
-    min-height: round(down, var(--ih-height-mobile, 82svh), 1px);
+    /* Fills the screen below the header, leaving only a sliver of the next section in view */
+    --ih-peek: 52px;
+    min-height: calc(100vh - var(--header-height, 64px) - var(--ih-peek));
+    min-height: round(down, calc(100svh - var(--header-height, 64px) - var(--ih-peek)), 1px);
     overflow: hidden;
     isolation: isolate;
     color: #ffffff;
@@ -139,8 +141,9 @@
     .ih {
       --ih-gutter: 40px;
 
-      min-height: var(--ih-height, 88vh);
-      min-height: round(down, var(--ih-height, 88vh), 1px);
+      --ih-peek: 64px;
+      min-height: calc(100vh - var(--header-height, 120px) - var(--ih-peek));
+      min-height: round(down, calc(100vh - var(--header-height, 120px) - var(--ih-peek)), 1px);
     }
   }
 
@@ -216,20 +219,21 @@
     transform: translateZ(0);
     bottom: -1px;
     top: auto;
-    height: var(--ih-fade-height, 32%);
-    /* Eased, with many stops, so there is no visible edge where the fade begins */
+    height: calc(var(--ih-fade-height, 32%) * 1.45);
+    /* Long, but the photo stays clear for most of it: the white builds late and fast (ease-in)
+       towards the foot, with many stops so there is no visible edge */
     background: linear-gradient(
       to bottom,
       color-mix(in srgb, var(--ih-fade, #ffffff) 0.0%, transparent) 0%,
-      color-mix(in srgb, var(--ih-fade, #ffffff) 2.8%, transparent) 10%,
-      color-mix(in srgb, var(--ih-fade, #ffffff) 10.4%, transparent) 20%,
-      color-mix(in srgb, var(--ih-fade, #ffffff) 21.6%, transparent) 30%,
-      color-mix(in srgb, var(--ih-fade, #ffffff) 35.2%, transparent) 40%,
-      color-mix(in srgb, var(--ih-fade, #ffffff) 50.0%, transparent) 50%,
-      color-mix(in srgb, var(--ih-fade, #ffffff) 64.8%, transparent) 60%,
-      color-mix(in srgb, var(--ih-fade, #ffffff) 78.4%, transparent) 70%,
-      color-mix(in srgb, var(--ih-fade, #ffffff) 89.6%, transparent) 80%,
-      color-mix(in srgb, var(--ih-fade, #ffffff) 97.2%, transparent) 90%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 0.6%, transparent) 10%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 2.9%, transparent) 20%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 7.1%, transparent) 30%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 13.3%, transparent) 40%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 21.8%, transparent) 50%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 32.5%, transparent) 60%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 45.6%, transparent) 70%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 61.2%, transparent) 80%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 79.3%, transparent) 90%,
       color-mix(in srgb, var(--ih-fade, #ffffff) 100.0%, transparent) 100%
     );
   }
