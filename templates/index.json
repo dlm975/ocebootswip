@@ -890,6 +890,14 @@
     "newly_listed_fc": {
       "type": "product-list",
       "blocks": {
+        "see-all-new": {
+          "type": "plist-link",
+          "settings": {
+            "label": "See all new boots",
+            "link": "shopify://collections/shop-new"
+          },
+          "blocks": {}
+        },
         "static-header": {
           "type": "_product-list-content",
           "name": "Header",
@@ -923,8 +931,7 @@
             "padding-inline-start": 0,
             "padding-inline-end": 0
           },
-          "blocks": {},
-          "block_order": []
+          "blocks": {}
         },
         "static-product-card": {
           "type": "_product-card",
@@ -964,21 +971,19 @@
           "block_order": [
             "product-card-gallery"
           ]
-        },
-        "see-all-new": {
-          "type": "plist-link",
-          "settings": {
-            "label": "See all new boots",
-            "link": "shopify://collections/shop-new"
-          }
         }
       },
+      "block_order": [
+        "see-all-new"
+      ],
       "settings": {
         "collection": "shop-new",
         "layout_type": "grid",
         "carousel_on_mobile": false,
         "max_products": 12,
         "mobile_max": 8,
+        "mobile_view_all_card": false,
+        "boxed": true,
         "columns": 6,
         "mobile_columns": "4",
         "mobile_card_size": "60cqw",
@@ -991,13 +996,8 @@
         "gap": 0,
         "color_scheme": "scheme-1",
         "padding-block-start": 8,
-        "padding-block-end": 48,
-        "mobile_view_all_card": false,
-        "boxed": true
-      },
-      "block_order": [
-        "see-all-new"
-      ]
+        "padding-block-end": 48
+      }
     },
     "player_reels_main": {
       "type": "player-reels",
@@ -1007,6 +1007,7 @@
           "settings": {
             "name": "Neymar Jr",
             "collection": "neymar-jr",
+            "video": "shopify://files/videos/snaptik_7621299847882214676_v3.mov",
             "image": "shopify://shop_images/8939b6d73f7ce255d6eb69a866906861.jpg",
             "button_label": "Shop collection"
           }
@@ -1016,6 +1017,7 @@
           "settings": {
             "name": "CR7",
             "collection": "cr7",
+            "video": "shopify://files/videos/snaptik_7657857445410196757_v3.mov",
             "image": "shopify://shop_images/SnapInsta.to_660307150_18721519762056421_301077248123342423_n.jpg",
             "button_label": "Shop collection"
           }
@@ -1025,6 +1027,7 @@
           "settings": {
             "name": "Messi",
             "collection": "messi-1",
+            "video": "shopify://files/videos/snaptik_7441619545900485890_v3 2.mov",
             "image": "shopify://shop_images/adidas-messi-f50-triunfo-dorado-boots_6.jpg",
             "button_label": "Shop collection"
           }
@@ -1034,6 +1037,7 @@
           "settings": {
             "name": "Olise",
             "collection": "olise",
+            "video": "shopify://files/videos/snaptik_7675038953073904928_v3.mov",
             "image": "shopify://shop_images/SnapInsta.to_654969911_18568562623057038_5230344121947742236_n.jpg",
             "button_label": "Shop collection"
           }
@@ -1043,6 +1047,7 @@
           "settings": {
             "name": "Pogba",
             "collection": "pogba",
+            "video": "shopify://files/videos/snaptik_7546869617134931223_v3.mov",
             "image": "shopify://shop_images/images_voltaxMediaLibrary_mmsport_90min_en_international_web_01k4ajkbnh9t405hewvm.webp",
             "button_label": "Shop collection"
           }
