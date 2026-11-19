@@ -83,6 +83,7 @@
 
 <script type="module">
   import { animate } from 'motion';
+  import { pinchZoom } from '{{ 'pdp-pinch-zoom.js' | asset_url }}';
   import { CartAddEvent } from '@theme/events';
 
   const dialog = document.querySelector('[data-wlq]');
@@ -135,6 +136,8 @@
     function setUp(root) {
       // Photos: a swipeable track, with a counter and thumbnails that follow it
       const track = root.querySelector('[data-wlq-track]');
+      // Pinch a photo to zoom in; it eases back to normal when let go
+      if (track) pinchZoom(track, { slide: '[data-wlq-slide]', target: (slide) => slide.querySelector('.wlq__image') });
       const thumbs = [...root.querySelectorAll('[data-wlq-thumb]')];
       const counter = root.querySelector('[data-wlq-counter]');
       const total = root.querySelectorAll('[data-wlq-slide]').length;
@@ -826,7 +829,15 @@
     flex: 0 0 100%;
     aspect-ratio: 1;
     margin: 0;
+    overflow: hidden;
     scroll-snap-align: start;
+    /* Two fingers zoom the photo (pdp-pinch-zoom.js), not the page */
+    touch-action: pan-x pan-y;
+  }
+
+  .wlq__slide.is-pinching {
+    position: relative;
+    z-index: 1;
   }
 
   .wlq__image {
