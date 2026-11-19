@@ -36,10 +36,7 @@
         </a>
       </h2>
       <a class="igf__follow" href="{{ profile_url }}" target="_blank" rel="noopener">
-        <span>{{ section.settings.follow_label | escape }}</span>
-        <span class="igf__disk oce-disk" aria-hidden="true">
-          {%- render 'gicon', name: 'arrow_forward', size: 16 -%}
-        </span>
+        {{- section.settings.follow_label | escape -}}
       </a>
     </div>
 
@@ -97,12 +94,12 @@
 {%- endif -%}
 
 {% stylesheet %}
+  /* The heading and the Follow button on one line; the heading wraps, the button never does */
   .igf__head {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 10px 16px;
+    gap: 12px;
     margin-block-end: clamp(14px, 2vw, 22px);
   }
 
@@ -111,8 +108,9 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 0 0.3em;
+    min-width: 0;
     margin: 0;
-    font-size: clamp(1.5rem, 6vw, 2.5rem);
+    font-size: clamp(1.375rem, 5.6vw, 2.5rem);
     font-weight: 750;
     line-height: 1.1;
     letter-spacing: -0.03em;
@@ -134,35 +132,35 @@
     color: #0095f6;
   }
 
+  /* Instagram's own Follow button: blue, white bold text, softly rounded */
   .igf__follow {
     display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    color: var(--color-foreground);
-    font-size: 0.9375rem;
-    font-weight: 750;
-    text-decoration: none;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .igf__disk {
-    display: grid;
     flex: none;
-    place-items: center;
-    width: 34px;
+    align-items: center;
+    justify-content: center;
     height: 34px;
-    border-radius: 50%;
+    padding: 0 18px;
+    border-radius: 8px;
+    background: #0095f6;
+    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.18s ease, transform 0.2s cubic-bezier(0.3, 0.7, 0.3, 1);
   }
 
-  .igf__disk svg {
-    position: relative;
-    width: 55%;
-    height: 55%;
-    transition: transform 0.25s cubic-bezier(0.3, 0.7, 0.3, 1);
+  @media (hover: hover) {
+    .igf__follow:hover {
+      background: #1877f2;
+    }
   }
 
-  .igf__follow .igf__disk::after {
-    animation: none;
+  .igf__follow:active {
+    transform: scale(0.96);
   }
 
   /* Phones: swipe through; desktop: four in view */
@@ -275,22 +273,6 @@
       transform: scale(1.04);
     }
 
-    .igf__follow:hover .igf__disk svg {
-      transform: translateX(2px);
-    }
-
-    .igf__follow:hover .igf__disk::after {
-      animation: igf-glint 0.8s cubic-bezier(0.45, 0, 0.25, 1) 0.1s 1 both;
-    }
-  }
-
-  @keyframes igf-glint {
-    from {
-      transform: translateX(-110%);
-    }
-    to {
-      transform: translateX(110%);
-    }
   }
 
   .igf__card:focus-visible,
@@ -312,12 +294,8 @@
 
   @media (prefers-reduced-motion: reduce) {
     .igf__image,
-    .igf__disk svg {
+    .igf__follow {
       transition: none;
-    }
-
-    .igf__follow:hover .igf__disk::after {
-      animation: none;
     }
   }
 {% endstylesheet %}
