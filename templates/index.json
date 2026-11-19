@@ -497,11 +497,81 @@
       "type": "worn-by-pros",
       "settings": {
         "heading": "Who we've worked with",
-        "hint": "Tap a club to meet the player",
+        "hint": "Tap a league to meet the players",
         "color_scheme": "scheme-1",
         "padding-block-start": 24,
         "padding-block-end": 24
-      }
+      },
+      "blocks": {
+        "league_premier": {
+          "type": "league",
+          "settings": {
+            "logo": "shopify://shop_images/Premier_League_Logo.svg",
+            "name": "Premier League",
+            "player_1": "none",
+            "player_2": "none",
+            "player_3": "none"
+          }
+        },
+        "league_laliga": {
+          "type": "league",
+          "settings": {
+            "logo": "shopify://shop_images/LaLiga_EA_Sports_2023_Vertical_Logo.svg",
+            "name": "LaLiga",
+            "player_1": "none",
+            "player_2": "none",
+            "player_3": "none"
+          }
+        },
+        "league_bundesliga": {
+          "type": "league",
+          "settings": {
+            "logo": "shopify://shop_images/Bundesliga_logo__2017.svg",
+            "name": "Bundesliga",
+            "player_1": "none",
+            "player_2": "none",
+            "player_3": "none"
+          }
+        },
+        "league_seriea": {
+          "type": "league",
+          "settings": {
+            "logo": "shopify://shop_images/Serie_A_ENILIVE_logo.svg",
+            "name": "Serie A",
+            "player_1": "3",
+            "player_2": "none",
+            "player_3": "none"
+          }
+        },
+        "league_mls": {
+          "type": "league",
+          "settings": {
+            "logo": "shopify://shop_images/Major_League_Soccer_logo.svg",
+            "name": "MLS",
+            "player_1": "6",
+            "player_2": "none",
+            "player_3": "none"
+          }
+        },
+        "league_saudi": {
+          "type": "league",
+          "settings": {
+            "logo": "shopify://shop_images/Roshn_Saudi_League_Logo.svg",
+            "name": "Saudi Pro League",
+            "player_1": "none",
+            "player_2": "none",
+            "player_3": "none"
+          }
+        }
+      },
+      "block_order": [
+        "league_premier",
+        "league_laliga",
+        "league_bundesliga",
+        "league_seriea",
+        "league_mls",
+        "league_saudi"
+      ]
     },
     "collection_cutout_grid_gidTf3": {
       "type": "collection-cutout-grid",
