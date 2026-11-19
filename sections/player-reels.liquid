@@ -70,7 +70,6 @@
               }}
             {%- endif -%}
             <video
-              data-sources="{% for source in clip.sources %}{{ source.format }}:{{ source.width }}x{{ source.height }} {% endfor %}"
               class="preels__video"
               muted
               loop
@@ -454,7 +453,7 @@
           "type": "video",
           "id": "video",
           "label": "Video",
-          "info": "A short clip, played muted on loop. Portrait (9:16) works best. Shopify makes a 480p copy, which is what plays (quick to start), so any size can be uploaded."
+          "info": "A short clip, played muted on loop. Portrait (9:16) works best. Upload it at 480p (about 270x480): the storefront plays the largest copy Shopify offers, so a bigger upload loads slower."
         },
         {
           "type": "image_picker",
