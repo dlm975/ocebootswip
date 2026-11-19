@@ -1,0 +1,768 @@
+{%- comment -%}
+  "Who we've worked with": the Pros and Worn by sections in one. A big heading and the clubs'
+  badges floating in a field; tapping one pulls it forward onto a card with the player we sold
+  boots to: their photo, club, country and the boots. A ring travels from badge to badge, and a
+  "Tap a club" hint shows, until the first tap.
+  The players are the shared pro roster (Theme settings > Pro players), the same list as the
+  Pros wall: a player shows here when they have a name, a club badge and a photo.
+  Animations: Motion (assets/motion.js).
+{%- endcomment -%}
+
+{%- liquid
+  assign positions = '22,20|76,15|48,47|84,64|16,74|57,86|50,12|12,44|86,35|86,90' | split: '|'
+  assign count = 0
+-%}
+
+{%- capture logos -%}
+  {%- for i in (1..10) -%}
+    {%- liquid
+      assign k = 'ppw_player_' | append: i
+      assign k_name = k | append: '_name'
+      assign k_image = k | append: '_image'
+      assign k_badge = k | append: '_badge'
+      assign k_club = k | append: '_club'
+      assign name = settings[k_name]
+      assign crest = settings[k_badge]
+      assign photo = settings[k_image]
+      if name == blank or crest == blank or photo == blank
+        continue
+      endif
+      assign at = positions[count] | split: ','
+      assign drift = count | times: 7 | modulo: 5 | plus: 7
+      assign delay = count | times: 1.7 | modulo: 6
+      assign count = count | plus: 1
+    -%}
+    <button
+      type="button"
+      class="wbp__logo"
+      style="--x: {{ at[0] }}%; --y: {{ at[1] }}%; --drift: {{ drift }}s; --delay: -{{ delay }}s;"
+      data-wbp-logo
+      aria-expanded="false"
+      aria-label="{{ name | escape }}, {{ settings[k_club] | escape }}"
+    >
+      <span class="wbp__float">
+        <span class="wbp__ring" aria-hidden="true"></span>
+        {{ crest | image_url: width: 320 | image_tag: class: 'wbp__crest', loading: 'lazy', alt: '', width: 160, height: 160 }}
+      </span>
+    </button>
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- if count > 0 or request.design_mode -%}
+  <div class="section-background color-{{ section.settings.color_scheme }}"></div>
+  <div
+    class="section section--page-width color-{{ section.settings.color_scheme }} wbp spacing-style"
+    style="{% render 'spacing-style', settings: section.settings %}"
+  >
+    <div class="wbp__box">
+      <h2 class="wbp__heading">{{ section.settings.heading | escape }}</h2>
+      {%- if section.settings.hint != blank -%}
+        <p class="wbp__hint" data-wbp-hint>
+          {%- render 'gicon', name: 'touch_app', class: 'wbp__hint-icon', size: 20 -%}
+          <span>{{ section.settings.hint | escape }}</span>
+        </p>
+      {%- endif -%}
+
+      {%- if count > 0 -%}
+        <div class="wbp__stage" data-wbp-stage>
+          {{ logos }}
+
+          <div class="wbp__card" data-wbp-card hidden>
+            <button type="button" class="wbp__close" data-wbp-close aria-label="Close">
+              {%- render 'gicon', name: 'close', size: 20 -%}
+            </button>
+            {%- for i in (1..10) -%}
+              {%- liquid
+                assign k = 'ppw_player_' | append: i
+                assign k_name = k | append: '_name'
+                assign k_image = k | append: '_image'
+                assign k_badge = k | append: '_badge'
+                assign k_club = k | append: '_club'
+                assign k_flag = k | append: '_flag'
+                assign k_boot = k | append: '_boot'
+                assign k_link = k | append: '_link'
+                if settings[k_name] == blank or settings[k_badge] == blank or settings[k_image] == blank
+                  continue
+                endif
+              -%}
+              <div class="wbp__player" data-wbp-player hidden>
+                <div class="wbp__photo">
+                  {{
+                    settings[k_image]
+                    | image_url: width: 800
+                    | image_tag:
+                      widths: '300, 450, 600, 800',
+                      sizes: '(min-width: 990px) 300px, 40vw',
+                      loading: 'lazy',
+                      class: 'wbp__photo-image',
+                      alt: settings[k_name]
+                  }}
+                </div>
+                <div class="wbp__info">
+                  <span class="wbp__slot" data-wbp-slot aria-hidden="true"></span>
+                  <p class="wbp__club">
+                    {%- if settings[k_flag] != blank -%}
+                      {{ settings[k_flag] | image_url: width: 64 | image_tag: class: 'wbp__flag', loading: 'lazy', alt: '' }}
+                    {%- endif -%}
+                    <span>{{ settings[k_club] | escape }}</span>
+                  </p>
+                  <h3 class="wbp__name">{{ settings[k_name] | escape }}</h3>
+                  {%- if settings[k_boot] != blank -%}
+                    <p class="wbp__boot">
+                      <span class="wbp__boot-label">Wore</span>
+                      <span class="wbp__boot-name">{{ settings[k_boot] | escape }}</span>
+                    </p>
+                  {%- endif -%}
+                  {%- if settings[k_link] != blank -%}
+                    <a class="wbp__shop" href="{{ settings[k_link] }}">
+                      <span>Shop the boots</span>
+                      <span class="wbp__disk oce-disk" aria-hidden="true">
+                        {%- render 'gicon', name: 'arrow_forward', size: 18 -%}
+                      </span>
+                    </a>
+                  {%- endif -%}
+                </div>
+              </div>
+            {%- endfor -%}
+          </div>
+        </div>
+      {%- else -%}
+        <p class="wbp__empty">
+          Add players in Theme settings &gt; Pro players: a name, a club badge and a photo each (only shown in the editor).
+        </p>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+
+<script type="module">
+  import { animate } from 'motion';
+
+  const root = document.getElementById('shopify-section-{{ section.id }}');
+  const stage = root?.querySelector('[data-wbp-stage]');
+  if (stage) {
+    const logos = [...stage.querySelectorAll('[data-wbp-logo]')];
+    const players = [...stage.querySelectorAll('[data-wbp-player]')];
+    const card = stage.querySelector('[data-wbp-card]');
+    const hint = root.querySelector('[data-wbp-hint]');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const EASE = [0.3, 0.7, 0.3, 1];
+    const IN = 0.55;
+    const OUT = 0.22;
+    let current = -1;
+    let closing = 0;
+
+    // Stop this script's animations on an element (not its CSS transitions and drifts)
+    const finish = (el) =>
+      el.getAnimations().forEach((a) => {
+        if (!(a instanceof CSSTransition) && !(a instanceof CSSAnimation)) a.cancel();
+      });
+
+    /** The logo's transform right now (mid-flight included), then cleared to measure from home */
+    const takeTransform = (el) => {
+      const now = getComputedStyle(el).transform;
+      finish(el);
+      return now === 'none' ? 'translate(0px, 0px) scale(1)' : now;
+    };
+
+    /** The badge drifts on its own; stop the drift where it is and ease that offset away */
+    const settle = (logo) => {
+      const float = logo.querySelector('.wbp__float');
+      const now = getComputedStyle(float).transform;
+      logo.classList.add('is-still');
+      if (now !== 'none' && !reduce.matches) {
+        animate(float, { transform: [now, 'none'] }, { duration: IN, ease: EASE });
+      }
+    };
+
+    const flyHome = (logo) => {
+      const from = takeTransform(logo);
+      logo.style.transform = '';
+      logo.classList.remove('is-picked', 'is-still');
+      logo.setAttribute('aria-expanded', 'false');
+      if (!reduce.matches) animate(logo, { transform: [from, 'translate(0px, 0px) scale(1)'] }, { duration: IN, ease: EASE });
+    };
+
+    const open = (i) => {
+      const logo = logos[i];
+      const previous = current >= 0 ? logos[current] : null;
+      current = i;
+      clearTimeout(closing);
+      stopHint();
+
+      // Show this player's card (at its resting place, so the badge's spot can be measured)
+      finish(card);
+      card.hidden = false;
+      players.forEach((p, n) => (p.hidden = n !== i));
+      stage.classList.add('is-open');
+      if (previous && previous !== logo) flyHome(previous);
+
+      // Measure and start in the same frame: from where the badge is, to its spot on the card
+      const from = takeTransform(logo);
+      logo.style.transform = '';
+      const home = logo.getBoundingClientRect();
+      const slot = players[i].querySelector('[data-wbp-slot]').getBoundingClientRect();
+      const scale = slot.width / home.width;
+      const dx = slot.left + slot.width / 2 - (home.left + home.width / 2);
+      const dy = slot.top + slot.height / 2 - (home.top + home.height / 2);
+      const to = `translate(${dx}px, ${dy}px) scale(${scale})`;
+      logo.style.transform = to;
+      logo.classList.add('is-picked');
+      logo.setAttribute('aria-expanded', 'true');
+      settle(logo);
+
+      if (reduce.matches) return;
+      animate(logo, { transform: [from, to] }, { duration: IN, ease: EASE });
+      animate(card, { opacity: [0, 1], transform: ['translateY(14px) scale(0.97)', 'none'] }, { duration: IN, ease: EASE });
+    };
+
+    const close = () => {
+      if (current < 0) return;
+      const logo = logos[current];
+      current = -1;
+      stage.classList.remove('is-open');
+      flyHome(logo);
+      finish(card);
+      if (reduce.matches) {
+        card.hidden = true;
+        return;
+      }
+      animate(card, { opacity: [1, 0], transform: ['none', 'translateY(8px) scale(0.98)'] }, { duration: OUT, ease: 'easeOut' });
+      closing = setTimeout(() => {
+        if (current < 0) {
+          finish(card);
+          card.hidden = true;
+        }
+      }, OUT * 1000);
+    };
+
+    stage.addEventListener('click', (event) => {
+      const logo = event.target.closest('[data-wbp-logo]');
+      if (logo) {
+        const i = logos.indexOf(logo);
+        i === current ? close() : open(i);
+        return;
+      }
+      if (event.target.closest('[data-wbp-close]') || !event.target.closest('[data-wbp-card]')) close();
+    });
+
+    root.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && current >= 0) {
+        const logo = logos[current];
+        close();
+        logo.focus();
+      }
+    });
+
+    // The prompt: a ring passes from badge to badge while the section is on screen, until the
+    // first tap
+    let hintIndex = -1;
+    let hintTimer = 0;
+    let hinting = true;
+    const step = () => {
+      logos[hintIndex]?.classList.remove('is-hinting');
+      hintIndex = (hintIndex + 1) % logos.length;
+      logos[hintIndex].classList.add('is-hinting');
+    };
+    const startHint = () => {
+      if (!hinting || hintTimer) return;
+      step();
+      hintTimer = setInterval(step, 2400);
+    };
+    const pauseHint = () => {
+      clearInterval(hintTimer);
+      hintTimer = 0;
+    };
+    function stopHint() {
+      if (!hinting) return;
+      hinting = false;
+      pauseHint();
+      logos[hintIndex]?.classList.remove('is-hinting');
+      hint?.classList.add('is-done');
+    }
+    new IntersectionObserver(([entry]) => (entry.isIntersecting ? startHint() : pauseHint()), { threshold: 0.35 }).observe(stage);
+  }
+</script>
+
+{% stylesheet %}
+  /* In a container: a white rounded card, as the other home page sections */
+  .wbp__box {
+    min-width: 0;
+    padding: 22px 14px 14px;
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgb(18 18 18 / 0.06), 0 8px 24px rgb(18 18 18 / 0.08);
+  }
+
+  @media screen and (min-width: 750px) {
+    .wbp__box {
+      padding: 36px 32px 24px;
+      border-radius: 24px;
+    }
+  }
+
+  .wbp__heading {
+    margin: 0;
+    font-size: clamp(2.25rem, 10.5vw, 4.75rem);
+    font-weight: 800;
+    line-height: 0.98;
+    letter-spacing: -0.045em;
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  /* "Tap a club to meet the player", with a finger that taps */
+  .wbp__hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 10px 0 0;
+    color: rgb(18 18 18 / 0.6);
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: opacity 0.25s ease;
+  }
+
+  .wbp__hint.is-done {
+    opacity: 0;
+  }
+
+  .wbp__hint-icon {
+    flex: none;
+    animation: wbp-tap 2.4s cubic-bezier(0.3, 0.7, 0.3, 1) infinite;
+  }
+
+  @keyframes wbp-tap {
+    0%, 40%, 100% {
+      transform: none;
+    }
+
+    55% {
+      transform: translateY(3px) scale(0.92);
+    }
+
+    70% {
+      transform: none;
+    }
+  }
+
+  /* The field the badges float in */
+  .wbp__stage {
+    --wbp-logo: 78px;
+    position: relative;
+    height: 400px;
+    margin-top: 6px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .wbp__stage {
+      --wbp-logo: 120px;
+      height: 480px;
+    }
+  }
+
+  .wbp__logo {
+    position: absolute;
+    top: calc(var(--y) - var(--wbp-logo) / 2);
+    left: calc(var(--x) - var(--wbp-logo) / 2);
+    z-index: 1;
+    width: var(--wbp-logo);
+    height: var(--wbp-logo);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    transform-origin: 50% 50%;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      opacity 0.35s ease,
+      scale 0.55s cubic-bezier(0.3, 0.7, 0.3, 1),
+      filter 0.35s ease;
+  }
+
+  /* Not the edge of the field: keep the badges whole inside it */
+  @media screen and (max-width: 749px) {
+    .wbp__logo {
+      left: clamp(0px, calc(var(--x) - var(--wbp-logo) / 2), calc(100% - var(--wbp-logo)));
+    }
+  }
+
+  .wbp__float {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    animation: wbp-drift var(--drift, 9s) ease-in-out var(--delay, 0s) infinite;
+  }
+
+  /* Picked: the drift stops (its offset eases away in the script), and starts again from rest */
+  .wbp__logo.is-still .wbp__float {
+    animation: none;
+  }
+
+  .wbp__logo:not(.is-still) .wbp__float {
+    animation-delay: var(--delay, 0s);
+  }
+
+  @keyframes wbp-drift {
+    0%, 100% {
+      transform: none;
+    }
+
+    25% {
+      transform: translate(6px, -9px) rotate(2.5deg);
+    }
+
+    50% {
+      transform: translate(-4px, -14px) rotate(-1.5deg);
+    }
+
+    75% {
+      transform: translate(-8px, -4px) rotate(-3deg);
+    }
+  }
+
+  .wbp__crest {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 14px rgb(18 18 18 / 0.18));
+    transition: transform 0.25s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  @media (hover: hover) {
+    .wbp__logo:hover .wbp__crest {
+      transform: scale(1.06);
+    }
+  }
+
+  .wbp__logo:active .wbp__crest {
+    transform: scale(0.94);
+  }
+
+  .wbp__logo:focus-visible {
+    outline: 2px solid #121212;
+    outline-offset: 6px;
+    border-radius: 50%;
+  }
+
+  /* The prompt's ring: a soft pulse out from the badge it is passing */
+  .wbp__ring {
+    position: absolute;
+    inset: -10%;
+    border-radius: 50%;
+    border: 2px solid rgb(18 18 18 / 0.35);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .wbp__logo.is-hinting .wbp__ring {
+    animation: wbp-ring 1.6s cubic-bezier(0.3, 0.7, 0.3, 1) 2;
+  }
+
+  .wbp__logo.is-hinting .wbp__crest {
+    animation: wbp-nudge 1.6s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  @keyframes wbp-ring {
+    0% {
+      opacity: 0.9;
+      transform: scale(0.85);
+    }
+
+    100% {
+      opacity: 0;
+      transform: scale(1.35);
+    }
+  }
+
+  @keyframes wbp-nudge {
+    0%, 100% {
+      transform: none;
+    }
+
+    20% {
+      transform: scale(1.1);
+    }
+
+    40% {
+      transform: scale(0.98);
+    }
+  }
+
+  /* A badge picked: the others step back; it comes forward onto the card */
+  .wbp__stage.is-open .wbp__logo:not(.is-picked) {
+    opacity: 0.14;
+    scale: 0.86;
+    filter: grayscale(1);
+  }
+
+  .wbp__logo.is-picked {
+    z-index: 3;
+  }
+
+  .wbp__logo.is-picked .wbp__crest {
+    filter: drop-shadow(0 10px 18px rgb(18 18 18 / 0.25));
+  }
+
+  /* The player's card, in the middle of the field */
+  .wbp__card {
+    position: absolute;
+    inset: 50% 0 auto;
+    z-index: 2;
+    max-width: 760px;
+    margin-inline: auto;
+    translate: 0 -50%;
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 0 0 1px rgb(18 18 18 / 0.06), 0 18px 48px rgb(18 18 18 / 0.18);
+  }
+
+  .wbp__card[hidden] {
+    display: none;
+  }
+
+  .wbp__player {
+    display: grid;
+    grid-template-columns: 42% 1fr;
+    gap: 14px;
+    padding: 10px;
+  }
+
+  .wbp__player[hidden] {
+    display: none;
+  }
+
+  @media screen and (min-width: 750px) {
+    .wbp__player {
+      grid-template-columns: 300px 1fr;
+      gap: 28px;
+      padding: 14px;
+    }
+  }
+
+  .wbp__photo {
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 14px;
+    background: #e7e7ea;
+  }
+
+  .wbp__photo-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .wbp__info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 6px;
+    min-width: 0;
+    padding-block: 4px;
+    padding-inline-end: 30px;
+  }
+
+  /* Where the badge lands */
+  .wbp__slot {
+    display: block;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 4px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .wbp__slot {
+      width: 132px;
+      height: 132px;
+      margin-bottom: 8px;
+    }
+  }
+
+  .wbp__club {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    color: rgb(18 18 18 / 0.6);
+    font-size: 0.75rem;
+    font-weight: 650;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .wbp__flag {
+    flex: none;
+    width: 20px;
+    height: 14px;
+    border-radius: 3px;
+    object-fit: cover;
+    box-shadow: 0 0 0 1px rgb(18 18 18 / 0.08);
+  }
+
+  .wbp__name {
+    margin: 0;
+    font-size: clamp(1.375rem, 6vw, 2.75rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+  }
+
+  .wbp__boot {
+    display: flex;
+    flex-direction: column;
+    margin: 4px 0 0;
+    font-size: 0.9375rem;
+    line-height: 1.25;
+  }
+
+  .wbp__boot-label {
+    color: rgb(18 18 18 / 0.55);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .wbp__boot-name {
+    font-weight: 750;
+  }
+
+  .wbp__shop {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    color: #121212;
+    font-size: 1rem;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .wbp__disk {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+  }
+
+  .wbp__disk svg {
+    position: relative;
+  }
+
+  .wbp__close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 4;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #f1f1f1;
+    color: #121212;
+    cursor: pointer;
+    transition: background-color 0.18s ease;
+  }
+
+  @media (hover: hover) {
+    .wbp__close:hover {
+      background: #e4e4e4;
+    }
+  }
+
+  .wbp__empty {
+    margin: 16px 0 0;
+    padding: 28px 20px;
+    border-radius: 16px;
+    background: #f4f4f2;
+    color: rgb(18 18 18 / 0.6);
+    font-size: 0.875rem;
+    text-align: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wbp__float,
+    .wbp__hint-icon,
+    .wbp__logo.is-hinting .wbp__crest {
+      animation: none;
+    }
+
+    .wbp__logo,
+    .wbp__crest {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Who we've worked with",
+  "tag": "section",
+  "class": "section-worn-by-pros",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "The players are the shared pro roster in Theme settings > Pro players. Each one with a name, a club badge and a photo floats here as their club's badge."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Who we've worked with"
+    },
+    {
+      "type": "text",
+      "id": "hint",
+      "label": "Prompt",
+      "default": "Tap a club to meet the player"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    }
+  ],
+  "presets": [
+    {
+      "name": "Who we've worked with"
+    }
+  ]
+}
+{% endschema %}
