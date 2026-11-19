@@ -638,6 +638,13 @@
     text-transform: uppercase;
   }
 
+  /* Desktop menu: centred like the others, the bigger word's baseline would sit 0.1em low; lift it
+     so the bottom of "Sale" lines up with the bottom of the other items */
+  .menu-list__link-title.menu-item--sale {
+    position: relative;
+    top: -0.1em;
+  }
+
   /* Brand drill-down inside the drawer: inset like the child links */
   .menu-drawer__drill {
     padding-inline: var(--padding-xl, 20px);
