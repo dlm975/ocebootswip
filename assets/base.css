@@ -4602,3 +4602,16 @@ html.wlq-open {
   color: #e8323c;
   font-weight: 750;
 }
+
+/*
+  Product cards: the boot's name in bold, the price a step smaller beneath it (the name leads).
+  Covers the plain price, the sale "Sale:" line and any compare-at price.
+*/
+:is(product-card, .product-card) .text-block {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+:is(product-card, .product-card) :is(.price, .compare-at-price, .card-sale-price, .card-sale-price__label) {
+  font-size: 0.75rem;
+}
