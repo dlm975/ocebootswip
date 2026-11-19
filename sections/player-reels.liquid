@@ -59,10 +59,10 @@
             {%- if still -%}
               {{
                 still
-                | image_url: width: 720
+                | image_url: width: 1080
                 | image_tag:
-                  widths: '360, 540, 720',
-                  sizes: '(min-width: 990px) 20vw, (min-width: 750px) 30vw, 62vw',
+                  widths: '360, 540, 720, 1080',
+                  sizes: '(min-width: 990px) 36vw, (min-width: 750px) 30vw, 62vw',
                   loading: 'eager',
                   fetchpriority: 'low',
                   class: 'preels__image preels__still',
@@ -79,7 +79,7 @@
               disableremoteplayback
               aria-hidden="true"
               {% if still %}
-                poster="{{ still | image_url: width: 720 }}"
+                poster="{{ still | image_url: width: 1080 }}"
               {% endif %}
             >
               {%- if mp4 -%}
@@ -89,10 +89,10 @@
           {%- elsif block.settings.image != blank -%}
             {{
               block.settings.image
-              | image_url: width: 720
+              | image_url: width: 1080
               | image_tag:
-                widths: '360, 540, 720',
-                sizes: '(min-width: 990px) 20vw, (min-width: 750px) 30vw, 62vw',
+                widths: '360, 540, 720, 1080',
+                sizes: '(min-width: 990px) 36vw, (min-width: 750px) 30vw, 62vw',
                 loading: 'lazy',
                 class: 'preels__image',
                 alt: ''
@@ -220,9 +220,16 @@
     }
   }
 
+  /* Desktop: big tiles, about three times the area of a fifth-width tile: under three in view,
+     the next one peeking in to show there's more */
   @media screen and (min-width: 990px) {
     .preels__track {
-      grid-auto-columns: calc((100% - 4 * 14px) / 5);
+      grid-auto-columns: calc((100% - 2 * 16px) / 2.85);
+      gap: 16px;
+    }
+
+    .preels__card {
+      border-radius: 24px;
     }
   }
 
@@ -322,7 +329,8 @@
 
   @media screen and (min-width: 990px) {
     .preels__text {
-      --preels-disk: 36px;
+      --preels-disk: 52px;
+      inset: auto 20px 20px 24px;
     }
   }
 
