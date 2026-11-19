@@ -496,12 +496,22 @@
     "worn_by_pros_main": {
       "type": "worn-by-pros",
       "blocks": {
+        "league_LB3MjY": {
+          "type": "league",
+          "settings": {
+            "logo": "shopify://shop_images/Ligue1_logo.png",
+            "name": "Ligue 1",
+            "player_1": "none",
+            "player_2": "none",
+            "player_3": "4"
+          }
+        },
         "league_premier": {
           "type": "league",
           "settings": {
             "logo": "shopify://shop_images/Premier_League_Logo.svg",
             "name": "Premier League",
-            "player_1": "none",
+            "player_1": "1",
             "player_2": "none",
             "player_3": "none"
           }
@@ -521,7 +531,7 @@
           "settings": {
             "logo": "shopify://shop_images/Bundesliga_logo__2017.svg",
             "name": "Bundesliga",
-            "player_1": "none",
+            "player_1": "2",
             "player_2": "none",
             "player_3": "none"
           }
@@ -558,6 +568,7 @@
         }
       },
       "block_order": [
+        "league_LB3MjY",
         "league_premier",
         "league_laliga",
         "league_bundesliga",
