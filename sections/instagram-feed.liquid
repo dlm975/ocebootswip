@@ -59,6 +59,9 @@
             else
               assign still = media
             endif
+            if post.is_video.value == true
+              assign is_video = true
+            endif
             assign link = post.permalink.value | default: profile_url
           -%}
           {%- liquid
