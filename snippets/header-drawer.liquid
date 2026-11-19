@@ -618,15 +618,22 @@
 </header-drawer>
 
 {% stylesheet %}
-  /* Sale reads as an offer: bold red capitals (also in the desktop menu, snippets/header-menu.liquid) */
+  /* Sale reads as an offer: red, "Sale" with a capital S, in the brand Inter (display optical size)
+     and heavier than the other menu items (also in the desktop menu, snippets/header-menu.liquid) */
   :is(.menu-list__link, .menu-drawer__menu-item, .menu-list__link-title, .menu-drawer__menu-item-text).menu-item--sale,
   .menu-list__link .menu-list__link-title.menu-item--sale,
   .menu-drawer__menu-item .menu-drawer__menu-item-text.menu-item--sale {
+    display: inline-block;
     color: #e8323c;
-    font-weight: 800;
-    /* The brand typography (snippets/brand-typography.liquid) keeps all other text in normal case */
-    text-transform: uppercase !important; /* stylelint-disable-line declaration-no-important */
-    letter-spacing: 0.02em;
+    font-family: var(--font-oce, 'Inter', system-ui, sans-serif);
+    font-weight: 850;
+    font-variation-settings: 'opsz' 32;
+    text-transform: lowercase !important; /* stylelint-disable-line declaration-no-important */
+    letter-spacing: -0.01em;
+  }
+
+  :is(.menu-list__link-title, .menu-drawer__menu-item-text).menu-item--sale::first-letter {
+    text-transform: uppercase;
   }
 
   /* Brand drill-down inside the drawer: inset like the child links */
