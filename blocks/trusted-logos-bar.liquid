@@ -1,18 +1,16 @@
 {% doc %}
-  A bold label ("Worn by") with the logos on the same line: gliding past on phones, a still row
-  on desktop.
+  A bold label ("Worn by") with the logos still, on the same line.
   Logos are uploaded via theme editor image pickers (up to 12).
 {% enddoc %}
 
 {% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
 
 {% style %}
-  /* One line: a bold label, then the logos. Phones: the logos glide past, fading at both ends.
-     Desktop: one still row straight after the label. */
+  /* One line: a bold label, then every logo, still, sized to share the row */
   .tlb-{{ ai_gen_id }} {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
     width: 100%;
     padding: {{ block.settings.section_padding | at_least: 14 }}px var(--page-margin, 16px);
     background: {{ block.settings.section_background }};
@@ -27,7 +25,7 @@
     margin: 0;
     color: {{ block.settings.label_color }};
     font-family: var(--font-heading--family);
-    font-size: clamp(1.125rem, 4.6vw, 1.5rem);
+    font-size: clamp(1.0625rem, 4.4vw, 1.5rem);
     font-weight: 800;
     line-height: 1;
     letter-spacing: -0.03em;
@@ -37,44 +35,34 @@
   .tlb-bar-{{ ai_gen_id }} {
     flex: 1 1 auto;
     min-width: 0;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
-    mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
   }
 
   .tlb-track-{{ ai_gen_id }} {
     display: flex;
     align-items: center;
-    gap: 32px;
-    width: max-content;
-    padding-inline-end: 32px;
-    animation: tlb-scroll-{{ ai_gen_id }} {{ block.settings.scroll_speed }}s linear infinite;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
   }
 
+  /* Each logo keeps its shape and shrinks with the row */
   .tlb-track-{{ ai_gen_id }} img {
     display: block;
-    flex-shrink: 0;
+    flex: 0 1 auto;
+    min-width: 0;
     width: auto;
-    height: 28px;
+    height: 24px;
     object-fit: contain;
     filter: {{ block.settings.logo_filter }};
     opacity: {{ block.settings.logo_opacity | divided_by: 100.0 }};
   }
 
-  @keyframes tlb-scroll-{{ ai_gen_id }} {
-    from { transform: translateX(0); }
-    to   { transform: translateX(-50%); }
+  /* The second set was only for a scrolling loop */
+  .tlb-track-{{ ai_gen_id }} img[aria-hidden="true"] {
+    display: none;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .tlb-track-{{ ai_gen_id }} {
-      animation: none;
-    }
-  }
-
-  /* Desktop: the label and every logo still, in one centred row */
+  /* Desktop: the label and the logos in one centred row */
   @media screen and (min-width: 750px) {
     .tlb-{{ ai_gen_id }} {
       justify-content: center;
@@ -84,24 +72,16 @@
 
     .tlb-bar-{{ ai_gen_id }} {
       flex: 0 1 auto;
-      overflow: visible;
-      -webkit-mask-image: none;
-      mask-image: none;
     }
 
     .tlb-track-{{ ai_gen_id }} {
+      justify-content: center;
       gap: {{ block.settings.logo_gap | at_most: 48 }}px;
-      padding: 0;
-      animation: none;
+      width: auto;
     }
 
     .tlb-track-{{ ai_gen_id }} img {
       height: {{ block.settings.logo_height }}px;
-    }
-
-    /* The second set is only for the phone loop */
-    .tlb-track-{{ ai_gen_id }} img[aria-hidden="true"] {
-      display: none;
     }
   }
 
