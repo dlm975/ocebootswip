@@ -56,16 +56,32 @@
             endif
             assign link = post.permalink.value | default: profile_url
           -%}
+          {%- liquid
+            assign likes = post.like_count.value | default: 0
+            assign comments = post.comment_count.value | default: 0
+          -%}
           <li class="igf__item">
-            <a class="igf__card" href="{{ link }}" target="_blank" rel="noopener">
-              <span class="igf__media">
+            <article class="igf__card">
+              <header class="igf__card-head">
+                <span class="igf__avatar" aria-hidden="true">
+                  {%- if section.settings.avatar != blank -%}
+                    {{ section.settings.avatar | image_url: width: 64 | image_tag: loading: 'lazy', alt: '' }}
+                  {%- else -%}
+                    {{ handle | slice: 0 | upcase }}
+                  {%- endif -%}
+                </span>
+                <span class="igf__card-name">{{ handle | escape }}</span>
+                {%- render 'gicon', name: 'verified-fill', class: 'igf__card-tick', size: 14 -%}
+                <time class="igf__card-date" datetime="{{ post.posted_at.value | date: '%Y-%m-%d' }}">{{ post.posted_at.value | date: '%-d %b' }}</time>
+              </header>
+              <a class="igf__media" href="{{ link }}" target="_blank" rel="noopener" aria-label="Open this post on Instagram">
                 {%- if still -%}
                   {{
                     still
                     | image_url: width: 720
                     | image_tag:
                       widths: '360, 540, 720',
-                      sizes: '(min-width: 990px) 22vw, (min-width: 750px) 32vw, 64vw',
+                      sizes: '(min-width: 990px) 22vw, (min-width: 750px) 32vw, 72vw',
                       loading: 'lazy',
                       class: 'igf__image',
                       alt: ''
@@ -76,12 +92,28 @@
                     {%- render 'gicon', name: 'play_arrow-fill', size: 18 -%}
                   </span>
                 {%- endif -%}
-                <span class="igf__date">{{ post.posted_at.value | date: '%-d %b' }}</span>
-              </span>
-              {%- if post.caption.value != blank -%}
-                <span class="igf__caption">{{ post.caption.value | strip_newlines | escape }}</span>
+              </a>
+              <div class="igf__actions">
+                <a class="igf__action" href="{{ link }}" target="_blank" rel="noopener" aria-label="Like on Instagram">
+                  {%- render 'gicon', name: 'favorite', size: 24 -%}
+                </a>
+                <a class="igf__action" href="{{ link }}" target="_blank" rel="noopener" aria-label="Comment on Instagram">
+                  {%- render 'gicon', name: 'chat_bubble', size: 22 -%}
+                </a>
+                <button class="igf__action" type="button" data-igf-share="{{ link }}" aria-label="Share this post">
+                  {%- render 'gicon', name: 'send', size: 22 -%}
+                </button>
+              </div>
+              {%- if likes > 0 -%}
+                <p class="igf__likes"><span data-igf-count="{{ likes }}">{{ likes }}</span> {% if likes == 1 %}like{% else %}likes{% endif %}</p>
               {%- endif -%}
-            </a>
+              {%- if post.caption.value != blank -%}
+                <p class="igf__caption"><strong>{{ handle | escape }}</strong> {{ post.caption.value | strip_newlines | escape }}</p>
+              {%- endif -%}
+              {%- if comments > 0 -%}
+                <a class="igf__comments" href="{{ link }}" target="_blank" rel="noopener">View {% if comments == 1 %}1 comment{% else %}all <span data-igf-count="{{ comments }}">{{ comments }}</span> comments{% endif %}</a>
+              {%- endif -%}
+            </article>
           </li>
         {%- endfor -%}
       </ul>
@@ -92,6 +124,33 @@
     {%- endif -%}
   </div>
 {%- endif -%}
+
+<script>
+  (function () {
+    var root = document.getElementById('shopify-section-{{ section.id }}');
+    if (!root) return;
+    // 1234 -> 1,234 (the shopper's own way of writing numbers)
+    var format = new Intl.NumberFormat();
+    root.querySelectorAll('[data-igf-count]').forEach(function (el) {
+      var n = Number(el.dataset.igfCount);
+      if (!isNaN(n)) el.textContent = format.format(n);
+    });
+    // Share: the phone's share sheet where there is one, else copy the link
+    root.addEventListener('click', function (event) {
+      var button = event.target.closest('[data-igf-share]');
+      if (!button) return;
+      var url = button.dataset.igfShare;
+      if (navigator.share) {
+        navigator.share({ url: url }).catch(function () {});
+      } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(function () {
+          button.classList.add('is-copied');
+          setTimeout(function () { button.classList.remove('is-copied'); }, 1400);
+        });
+      }
+    });
+  })();
+</script>
 
 {% stylesheet %}
   /* The heading and the Follow button on one line; the heading wraps, the button never does */
@@ -167,7 +226,7 @@
   .igf__track {
     display: grid;
     grid-auto-flow: column;
-    grid-auto-columns: 64%;
+    grid-auto-columns: 74%;
     gap: 10px;
     margin: 0 calc(-1 * var(--page-margin, 16px));
     padding: 0 var(--page-margin, 16px);
@@ -200,21 +259,68 @@
     scroll-snap-align: start;
   }
 
+  /* Instagram-style post card: name row, 3:4 photo, heart / comment / share, likes, caption */
   .igf__card {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     color: var(--color-foreground);
-    text-decoration: none;
-    -webkit-tap-highlight-color: transparent;
+  }
+
+  .igf__card-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-inline: 2px;
+    font-size: 0.8125rem;
+  }
+
+  /* Instagram's story ring around the avatar */
+  .igf__avatar {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    overflow: hidden;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    background: #121212;
+    box-shadow: 0 0 0 2px #d6249f;
+    background-clip: padding-box;
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 750;
+  }
+
+  .igf__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .igf__card-name {
+    font-weight: 700;
+  }
+
+  .igf__card-tick {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    color: #0095f6;
+  }
+
+  .igf__card-date {
+    margin-inline-start: auto;
+    color: rgb(18 18 18 / 0.5);
   }
 
   .igf__media {
     position: relative;
     display: block;
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 3 / 4;
     overflow: hidden;
-    border-radius: 20px;
+    border-radius: 16px;
     background: #e7e7ea;
     isolation: isolate;
   }
@@ -227,14 +333,15 @@
     transition: transform 0.55s cubic-bezier(0.3, 0.7, 0.3, 1);
   }
 
-  /* Small glass pills on the photo: the date, and a play mark on videos */
-  .igf__date,
   .igf__play {
     position: absolute;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 999px;
+    top: 10px;
+    right: 10px;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
     background: rgb(255 255 255 / 0.66);
     -webkit-backdrop-filter: blur(14px) saturate(180%);
     backdrop-filter: blur(14px) saturate(180%);
@@ -242,19 +349,58 @@
     color: #121212;
   }
 
-  .igf__date {
-    left: 10px;
-    bottom: 10px;
-    padding: 5px 10px;
-    font-size: 0.75rem;
-    font-weight: 750;
+  .igf__actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-inline-start: -6px;
   }
 
-  .igf__play {
-    top: 10px;
-    right: 10px;
-    width: 32px;
-    height: 32px;
+  .igf__action {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #121212;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.2s cubic-bezier(0.3, 0.7, 0.3, 1), color 0.18s ease;
+  }
+
+  .igf__action svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .igf__action:active {
+    transform: scale(0.88);
+  }
+
+  .igf__action.is-copied {
+    color: #0095f6;
+  }
+
+  @media (hover: hover) {
+    .igf__action:hover {
+      color: rgb(18 18 18 / 0.55);
+    }
+  }
+
+  .igf__likes,
+  .igf__caption,
+  .igf__comments {
+    margin: 0;
+    padding-inline: 2px;
+    font-size: 0.875rem;
+    line-height: 1.35;
+  }
+
+  .igf__likes {
+    font-weight: 700;
   }
 
   .igf__caption {
@@ -262,20 +408,27 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    padding-inline: 4px;
-    font-size: 0.875rem;
-    line-height: 1.35;
-    color: rgb(18 18 18 / 0.75);
+    color: #121212;
+  }
+
+  .igf__caption strong {
+    font-weight: 700;
+  }
+
+  .igf__comments {
+    color: rgb(18 18 18 / 0.5);
+    text-decoration: none;
   }
 
   @media (hover: hover) {
-    .igf__card:hover .igf__image {
+    .igf__media:hover .igf__image {
       transform: scale(1.04);
     }
 
   }
 
-  .igf__card:focus-visible,
+  .igf__media:focus-visible,
+  .igf__action:focus-visible,
   .igf__follow:focus-visible {
     outline: 2px solid currentColor;
     outline-offset: 3px;
@@ -294,7 +447,8 @@
 
   @media (prefers-reduced-motion: reduce) {
     .igf__image,
-    .igf__follow {
+    .igf__follow,
+    .igf__action {
       transition: none;
     }
   }
@@ -308,7 +462,7 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Posts come from Shopify admin: Content > Metaobjects > Instagram post (newest first). The section is hidden until there is at least one post."
+      "content": "Posts come from Shopify admin: Content > Metaobjects > Instagram post (newest first), with their like and comment counts. The section is hidden until there is at least one post."
     },
     {
       "type": "text",
@@ -321,6 +475,12 @@
       "id": "handle",
       "label": "Instagram handle",
       "default": "oceboots"
+    },
+    {
+      "type": "image_picker",
+      "id": "avatar",
+      "label": "Profile picture",
+      "info": "Shown in the small ring on each post. Without one, the first letter of the handle shows."
     },
     {
       "type": "text",
