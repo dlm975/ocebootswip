@@ -70,6 +70,7 @@
               }}
             {%- endif -%}
             <video
+              data-sources="{% for source in clip.sources %}{{ source.format }}:{{ source.width }}x{{ source.height }} {% endfor %}"
               class="preels__video"
               muted
               loop
