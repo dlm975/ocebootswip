@@ -29,30 +29,49 @@
         <span class="preels__media">
           {%- if block.settings.video != blank -%}
             {%- liquid
-              # Light and smooth: HLS first (Safari streams it at the size it can manage), then one
-              # MP4 no taller than 720p for everyone else, never the full-size original
+              # Light and quick to start: HLS first (Safari streams the size it can manage), then
+              # one MP4 at 480p (its shorter side at most 480px), never the full-size original
               assign clip = block.settings.video
               assign hls = nil
               assign mp4 = nil
-              assign mp4_height = 0
+              assign mp4_side = 0
               assign smallest = nil
+              assign smallest_side = 100000
               for source in clip.sources
                 if source.format == 'm3u8'
                   assign hls = source
                 elsif source.format == 'mp4'
-                  if smallest == nil or source.height < smallest.height
+                  assign side = source.width | at_most: source.height
+                  if side < smallest_side
                     assign smallest = source
+                    assign smallest_side = side
                   endif
-                  if source.height <= 720 and source.height > mp4_height
+                  if side <= 480 and side > mp4_side
                     assign mp4 = source
-                    assign mp4_height = source.height
+                    assign mp4_side = side
                   endif
                 endif
               endfor
               if mp4 == nil
                 assign mp4 = smallest
               endif
+
+              # What shows until the clip is playing: the card's photo, else the clip's own first frame
+              assign still = block.settings.image | default: clip.preview_image
             -%}
+            {%- if still -%}
+              {{
+                still
+                | image_url: width: 720
+                | image_tag:
+                  widths: '360, 540, 720',
+                  sizes: '(min-width: 990px) 20vw, (min-width: 750px) 30vw, 62vw',
+                  loading: 'eager',
+                  fetchpriority: 'low',
+                  class: 'preels__image preels__still',
+                  alt: ''
+              }}
+            {%- endif -%}
             <video
               class="preels__video"
               muted
@@ -62,8 +81,8 @@
               disablepictureinpicture
               disableremoteplayback
               aria-hidden="true"
-              {% if clip.preview_image %}
-                poster="{{ clip.preview_image | image_url: width: 720 }}"
+              {% if still %}
+                poster="{{ still | image_url: width: 720 }}"
               {% endif %}
             >
               {%- if hls -%}
@@ -104,7 +123,8 @@
 <script type="module">
   /*
     Keeping the clips smooth without slowing the page:
-    - nothing downloads until a card is about to scroll into view (preload="none" until then);
+    - nothing downloads until a card is a screen or so away (preload="none" until then);
+    - each card shows its photo straight away, and the clip fades in over it once it is playing;
     - a clip plays while any part of its card is on screen (peeking cards too), and pauses when it leaves or the tab hides;
     - with reduced motion, Data Saver or a slow connection, the poster stays and nothing plays.
   */
@@ -133,7 +153,7 @@
             if (video.preload !== 'auto') video.preload = 'auto';
             this.near.unobserve(video);
           }),
-        { rootMargin: '300px 300px' }
+        { rootMargin: '900px 900px' }
       );
 
       // Play while any part of the card is on screen, including cards peeking in at the sides
@@ -149,6 +169,10 @@
 
       this.videos.forEach((video) => {
         video.muted = true;
+        // Shown over the photo only once frames are actually playing: never a black card
+        const ready = () => video.classList.add('is-ready');
+        video.addEventListener('playing', ready, { once: true });
+        if (video.readyState >= 3 && !video.paused) ready();
         this.near.observe(video);
         this.seen.observe(video);
       });
@@ -214,7 +238,7 @@
     aspect-ratio: 9 / 16;
     overflow: hidden;
     border-radius: 20px;
-    background: #121212;
+    background: #e7e7ea;
     color: #ffffff;
     text-decoration: none;
     scroll-snap-align: start;
@@ -241,10 +265,21 @@
     transition: transform 0.55s cubic-bezier(0.3, 0.7, 0.3, 1);
   }
 
-  /* Its own layer, so a playing clip doesn't repaint the card around it */
+  /* Its own layer, so a playing clip doesn't repaint the card around it. Hidden (the photo shows)
+     until it is playing, then faded in */
   .preels__video {
+    opacity: 0;
     transform: translateZ(0);
-    background: #121212;
+    transition: opacity 0.4s ease;
+  }
+
+  .preels__video.is-ready {
+    opacity: 1;
+  }
+
+  /* While nothing has loaded at all, a soft grey rather than black */
+  .preels__card {
+    background-color: #e7e7ea;
   }
 
   .preels__placeholder {
@@ -424,13 +459,13 @@
           "type": "video",
           "id": "video",
           "label": "Video",
-          "info": "A short clip, played muted on loop. Portrait (9:16) works best."
+          "info": "A short clip, played muted on loop. Portrait (9:16) works best. Shopify makes a 480p copy, which is what plays, so any size can be uploaded."
         },
         {
           "type": "image_picker",
           "id": "image",
           "label": "Image",
-          "info": "Shown until a video is added."
+          "info": "Shown straight away, and until the video starts playing (or instead of it, with no video)."
         },
         {
           "type": "text",
