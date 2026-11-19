@@ -34,7 +34,7 @@
       aria-label="Search"
     >
       {%- render 'gicon', name: 'search', size: 22 -%}
-      <span class="mdock__line" aria-hidden="true"></span>
+      <span class="mdock__label" aria-hidden="true">Search</span>
     </button>
     {%- if size_link -%}
       <span
@@ -623,15 +623,6 @@
     .mdock__button:active {
       background: rgb(255 255 255 / 0.6);
       transform: scale(0.96);
-    }
-
-    /* Beside the search icon, the line of a search field, as in the header's search */
-    .mdock__line {
-      width: 46px;
-      height: 1.5px;
-      margin-top: 12px;
-      border-radius: 1px;
-      background: #121212;
     }
 
     .mdock__label {
