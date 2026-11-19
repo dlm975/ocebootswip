@@ -327,7 +327,14 @@
 
     grid.addEventListener('click', (event) => {
       const button = event.target.closest('[data-wlq-open]');
-      if (button) open(button.dataset.wlqOpen, button);
+      if (!button) return;
+      // The card's photo is a link to the product page: a plain tap opens the mini product page
+      // instead; a new-tab click (cmd/ctrl/shift, middle button) still opens the product page
+      if (button.tagName === 'A') {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+        event.preventDefault();
+      }
+      open(button.dataset.wlqOpen, button);
     });
     // Start fetching as soon as a Buy button is pointed at or pressed
     const warm = (event) => {

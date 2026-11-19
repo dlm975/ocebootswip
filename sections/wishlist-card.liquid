@@ -2,7 +2,8 @@
   One saved product's card on the wishlist page (sections/wishlist.liquid), fetched from the
   product's own URL with section_id=wishlist-card so the price comes in the shopper's currency.
   Not for adding to pages: it has no presets.
-  Just the photo: "See Details" (a holographic coin arrow) opens the mini product page.
+  Just the photo. Tapping anywhere on the card (the photo or "See Details") opens the mini product
+  page; a sold-out boot's photo still leads to its product page.
 {%- endcomment -%}
 
 {%- liquid
@@ -18,6 +19,10 @@
     <a
       class="wl-card"
       href="{{ product.url }}"
+      {%- if product.available %}
+        data-wlq-open="{{ product.handle }}"
+        aria-haspopup="dialog"
+      {%- endif %}
     >
       <span class="wl-card__media">
         {%- if image -%}
