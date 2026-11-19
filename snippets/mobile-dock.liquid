@@ -34,6 +34,7 @@
       aria-label="Search"
     >
       {%- render 'gicon', name: 'search', size: 22 -%}
+      <span class="mdock__line" aria-hidden="true"></span>
     </button>
     {%- if size_link -%}
       <span
@@ -49,6 +50,7 @@
         aria-label="Shop by size"
       >
         {%- render 'gicon', name: 'straighten', size: 22 -%}
+        <span class="mdock__label" aria-hidden="true">Size</span>
       </button>
     {%- endif -%}
   </nav>
@@ -596,9 +598,10 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 52px;
+      gap: 8px;
+      min-width: 52px;
       height: 44px;
-      padding: 0;
+      padding: 0 16px;
       border: 0;
       border-radius: 999px;
       background: transparent;
@@ -620,6 +623,21 @@
     .mdock__button:active {
       background: rgb(255 255 255 / 0.6);
       transform: scale(0.96);
+    }
+
+    /* Beside the search icon, the line of a search field, as in the header's search */
+    .mdock__line {
+      width: 46px;
+      height: 1.5px;
+      margin-top: 12px;
+      border-radius: 1px;
+      background: #121212;
+    }
+
+    .mdock__label {
+      font-size: 0.9375rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
     }
 
     .mdock__divider {
