@@ -636,6 +636,22 @@
     box-shadow: none;
   }
 
+  /* A soft shadow under the whole header bar, so it lifts off the page as it rides along */
+  #header-component {
+    box-shadow:
+      0 1px 0 rgb(18 18 18 / 0.05),
+      0 8px 20px -12px rgb(18 18 18 / 0.28);
+  }
+
+  /* Collection pages: the lower row is see-through (the dock and the currency tab hang from the
+     bar), so the shadow sits under the top bar instead; the dock pieces, drawn above it, cover it
+     where they join */
+  #header-component:has(.header-menu--dock) .header__row--top {
+    box-shadow:
+      0 1px 0 rgb(18 18 18 / 0.05),
+      0 8px 20px -12px rgb(18 18 18 / 0.28);
+  }
+
   /* Gutters are set here, not by the page-width grid, so both rows share one left edge */
   #header-component .header__row .header__columns {
     padding-inline: var(--header-gutter);
