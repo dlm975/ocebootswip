@@ -9,7 +9,8 @@
 {%- endcomment -%}
 
 {%- liquid
-  assign positions = '22,20|76,15|48,47|84,64|16,74|57,86|50,12|12,44|86,35|86,90' | split: '|'
+  assign positions = '30,20|72,17|52,46|24,66|78,60|50,85|84,88|14,40|88,36|20,92' | split: '|'
+  assign sizes = '1.1,0.92,1.2,0.95,1.05,0.9,0.85,0.8,0.85,0.8' | split: ','
   assign count = 0
 -%}
 
@@ -30,12 +31,13 @@
       assign at = positions[count] | split: ','
       assign drift = count | times: 7 | modulo: 5 | plus: 7
       assign delay = count | times: 1.7 | modulo: 6
+      assign size = sizes[count]
       assign count = count | plus: 1
     -%}
     <button
       type="button"
       class="wbp__logo"
-      style="--x: {{ at[0] }}%; --y: {{ at[1] }}%; --drift: {{ drift }}s; --delay: -{{ delay }}s;"
+      style="--x: {{ at[0] }}%; --y: {{ at[1] }}%; --s: {{ size }}; --drift: {{ drift }}s; --delay: -{{ delay }}s;"
       data-wbp-logo
       aria-expanded="false"
       aria-label="{{ name | escape }}, {{ settings[k_club] | escape }}"
@@ -55,17 +57,26 @@
     style="{% render 'spacing-style', settings: section.settings %}"
   >
     <div class="wbp__box">
-      <h2 class="wbp__heading">{{ section.settings.heading | escape }}</h2>
-      {%- if section.settings.hint != blank -%}
-        <p class="wbp__hint" data-wbp-hint>
-          {%- render 'gicon', name: 'touch_app', class: 'wbp__hint-icon', size: 20 -%}
-          <span>{{ section.settings.hint | escape }}</span>
-        </p>
-      {%- endif -%}
+      <div class="wbp__layout" data-wbp-layout>
+      <div class="wbp__text">
+        <h2 class="wbp__heading">
+          {%- assign words = section.settings.heading | split: ' ' -%}
+          {%- for word in words -%}
+            <span>{{ word | escape }}</span>{% unless forloop.last %} {% endunless %}
+          {%- endfor -%}
+        </h2>
+        {%- if section.settings.hint != blank and count > 0 -%}
+          <p class="wbp__hint" data-wbp-hint>
+            {%- render 'gicon', name: 'touch_app', class: 'wbp__hint-icon', size: 20 -%}
+            <span>{{ section.settings.hint | escape }}</span>
+          </p>
+        {%- endif -%}
+      </div>
 
       {%- if count > 0 -%}
         <div class="wbp__stage" data-wbp-stage>
           {{ logos }}
+        </div>
 
           <div class="wbp__card" data-wbp-card hidden>
             <button type="button" class="wbp__close" data-wbp-close aria-label="Close">
@@ -125,12 +136,12 @@
               </div>
             {%- endfor -%}
           </div>
-        </div>
       {%- else -%}
         <p class="wbp__empty">
           Add players in Theme settings &gt; Pro players: a name, a club badge and a photo each (only shown in the editor).
         </p>
       {%- endif -%}
+      </div>
     </div>
   </div>
 {%- endif -%}
@@ -140,10 +151,11 @@
 
   const root = document.getElementById('shopify-section-{{ section.id }}');
   const stage = root?.querySelector('[data-wbp-stage]');
-  if (stage) {
+  const layout = root?.querySelector('[data-wbp-layout]');
+  if (stage && layout) {
     const logos = [...stage.querySelectorAll('[data-wbp-logo]')];
-    const players = [...stage.querySelectorAll('[data-wbp-player]')];
-    const card = stage.querySelector('[data-wbp-card]');
+    const players = [...layout.querySelectorAll('[data-wbp-player]')];
+    const card = layout.querySelector('[data-wbp-card]');
     const hint = root.querySelector('[data-wbp-hint]');
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
     const EASE = [0.3, 0.7, 0.3, 1];
@@ -194,7 +206,7 @@
       finish(card);
       card.hidden = false;
       players.forEach((p, n) => (p.hidden = n !== i));
-      stage.classList.add('is-open');
+      layout.classList.add('is-open');
       if (previous && previous !== logo) flyHome(previous);
 
       // Measure and start in the same frame: from where the badge is, to its spot on the card
@@ -220,7 +232,7 @@
       if (current < 0) return;
       const logo = logos[current];
       current = -1;
-      stage.classList.remove('is-open');
+      layout.classList.remove('is-open');
       flyHome(logo);
       finish(card);
       if (reduce.matches) {
@@ -236,7 +248,7 @@
       }, OUT * 1000);
     };
 
-    stage.addEventListener('click', (event) => {
+    layout.addEventListener('click', (event) => {
       const logo = event.target.closest('[data-wbp-logo]');
       if (logo) {
         const i = logos.indexOf(logo);
@@ -301,23 +313,45 @@
     }
   }
 
+  /* The big stacked heading in the left half; the badges in a close jumble in the right half;
+     a player's card opens across both */
+  .wbp__layout {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .wbp__text {
+    min-width: 0;
+    transition: opacity 0.35s ease;
+  }
+
+  .wbp__layout.is-open .wbp__text {
+    opacity: 0.14;
+  }
+
   .wbp__heading {
+    display: flex;
+    flex-direction: column;
     margin: 0;
-    font-size: clamp(2.25rem, 10.5vw, 4.75rem);
-    font-weight: 800;
-    line-height: 0.98;
-    letter-spacing: -0.045em;
-    text-align: center;
-    text-wrap: balance;
+    font-size: clamp(2.5rem, 11.5vw, 8.5rem);
+    font-weight: 850;
+    line-height: 0.9;
+    letter-spacing: -0.05em;
+  }
+
+  .wbp__heading > span {
+    display: block;
   }
 
   /* "Tap a club to meet the player", with a finger that taps */
   .wbp__hint {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 6px;
-    margin: 10px 0 0;
+    margin: 14px 0 0;
     color: rgb(18 18 18 / 0.6);
     font-size: 0.875rem;
     font-weight: 600;
@@ -349,26 +383,26 @@
 
   /* The field the badges float in */
   .wbp__stage {
-    --wbp-logo: 78px;
+    --wbp-logo: 74px;
     position: relative;
-    height: 400px;
-    margin-top: 6px;
+    height: 340px;
   }
 
   @media screen and (min-width: 750px) {
     .wbp__stage {
-      --wbp-logo: 120px;
-      height: 480px;
+      --wbp-logo: 150px;
+      height: 520px;
     }
   }
 
   .wbp__logo {
     position: absolute;
-    top: calc(var(--y) - var(--wbp-logo) / 2);
-    left: calc(var(--x) - var(--wbp-logo) / 2);
+    --size: calc(var(--wbp-logo) * var(--s, 1));
+    top: calc(var(--y) - var(--size) / 2);
+    left: calc(var(--x) - var(--size) / 2);
     z-index: 1;
-    width: var(--wbp-logo);
-    height: var(--wbp-logo);
+    width: var(--size);
+    height: var(--size);
     margin: 0;
     padding: 0;
     border: 0;
@@ -385,7 +419,7 @@
   /* Not the edge of the field: keep the badges whole inside it */
   @media screen and (max-width: 749px) {
     .wbp__logo {
-      left: clamp(0px, calc(var(--x) - var(--wbp-logo) / 2), calc(100% - var(--wbp-logo)));
+      left: clamp(0px, calc(var(--x) - var(--size) / 2), calc(100% - var(--size)));
     }
   }
 
@@ -494,7 +528,7 @@
   }
 
   /* A badge picked: the others step back; it comes forward onto the card */
-  .wbp__stage.is-open .wbp__logo:not(.is-picked) {
+  .wbp__layout.is-open .wbp__logo:not(.is-picked) {
     opacity: 0.14;
     scale: 0.86;
     filter: grayscale(1);
@@ -513,7 +547,7 @@
     position: absolute;
     inset: 50% 0 auto;
     z-index: 2;
-    max-width: 760px;
+    max-width: 820px;
     margin-inline: auto;
     translate: 0 -50%;
     border-radius: 20px;
