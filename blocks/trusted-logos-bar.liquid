@@ -1,5 +1,6 @@
 {% doc %}
-  A bold label ("Worn by") with the logos still, on the same line.
+  A bold label ("Worn by") with the logos on the same line, scattered and overlapping like stickers
+  (best with logos on transparent backgrounds).
   Logos are uploaded via theme editor image pickers (up to 12).
 {% enddoc %}
 
@@ -37,25 +38,41 @@
     min-width: 0;
   }
 
+  /* The logos scattered and overlapping like stickers: each turned and nudged a little, still */
   .tlb-track-{{ ai_gen_id }} {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+    justify-content: center;
     width: 100%;
+    padding-block: 6px;
   }
 
-  /* Each logo keeps its shape, and shrinks with the row */
   .tlb-track-{{ ai_gen_id }} img {
+    --r: 0deg;
+    --y: 0px;
+    position: relative;
     display: block;
     flex: 0 1 auto;
     min-width: 0;
     width: auto;
-    height: 24px;
+    height: 34px;
+    margin-inline-start: -8px;
     object-fit: contain;
-    filter: {{ block.settings.logo_filter }};
+    filter: drop-shadow(0 2px 4px rgb(18 18 18 / 0.14)) {{ block.settings.logo_filter | replace: 'none', '' }};
     opacity: {{ block.settings.logo_opacity | divided_by: 100.0 }};
+    transform: translateY(var(--y)) rotate(var(--r));
   }
+
+  .tlb-track-{{ ai_gen_id }} img:first-child {
+    margin-inline-start: 0;
+  }
+
+  .tlb-track-{{ ai_gen_id }} img:nth-child(6n + 1) { --r: -8deg; --y: -4px; z-index: 3; }
+  .tlb-track-{{ ai_gen_id }} img:nth-child(6n + 2) { --r: 6deg; --y: 5px; z-index: 5; }
+  .tlb-track-{{ ai_gen_id }} img:nth-child(6n + 3) { --r: -4deg; --y: -6px; z-index: 2; }
+  .tlb-track-{{ ai_gen_id }} img:nth-child(6n + 4) { --r: 9deg; --y: 3px; z-index: 6; }
+  .tlb-track-{{ ai_gen_id }} img:nth-child(6n + 5) { --r: -7deg; --y: 6px; z-index: 4; }
+  .tlb-track-{{ ai_gen_id }} img:nth-child(6n) { --r: 5deg; --y: -3px; z-index: 1; }
 
   /* The second set was only for a scrolling loop */
   .tlb-track-{{ ai_gen_id }} img[aria-hidden="true"] {
@@ -75,13 +92,12 @@
     }
 
     .tlb-track-{{ ai_gen_id }} {
-      justify-content: center;
-      gap: {{ block.settings.logo_gap | at_most: 48 }}px;
       width: auto;
     }
 
     .tlb-track-{{ ai_gen_id }} img {
-      height: {{ block.settings.logo_height }}px;
+      height: {{ block.settings.logo_height | at_least: 44 }}px;
+      margin-inline-start: -10px;
     }
   }
 
