@@ -88,15 +88,15 @@
               </a>
               <div class="igf__actions">
                 <a class="igf__action" href="{{ link }}" target="_blank" rel="noopener" aria-label="Like on Instagram{% if likes > 0 %}, {{ likes }} likes{% endif %}">
-                  {%- render 'gicon', name: 'favorite', size: 24 -%}
+                  <svg class="igf__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M16.79 3.5c-1.98 0-3.73 1.04-4.79 2.67C10.94 4.54 9.19 3.5 7.21 3.5 4.06 3.5 1.5 6.17 1.5 9.48c0 5.5 9.06 11.02 10.5 11.02s10.5-5.52 10.5-11.02c0-3.31-2.56-5.98-5.71-5.98Z"/></svg>
                   {%- if likes > 0 -%}<span class="igf__count" data-igf-count="{{ likes }}">{{ likes }}</span>{%- endif -%}
                 </a>
                 <a class="igf__action" href="{{ link }}" target="_blank" rel="noopener" aria-label="Comment on Instagram{% if comments > 0 %}, {{ comments }} comments{% endif %}">
-                  {%- render 'gicon', name: 'chat_bubble', size: 22 -%}
+                  <svg class="igf__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.34 16.6A9.5 9.5 0 1 1 6.8 20.3L2.5 21.5Z"/></svg>
                   {%- if comments > 0 -%}<span class="igf__count" data-igf-count="{{ comments }}">{{ comments }}</span>{%- endif -%}
                 </a>
                 <button class="igf__action" type="button" data-igf-share="{{ link }}" aria-label="Share this post">
-                  {%- render 'gicon', name: 'send', size: 22 -%}
+                  <svg class="igf__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M22 3 9.22 10.08"/><path d="M11.7 20.33 22 3H2l7.22 7.08 2.48 10.25Z"/></svg>
                 </button>
               </div>
             </article>
@@ -384,9 +384,16 @@
     transition: transform 0.2s cubic-bezier(0.3, 0.7, 0.3, 1), color 0.18s ease;
   }
 
-  .igf__action svg {
+  /* Instagram's own action icons (outlined heart, speech bubble, paper plane), drawn in its style:
+     an agreed exception to the Google icons rule, like brand logos */
+  .igf__icon {
     width: 24px;
     height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
   .igf__count {
