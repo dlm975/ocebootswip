@@ -1,66 +1,66 @@
 {% doc %}
-  A label above a thin infinite-scrolling logo bar.
+  A bold label ("Worn by") with the logos on the same line: gliding past on phones, a still row
+  on desktop.
   Logos are uploaded via theme editor image pickers (up to 12).
 {% enddoc %}
 
 {% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
 
 {% style %}
+  /* One line: a bold label, then the logos. Phones: the logos glide past, fading at both ends.
+     Desktop: one still row straight after the label. */
   .tlb-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    gap: 16px;
     width: 100%;
-    padding: {{ block.settings.section_padding }}px 0;
+    padding: {{ block.settings.section_padding | at_least: 14 }}px var(--page-margin, 16px);
     background: {{ block.settings.section_background }};
+    box-sizing: border-box;
   }
 
-  /* --- Header label --- */
   .tlb-header-{{ ai_gen_id }} {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: {{ block.settings.header_gap }}px;
+    flex: none;
   }
 
   .tlb-label-{{ ai_gen_id }} {
-    font-size: {{ block.settings.label_size }}px;
-    color: {{ block.settings.label_color }};
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    text-transform: none;
     margin: 0;
+    color: {{ block.settings.label_color }};
+    font-family: var(--font-heading--family);
+    font-size: clamp(1.125rem, 4.6vw, 1.5rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    white-space: nowrap;
   }
 
-  /* --- Scrolling bar --- */
   .tlb-bar-{{ ai_gen_id }} {
-    overflow: hidden;
-    width: 100%;
-    background: {{ block.settings.bar_background }};
-    border-top: 1px solid {{ block.settings.bar_border_color }};
-    border-bottom: 1px solid {{ block.settings.bar_border_color }};
-    padding: {{ block.settings.bar_padding }}px 0;
+    flex: 1 1 auto;
+    min-width: 0;
     display: flex;
     align-items: center;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
   }
 
   .tlb-track-{{ ai_gen_id }} {
     display: flex;
     align-items: center;
-    gap: {{ block.settings.logo_gap }}px;
+    gap: 32px;
     width: max-content;
+    padding-inline-end: 32px;
     animation: tlb-scroll-{{ ai_gen_id }} {{ block.settings.scroll_speed }}s linear infinite;
   }
 
-  .tlb-track-{{ ai_gen_id }}:hover {
-    animation-play-state: paused;
-  }
-
   .tlb-track-{{ ai_gen_id }} img {
-    height: {{ block.settings.logo_height }}px;
-    width: auto;
-    object-fit: contain;
+    display: block;
     flex-shrink: 0;
+    width: auto;
+    height: 28px;
+    object-fit: contain;
     filter: {{ block.settings.logo_filter }};
     opacity: {{ block.settings.logo_opacity | divided_by: 100.0 }};
-    display: block;
   }
 
   @keyframes tlb-scroll-{{ ai_gen_id }} {
@@ -68,31 +68,47 @@
     to   { transform: translateX(-50%); }
   }
 
-  /* Static layout on desktop — no scroll, single centered row */
+  @media (prefers-reduced-motion: reduce) {
+    .tlb-track-{{ ai_gen_id }} {
+      animation: none;
+    }
+  }
+
+  /* Desktop: the label and every logo still, in one centred row */
   @media screen and (min-width: 750px) {
+    .tlb-{{ ai_gen_id }} {
+      justify-content: center;
+      gap: 40px;
+      padding-block: {{ block.settings.section_padding | at_least: 22 }}px;
+    }
+
     .tlb-bar-{{ ai_gen_id }} {
+      flex: 0 1 auto;
       overflow: visible;
+      -webkit-mask-image: none;
+      mask-image: none;
     }
 
     .tlb-track-{{ ai_gen_id }} {
+      gap: {{ block.settings.logo_gap | at_most: 48 }}px;
+      padding: 0;
       animation: none;
-      width: 100%;
-      flex-wrap: wrap;
-      justify-content: center;
     }
 
-    /* Hide the duplicate set used only for the seamless loop */
+    .tlb-track-{{ ai_gen_id }} img {
+      height: {{ block.settings.logo_height }}px;
+    }
+
+    /* The second set is only for the phone loop */
     .tlb-track-{{ ai_gen_id }} img[aria-hidden="true"] {
       display: none;
     }
   }
 
   .tlb-empty-{{ ai_gen_id }} {
-    width: 100%;
-    text-align: center;
+    margin: 0;
     font-size: 13px;
     color: #64748B;
-    padding: 0 20px;
   }
 {% endstyle %}
 
