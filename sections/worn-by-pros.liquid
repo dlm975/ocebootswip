@@ -456,9 +456,9 @@
 
   /* The field the badges float in */
   .wbp__stage {
-    --wbp-logo: 74px;
+    --wbp-logo: 70px;
     position: relative;
-    height: 340px;
+    height: 430px;
   }
 
   @media screen and (min-width: 750px) {
@@ -492,6 +492,8 @@
   /* Not the edge of the field: keep the badges whole inside it */
   @media screen and (max-width: 749px) {
     .wbp__logo {
+      /* Phones: less size difference, so the bigger logos don't cover their neighbours */
+      --size: calc(var(--wbp-logo) * min(var(--s, 1), 1.05));
       left: clamp(0px, calc(var(--x) - var(--size) / 2), calc(100% - var(--size)));
     }
   }
