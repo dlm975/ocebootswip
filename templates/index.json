@@ -1027,6 +1027,7 @@
           "settings": {
             "name": "Messi",
             "collection": "messi-1",
+            "video": "shopify://files/videos/snaptik_7441619545900485890_v3 2.mov",
             "image": "shopify://shop_images/adidas-messi-f50-triunfo-dorado-boots_6.jpg",
             "button_label": "Shop collection"
           }
@@ -1036,6 +1037,7 @@
           "settings": {
             "name": "Olise",
             "collection": "olise",
+            "video": "shopify://files/videos/snaptik_7675038953073904928_v3.mov",
             "image": "shopify://shop_images/SnapInsta.to_654969911_18568562623057038_5230344121947742236_n.jpg",
             "button_label": "Shop collection"
           }
