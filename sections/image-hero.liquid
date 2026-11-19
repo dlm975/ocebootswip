@@ -219,22 +219,24 @@
     transform: translateZ(0);
     bottom: -1px;
     top: auto;
-    height: calc(var(--ih-fade-height, 32%) * 1.45);
-    /* Long, but the photo stays clear for most of it: the white builds late and fast (ease-in)
-       towards the foot, with many stops so there is no visible edge */
+    height: calc(var(--ih-fade-height, 32%) * 1.75);
+    /* Long and gradual: the white builds evenly up the photo with soft ends, many stops so
+       there is no visible edge */
     background: linear-gradient(
       to bottom,
-      color-mix(in srgb, var(--ih-fade, #ffffff) 0.0%, transparent) 0%,
-      color-mix(in srgb, var(--ih-fade, #ffffff) 0.6%, transparent) 10%,
-      color-mix(in srgb, var(--ih-fade, #ffffff) 2.9%, transparent) 20%,
-      color-mix(in srgb, var(--ih-fade, #ffffff) 7.1%, transparent) 30%,
-      color-mix(in srgb, var(--ih-fade, #ffffff) 13.3%, transparent) 40%,
-      color-mix(in srgb, var(--ih-fade, #ffffff) 21.8%, transparent) 50%,
-      color-mix(in srgb, var(--ih-fade, #ffffff) 32.5%, transparent) 60%,
-      color-mix(in srgb, var(--ih-fade, #ffffff) 45.6%, transparent) 70%,
-      color-mix(in srgb, var(--ih-fade, #ffffff) 61.2%, transparent) 80%,
-      color-mix(in srgb, var(--ih-fade, #ffffff) 79.3%, transparent) 90%,
-      color-mix(in srgb, var(--ih-fade, #ffffff) 100.0%, transparent) 100%
+      color-mix(in srgb, var(--ih-fade, #ffffff) 0.0%, transparent) 0.0%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 1.1%, transparent) 8.3%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 5.0%, transparent) 16.7%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 11.8%, transparent) 25.0%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 21.2%, transparent) 33.3%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 32.5%, transparent) 41.7%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 45.1%, transparent) 50.0%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 58.1%, transparent) 58.3%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 70.8%, transparent) 66.7%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 82.3%, transparent) 75.0%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 91.5%, transparent) 83.3%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 97.7%, transparent) 91.7%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 100.0%, transparent) 100.0%
     );
   }
 
