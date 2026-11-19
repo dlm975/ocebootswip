@@ -4385,7 +4385,7 @@ html.wlq-open {
   display: none;
 }
 
-/* The cart's Checkout: the same key (its burning fuse still traces the outline), with room for its
+/* The cart's Checkout: the same key, with room for its
    edge; doubled class to outrank the cart's own button settings */
 .cart__ctas .cart__checkout-button.cart__checkout-button {
   margin-block-end: 5px;
