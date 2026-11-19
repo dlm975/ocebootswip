@@ -7,6 +7,9 @@
  * or heel at the very edge can be seen whole) and never further, so it can't be dragged off into
  * empty space. Lifting the last finger eases it back. One finger still swipes between photos and a tap still
  * opens the full-screen view; the page itself no longer zooms when pinching a photo.
+ *
+ * Also used by the wishlist's mini product page: import { pinchZoom } from this file and call
+ * pinchZoom(container, { slide, target }) with its slides' selector and the element to zoom.
  */
 const MAX_SCALE = 4;
 const EDGE_MARGIN = 24; // px of give past the photo's edges once zoomed
@@ -22,14 +25,17 @@ const distance = (a, b) => Math.hypot(a.clientX - b.clientX, a.clientY - b.clien
 const midpoint = (a, b) => ({ x: (a.clientX + b.clientX) / 2, y: (a.clientY + b.clientY) / 2 });
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
-function setUp(gallery) {
+const PDP_SLIDE = 'slideshow-slide, .product-media-container';
+const pdpTarget = (slide) => slide.querySelector('.product-media') || slide.querySelector('img');
+
+function setUp(gallery, { slide: slideSelector = PDP_SLIDE, target: targetFor = pdpTarget } = {}) {
   if (gallery.dataset.pinchZoom) return;
   gallery.dataset.pinchZoom = '1';
 
   let active = null; // { slide, target, box, startDistance, startMid, startScale, startX, startY, scale, x, y }
   let suppressClick = false;
 
-  const targetOf = (slide) => slide.querySelector('.product-media') || slide.querySelector('img');
+  const targetOf = targetFor;
 
   const apply = (state, animate) => {
     const { target, scale, x, y } = state;
@@ -67,7 +73,7 @@ function setUp(gallery) {
   };
 
   const begin = (event) => {
-    const slide = event.target.closest('slideshow-slide, .product-media-container');
+    const slide = event.target.closest(slideSelector);
     const target = slide && targetOf(slide);
     if (!target) return;
     const [a, b] = event.touches;
@@ -165,17 +171,23 @@ function setUp(gallery) {
   );
 }
 
-function init() {
-  document.querySelectorAll('.product-information__media media-gallery').forEach(setUp);
+/** Pinch to zoom on any set of photos: container holds the slides */
+export function pinchZoom(container, options) {
+  setUp(container, options);
 }
 
-init();
-// The gallery is redrawn when another size or colour is chosen
-let queued = 0;
-new MutationObserver(() => {
-  if (queued) return;
-  queued = requestAnimationFrame(() => {
-    queued = 0;
-    init();
-  });
-}).observe(document.querySelector('.product-information') || document.body, { childList: true, subtree: true });
+// The product page's own gallery
+const productInfo = document.querySelector('.product-information');
+if (productInfo) {
+  const init = () => document.querySelectorAll('.product-information__media media-gallery').forEach((g) => setUp(g));
+  init();
+  // The gallery is redrawn when another size or colour is chosen
+  let queued = 0;
+  new MutationObserver(() => {
+    if (queued) return;
+    queued = requestAnimationFrame(() => {
+      queued = 0;
+      init();
+    });
+  }).observe(productInfo, { childList: true, subtree: true });
+}
