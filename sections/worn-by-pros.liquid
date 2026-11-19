@@ -148,7 +148,16 @@
                         }}
                       </div>
                       <div class="wbp__info">
-                        <span class="wbp__slot" data-wbp-slot aria-hidden="true"></span>
+                        {%- comment -%} The league logo lands in the slot; on phones the flag and club badge sit beside it {%- endcomment -%}
+                        <div class="wbp__marks">
+                          <span class="wbp__slot" data-wbp-slot aria-hidden="true"></span>
+                          {%- if settings[k_flag] != blank -%}
+                            {{ settings[k_flag] | image_url: width: 96 | image_tag: class: 'wbp__flag wbp__mark', loading: 'lazy', alt: '' }}
+                          {%- endif -%}
+                          {%- if settings[k_badge] != blank -%}
+                            {{ settings[k_badge] | image_url: width: 96 | image_tag: class: 'wbp__badge wbp__mark', loading: 'lazy', alt: settings[k_club] }}
+                          {%- endif -%}
+                        </div>
                         <p class="wbp__club">
                           {%- if settings[k_flag] != blank -%}
                             {{ settings[k_flag] | image_url: width: 64 | image_tag: class: 'wbp__flag', loading: 'lazy', alt: '' }}
@@ -709,6 +718,17 @@
     text-transform: uppercase;
   }
 
+  .wbp__marks {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Desktop: the flag and badge stay with the club's name */
+  .wbp__mark {
+    display: none;
+  }
+
   .wbp__club > span {
     min-width: 0;
     overflow: hidden;
@@ -870,6 +890,86 @@
     .wbp__logo,
     .wbp__crest {
       transition: none;
+    }
+  }
+
+  /*
+    Phones: a 3:4 card. The photo on top; under it the league logo (landed from the field), the
+    country flag and the club badge in a row, the name below, and the boots they wore under that.
+  */
+  @media screen and (max-width: 749px) {
+    .wbp__card {
+      max-width: 320px;
+    }
+
+    .wbp__player {
+      grid-template-columns: 1fr;
+      gap: 0;
+      padding: 8px;
+    }
+
+    .wbp__photo {
+      aspect-ratio: 8 / 7;
+      border-radius: 14px;
+    }
+
+    .wbp__photo-image {
+      object-position: 50% 18%;
+    }
+
+    .wbp__info {
+      gap: 6px;
+      padding: 12px 6px 8px;
+    }
+
+    .wbp__slot {
+      width: 46px;
+      height: 46px;
+      margin: 0;
+    }
+
+    .wbp__mark {
+      display: block;
+    }
+
+    .wbp__marks .wbp__flag {
+      width: 32px;
+      height: 22px;
+      border-radius: 4px;
+    }
+
+    .wbp__marks .wbp__badge {
+      width: 34px;
+      height: 34px;
+    }
+
+    .wbp__club {
+      display: none;
+    }
+
+    .wbp__name {
+      font-size: 1.75rem;
+    }
+
+    .wbp__boot {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0 0.35em;
+      margin: 0;
+    }
+
+    .wbp__boot-label {
+      font-size: 0.875rem;
+    }
+
+    /* The close button over the photo's corner */
+    .wbp__close {
+      top: 16px;
+      right: 16px;
+      background: rgb(255 255 255 / 0.85);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
     }
   }
 {% endstylesheet %}
