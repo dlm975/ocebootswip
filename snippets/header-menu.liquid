@@ -300,6 +300,9 @@
     /* The dock starts where the menu did: pull it left by the reverse curve */
     .header-menu--dock .overflow-menu::part(list) {
       margin-inline-start: calc(-1 * var(--dock-flare));
+      /* A soft shadow under the dock only: pulled in past the reverse curves, rounded like it */
+      border-radius: 0 0 calc(var(--dock-flare) + var(--dock-round)) calc(var(--dock-flare) + var(--dock-round));
+      box-shadow: 0 14px 18px -14px rgb(18 18 18 / 0.22);
     }
 
     /* The rest of the menu row is see-through: only the dock (and the currency tab) show */
@@ -388,6 +391,8 @@
       padding: 0 16px;
       border-radius: 0 0 18px 18px;
       background: #ffffff;
+      /* The same soft shadow under the currency tab */
+      box-shadow: 0 14px 18px -12px rgb(18 18 18 / 0.22);
     }
 
     #header-component .header__row--bottom:has(.header-menu--dock) .header__column--right::before,

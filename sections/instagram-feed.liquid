@@ -26,6 +26,7 @@
     class="section section--page-width color-{{ section.settings.color_scheme }} igf spacing-style"
     style="{% render 'spacing-style', settings: section.settings %}"
   >
+    <div class="igf__box">
     <div class="igf__head">
       <h2 class="igf__heading">
         <span>{{ section.settings.heading | escape }}</span>
@@ -68,27 +69,69 @@
             assign likes = post.like_count.value | default: 0
             assign comments = post.comment_count.value | default: 0
           -%}
+          {%- liquid
+            assign slides = post.gallery.value
+            assign slide_count = slides.size | default: 0
+            if slide_count < 2
+              assign slide_count = 1
+            endif
+          -%}
           <li class="igf__item">
-            <article class="igf__card">
-              <a class="igf__media" href="{{ link }}" target="_blank" rel="noopener" aria-label="Open this post on Instagram">
-                {%- if still -%}
-                  {{
-                    still
-                    | image_url: width: 720
-                    | image_tag:
-                      widths: '360, 540, 720',
-                      sizes: '(min-width: 990px) 22vw, (min-width: 750px) 32vw, 72vw',
-                      loading: 'lazy',
-                      class: 'igf__image',
-                      alt: ''
-                  }}
-                {%- endif -%}
-                {%- if is_video -%}
-                  <span class="igf__play" aria-hidden="true">
-                    {%- render 'gicon', name: 'play_arrow-fill', size: 18 -%}
+            <article class="igf__card"{% if slide_count > 1 %} data-igf-carousel{% endif %}>
+              <div class="igf__media">
+                {%- if slide_count > 1 -%}
+                  <div class="igf__slides" data-igf-slides tabindex="-1">
+                    {%- for slide in slides -%}
+                      <a class="igf__slide" href="{{ link }}" target="_blank" rel="noopener" aria-label="Open this post on Instagram, photo {{ forloop.index }} of {{ slide_count }}">
+                        {{
+                          slide
+                          | image_url: width: 720
+                          | image_tag:
+                            widths: '360, 540, 720',
+                            sizes: '(min-width: 990px) 22vw, (min-width: 750px) 32vw, 72vw',
+                            loading: 'lazy',
+                            class: 'igf__image',
+                            alt: ''
+                        }}
+                      </a>
+                    {%- endfor -%}
+                  </div>
+                  <span class="igf__badge" aria-hidden="true"><span data-igf-index>1</span>/{{ slide_count }}</span>
+                  <button class="igf__arrow igf__arrow--prev" type="button" data-igf-step="-1" aria-label="Previous photo" hidden>
+                    {%- render 'gicon', name: 'chevron_left', size: 20 -%}
+                  </button>
+                  <button class="igf__arrow igf__arrow--next" type="button" data-igf-step="1" aria-label="Next photo">
+                    {%- render 'gicon', name: 'chevron_right', size: 20 -%}
+                  </button>
+                  <span class="igf__dots" aria-hidden="true">
+                    <span class="igf__dots-track" data-igf-dots>
+                      {%- for slide in slides -%}
+                        <span class="igf__dot{% if forloop.first %} is-active{% endif %}"></span>
+                      {%- endfor -%}
+                    </span>
                   </span>
+                {%- else -%}
+                  <a class="igf__slide" href="{{ link }}" target="_blank" rel="noopener" aria-label="Open this post on Instagram">
+                    {%- if still -%}
+                      {{
+                        still
+                        | image_url: width: 720
+                        | image_tag:
+                          widths: '360, 540, 720',
+                          sizes: '(min-width: 990px) 22vw, (min-width: 750px) 32vw, 72vw',
+                          loading: 'lazy',
+                          class: 'igf__image',
+                          alt: ''
+                      }}
+                    {%- endif -%}
+                  </a>
+                  {%- if is_video -%}
+                    <span class="igf__play" aria-hidden="true">
+                      {%- render 'gicon', name: 'play_arrow-fill', size: 18 -%}
+                    </span>
+                  {%- endif -%}
                 {%- endif -%}
-              </a>
+              </div>
               <div class="igf__actions">
                 <a class="igf__action" href="{{ link }}" target="_blank" rel="noopener" aria-label="Like on Instagram{% if likes > 0 %}, {{ likes }} likes{% endif %}">
                   <svg class="igf__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M16.79 3.5c-1.98 0-3.73 1.04-4.79 2.67C10.94 4.54 9.19 3.5 7.21 3.5 4.06 3.5 1.5 6.17 1.5 9.48c0 5.5 9.06 11.02 10.5 11.02s10.5-5.52 10.5-11.02c0-3.31-2.56-5.98-5.71-5.98Z"/></svg>
@@ -111,6 +154,7 @@
         No posts yet: add them in Shopify admin under Content &gt; Metaobjects &gt; Instagram post (only shown in the editor).
       </p>
     {%- endif -%}
+    </div>
   </div>
 {%- endif -%}
 
@@ -124,6 +168,56 @@
       var n = Number(el.dataset.igfCount);
       if (!isNaN(n)) el.textContent = format.format(n);
     });
+    // Carousel posts: swipe (or the arrows) through the photos, as on Instagram. The counter, the
+    // dots (a window of five that slides along, the end ones smaller) and the arrows follow the
+    // nearest photo.
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    root.querySelectorAll('[data-igf-carousel]').forEach(function (card) {
+      var slides = card.querySelector('[data-igf-slides]');
+      var index = card.querySelector('[data-igf-index]');
+      var dots = card.querySelector('[data-igf-dots]');
+      var prev = card.querySelector('[data-igf-step="-1"]');
+      var next = card.querySelector('[data-igf-step="1"]');
+      var count = slides.children.length;
+      var current = -1;
+      var queued = 0;
+      var WINDOW = 5;
+      var PITCH = 10; // a dot and its gap, px
+
+      var show = function (i) {
+        if (i === current) return;
+        current = i;
+        index.textContent = i + 1;
+        prev.hidden = i === 0;
+        next.hidden = i === count - 1;
+        var start = Math.max(0, Math.min(i - 2, count - WINDOW));
+        dots.style.transform = 'translateX(' + -start * PITCH + 'px)';
+        Array.prototype.forEach.call(dots.children, function (dot, n) {
+          dot.classList.toggle('is-active', n === i);
+          var edge = count > WINDOW && ((n === start && start > 0) || (n === start + WINDOW - 1 && start + WINDOW < count));
+          var outside = n < start || n >= start + WINDOW;
+          dot.classList.toggle('is-small', edge || outside);
+        });
+      };
+
+      slides.addEventListener('scroll', function () {
+        if (queued) return;
+        queued = requestAnimationFrame(function () {
+          queued = 0;
+          show(Math.round(slides.scrollLeft / slides.clientWidth));
+        });
+      }, { passive: true });
+
+      card.addEventListener('click', function (event) {
+        var arrow = event.target.closest('[data-igf-step]');
+        if (!arrow) return;
+        var target = Math.max(0, Math.min(count - 1, current + Number(arrow.dataset.igfStep)));
+        slides.scrollTo({ left: target * slides.clientWidth, behavior: reduce.matches ? 'auto' : 'smooth' });
+      });
+
+      show(0);
+    });
+
     // Share: the phone's share sheet where there is one, else copy the link
     root.addEventListener('click', function (event) {
       var button = event.target.closest('[data-igf-share]');
@@ -142,6 +236,24 @@
 </script>
 
 {% stylesheet %}
+  /* The whole section in a container: a white rounded card, as the Newly Listed section */
+  .igf__box {
+    --igf-pad: 12px;
+    min-width: 0;
+    padding: 16px var(--igf-pad) 18px;
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgb(18 18 18 / 0.06), 0 8px 24px rgb(18 18 18 / 0.08);
+  }
+
+  @media screen and (min-width: 750px) {
+    .igf__box {
+      --igf-pad: 28px;
+      padding: 28px var(--igf-pad) 30px;
+      border-radius: 24px;
+    }
+  }
+
   /* The heading and the Follow button on one line; the heading wraps, the button never does */
   .igf__head {
     display: flex;
@@ -256,13 +368,13 @@
     grid-auto-flow: column;
     grid-auto-columns: 74%;
     gap: 10px;
-    margin: 0 calc(-1 * var(--page-margin, 16px));
-    padding: 0 var(--page-margin, 16px);
+    margin: 0 calc(-1 * var(--igf-pad));
+    padding: 4px var(--igf-pad) 6px;
     list-style: none;
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
-    scroll-padding-inline: var(--page-margin, 16px);
+    scroll-padding-inline: var(--igf-pad);
     scrollbar-width: none;
   }
 
@@ -288,10 +400,15 @@
   }
 
   /* Instagram-style post card: just the 3:4 photo and heart / comment / share, with the counts */
+  /* Each post in its own container: the photo across the top, the actions below, as on Instagram */
   .igf__card {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 0 0 1px rgb(18 18 18 / 0.08), 0 4px 14px rgb(18 18 18 / 0.06);
     color: var(--color-foreground);
   }
 
@@ -348,9 +465,141 @@
     display: block;
     aspect-ratio: 3 / 4;
     overflow: hidden;
-    border-radius: 16px;
     background: #e7e7ea;
     isolation: isolate;
+  }
+
+  .igf__slide {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* A carousel post: its photos side by side, one at a time, swiped like Instagram's */
+  .igf__slides {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    outline: none;
+  }
+
+  .igf__slides::-webkit-scrollbar {
+    display: none;
+  }
+
+  .igf__slides > .igf__slide {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  /* "1/6" at the top right, in the same glass as the play mark */
+  .igf__badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: rgb(18 18 18 / 0.6);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 650;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+
+  /* Instagram's dots along the foot of the photo: a window of five that slides with the photo */
+  .igf__dots {
+    position: absolute;
+    left: 50%;
+    bottom: 10px;
+    width: 46px;
+    overflow: hidden;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .igf__dots:has(.igf__dot:nth-child(-n + 4):last-child) {
+    width: auto;
+  }
+
+  .igf__dots-track {
+    display: flex;
+    gap: 4px;
+    transition: transform 0.3s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  .igf__dot {
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.55);
+    box-shadow: 0 0 2px rgb(0 0 0 / 0.25);
+    transition: background-color 0.2s ease, transform 0.3s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  .igf__dot.is-active {
+    background: #ffffff;
+  }
+
+  .igf__dot.is-small {
+    transform: scale(0.66);
+  }
+
+  /* Arrows for a mouse, as on Instagram's website: shown on pointing at the post */
+  .igf__arrow {
+    position: absolute;
+    top: 50%;
+    display: none;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    margin-top: -15px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.85);
+    box-shadow: 0 2px 8px rgb(18 18 18 / 0.18);
+    color: #121212;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  .igf__arrow--prev {
+    left: 8px;
+  }
+
+  .igf__arrow--next {
+    right: 8px;
+  }
+
+  .igf__arrow[hidden] {
+    display: none !important;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .igf__arrow {
+      display: grid;
+    }
+
+    .igf__card:hover .igf__arrow,
+    .igf__arrow:focus-visible {
+      opacity: 1;
+    }
+
+    .igf__arrow:active {
+      transform: scale(0.92);
+    }
   }
 
   .igf__image {
@@ -377,11 +626,12 @@
     color: #121212;
   }
 
+  /* The heart sits a little in from the photo's left edge, as on Instagram */
   .igf__actions {
     display: flex;
     align-items: center;
-    gap: 2px;
-    margin-inline-start: -6px;
+    gap: 12px;
+    padding: 2px 10px 4px;
   }
 
   .igf__action {
@@ -389,8 +639,7 @@
     align-items: center;
     justify-content: center;
     gap: 5px;
-    min-width: 38px;
-    height: 38px;
+    height: 42px;
     margin: 0;
     padding: 0;
     border: 0;
@@ -417,10 +666,6 @@
     font-size: 0.875rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
-  }
-
-  .igf__action:has(.igf__count) {
-    padding-inline-end: 6px;
   }
 
   .igf__action:active {
@@ -468,13 +713,17 @@
   }
 
   @media (hover: hover) {
-    .igf__media:hover .igf__image {
+    .igf__card:not([data-igf-carousel]) .igf__media:hover .igf__image {
       transform: scale(1.04);
     }
 
   }
 
-  .igf__media:focus-visible,
+  .igf__slide:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: -4px;
+  }
+
   .igf__action:focus-visible,
   .igf__follow:focus-visible {
     outline: 2px solid currentColor;
@@ -495,7 +744,10 @@
   @media (prefers-reduced-motion: reduce) {
     .igf__image,
     .igf__follow,
-    .igf__action {
+    .igf__action,
+    .igf__dots-track,
+    .igf__dot,
+    .igf__arrow {
       transition: none;
     }
   }
