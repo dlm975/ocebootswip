@@ -1,0 +1,399 @@
+{%- comment -%}
+  "What's new on @oceboots ✓": the newest Instagram posts as cards, from the "Instagram post"
+  metaobjects (Shopify admin: Content > Metaobjects), newest first by Posted at. Posts are added by
+  hand, or by the automatic Instagram sync once it is connected. Hidden on the storefront until
+  there is at least one post.
+{%- endcomment -%}
+
+{%- liquid
+  assign handle = section.settings.handle | remove: '@' | strip | default: 'oceboots'
+  assign profile_url = 'https://www.instagram.com/' | append: handle | append: '/'
+  assign limit = section.settings.limit
+
+  # Newest first: sort "timestamp|handle" keys, then look each post up by its handle
+  assign keys = ''
+  for post in shop.metaobjects.instagram_post.values
+    assign stamp = post.posted_at.value | date: '%s'
+    assign key = stamp | prepend: '0000000000' | slice: -10, 10 | append: '|' | append: post.system.handle
+    assign keys = keys | append: key | append: ','
+  endfor
+  assign keys = keys | split: ',' | sort | reverse
+-%}
+
+{%- if keys.size > 0 or request.design_mode -%}
+  <div class="section-background color-{{ section.settings.color_scheme }}"></div>
+  <div
+    class="section section--page-width color-{{ section.settings.color_scheme }} igf spacing-style"
+    style="{% render 'spacing-style', settings: section.settings %}"
+  >
+    <div class="igf__head">
+      <h2 class="igf__heading">
+        <span>{{ section.settings.heading | escape }}</span>
+        <a class="igf__handle" href="{{ profile_url }}" target="_blank" rel="noopener">
+          @{{ handle | escape }}
+          {%- render 'gicon', name: 'verified-fill', class: 'igf__verified', size: 22 -%}
+          <span class="visually-hidden">(verified)</span>
+        </a>
+      </h2>
+      <a class="igf__follow" href="{{ profile_url }}" target="_blank" rel="noopener">
+        <span>{{ section.settings.follow_label | escape }}</span>
+        <span class="igf__disk oce-disk" aria-hidden="true">
+          {%- render 'gicon', name: 'arrow_forward', size: 16 -%}
+        </span>
+      </a>
+    </div>
+
+    {%- if keys.size > 0 -%}
+      <ul class="igf__track" role="list">
+        {%- for key in keys limit: limit -%}
+          {%- liquid
+            assign post_handle = key | split: '|' | last
+            assign post = shop.metaobjects.instagram_post[post_handle]
+            assign media = post.media.value
+            assign is_video = false
+            if media.media_type == 'video'
+              assign is_video = true
+              assign still = media.preview_image
+            else
+              assign still = media
+            endif
+            assign link = post.permalink.value | default: profile_url
+          -%}
+          <li class="igf__item">
+            <a class="igf__card" href="{{ link }}" target="_blank" rel="noopener">
+              <span class="igf__media">
+                {%- if still -%}
+                  {{
+                    still
+                    | image_url: width: 720
+                    | image_tag:
+                      widths: '360, 540, 720',
+                      sizes: '(min-width: 990px) 22vw, (min-width: 750px) 32vw, 64vw',
+                      loading: 'lazy',
+                      class: 'igf__image',
+                      alt: ''
+                  }}
+                {%- endif -%}
+                {%- if is_video -%}
+                  <span class="igf__play" aria-hidden="true">
+                    {%- render 'gicon', name: 'play_arrow-fill', size: 18 -%}
+                  </span>
+                {%- endif -%}
+                <span class="igf__date">{{ post.posted_at.value | date: '%-d %b' }}</span>
+              </span>
+              {%- if post.caption.value != blank -%}
+                <span class="igf__caption">{{ post.caption.value | strip_newlines | escape }}</span>
+              {%- endif -%}
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- else -%}
+      <p class="igf__empty">
+        No posts yet: add them in Shopify admin under Content &gt; Metaobjects &gt; Instagram post (only shown in the editor).
+      </p>
+    {%- endif -%}
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .igf__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 16px;
+    margin-block-end: clamp(14px, 2vw, 22px);
+  }
+
+  .igf__heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 0.3em;
+    margin: 0;
+    font-size: clamp(1.5rem, 6vw, 2.5rem);
+    font-weight: 750;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+
+  .igf__handle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15em;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Instagram's verified blue */
+  .igf__verified {
+    flex: none;
+    width: 0.75em;
+    height: 0.75em;
+    color: #0095f6;
+  }
+
+  .igf__follow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--color-foreground);
+    font-size: 0.9375rem;
+    font-weight: 750;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .igf__disk {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+  }
+
+  .igf__disk svg {
+    position: relative;
+    width: 55%;
+    height: 55%;
+    transition: transform 0.25s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  .igf__follow .igf__disk::after {
+    animation: none;
+  }
+
+  /* Phones: swipe through; desktop: four in view */
+  .igf__track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 64%;
+    gap: 10px;
+    margin: 0 calc(-1 * var(--page-margin, 16px));
+    padding: 0 var(--page-margin, 16px);
+    list-style: none;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--page-margin, 16px);
+    scrollbar-width: none;
+  }
+
+  .igf__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media screen and (min-width: 750px) {
+    .igf__track {
+      grid-auto-columns: calc((100% - 2 * 14px) / 3);
+      gap: 14px;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .igf__track {
+      grid-auto-columns: calc((100% - 3 * 14px) / 4);
+    }
+  }
+
+  .igf__item {
+    scroll-snap-align: start;
+  }
+
+  .igf__card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: var(--color-foreground);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .igf__media {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 20px;
+    background: #e7e7ea;
+    isolation: isolate;
+  }
+
+  .igf__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.55s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  /* Small glass pills on the photo: the date, and a play mark on videos */
+  .igf__date,
+  .igf__play {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.66);
+    -webkit-backdrop-filter: blur(14px) saturate(180%);
+    backdrop-filter: blur(14px) saturate(180%);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.7), 0 4px 12px rgb(18 18 18 / 0.12);
+    color: #121212;
+  }
+
+  .igf__date {
+    left: 10px;
+    bottom: 10px;
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    font-weight: 750;
+  }
+
+  .igf__play {
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .igf__caption {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    padding-inline: 4px;
+    font-size: 0.875rem;
+    line-height: 1.35;
+    color: rgb(18 18 18 / 0.75);
+  }
+
+  @media (hover: hover) {
+    .igf__card:hover .igf__image {
+      transform: scale(1.04);
+    }
+
+    .igf__follow:hover .igf__disk svg {
+      transform: translateX(2px);
+    }
+
+    .igf__follow:hover .igf__disk::after {
+      animation: igf-glint 0.8s cubic-bezier(0.45, 0, 0.25, 1) 0.1s 1 both;
+    }
+  }
+
+  @keyframes igf-glint {
+    from {
+      transform: translateX(-110%);
+    }
+    to {
+      transform: translateX(110%);
+    }
+  }
+
+  .igf__card:focus-visible,
+  .igf__follow:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+    border-radius: 20px;
+  }
+
+  .igf__empty {
+    margin: 0;
+    padding: 28px 20px;
+    border-radius: 20px;
+    background: #f4f4f2;
+    color: rgb(18 18 18 / 0.6);
+    font-size: 0.875rem;
+    text-align: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .igf__image,
+    .igf__disk svg {
+      transition: none;
+    }
+
+    .igf__follow:hover .igf__disk::after {
+      animation: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Instagram feed",
+  "tag": "section",
+  "class": "section-instagram-feed",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Posts come from Shopify admin: Content > Metaobjects > Instagram post (newest first). The section is hidden until there is at least one post."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "What's new on"
+    },
+    {
+      "type": "text",
+      "id": "handle",
+      "label": "Instagram handle",
+      "default": "oceboots"
+    },
+    {
+      "type": "text",
+      "id": "follow_label",
+      "label": "Follow link text",
+      "default": "Follow"
+    },
+    {
+      "type": "range",
+      "id": "limit",
+      "label": "Posts to show",
+      "min": 4,
+      "max": 16,
+      "step": 1,
+      "default": 12
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    }
+  ],
+  "presets": [
+    {
+      "name": "Instagram feed"
+    }
+  ]
+}
+{% endschema %}
