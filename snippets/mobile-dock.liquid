@@ -239,36 +239,57 @@
       if (sheet) {
         const panel = sheet.querySelector('[data-mdock-panel]');
         const scrim = sheet.querySelector('[data-mdock-scrim]');
-        let closing = null;
+        let state = 'closed';
+        let token = 0;
+        const stop = (el) => el.getAnimations().forEach((a) => a.cancel());
 
-        const open = async () => {
-          if (closing) await closing;
-          if (sheet.open) return;
-          sheet.showModal();
-          lockPage('mdock-open');
-          if (reduced()) return;
-          animate(scrim, { opacity: [0, 1] }, { duration: 0.3, ease: 'linear' });
-          animate(panel, { transform: ['translateY(100%)', 'translateY(0%)'] }, { duration: 0.55, ease: EASE });
+        const finish = () => {
+          state = 'closed';
+          [panel, scrim].forEach((el) => {
+            stop(el);
+            el.style.removeProperty('transform');
+            el.style.removeProperty('opacity');
+          });
+          sheet.close();
+          unlockPage('mdock-open');
         };
 
+        // Opening (or reopening while it slides away): from wherever the sheet is now
+        const open = () => {
+          if (state === 'open') return;
+          const midway = state === 'closing';
+          token++;
+          state = 'open';
+          if (!sheet.open) {
+            sheet.showModal();
+            lockPage('mdock-open');
+          }
+          if (reduced()) return;
+          const panelFrom = midway ? getComputedStyle(panel).transform : 'translateY(100%)';
+          const scrimFrom = midway ? getComputedStyle(scrim).opacity : 0;
+          stop(panel);
+          stop(scrim);
+          animate(scrim, { opacity: [scrimFrom, 1] }, { duration: 0.3, ease: 'linear' });
+          animate(panel, { transform: [panelFrom, 'translateY(0%)'] }, { duration: 0.55, ease: EASE });
+        };
+
+        // Closing (also partway through opening): from wherever it is, a quick slide away
         const close = () => {
-          if (closing || !sheet.open) return closing;
-          const finish = () => {
-            sheet.close();
-            unlockPage('mdock-open');
-            [panel, scrim].forEach((el) => {
-              el.getAnimations().forEach((a) => a.cancel());
-              el.style.removeProperty('transform');
-              el.style.removeProperty('opacity');
-            });
-            closing = null;
-          };
+          if (state !== 'open') return;
           if (reduced()) return finish();
-          closing = Promise.all([
-            animate(scrim, { opacity: [1, 0] }, { duration: 0.24, ease: 'linear' }),
-            animate(panel, { transform: ['translateY(0%)', 'translateY(100%)'] }, { duration: 0.3, ease: [0.4, 0, 1, 1] }),
-          ]).then(finish, finish);
-          return closing;
+          const mine = ++token;
+          state = 'closing';
+          const panelFrom = getComputedStyle(panel).transform;
+          const scrimFrom = getComputedStyle(scrim).opacity;
+          stop(panel);
+          stop(scrim);
+          const done = () => {
+            if (mine === token) finish();
+          };
+          Promise.all([
+            animate(scrim, { opacity: [scrimFrom, 0] }, { duration: 0.24, ease: 'linear' }),
+            animate(panel, { transform: [panelFrom, 'translateY(100%)'] }, { duration: 0.3, ease: [0.4, 0, 1, 1] }),
+          ]).then(done, () => {});
         };
 
         dock.querySelector('[data-mdock-size]')?.addEventListener('click', open);
@@ -313,6 +334,16 @@
       const clean = (query) => query.replace(/\*+/g, ' ').replace(/\s+/g, ' ').trim();
 
       /* ---------- Opening and closing ---------- */
+      const contents = () => bar.querySelectorAll('.msearch__glass, .msearch__input, .msearch__close');
+
+      /** Show or hide the nav at once (no fade), for the hand-over between the nav and the bar */
+      const dockNow = (searching) => {
+        dock.style.transition = 'none';
+        dock.classList.toggle('is-searching', searching);
+        dock.getBoundingClientRect();
+        requestAnimationFrame(() => dock.style.removeProperty('transition'));
+      };
+
       function open() {
         if (!layer.hidden) return;
         const from = dock.getBoundingClientRect();
@@ -322,10 +353,13 @@
         // Focus at once, inside the tap, so phones bring the keyboard up
         input.focus({ preventScroll: true });
         lockPage('msearch-open');
-        dock.classList.add('is-searching');
+        // The bar takes over from the nav in the same frame, at the nav's size and place
+        dockNow(true);
         if (reduced()) return;
         const to = bar.getBoundingClientRect();
         animate(veil, { opacity: [0, 1] }, { duration: 0.35, ease: 'linear' });
+        // Its contents show once it has room for them
+        contents().forEach((el) => animate(el, { opacity: [0, 1] }, { duration: 0.3, delay: 0.12, ease: 'linear' }));
         // The nav itself grows into the bar: same centre line, so it rises and widens
         animate(
           bar,
@@ -344,10 +378,11 @@
         if (layer.hidden || closing) return closing;
         input.blur();
         const finish = () => {
+          // The nav takes back over from the bar in the same frame: no gap between them
+          dockNow(false);
           layer.hidden = true;
           unlockPage('msearch-open');
-          dock.classList.remove('is-searching');
-          [veil, bar, results].forEach((el) => {
+          [veil, bar, results, ...contents()].forEach((el) => {
             el.getAnimations().forEach((a) => a.cancel());
             ['opacity', 'width', 'height', 'transform'].forEach((p) => el.style.removeProperty(p));
           });
@@ -359,19 +394,25 @@
           finish();
           return Promise.resolve();
         }
-        const from = bar.getBoundingClientRect();
-        dock.classList.remove('is-searching');
+        // From exactly where everything is now (also partway through opening)
+        const seen = bar.getBoundingClientRect();
+        const veilFrom = getComputedStyle(veil).opacity;
+        const resultsFrom = getComputedStyle(results).opacity;
+        const contentsFrom = [...contents()].map((el) => getComputedStyle(el).opacity);
+        [veil, bar, results, ...contents()].forEach((el) => el.getAnimations().forEach((a) => a.cancel()));
+        ['width', 'height', 'transform'].forEach((p) => bar.style.removeProperty(p));
+        const rest = bar.getBoundingClientRect();
         const to = dock.getBoundingClientRect();
-        dock.classList.add('is-searching');
+        contents().forEach((el, i) => animate(el, { opacity: [contentsFrom[i], 0] }, { duration: 0.15, ease: 'linear' }));
         closing = Promise.all([
-          animate(veil, { opacity: [1, 0] }, { duration: 0.3, ease: 'linear' }),
-          animate(results, { opacity: [1, 0] }, { duration: 0.18, ease: 'linear' }),
+          animate(veil, { opacity: [veilFrom, 0] }, { duration: 0.3, ease: 'linear' }),
+          animate(results, { opacity: [resultsFrom, 0] }, { duration: 0.18, ease: 'linear' }),
           animate(
             bar,
             {
-              width: [from.width + 'px', to.width + 'px'],
-              height: [from.height + 'px', to.height + 'px'],
-              transform: ['translateY(0px)', 'translateY(' + (to.top - from.top) + 'px)'],
+              width: [seen.width + 'px', to.width + 'px'],
+              height: [seen.height + 'px', to.height + 'px'],
+              transform: ['translateY(' + (seen.top - rest.top) + 'px)', 'translateY(' + (to.top - rest.top) + 'px)'],
             },
             { duration: 0.45, ease: EASE }
           ),
