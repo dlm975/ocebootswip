@@ -1066,6 +1066,18 @@
         "padding-block-start": 28,
         "padding-block-end": 48
       }
+    },
+    "instagram_feed_main": {
+      "type": "instagram-feed",
+      "settings": {
+        "heading": "What's new on",
+        "handle": "oceboots",
+        "follow_label": "Follow",
+        "limit": 12,
+        "color_scheme": "scheme-1",
+        "padding-block-start": 32,
+        "padding-block-end": 48
+      }
     }
   },
   "order": [
@@ -1078,6 +1090,7 @@
     "pro_player_wall_hhtJ4x",
     "popular_categories_main",
     "newly_listed_fc",
+    "instagram_feed_main",
     "player_reels_main"
   ]
 }
