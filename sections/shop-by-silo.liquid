@@ -364,6 +364,18 @@
         }, 140);
         return;
       }
+      // Closing a brand: its silos fade first, then it narrows back and the others return
+      if (previous && !target && list === this.brands && !reduced() && !moving(this.parts(previous).panel)) {
+        const inner = this.parts(previous).inner;
+        const from = parseFloat(getComputedStyle(inner).opacity);
+        stop(inner);
+        animate(inner, { opacity: [from, 0] }, { duration: OUT, ease: 'linear' }).then(() => {
+          if (this.pending.get(list) !== token) return;
+          inner.style.opacity = '0';
+          this.switchIn(list, null);
+        });
+        return;
+      }
       if (!previous || !target || previous === target || reduced()) {
         this.switchIn(list, target);
         return;
