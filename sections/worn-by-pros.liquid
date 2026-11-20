@@ -218,6 +218,26 @@
   import { animate } from 'motion';
 
   const root = document.getElementById('shopify-section-{{ section.id }}');
+
+  // Compact heading: the last line (e.g. "Pros.") sized up to the width of the widest line above it
+  const heading = root?.querySelector('.wbp--compact .wbp__heading');
+  if (heading && heading.children.length > 1) {
+    const lines = [...heading.children];
+    const last = lines[lines.length - 1];
+    const fit = () => {
+      last.style.removeProperty('font-size');
+      const widest = Math.max(...lines.slice(0, -1).map((line) => line.getBoundingClientRect().width));
+      const own = last.getBoundingClientRect().width;
+      if (own > 0 && widest > 0) last.style.fontSize = (parseFloat(getComputedStyle(last).fontSize) * widest) / own + 'px';
+    };
+    fit();
+    document.fonts?.ready.then(fit);
+    let queued = 0;
+    window.addEventListener('resize', () => {
+      cancelAnimationFrame(queued);
+      queued = requestAnimationFrame(fit);
+    });
+  }
   const stage = root?.querySelector('[data-wbp-stage]');
   const layout = root?.querySelector('[data-wbp-layout]');
   if (stage && layout) {
@@ -488,8 +508,10 @@
   .wbp__logo {
     position: absolute;
     --size: calc(var(--wbp-logo) * var(--s, 1));
-    top: calc(var(--y) - var(--size) / 2);
-    left: calc(var(--x) - var(--size) / 2);
+    --cx: calc(50% + (var(--x) - 50%) * var(--tight, 1));
+    --cy: calc(50% + (var(--y) - 50%) * var(--tight, 1));
+    top: calc(var(--cy) - var(--size) / 2);
+    left: calc(var(--cx) - var(--size) / 2);
     z-index: 1;
     width: var(--size);
     height: var(--size);
@@ -511,7 +533,7 @@
     .wbp__logo {
       /* Phones: less size difference, so the bigger logos don't cover their neighbours */
       --size: calc(var(--wbp-logo) * min(var(--s, 1), 1.05));
-      left: clamp(0px, calc(var(--x) - var(--size) / 2), calc(100% - var(--size)));
+      left: clamp(0px, calc(var(--cx) - var(--size) / 2), calc(100% - var(--size)));
     }
   }
 
@@ -984,8 +1006,19 @@
     font-size: clamp(2rem, 9vw, 6.5rem);
   }
 
+  .wbp--compact .wbp__heading {
+    align-items: flex-start;
+  }
+
+  /* Each line its own width, so the last can be sized to match the widest (script below) */
   .wbp--compact .wbp__heading > span {
+    width: max-content;
     white-space: nowrap;
+  }
+
+  /* The logos a little closer together */
+  .wbp--compact .wbp__stage {
+    --tight: 0.8;
   }
 
   @media screen and (max-width: 749px) {
