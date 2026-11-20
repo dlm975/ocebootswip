@@ -227,8 +227,12 @@
     const fit = () => {
       last.style.removeProperty('font-size');
       const widest = Math.max(...lines.slice(0, -1).map((line) => line.getBoundingClientRect().width));
-      const own = last.getBoundingClientRect().width;
-      if (own > 0 && widest > 0) last.style.fontSize = (parseFloat(getComputedStyle(last).fontSize) * widest) / own + 'px';
+      // Two passes: text doesn't grow exactly in proportion to its size, so the second corrects the first
+      for (let pass = 0; pass < 2; pass++) {
+        const own = last.getBoundingClientRect().width;
+        if (!(own > 0 && widest > 0)) return;
+        last.style.fontSize = (parseFloat(getComputedStyle(last).fontSize) * widest) / own + 'px';
+      }
     };
     fit();
     document.fonts?.ready.then(fit);
