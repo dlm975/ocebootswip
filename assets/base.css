@@ -4658,3 +4658,154 @@ html.wlq-open {
   line-height: 0.75;
   white-space: nowrap;
 }
+
+/*
+  Collection filters, styled as their menus in the header: Size as Shop by Size (US / UK / EU in
+  big bold type, the chosen one dark and the others faded; the sizes as bold numbers), Brand as
+  Shop by Silo (the names in big bold type), and Condition and Surface the same way. A chosen
+  value is underlined (a size: a dark pill). The checkboxes and buttons underneath are unchanged.
+*/
+
+/* Desktop dropdown: a white rounded tray, like the header's */
+.facets--horizontal .facets__panel .facets__panel-content.facets__panel-content {
+  padding: 18px 24px 20px;
+  border: 0;
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow:
+    0 0 0 1px rgb(18 18 18 / 0.04),
+    0 22px 34px -18px rgb(18 18 18 / 0.22);
+}
+
+/* Brand, Condition, Surface: the names in big bold type */
+.facets .facets__inputs-list .checkbox__label-text,
+.facets .facets__inputs-list .surface-option__name {
+  color: #121212;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+  font-variation-settings: 'opsz' 32;
+  white-space: nowrap;
+}
+
+.facets--drawer .facets__inputs-list :is(.checkbox__label-text, .surface-option__name) {
+  font-size: 1.5rem;
+}
+
+/* No tick box: the name itself is the choice */
+.facets .facets__inputs-list .checkbox .icon-checkmark,
+.facets .facets__inputs-list .checkbox .checkbox__label > svg,
+.facets .facets__inputs-list .surface-option__swatch {
+  display: none;
+}
+
+.facets .facets__inputs-list .checkbox__label {
+  gap: 0;
+  padding-block: 2px;
+  cursor: pointer;
+}
+
+.facets .facets__inputs-list .checkbox__label-text {
+  padding: 0;
+  margin: 0;
+}
+
+/* Chosen: underlined, as the menus underline the item pointed at */
+.facets .facets__inputs-list .checkbox__input:checked + .checkbox__label :is(.checkbox__label-text, .surface-option__name),
+.facets .facets__inputs-list .checkbox__input:checked ~ label :is(.checkbox__label-text, .surface-option__name) {
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 5px;
+}
+
+@media (hover: hover) {
+  .facets .facets__inputs-list .checkbox__label:hover :is(.checkbox__label-text, .surface-option__name) {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 5px;
+  }
+}
+
+.facets .facets__inputs-list .checkbox__input:disabled ~ label {
+  opacity: 0.3;
+}
+
+.facets .facets__inputs-list .checkbox__input:focus-visible ~ label {
+  outline: 2px solid #121212;
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Size: US / UK / EU in big bold type, the chosen one dark, the others faded (no switch) */
+.facets .size-facet__toggle.size-facet__toggle {
+  display: flex;
+  gap: 18px;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.facets .size-facet__thumb {
+  display: none;
+}
+
+.facets .size-facet__sys.size-facet__sys {
+  min-width: 0;
+  height: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #121212;
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variation-settings: 'opsz' 32;
+  opacity: 0.22;
+  transition: opacity 0.2s ease;
+}
+
+.facets .size-facet__sys[aria-checked='true'] {
+  opacity: 1;
+}
+
+@media (hover: hover) {
+  .facets .size-facet__sys:hover {
+    opacity: 0.6;
+  }
+
+  .facets .size-facet__sys[aria-checked='true']:hover {
+    opacity: 1;
+  }
+}
+
+/* The sizes: bold numbers, no boxes; a chosen size a dark pill */
+.facets .size-facet__chip.size-facet__chip {
+  height: 40px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  box-shadow: none;
+  color: #121212;
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+@media (hover: hover) {
+  .facets .size-facet__chip:not([aria-pressed='true'], :disabled):hover {
+    background: #f1f1f1;
+  }
+}
+
+.facets .size-facet__chip[aria-pressed='true'] {
+  background: #121212;
+  color: #ffffff;
+}
+
+.facets .size-facet__chip:disabled {
+  opacity: 0.25;
+}
