@@ -213,7 +213,10 @@
   const MOVE = 0.55;
   const OUT = 0.18;
   const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const stop = (el) => el.getAnimations().forEach((a) => a.cancel());
+  // This script's own animations: not the CSS fades (the cards stepping back), which must run on
+  const ours = (el) => el.getAnimations().filter((a) => !(a instanceof CSSTransition) && !(a instanceof CSSAnimation));
+  const moving = (el) => ours(el).length > 0;
+  const stop = (el) => ours(el).forEach((a) => a.cancel());
   const clear = (el, ...props) => props.forEach((p) => el.style.removeProperty(p));
 
   /** cubic-bezier(x1, y1, x2, y2) as a function of progress, for the page scroll */
@@ -357,12 +360,12 @@
       target.classList.add('is-next');
       const { panel, inner } = this.parts(previous);
       // Things still moving from the last choice: go straight into the move from where they are
-      if (panel.getAnimations().length || [...list.children].some((card) => card.getAnimations().length)) {
+      if (moving(panel) || [...list.children].some((card) => moving(card))) {
         this.switchIn(list, target, { deferOpen: true });
         return;
       }
       // Still opening? Hold it where it is, so nothing drifts before the straight move
-      if (panel.getAnimations().length) {
+      if (moving(panel)) {
         const height = panel.getBoundingClientRect().height;
         stop(panel);
         panel.style.height = height + 'px';
@@ -388,6 +391,11 @@
       const was = previous && this.parts(previous);
       const next = target && this.parts(target);
 
+      // The cards are briefly laid out where they end up, to be measured: the browser must not
+      // shift the page's scroll to keep things still while they are (it jumped it by ~90px, which
+      // the eased scroll then had to undo)
+      this.holdScroll(duration);
+
       const before = new Map(cards.map((card) => [card, card.getBoundingClientRect()]));
       const wasHeight = was && !was.panel.hidden ? was.panel.getBoundingClientRect().height : 0;
       const wasOpacity = was && !was.panel.hidden ? parseFloat(getComputedStyle(was.inner).opacity) : 1;
@@ -398,7 +406,7 @@
       // Panels around this list that are still easing open: carry them to their new height too
       const outer = [];
       for (let p = list.parentElement.closest('[data-panel]'); p; p = p.parentElement.closest('[data-panel]')) {
-        if (p.getAnimations().length) outer.push([p, p.getBoundingClientRect().height]);
+        if (moving(p)) outer.push([p, p.getBoundingClientRect().height]);
       }
 
       // Settle everything into its end state, without animation
@@ -464,7 +472,7 @@
         if (!inner || !width || Math.abs(before.get(card).width - after.get(card).width) <= 1) return;
         inner.style.width = width + 'px';
         setTimeout(() => {
-          if (!card.getAnimations().some((a) => a.effect && a.effect.getKeyframes().some((k) => 'width' in k))) clear(inner, 'width');
+          if (!ours(card).some((a) => a.effect && a.effect.getKeyframes().some((k) => 'width' in k))) clear(inner, 'width');
         }, duration * 1000 + 30);
       };
       if (next) pin(target, next.inner, next.inner.getBoundingClientRect().width);
@@ -477,14 +485,14 @@
           // Growing to (or shrinking from) the full row; the closing card stays on top as it shrinks
           card.style.zIndex = card === previous ? '2' : '1';
           animate(card, { width: [b.width + 'px', a.width + 'px'] }, { duration, ease: EASE }).then(() => {
-            if (!card.getAnimations().length) clear(card, 'width', 'z-index');
+            if (!moving(card)) clear(card, 'width', 'z-index');
           });
         }
         const dx = b.left - a.left;
         const dy = b.top - a.top;
         if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
           animate(card, { transform: [`translate(${dx}px, ${dy}px)`, 'translate(0px, 0px)'] }, { duration, ease: EASE }).then(() => {
-            if (!card.getAnimations().length) clear(card, 'transform');
+            if (!moving(card)) clear(card, 'transform');
           });
         }
       });
@@ -492,7 +500,7 @@
       if (was) {
         animate(was.inner, { opacity: [wasOpacity, 0] }, { duration: OUT, ease: 'linear' });
         animate(was.panel, { height: [wasHeight + 'px', '0px'] }, { duration, ease: EASE }).then(() => {
-          if (previous.classList.contains('is-open') || was.panel.getAnimations().length) return;
+          if (previous.classList.contains('is-open') || was.moving(panel)) return;
           was.panel.hidden = true;
           clear(was.panel, 'height', 'overflow');
           clear(was.inner, 'opacity', 'width');
@@ -507,7 +515,7 @@
       if (next && deferOpen) {
         // Its contents wait until it has arrived, then roll out
         setTimeout(() => {
-          if (this.open.get(list) !== target || next.panel.getAnimations().length) return;
+          if (this.open.get(list) !== target || next.moving(panel)) return;
           if (next.panel.style.height !== '0px') return;
           clear(next.panel, 'height');
           const height = next.panel.getBoundingClientRect().height;
@@ -525,6 +533,14 @@
           this.roll(next.panel);
         }
       }
+    }
+
+    /** No scroll anchoring on the page while things move (the eased scroll does the moving) */
+    holdScroll(duration) {
+      const root = document.documentElement;
+      root.style.overflowAnchor = 'none';
+      clearTimeout(this.anchorTimer);
+      this.anchorTimer = setTimeout(() => root.style.removeProperty('overflow-anchor'), duration * 1000 + 400);
     }
 
     /** Anything left open inside a closed panel is shut, out of sight */
@@ -547,7 +563,7 @@
       }
       panel.style.overflow = 'hidden';
       animate(panel, { height: [from + 'px', to + 'px'] }, { duration, ease: EASE }).then(() => {
-        if (panel.getAnimations().length) return;
+        if (moving(panel)) return;
         clear(panel, 'height', 'overflow');
       });
     }
