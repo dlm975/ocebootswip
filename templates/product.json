@@ -116,6 +116,11 @@
                 "padding-inline-end": 0
               },
               "blocks": {
+                "product_meta_oce": {
+                  "type": "product-meta",
+                  "settings": {},
+                  "blocks": {}
+                },
                 "text_xrnftG": {
                   "type": "text",
                   "settings": {
@@ -141,6 +146,18 @@
                   },
                   "blocks": {}
                 },
+                "star_rating_001": {
+                  "type": "product-star-rating",
+                  "settings": {
+                    "placement": "in_place",
+                    "show_stars": true,
+                    "text": "1000+ HAPPY CUSTOMERS",
+                    "star_color": "#25d366",
+                    "text_color": "#1f2937",
+                    "star_size": 13
+                  },
+                  "blocks": {}
+                },
                 "price_tVjtKg": {
                   "type": "price",
                   "settings": {
@@ -162,23 +179,6 @@
                     "padding-inline-end": 0
                   },
                   "blocks": {}
-                },
-                "product_meta_oce": {
-                  "type": "product-meta",
-                  "settings": {},
-                  "blocks": {}
-                },
-                "star_rating_001": {
-                  "type": "product-star-rating",
-                  "settings": {
-                    "show_stars": true,
-                    "text": "1000+ HAPPY CUSTOMERS",
-                    "star_color": "#25D366",
-                    "text_color": "#1F2937",
-                    "star_size": 13,
-                    "placement": "in_place"
-                  },
-                  "blocks": {}
                 }
               },
               "block_order": [
@@ -198,7 +198,7 @@
                   "fg-ag-studs-for-nike"
                 ],
                 "excluded_tag": "",
-                "background": "#F1F5F9",
+                "background": "#f1f5f9",
                 "text_color": "#121212"
               },
               "blocks": {}
@@ -208,20 +208,21 @@
               "name": "t:names.product_variant_picker",
               "settings": {
                 "variant_style": "size_grid",
+                "show_stock_urgency": true,
+                "urgency_threshold": 5,
+                "urgency_dot_color": "orange",
                 "show_swatches": false,
                 "alignment": "left",
                 "padding-block-start": 0,
                 "padding-block-end": 8,
                 "padding-inline-start": 0,
-                "padding-inline-end": 0,
-                "show_stock_urgency": true,
-                "urgency_threshold": 5,
-                "urgency_dot_color": "orange"
+                "padding-inline-end": 0
               },
               "blocks": {}
             },
             "urgency_stock_001": {
               "type": "product-urgency-stock",
+              "disabled": true,
               "settings": {
                 "threshold": 5,
                 "dot_color": "orange",
@@ -230,8 +231,7 @@
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
               },
-              "blocks": {},
-              "disabled": true
+              "blocks": {}
             },
             "buy_buttons_pKHp9V": {
               "type": "buy-buttons",
@@ -301,10 +301,10 @@
                 "choose_label": "Choose",
                 "free_label": "FREE",
                 "radius": 16,
-                "background": "#F1F5F9",
+                "background": "#f1f5f9",
                 "text_color": "#121212",
                 "card_background": "#ffffff",
-                "card_border": "#64748B40",
+                "card_border": "#64748b40",
                 "button_background": "#121212",
                 "button_text_color": "#ffffff"
               },
@@ -337,6 +337,34 @@
         "color_scheme": "",
         "padding-block-start": 0,
         "padding-block-end": 0
+      }
+    },
+    "pdp_info_panel": {
+      "type": "pdp-info-panel",
+      "settings": {
+        "attach_to_details": true,
+        "heading": "",
+        "show_description": true,
+        "description_heading": "Details",
+        "open_description": false,
+        "q1": "Are these boots legit?",
+        "a1": "Yes. We have 20+ years of experience with football boots. This means we can spot a fake from a mile away.",
+        "q2": "How long will shipping take?",
+        "a2": "We have both Express and Economy options available at checkout. Express - 3-5 Business Days. Economy - 10-14 Business Days.",
+        "q3": "Can I return them if they don't fit?",
+        "a3": "Yes. We offer returns within 7 days of your boots arriving. They must be in unworn condition.",
+        "q4": "",
+        "a4": "",
+        "q5": "",
+        "a5": "",
+        "q6": "",
+        "a6": "",
+        "q7": "",
+        "a7": "",
+        "q8": "",
+        "a8": "",
+        "padding-block-start": 32,
+        "padding-block-end": 32
       }
     },
     "worn_by_pros_pdp": {
@@ -430,46 +458,21 @@
         "padding-block-end": 24
       }
     },
-    "pdp_info_panel": {
-      "type": "pdp-info-panel",
-      "settings": {
-        "attach_to_details": true,
-        "heading": "",
-        "show_description": true,
-        "description_heading": "Details",
-        "open_description": false,
-        "q1": "Are these boots legit?",
-        "a1": "Yes. We have 20+ years of experience with football boots. This means we can spot a fake from a mile away.",
-        "q2": "How long will shipping take?",
-        "a2": "We have both Express and Economy options available at checkout. Express - 3-5 Business Days. Economy - 10-14 Business Days.",
-        "q3": "Can I return them if they don't fit?",
-        "a3": "Yes. We offer returns within 7 days of your boots arriving. They must be in unworn condition.",
-        "q4": "",
-        "a4": "",
-        "q5": "",
-        "a5": "",
-        "q6": "",
-        "a6": "",
-        "q7": "",
-        "a7": "",
-        "q8": "",
-        "a8": "",
-        "padding-block-start": 32,
-        "padding-block-end": 32
-      }
-    },
     "pdp_trust_bar": {
       "type": "pdp-trust-bar",
       "settings": {
         "attach_to_details": true,
         "icon_1": "shopify://shop_images/Twitter_Verified_Badge.svg",
+        "symbol_1": "verified_user",
         "text_1": "Verified Boots",
         "icon_2": "shopify://shop_images/Noto_Emoji_v2.034_2708.svg",
+        "symbol_2": "local_shipping",
         "text_2": "Express Shipping",
         "icon_3": "shopify://shop_images/RecyclingSymbolGreen.png",
+        "symbol_3": "autorenew",
         "text_3": "Accept Returns",
-        "background": "#F1F5F9",
-        "text_color": "#1F2937",
+        "background": "#f1f5f9",
+        "text_color": "#1f2937",
         "corner_radius": 10,
         "padding-block-start": 8,
         "padding-block-end": 24
@@ -630,7 +633,7 @@
         "body": "<p>We have spent 20+ years around football boots — chasing releases, hunting down retros and knowing a fake on sight. Every pair we list is checked by hand before it ships.</p>",
         "button_label": "",
         "button_link": "",
-        "tile_background": "#F1F5F9",
+        "tile_background": "#f1f5f9",
         "text_color": "#121212",
         "corner_radius": 20,
         "padding-block-start": 32,
@@ -643,7 +646,7 @@
         "reveal_mode": "after_button",
         "button_text": "Add to cart",
         "sheet_heading": "Select size",
-        "button_color": "#25D366",
+        "button_color": "#25d366",
         "button_text_color": "#ffffff"
       }
     },
@@ -696,9 +699,9 @@
   "order": [
     "pdp_gallery_style",
     "main",
-    "worn_by_pros_pdp",
     "pdp_info_panel",
     "pdp_trust_bar",
+    "worn_by_pros_pdp",
     "customer_collage",
     "pdp_about",
     "pdp_sticky_buy",
