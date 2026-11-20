@@ -419,6 +419,13 @@
 </script>
 
 {% stylesheet %}
+  /* A player's card open: the whole section comes in front of the ones around it (the card
+     reaches past its edges onto them), still under the sticky header */
+  .shopify-section:has(.wbp__layout.is-open) {
+    position: relative;
+    z-index: 4;
+  }
+
   /* Free on the page: no container around it */
   .wbp__box {
     min-width: 0;
