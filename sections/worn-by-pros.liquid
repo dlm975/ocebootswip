@@ -1026,9 +1026,20 @@
   }
 
   @media screen and (max-width: 749px) {
+    .wbp--compact .wbp__heading {
+      font-size: 12vw;
+    }
+
     .wbp--compact .wbp__stage {
       --wbp-logo: 44px;
       min-height: 140px;
+    }
+
+    /* Phones: every logo, drift included, stays within the height of the text beside it (the
+       drift reaches up to 14px up, 8px left and 6px right of a logo's place) */
+    .wbp--compact .wbp__logo {
+      top: clamp(14px, calc(var(--cy) - var(--size) / 2), calc(100% - var(--size)));
+      left: clamp(8px, calc(var(--cx) - var(--size) / 2), calc(100% - var(--size) - 6px));
     }
   }
 
