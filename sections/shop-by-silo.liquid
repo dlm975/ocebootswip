@@ -353,10 +353,15 @@
       const previous = this.open.get(list) || null;
       const token = {};
       this.pending.set(list, token);
-      // Opening a brand: it widens and settles into its place first, then its silos roll down
-      // (rather than its panel growing while it is still a narrow tile)
+      // Opening a brand: the others fade back first (so they are barely there as they move), then
+      // it widens and settles into its place, then its silos roll down
       if (!previous && target && list === this.brands && !reduced()) {
-        this.switchIn(list, target, { deferOpen: true });
+        target.classList.add('is-next');
+        list.classList.add('has-open');
+        setTimeout(() => {
+          if (this.pending.get(list) !== token) return;
+          this.switchIn(list, target, { deferOpen: true });
+        }, 140);
         return;
       }
       if (!previous || !target || previous === target || reduced()) {
@@ -506,7 +511,7 @@
       if (was) {
         animate(was.inner, { opacity: [wasOpacity, 0] }, { duration: OUT, ease: 'linear' });
         animate(was.panel, { height: [wasHeight + 'px', '0px'] }, { duration, ease: EASE }).then(() => {
-          if (previous.classList.contains('is-open') || was.moving(panel)) return;
+          if (previous.classList.contains('is-open') || moving(was.panel)) return;
           was.panel.hidden = true;
           clear(was.panel, 'height', 'overflow');
           clear(was.inner, 'opacity', 'width');
@@ -521,7 +526,7 @@
       if (next && deferOpen) {
         // Its contents wait until it has arrived, then roll out
         setTimeout(() => {
-          if (this.open.get(list) !== target || next.moving(panel)) return;
+          if (this.open.get(list) !== target || moving(next.panel)) return;
           if (next.panel.style.height !== '0px') return;
           clear(next.panel, 'height');
           const height = next.panel.getBoundingClientRect().height;
