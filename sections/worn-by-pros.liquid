@@ -74,6 +74,7 @@
     class="section section--page-width color-{{ section.settings.color_scheme }} wbp{% if section.settings.heading contains '|' %} wbp--compact{% endif %} spacing-style"
     style="{% render 'spacing-style', settings: section.settings %}"
   >
+    <div class="wbp__veil" data-wbp-veil aria-hidden="true"></div>
     <div class="wbp__box">
       <div class="wbp__layout" data-wbp-layout>
         <div class="wbp__text">
@@ -365,6 +366,9 @@
       }, OUT * 1000);
     };
 
+    // The white veil over the rest of the page: tapping it closes the card
+    root.querySelector('[data-wbp-veil]')?.addEventListener('click', () => close());
+
     layout.addEventListener('click', (event) => {
       const chip = event.target.closest('[data-wbp-pick]');
       if (chip) {
@@ -421,6 +425,37 @@
 {% stylesheet %}
   /* A player's card open: the whole section comes in front of the ones around it (the card
      reaches past its edges onto them), still under the sticky header */
+  /* While a card is open, the rest of the page fades behind a soft white blur (the header stays
+     clear above it); fades in with the card, out quickly as it closes */
+  .wbp__veil {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: rgb(255 255 255 / 0.62);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .wbp:has(.wbp__layout.is-open) .wbp__veil {
+    opacity: 1;
+    pointer-events: auto;
+    transition-duration: 0.4s;
+  }
+
+  .wbp__box {
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wbp__veil {
+      transition: none;
+    }
+  }
+
   .shopify-section:has(.wbp__layout.is-open) {
     position: relative;
     /* Above the "Worn by you" photos (up to 6), under the sticky header (--layer-sticky, 8) */
