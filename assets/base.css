@@ -4608,3 +4608,53 @@ html.wlq-open {
   font-weight: 750;
 }
 
+
+/*
+  Product page, reduced price: "was <price>" small and muted on the line above, the price below,
+  and the "% off" in bold red to their right, centred on the two lines and about three quarters of
+  their height (line-height 0.75 wraps Inter's capitals, so the box is the text's own height).
+*/
+.pdp-sale {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-areas:
+    'was off'
+    'now off';
+  justify-content: start;
+  align-items: center;
+  column-gap: 16px;
+  row-gap: 1px;
+}
+
+.pdp-sale__was {
+  grid-area: was;
+  color: rgb(18 18 18 / 0.55);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.pdp-sale .pdp-sale__was .compare-at-price {
+  color: inherit;
+  font-size: inherit;
+}
+
+.pdp-sale__now {
+  grid-area: now;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.pdp-sale__off {
+  grid-area: off;
+  align-self: center;
+  color: #e8323c;
+  font-family: var(--font-oce, 'Inter', system-ui, sans-serif);
+  font-size: 44px;
+  font-weight: 850;
+  font-variation-settings: 'opsz' 32;
+  letter-spacing: -0.035em;
+  line-height: 0.75;
+  white-space: nowrap;
+}
