@@ -219,25 +219,15 @@
   const stop = (el) => ours(el).forEach((a) => a.cancel());
   const clear = (el, ...props) => props.forEach((p) => el.style.removeProperty(p));
 
-  /** cubic-bezier(x1, y1, x2, y2) as a function of progress, for the page scroll */
-  const bezier = (x1, y1, x2, y2) => {
-    const a = (p, q) => 1 - 3 * q + 3 * p;
-    const b = (p, q) => 3 * q - 6 * p;
-    const c = (p) => 3 * p;
-    const at = (t, p, q) => ((a(p, q) * t + b(p, q)) * t + c(p)) * t;
-    const slope = (t, p, q) => 3 * a(p, q) * t * t + 2 * b(p, q) * t + c(p);
-    return (x) => {
-      let t = x;
-      for (let i = 0; i < 8; i++) {
-        const err = at(t, x1, x2) - x;
-        const s = slope(t, x1, x2);
-        if (Math.abs(err) < 1e-5 || !s) break;
-        t -= err / s;
-      }
-      return at(Math.min(1, Math.max(0, t)), y1, y2);
-    };
+  /** Where a card is seen: its box, less any part clipped off its right edge (a width change in
+      progress is a clip, not a real width, so a tap mid-way carries on from what is on screen) */
+  const shown = (card) => {
+    const box = card.getBoundingClientRect();
+    const clip = getComputedStyle(card).clipPath;
+    const right = clip && clip.startsWith('inset(') ? parseFloat(clip.slice(6).split(' ')[1]) || 0 : 0;
+    return { left: box.left, top: box.top, width: box.width - right, height: box.height };
   };
-  const scrollEase = bezier(...EASE);
+
 
   class ShopBySilo extends HTMLElement {
     connectedCallback() {
@@ -280,7 +270,6 @@
 
     disconnectedCallback() {
       document.removeEventListener('shopify:block:select', this.onBlockSelect);
-      cancelAnimationFrame(this.scrollFrame);
     }
 
     itemOf(id) {
@@ -419,7 +408,7 @@
       // the eased scroll then had to undo)
       this.holdScroll(duration);
 
-      const before = new Map(cards.map((card) => [card, card.getBoundingClientRect()]));
+      const before = new Map(cards.map((card) => [card, shown(card)]));
       const wasHeight = was && !was.panel.hidden ? was.panel.getBoundingClientRect().height : 0;
       const wasOpacity = was && !was.panel.hidden ? parseFloat(getComputedStyle(was.inner).opacity) : 1;
       const wasWidth = was && !was.panel.hidden ? was.inner.getBoundingClientRect().width : 0;
@@ -435,7 +424,7 @@
       // Settle everything into its end state, without animation
       cards.forEach((card) => {
         stop(card);
-        clear(card, 'transform', 'width', 'z-index', 'grid-row');
+        clear(card, 'transform', 'width', 'z-index', 'grid-row', 'clip-path');
         const { panel, inner } = this.parts(card);
         if (!panel) return; // a silo that is just a link
         stop(panel);
@@ -505,10 +494,16 @@
         const b = before.get(card);
         const a = after.get(card);
         if (Math.abs(b.width - a.width) > 1) {
-          // Growing to (or shrinking from) the full row; the closing card stays on top as it shrinks
+          // Growing to (or shrinking from) the full row, the closing card on top as it shrinks. Not a
+          // real width change (the page re-laid out and the photo re-scaled every frame, which
+          // phones can't keep up with): the card takes the wider of its two sizes for the move and
+          // its right edge is a clip sliding in or out, which costs nothing per frame.
           card.style.zIndex = card === previous ? '2' : '1';
-          animate(card, { width: [b.width + 'px', a.width + 'px'] }, { duration, ease: EASE }).then(() => {
-            if (!moving(card)) clear(card, 'width', 'z-index');
+          const wide = Math.max(b.width, a.width);
+          if (b.width > a.width) card.style.width = wide + 'px';
+          const edge = (width) => `inset(0px ${wide - width}px 0px 0px round 20px)`;
+          animate(card, { clipPath: [edge(b.width), edge(a.width)] }, { duration, ease: EASE }).then(() => {
+            if (!moving(card)) clear(card, 'width', 'z-index', 'clip-path');
           });
         }
         const dx = b.left - a.left;
@@ -592,25 +587,12 @@
     }
 
     /** Ease the page to a scroll position, in step with the panels; a touch or wheel takes over */
-    scrollTo(target, duration = MOVE) {
-      cancelAnimationFrame(this.scrollFrame);
-      const start = window.scrollY;
-      const distance = Math.max(0, target) - start;
-      if (Math.abs(distance) < 4) return;
-      if (reduced()) {
-        window.scrollTo({ top: start + distance, behavior: 'instant' });
-        return;
-      }
-      const yieldScroll = () => cancelAnimationFrame(this.scrollFrame);
-      window.addEventListener('wheel', yieldScroll, { once: true, passive: true });
-      window.addEventListener('touchstart', yieldScroll, { once: true, passive: true });
-      const began = performance.now();
-      const step = (now) => {
-        const p = Math.min(1, (now - began) / (duration * 1000));
-        window.scrollTo({ top: start + distance * scrollEase(p), behavior: 'instant' });
-        if (p < 1) this.scrollFrame = requestAnimationFrame(step);
-      };
-      this.scrollFrame = requestAnimationFrame(step);
+    /* The page's own smooth scroll, which phones run off the main thread (stepping the scroll
+       from a script each frame stuttered on iPhones); a touch or wheel takes over as usual */
+    scrollTo(target) {
+      const top = Math.max(0, target);
+      if (Math.abs(top - window.scrollY) < 4) return;
+      window.scrollTo({ top, behavior: reduced() ? 'instant' : 'smooth' });
     }
   }
 
