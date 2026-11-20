@@ -379,12 +379,13 @@
           resized.observe(line);
         }
         fit(line);
-        alignBin(line.closest('.cart-items__table-row'));
       });
+      // Every row, with or without a size line (accessories too)
+      document.querySelectorAll('.cart-items__table-row').forEach(alignBin);
     };
     new MutationObserver(() => {
       if (!queued) queued = requestAnimationFrame(scan);
-    }).observe(document.documentElement, { childList: true, subtree: true });
+    }).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['open'] });
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan);
     else scan();
   })();
