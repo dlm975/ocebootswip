@@ -111,6 +111,13 @@ class HeaderMenu extends Component {
     item.ariaExpanded = 'true';
 
     let submenu = findSubmenu(item);
+
+    // Let the dropdown content start under the category that opened it.
+    if (submenu && isDefaultSlot) {
+      const offset = item.getBoundingClientRect().left - this.getBoundingClientRect().left;
+      submenu.style.setProperty('--submenu-offset', `${Math.max(0, Math.round(offset))}px`);
+    }
+
     let overflowMenuHeight = this.overflowMenu?.offsetHeight ?? 0;
 
     if (!submenu && !isDefaultSlot) {

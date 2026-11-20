@@ -14,16 +14,19 @@
     {% if is_bfsale_card == false or closest.product.available == false %}
       {% render 'product-card-badges', product: closest.product %}
     {% endif %}
-    {%  if settings.quick_add or settings.mobile_quick_add %}
-      {% render 'quick-add', product: closest.product, section_id: section.id %}
-    {% endif %}
+    {% # The add-to-cart circle is a wishlist heart (assets/wishlist.js) %}
+    {% render 'wishlist-button', product: closest.product, class: 'wishlist-toggle--card' %}
   {% endunless %}
 {% endcapture %}
 
 {% render 'card-gallery', children: children %}
 
 {% if closest.product != blank and is_bfsale_card %}
-  {% render 'bfsale-badge', product: closest.product %}
+  {% if settings.sale_badge_style == 'classic' %}
+    {% render 'bfsale-badge', product: closest.product %}
+  {% else %}
+    {% render 'sale-badge', product: closest.product %}
+  {% endif %}
 {% endif %}
 
 {% # Title and price for the zoomed out grid view %}

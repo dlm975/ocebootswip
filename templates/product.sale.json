@@ -97,7 +97,7 @@
                 "border_opacity": 100,
                 "border_radius": 0,
                 "toggle_overlay": false,
-                "overlay_color": "#00000026",
+                "overlay_color": "#12121226",
                 "overlay_style": "solid",
                 "gradient_direction": "to top",
                 "padding-block-start": 0,
@@ -122,7 +122,7 @@
                     "wrap": "pretty",
                     "color": "",
                     "background": false,
-                    "background_color": "#00000026",
+                    "background_color": "#12121226",
                     "corner_radius": 0,
                     "padding-block-start": 0,
                     "padding-block-end": 0,
@@ -152,9 +152,15 @@
                     "padding-inline-end": 0
                   },
                   "blocks": {}
+                },
+                "product_meta_oce": {
+                  "type": "product-meta",
+                  "settings": {},
+                  "blocks": {}
                 }
               },
               "block_order": [
+                "product_meta_oce",
                 "text_xrnftG",
                 "price_tVjtKg"
               ]
@@ -163,13 +169,16 @@
               "type": "variant-picker",
               "name": "t:names.product_variant_picker",
               "settings": {
-                "variant_style": "dropdowns",
+                "variant_style": "size_grid",
                 "show_swatches": false,
                 "alignment": "left",
                 "padding-block-start": 0,
                 "padding-block-end": 8,
                 "padding-inline-start": 0,
-                "padding-inline-end": 0
+                "padding-inline-end": 0,
+                "show_stock_urgency": true,
+                "urgency_threshold": 5,
+                "urgency_dot_color": "orange"
               },
               "blocks": {}
             },
@@ -183,14 +192,15 @@
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
               },
-              "blocks": {}
+              "blocks": {},
+              "disabled": true
             },
             "buy_buttons_pKHp9V": {
               "type": "buy-buttons",
               "name": "t:names.product_buy_buttons",
               "settings": {
                 "urgency_text": "",
-                "stacking": false,
+                "stacking": true,
                 "show_pickup_availability": false,
                 "padding-block-start": 0,
                 "padding-block-end": 0,
@@ -209,7 +219,7 @@
                   "type": "add-to-cart",
                   "static": true,
                   "settings": {
-                    "style_class": "button-secondary"
+                    "style_class": "button"
                   },
                   "blocks": {}
                 },
@@ -319,14 +329,14 @@
             "sale_countdown_001": {
               "type": "sale-countdown",
               "settings": {
-                "heading": "SALE ENDS IN",
+                "heading": "Sale ends in",
                 "end_date": "",
                 "end_time": "23:59",
                 "tz_offset": "+12:00",
                 "show_savings": true,
                 "expired_behavior": "hide",
                 "expired_text": "This sale has ended",
-                "accent": "#d0021b",
+                "accent": "#3897F0",
                 "padding-block-start": 4,
                 "padding-block-end": 4,
                 "padding-inline-start": 0,
@@ -337,10 +347,10 @@
             "sale_image_badge_001": {
               "type": "sale-image-badge",
               "settings": {
-                "text": "ON SALE",
+                "text": "On sale",
                 "show_percent": false,
                 "only_when_discounted": true,
-                "accent": "#d0021b"
+                "accent": "#3897F0"
               },
               "blocks": {}
             },
@@ -454,7 +464,7 @@
         "border_opacity": 100,
         "border_radius": 0,
         "toggle_overlay": false,
-        "overlay_color": "#00000026",
+        "overlay_color": "#12121226",
         "overlay_style": "solid",
         "gradient_direction": "to top",
         "padding-block-start": 0,

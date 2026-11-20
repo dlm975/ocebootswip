@@ -1,0 +1,460 @@
+{%- doc -%}
+  Shop by Size: size systems (US, UK, EU) in big bold type, each opening its sizes as bold numbers
+  with a small product count, in the same style as the Shop by Silo brand list.
+
+  Desktop: US / UK / EU stacked in a column; pointing at one blurs the others and its sizes open
+  out across the full width of the dropdown. Drawer (phones): US / UK / EU on one line; tapping
+  one blurs the others and opens its sizes below in a 3-wide grid, the menu growing to fit.
+  Behaviour is in assets/size-drill-menu.js.
+
+  The sizes come from the menu's links, one per size collection, each titled like
+  "US 8 - UK 7.5 - EU 41 1/3" (the collection's own title is read first, the link title if it
+  isn't a collection). One number can belong to several collections (US 8 is UK 7 in one brand's
+  chart and UK 7.5 in another's): they show once, with their counts added, and link to All Football
+  Boots filtered by every matching size. A number with one collection links to that collection.
+
+  @param {object} parent_link - The Shop by Size link (its links are the size collections)
+  @param {string} [variant] - 'desktop' (header dropdown) or 'drawer' (mobile menu drawer)
+  @param {string} id - Unique id prefix
+{%- enddoc -%}
+
+{%- liquid
+  assign variant = variant | default: 'desktop'
+  assign systems = 'US,UK,EU' | split: ','
+  assign filter_base = collections['all-football-boots'].url | default: routes.all_products_collection_url
+  assign most_sizes = 0
+-%}
+
+<script
+  src="{{ 'size-drill-menu.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+{%- capture panels -%}
+  {%- for system in systems -%}
+    {%- liquid
+      # One row per link for this system: "sortkey~number~count~url~size", sortable as text
+      capture rows
+        for link in parent_link.links
+          assign label = link.title
+          if link.type == 'collection_link' and link.object.title != blank
+            assign label = link.object.title
+          endif
+          assign count = 0
+          if link.type == 'collection_link'
+            assign count = link.object.all_products_count
+          endif
+          assign parts = label | split: ' - '
+          for part in parts
+            assign part = part | strip
+            assign part_system = part | slice: 0, 2 | upcase
+            if part_system == system
+              assign number = part | slice: 2, 20 | strip
+              assign bits = number | split: ' '
+              assign key = bits[0] | times: 1.0
+              if bits.size > 1
+                assign fraction = bits[1] | split: '/'
+                if fraction.size == 2
+                  assign fraction_value = fraction[0] | times: 1.0 | divided_by: fraction[1]
+                  assign key = key | plus: fraction_value
+                endif
+              endif
+              assign key = key | times: 100 | round
+              assign key = '000000' | append: key | slice: -6, 6
+              echo key | append: '~' | append: number | append: '~' | append: count | append: '~' | append: link.url | append: '~' | append: label | append: '^'
+            endif
+          endfor
+        endfor
+      endcapture
+      assign rows = rows | split: '^' | sort
+      capture keys
+        for row in rows
+          echo row | slice: 0, 6 | append: ','
+        endfor
+      endcapture
+      assign keys = keys | split: ',' | uniq
+      assign system_handle = system | downcase
+      assign panel_id = id | append: '-' | append: system_handle
+    -%}
+    {%- capture size_items -%}
+      {%- for key in keys -%}
+        {%- liquid
+          assign total = 0
+          assign group_size = 0
+          assign number = ''
+          assign url = ''
+          assign filters = ''
+          for row in rows
+            assign row_key = row | slice: 0, 6
+            if row_key == key
+              assign fields = row | split: '~'
+              assign number = fields[1]
+              assign total = total | plus: fields[2]
+              assign url = fields[3]
+              assign group_size = group_size | plus: 1
+              assign size_param = fields[4] | url_encode
+              assign filters = filters | append: '&filter.v.option.size=' | append: size_param
+            endif
+          endfor
+          if group_size > 1
+            assign url = filter_base | append: '?' | append: filters | remove_first: '&'
+          endif
+          assign shown = number | replace: ' 1/3', '⅓' | replace: ' 2/3', '⅔' | replace: ' 1/2', '½'
+        -%}
+        {%- comment -%} A size with nothing in it isn't offered {%- endcomment -%}
+        {%- if total == 0 -%}{%- continue -%}{%- endif -%}
+        <li>
+          <a
+            href="{{ url }}"
+            class="size-drill__size"
+            aria-label="{{ system }} {{ number }}"
+          >
+            <span class="size-drill__value">{{ shown }}</span>
+            {%- if total > 0 -%}
+              <span class="size-drill__count">{{ total }}</span>
+            {%- endif -%}
+          </a>
+        </li>
+      {%- endfor -%}
+    {%- endcapture -%}
+    {%- liquid
+      assign size_count = size_items | split: '<li>' | size | minus: 1
+      if size_count > most_sizes
+        assign most_sizes = size_count
+      endif
+    -%}
+    <ul
+      id="{{ panel_id }}"
+      class="size-drill__sizes list-unstyled"
+      role="list"
+      aria-label="{{ system }}"
+      data-size-system-panel
+      style="--size-drill-index: {{ forloop.index0 }};"
+      hidden
+    >
+      {{- size_items -}}
+    </ul>
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- liquid
+  # Desktop: every size on one row, all systems on the same pitch (set by the longest list);
+  # narrow desktops fall back to two rows
+  assign half_sizes = most_sizes | plus: 1 | divided_by: 2
+-%}
+
+<size-drill-menu
+  class="size-drill size-drill--{{ variant }}"
+  style="--size-drill-columns: {{ most_sizes }}; --size-drill-half: {{ half_sizes }};"
+>
+  <ul
+    class="size-drill__systems list-unstyled"
+    role="list"
+  >
+    {%- for system in systems -%}
+      <li class="size-drill__system-item">
+        <button
+          type="button"
+          class="size-drill__system"
+          aria-expanded="false"
+          aria-controls="{{ id }}-{{ system | downcase }}"
+          data-size-system
+        >
+          {{ system }}
+        </button>
+      </li>
+    {%- endfor -%}
+  </ul>
+
+  <div class="size-drill__panels">
+    {{ panels }}
+  </div>
+</size-drill-menu>
+
+{% stylesheet %}
+  .size-drill {
+    --size-drill-ease: cubic-bezier(0.3, 0.7, 0.3, 1);
+    --size-drill-duration: 0.55s;
+
+    display: block;
+    color: var(--color-foreground);
+  }
+
+  .size-drill__systems {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* US / UK / EU: same weight and tracking as the Shop by Silo brands */
+  .size-drill__system {
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-weight: 750;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    font-variation-settings: 'opsz' 32;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: filter var(--animation-speed, 0.2s) var(--animation-easing, ease),
+      opacity var(--animation-speed, 0.2s) var(--animation-easing, ease);
+  }
+
+  .size-drill__system:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  /* The others blur while one is open */
+  .size-drill[data-active] .size-drill__system[aria-expanded='false'] {
+    filter: blur(2px);
+    opacity: 0.45;
+  }
+
+  .size-drill[data-active] .size-drill__system[aria-expanded='false']:focus-visible {
+    filter: none;
+    opacity: 1;
+  }
+
+  .size-drill__sizes {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Sizes stay out of sight until their system is chosen (beats the grid rules below) */
+  .size-drill .size-drill__sizes[hidden] {
+    display: none !important; /* stylelint-disable-line declaration-no-important */
+  }
+
+  /* A size: the number in bold with its product count small at its shoulder */
+  .size-drill__size {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 4px;
+    color: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .size-drill__value {
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    font-variation-settings: 'opsz' 32;
+  }
+
+  .size-drill__count {
+    margin-block-start: 0.15em;
+    font-size: 0.625rem;
+    font-weight: 500;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: rgb(var(--color-foreground-rgb) / 0.55);
+  }
+
+  .size-drill__size:is(:hover, :focus-visible) .size-drill__value {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+
+  .size-drill__size:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  /* ---- Desktop: systems in a column, sizes open out across the full width ---- */
+  .size-drill--desktop {
+    --size-drill-system-row: 72px;
+    --size-drill-size-row: 56px;
+
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 40px;
+    align-items: start;
+
+    /* Span the whole dropdown, so the sizes share its full width in even columns */
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .size-drill--desktop .size-drill__systems {
+    display: flex;
+    flex-direction: column;
+    height: calc(3 * var(--size-drill-system-row));
+  }
+
+  .size-drill--desktop .size-drill__system-item {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .size-drill--desktop .size-drill__system {
+    font-size: calc(var(--size-drill-system-row) * 0.74);
+  }
+
+  /* Every panel sits in the same place; the dropdown keeps one height whichever is open. The
+     sizes sit on one row across the full width, every system on the same column pitch (set by the
+     longest list), with the type scaled to that pitch. */
+  .size-drill--desktop .size-drill__panels {
+    display: grid;
+    /* Exactly the width available: a row's own length must never widen it */
+    grid-template-columns: minmax(0, 1fr);
+        /* As tall as the US / UK / EU column whichever sizes are open, so the dropdown never resizes */
+    height: calc(3 * var(--size-drill-system-row));
+  }
+
+  /* One row with equal, fixed gaps between sizes, the type scaled so the row fills the width */
+  .size-drill--desktop .size-drill__sizes {
+    grid-area: 1 / 1;
+    align-self: start;
+    min-width: 0;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    align-content: flex-start;
+    /* The gap stays put; the type is sized (assets/size-drill-menu.js) so each size type's row
+       fills the full width. This is the size before that runs. */
+    column-gap: 12px;
+    font-size: 1.375rem;
+    height: var(--size-drill-size-row);
+    /* On the same line as its system (US sizes level with US, UK with UK, EU with EU), centred on
+       it whether the sizes take one row or wrap onto two */
+    margin-block-start: calc((var(--size-drill-index, 0) + 0.5) * var(--size-drill-system-row));
+    translate: 0 -50%;
+  }
+
+  .size-drill--desktop .size-drill__value {
+    font-size: 1em;
+  }
+
+  .size-drill--desktop .size-drill__count {
+    font-size: 0.5625rem;
+  }
+
+  .size-drill--desktop .size-drill__size {
+    gap: 2px;
+  }
+
+  .size-drill--desktop .size-drill__sizes > li {
+    flex: none;
+  }
+
+  /* Too narrow to fill one row at a readable size (set by the script): wrap onto two rows */
+  .size-drill--desktop .size-drill__sizes[data-wrap] {
+    flex-wrap: wrap;
+    row-gap: 10px;
+    height: auto;
+  }
+
+  /* Choosing a system shifts the whole list left (from under "Shop by Size" to the dropdown's
+     edge) while its sizes slide out to the right from behind it; the sizes area keeps the full
+     width by reaching as far right as the list moved left */
+  .size-drill--desktop {
+    transition: transform var(--size-drill-duration) var(--size-drill-ease);
+  }
+
+  .size-drill--desktop[data-active] {
+    transform: translateX(calc(-1 * var(--submenu-offset, 0px)));
+  }
+
+  .size-drill--desktop[data-active] .size-drill__panels {
+    margin-inline-end: calc(-1 * var(--submenu-offset, 0px));
+  }
+
+  .size-drill--desktop .size-drill__sizes:not([hidden]) {
+    animation: size-drill-open-out var(--size-drill-duration) var(--size-drill-ease) both;
+  }
+
+  @keyframes size-drill-open-out {
+    from {
+      opacity: 0;
+      transform: translateX(-48px);
+      clip-path: inset(0 100% 0 0);
+    }
+
+    to {
+      opacity: 1;
+      clip-path: inset(0 -20px 0 0);
+    }
+  }
+
+  /* ---- Drawer (phones): systems on one line, sizes below in a 3-wide grid ---- */
+  .size-drill--drawer {
+    --color-foreground-rgb: 18 18 18;
+
+    color: var(--brand-ink, #121212);
+    padding-block: 4px 12px;
+  }
+
+  .size-drill--drawer .size-drill__systems {
+    display: flex;
+    align-items: baseline;
+    gap: 0 28px;
+  }
+
+  .size-drill--drawer .size-drill__system {
+    font-size: min(3.25rem, 13vw);
+    padding-block: 6px;
+  }
+
+  .size-drill--drawer .size-drill__panels {
+    overflow: hidden;
+  }
+
+  .size-drill--drawer .size-drill__sizes {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px 12px;
+    padding-block: 18px 6px;
+  }
+
+  .size-drill--drawer .size-drill__size {
+    min-height: 44px;
+    align-items: center;
+  }
+
+  .size-drill--drawer .size-drill__count {
+    align-self: flex-start;
+    margin-block-start: 10px;
+  }
+
+  .size-drill--drawer .size-drill__value {
+    font-size: 1.375rem;
+  }
+
+  .size-drill--drawer .size-drill__sizes:not([hidden]) {
+    animation: size-drill-drop var(--size-drill-duration) var(--size-drill-ease) both;
+  }
+
+  @keyframes size-drill-drop {
+    from {
+      opacity: 0;
+      transform: translateY(-12px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .size-drill .size-drill__sizes:not([hidden]) {
+      animation: none;
+    }
+
+    .size-drill--desktop {
+      transition: none;
+    }
+
+    .size-drill[data-active] .size-drill__system[aria-expanded='false'] {
+      filter: none;
+    }
+  }
+{% endstylesheet %}

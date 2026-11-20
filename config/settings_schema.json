@@ -328,6 +328,13 @@
         "content": "t:content.fonts"
       },
       {
+        "type": "checkbox",
+        "id": "brand_font",
+        "label": "Use Inter display brand font",
+        "info": "Inter from Google Fonts with its optical-size axis: upright, mixed case, a single family for every role. Used instead of the fonts picked below.",
+        "default": true
+      },
+      {
         "type": "font_picker",
         "id": "type_body_font",
         "default": "work_sans_n4",
@@ -1405,6 +1412,23 @@
     "settings": [
       {
         "type": "select",
+        "id": "sale_badge_style",
+        "label": "Sale badge style",
+        "info": "The \"% off\" badge on sale products. Classic is the Oswald badge with flames.",
+        "options": [
+          {
+            "value": "flat",
+            "label": "Flat"
+          },
+          {
+            "value": "classic",
+            "label": "Classic"
+          }
+        ],
+        "default": "flat"
+      },
+      {
+        "type": "select",
         "id": "badge_position",
         "options": [
           {
@@ -2348,7 +2372,7 @@
         "type": "text",
         "id": "cart_ship_excluded_tag",
         "label": "Or use this product tag",
-        "info": "Optional \u2014 useful when more than 50 products need excluding. Case sensitive."
+        "info": "Optional — useful when more than 50 products need excluding. Case sensitive."
       },
       {
         "type": "text",

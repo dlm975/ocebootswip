@@ -1,3 +1,1 @@
-<svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect x="4.75" y="4.25" width="10" height="12" rx="2.25" stroke="currentColor" stroke-width="var(--icon-stroke-width)"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true" focusable="false" width="20" height="21"><path d="M740-80H220q-24 0-42-18t-18-42v-680q0-24 18-42t42-18h520q24 0 42 18t18 42v680q0 24-18 42t-42 18Zm-520-60h520v-680H220v680Zm0 0v-680 680Z"/></svg>

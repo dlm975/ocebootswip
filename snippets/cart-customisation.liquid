@@ -124,11 +124,34 @@
     }
   {%- endif %}
 
+  /* Item names: at most two lines (a longer name ends in an ellipsis) */
+  .cart-drawer .cart-items__title,
+  .cart-page .cart-items__title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+
+  /* The size and condition on one line, never cut: a script below shrinks the text to fit */
+  .cart-drawer .cart-items__variants,
+  .cart-page .cart-items__variants {
+    white-space: nowrap;
+  }
+
+  /* The bin is lifted (by the script below) so its icon's foot lines up with the photo's */
+
+  .cart-drawer .cart-items__variants :is(.cart-items__variant, dd),
+  .cart-page .cart-items__variants :is(.cart-items__variant, dd) {
+    display: inline;
+  }
+
   /* "Total" rather than "Estimated total" — the wording itself lives in
      locales/en.default.json under content.cart_estimated_total. */
   .cart-drawer .cart__total-label,
   .cart-page .cart__total-label {
-    text-transform: uppercase;
+    text-transform: none;
   }
 
   {%- if hide_quantity %}
@@ -317,3 +340,53 @@
     }
   {%- endif %}
 {% endstyle %}
+
+<script>
+  /* Cart items, refitted when the cart redraws or the drawer opens:
+     - the size and condition line kept whole on one line: if it is wider than its column (a long
+       size or condition on a narrow phone), its text shrinks just enough to fit, down to 7px;
+     - the bin lifted so the foot of its icon lines up with the foot of the photo.  */
+  (() => {
+    const fit = (line) => {
+      line.style.removeProperty('font-size');
+      const room = line.clientWidth;
+      if (!room || line.scrollWidth <= room + 0.5) return;
+      const size = parseFloat(getComputedStyle(line).fontSize);
+      line.style.fontSize = Math.max(7, Math.floor(((size * room) / line.scrollWidth) * 10) / 10) + 'px';
+    };
+    const alignBin = (row) => {
+      const bin = row?.querySelector('.cart-items__remove');
+      const icon = bin?.querySelector('svg');
+      const photo = row?.querySelector('.cart-items__media-container, .cart-items__media');
+      if (!icon || !photo) return;
+      bin.style.removeProperty('translate');
+      const gap = photo.getBoundingClientRect().bottom - icon.getBoundingClientRect().bottom;
+      if (photo.offsetHeight && Math.abs(gap) > 0.5) bin.style.translate = '0 ' + Math.round(gap) + 'px';
+    };
+    const watched = new WeakSet();
+    const resized = new ResizeObserver((entries) =>
+      entries.forEach((entry) => {
+        fit(entry.target);
+        alignBin(entry.target.closest('.cart-items__table-row'));
+      })
+    );
+    let queued = 0;
+    const scan = () => {
+      queued = 0;
+      document.querySelectorAll('.cart-items__variants').forEach((line) => {
+        if (!watched.has(line)) {
+          watched.add(line);
+          resized.observe(line);
+        }
+        fit(line);
+      });
+      // Every row, with or without a size line (accessories too)
+      document.querySelectorAll('.cart-items__table-row').forEach(alignBin);
+    };
+    new MutationObserver(() => {
+      if (!queued) queued = requestAnimationFrame(scan);
+    }).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['open'] });
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan);
+    else scan();
+  })();
+</script>

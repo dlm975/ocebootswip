@@ -8,7 +8,25 @@
   {% render 'search', style: 'default', class: 'custom-class' %}
 {%- enddoc -%}
 
-{% unless style == 'none' %}
+{% if style == 'bar' %}
+  {%- comment -%}
+    Inline search field for the desktop header. It is the theme's own predictive search
+    (same results, keyboard navigation and "view all" as the search modal), restyled as an
+    underlined field. header-search.js closes the results when focus leaves it.
+  {%- endcomment -%}
+  <header-search class="search-action header-search{% if class != blank %} {{ class | strip }}{% endif %}">
+    {% render 'predictive-search',
+      input_id: 'HeaderSearchInput',
+      class: 'header-search__predictive',
+      search_test_id: 'search-component--header'
+    %}
+  </header-search>
+  <script
+    src="{{ 'header-search.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+{% elsif style != 'none' %}
   <search-button class="search-action{% if class != blank %} {{ class | strip }}{% endif %}">
     <button
       onclick="window.customSearchOpen()"
@@ -23,7 +41,7 @@
       </span>
     </button>
   </search-button>
-{% endunless %}
+{% endif %}
 
 {% stylesheet %}
   .search-action {
@@ -48,5 +66,120 @@
     @media screen and (min-width: 750px) {
       margin-inline: calc(var(--gap-md) * -1) calc(var(--gap-xs) * -1);
     }
+  }
+  /* ---------------------------------------------------------------
+   * Desktop header search field: underline only, icon at the start,
+   * results drop down underneath. Hidden below 1024px, where the
+   * search icon opens the full-screen search overlay instead.
+   * --------------------------------------------------------------- */
+  .header-search {
+    width: 100%;
+    min-width: 0;
+  }
+
+  @media screen and (max-width: 1023px) {
+    .header .header-search {
+      display: none !important; /* stylelint-disable-line declaration-no-important */
+    }
+  }
+
+  .header-search .header-search__predictive {
+    --search-border-radius: 0;
+
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: none;
+    z-index: calc(var(--layer-header-menu) + 2);
+  }
+
+  .header-search .predictive-search-form__header {
+    position: relative;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  .header-search .predictive-search-form__header-inner {
+    position: relative;
+    background: transparent;
+    border: 0;
+    border-bottom: 1.5px solid var(--color-foreground);
+    border-radius: 0;
+    outline: 0;
+    transition: border-color var(--animation-speed) var(--animation-easing);
+  }
+
+  .header-search .predictive-search-form__header-inner:focus-within,
+  .header-search .predictive-search-form__header-inner:has(.search-input:focus-visible) {
+    outline: 0;
+    border-bottom-width: 2px;
+    border-bottom-color: var(--color-foreground);
+  }
+
+  .header-search .predictive-search__icon {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    color: var(--color-foreground);
+    pointer-events: none;
+  }
+
+  .header-search .predictive-search__icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .header-search .predictive-search-form__header .search-input {
+    width: 100%;
+    height: 48px;
+    padding: 0 40px 0 36px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--color-foreground);
+    font-family: var(--font-body--family);
+    font-size: 1rem;
+    font-weight: 500;
+    outline: 0;
+    box-shadow: none;
+
+    &::placeholder {
+      color: rgb(var(--color-foreground-rgb) / 0.6);
+      opacity: 1;
+    }
+
+    /* The reset button is the theme's own clear control */
+    &::-webkit-search-cancel-button {
+      appearance: none;
+    }
+  }
+
+  .header-search .predictive-search__reset-button {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .header-search .predictive-search__close-modal-button {
+    display: none;
+  }
+
+  /* Results panel: white card under the field, at least wide enough for the product rows */
+  .header-search .predictive-search-form__content-wrapper {
+    top: calc(100% + 8px);
+    left: 0;
+    right: auto;
+    width: max(100%, 560px);
+    max-height: min(70vh, 640px);
+    background-color: var(--color-background);
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.08);
+    border-radius: var(--style-border-radius-popover, 12px);
+    box-shadow: 0 16px 40px rgb(0 0 0 / 0.12);
   }
 {% endstylesheet %}

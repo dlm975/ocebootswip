@@ -41,9 +41,7 @@
           <details class="pip__item"{% if section.settings.open_description %} open{% endif %}>
             <summary class="pip__q">
               <span>{{ section.settings.description_heading | default: 'Details' }}</span>
-              <svg class="pip__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" width="15" height="15" aria-hidden="true">
-                <polyline points="6 9 12 15 18 9"/>
-              </svg>
+              {%- render 'gicon', name: 'keyboard_arrow_down', class: 'pip__chev', size: 15 -%}
             </summary>
             <div class="pip__a pip__a--rte rte">{{ desc }}</div>
           </details>
@@ -58,9 +56,7 @@
             <details class="pip__item">
               <summary class="pip__q">
                 <span>{{ q_text }}</span>
-                <svg class="pip__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" width="15" height="15" aria-hidden="true">
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
+                {%- render 'gicon', name: 'keyboard_arrow_down', class: 'pip__chev', size: 15 -%}
               </summary>
               <div class="pip__a">{{ a_text }}</div>
             </details>
@@ -84,9 +80,9 @@
 
   .pip__title {
     font-size: clamp(1.1rem, 2.4vw, 1.5rem);
-    font-weight: 800;
-    font-style: italic;
-    text-transform: uppercase;
+    font-weight: 750;
+    font-style: normal;
+    text-transform: none;
     letter-spacing: -0.01em;
     margin: 0 0 10px;
   }

@@ -4,9 +4,7 @@
   {{ block.shopify_attributes }}
 >
   <span class="cart-urgency-icon" aria-hidden="true">
-    <svg viewBox="0 0 10 16" fill="currentColor" width="12" height="12">
-      <path d="M6 0L0 9h4.5L4 16l6-9H5.5z"/>
-    </svg>
+    {%- render 'gicon', name: 'bolt-fill', size: 12 -%}
   </span>
   <span class="cart-urgency-text">{{ block.settings.text }}</span>
 </div>
@@ -17,9 +15,9 @@
     align-items: center;
     gap: 7px;
     font-size: 0.8rem;
-    color: #744210;
-    background: #fffbeb;
-    border: 1px solid #f6e05e;
+    color: #121212;
+    background: #F1F5F9;
+    border: 1px solid #3897F0;
     border-radius: 6px;
     padding: 7px 12px;
     width: 100%;
@@ -27,7 +25,7 @@
   }
 
   .cart-urgency-icon {
-    color: #c05621;
+    color: #121212;
     flex-shrink: 0;
     display: flex;
     align-items: center;

@@ -111,7 +111,7 @@
                         id="HeaderDrawer-{{ link.handle }}"
                         class="menu-drawer__menu-item menu-drawer__menu-item--mainlist menu-drawer__animated-element focus-inset"
                       >
-                        <span class="menu-drawer__menu-item-text">{{ link.title | escape }}</span>
+                        <span class="menu-drawer__menu-item-text{% assign title_key = link.title | downcase | strip %}{% if title_key == 'sale' %} menu-item--sale{% endif %}">{{ link.title | escape }}</span>
                         <span class="svg-wrapper icon-plus">
                           {{- 'icon-plus.svg' | inline_asset_content -}}
                         </span>
@@ -169,7 +169,7 @@
                       aria-current="page"
                     {% endif %}
                   >
-                    <span class="menu-drawer__menu-item-text">{{ link.title | escape }}</span>
+                    <span class="menu-drawer__menu-item-text{% assign title_key = link.title | downcase | strip %}{% if title_key == 'sale' %} menu-item--sale{% endif %}">{{ link.title | escape }}</span>
                   </a>
                   {% liquid
                     assign render_link_image = false
@@ -218,7 +218,7 @@
                       aria-current="page"
                     {% endif %}
                   >
-                    <span class="menu-drawer__menu-item-text">{{ link.title | escape }}</span>
+                    <span class="menu-drawer__menu-item-text{% assign title_key = link.title | downcase | strip %}{% if title_key == 'sale' %} menu-item--sale{% endif %}">{{ link.title | escape }}</span>
                   </a>
                 {% endif %}
               </li>
@@ -238,18 +238,37 @@
                   {%- comment -%}
                     Regardless of the Accordion setting, in menus with 3 levels of links, we use a details element to handle the top level of the menu for links that have children.
                   {%- endcomment -%}
+                  {%- liquid
+                    # Brand > model links (e.g. Shop by Silo): brand list with drill-down models
+                    assign has_grandchildren = false
+                    for childlink in link.links
+                      if childlink.links != blank
+                        assign has_grandchildren = true
+                        break
+                      endif
+                    endfor
+                    assign drill_id = 'DrawerDrill-' | append: link.handle
+                    assign is_size_menu = false
+                    assign first_size_title = link.links.first.title | upcase
+                    if first_size_title contains 'US ' and first_size_title contains ' - UK ' and first_size_title contains ' - EU '
+                      assign is_size_menu = true
+                    endif
+                  -%}
                   <details
                     id="Details-menu-drawer-menu-item-{{ forloop.index }}"
-                    class="menu-drawer__menu-container{% if block.settings.drawer_dividers %} menu-drawer__menu-container--divider{% endif %}"
+                    class="menu-drawer__menu-container menu-drawer__menu-container--focus{% if block.settings.drawer_dividers %} menu-drawer__menu-container--divider{% endif %}"
                   >
                     <summary
                       id="HeaderDrawer-{{ link.handle }}"
                       class="menu-drawer__menu-item menu-drawer__menu-item--mainlist menu-drawer__animated-element focus-inset{% if link.child_active %} menu-drawer__menu-item--active{% endif %}"
-                      on:click="header-drawer/open"
+                      on:click="header-drawer/toggleSubmenu"
                     >
-                      <span class="menu-drawer__menu-item-text">{{ link.title | escape }}</span>
+                      <span class="menu-drawer__menu-item-text{% assign title_key = link.title | downcase | strip %}{% if title_key == 'sale' %} menu-item--sale{% endif %}">{{ link.title | escape }}</span>
                       <span class="svg-wrapper icon-caret icon-caret--forward">
                         {{- 'icon-caret.svg' | inline_asset_content -}}
+                      </span>
+                      <span class="svg-wrapper menu-drawer__drill-close" aria-hidden="true">
+                        {{- 'icon-close.svg' | inline_asset_content -}}
                       </span>
                     </summary>
                     <div
@@ -259,29 +278,7 @@
                       style="--menu-drawer-animation-index: {{ animation_index }};"
                     >
                       <div class="menu-drawer__inner-submenu">
-                        <div class="menu-drawer__nav-buttons">
-                          <button
-                            class="button menu-drawer__back-button focus-inset"
-                            aria-expanded="true"
-                            on:click="header-drawer/back"
-                            aria-label="{{ 'actions.back' | t }}"
-                          >
-                            <span class="svg-wrapper icon-caret icon-caret--backward">
-                              {{- 'icon-caret.svg' | inline_asset_content -}}
-                            </span>
-                            <span class="menu-drawer__menu-item-text">{{ link.title | escape }}</span>
-                          </button>
-                          <button
-                            class="button menu-drawer__close-button"
-                            type="button"
-                            aria-label="{{ 'actions.close' | t }}"
-                            on:click="header-drawer/close"
-                          >
-                            <span class="svg-wrapper header-drawer-icon header-drawer-icon--close">
-                              {{- 'icon-close.svg' | inline_asset_content -}}
-                            </span>
-                          </button>
-                        </div>
+                        {%- comment -%} No back / close row: the item's own row (its X) closes it {%- endcomment -%}
                         {% liquid
                           assign render_link_image = false
                           if block.settings.menu_style == 'collection_images'
@@ -291,6 +288,15 @@
                             endif
                           endif
                         %}
+                        {%- if has_grandchildren -%}
+                          <div class="menu-drawer__drill">
+                            {% render 'brand-drill-menu', parent_link: link, variant: 'drawer', id: drill_id %}
+                          </div>
+                        {%- elsif is_size_menu -%}
+                          <div class="menu-drawer__drill">
+                            {% render 'size-drill-menu', parent_link: link, variant: 'drawer', id: drill_id %}
+                          </div>
+                        {%- else -%}
                         <ul
                           class="menu-drawer__menu menu-drawer__menu--childlist{% if render_link_image and link.levels == 1 %} menu-drawer__menu--grid{% endif %}"
                           role="list"
@@ -463,6 +469,7 @@
                             </li>
                           {%- endfor -%}
                         </ul>
+                        {%- endif -%}
                         {% liquid
                           if block.settings.menu_style == 'featured_collections'
                             assign featured_collections = link.links | where: 'type', 'collection_link'
@@ -520,7 +527,7 @@
                       aria-current="page"
                     {% endif %}
                   >
-                    <span class="menu-drawer__menu-item-text">{{ link.title | escape }}</span>
+                    <span class="menu-drawer__menu-item-text{% assign title_key = link.title | downcase | strip %}{% if title_key == 'sale' %} menu-item--sale{% endif %}">{{ link.title | escape }}</span>
                   </a>
                 {%- endif -%}
               </li>
@@ -532,10 +539,7 @@
               {%- form 'localization', id: 'mobile-drawer-localization-form' -%}
                 <div class="drawer-region-wrapper">
                   <span class="drawer-region-label">
-                    <svg class="drawer-region-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <circle cx="12" cy="12" r="10"/>
-                      <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                    </svg>
+                    {%- render 'gicon', name: 'language', class: 'drawer-region-icon' -%}
                     {%- comment -%}
                       Presentment currency — the one prices are rendered in —
                       rather than the selected country's own currency.
@@ -614,6 +618,106 @@
 </header-drawer>
 
 {% stylesheet %}
+  /* Sale reads as an offer: red, "Sale" with a capital S, in the brand Inter (display optical size)
+     and heavier than the other menu items (also in the desktop menu, snippets/header-menu.liquid) */
+  :is(.menu-list__link, .menu-drawer__menu-item, .menu-list__link-title, .menu-drawer__menu-item-text).menu-item--sale,
+  .menu-list__link .menu-list__link-title.menu-item--sale,
+  .menu-drawer__menu-item .menu-drawer__menu-item-text.menu-item--sale {
+    display: inline-block;
+    color: #e8323c;
+    font-family: var(--font-oce, 'Inter', system-ui, sans-serif);
+    font-size: 1.5em;
+    font-weight: 850;
+    font-variation-settings: 'opsz' 32;
+    line-height: 1;
+    text-transform: lowercase !important; /* stylelint-disable-line declaration-no-important */
+    letter-spacing: -0.01em;
+  }
+
+  :is(.menu-list__link-title, .menu-drawer__menu-item-text).menu-item--sale::first-letter {
+    text-transform: uppercase;
+  }
+
+  /* Desktop menu: centred like the others, the bigger word's baseline would sit 0.1em low; lift it
+     so the bottom of "Sale" lines up with the bottom of the other items */
+  .menu-list__link-title.menu-item--sale {
+    position: relative;
+    top: -0.1em;
+  }
+
+  /* Brand drill-down inside the drawer: inset like the child links */
+  .menu-drawer__drill {
+    padding-inline: var(--padding-xl, 20px);
+  }
+
+  /* While a menu item is open, the other items are hidden and its title sits at the top.
+     The slide in and out is in assets/header-drawer.js (toggleSubmenu). */
+  .menu-drawer__menu:has(> li > details.menu-drawer__menu-container--focus[open])
+    > li:not(:has(> details.menu-drawer__menu-container--focus[open])) {
+    display: none;
+  }
+
+  /* Its sub items drop down from under the title as the title slides up (instead of the theme's
+     slide in from the side), and simply fade out when it closes */
+  .menu-drawer__menu-container--focus > .menu-drawer__submenu {
+    transform: none;
+  }
+
+  .menu-drawer__menu-container--focus.menu-open > .menu-drawer__submenu {
+    transform: none;
+    animation: menu-drawer-drop 0.55s cubic-bezier(0.3, 0.7, 0.3, 1) backwards;
+  }
+
+  .menu-drawer__menu-container--focus > .menu-drawer__submenu .menu-drawer__animated-element {
+    animation: none;
+  }
+
+  @keyframes menu-drawer-drop {
+    from {
+      opacity: 0;
+      transform: translateY(-24px);
+      clip-path: inset(0 0 100% 0);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+      clip-path: inset(0 0 -50% 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .menu-drawer__menu-container--focus.menu-open > .menu-drawer__submenu {
+      animation: none;
+    }
+  }
+
+  /* No grey/black tap flash on phones when menu items are tapped */
+  .menu-drawer :is(a, summary, button, [role='button']) {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* An open item's row shows an X instead of the arrow; tapping the row closes it */
+  .menu-drawer__drill-close {
+    display: none;
+    width: 16px;
+    height: 16px;
+    margin-inline-start: auto;
+  }
+
+  .menu-drawer__drill-close svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  details[open] > summary > .menu-drawer__drill-close {
+    display: inline-flex;
+  }
+
+  details[open] > summary:has(> .menu-drawer__drill-close) > .icon-caret {
+    display: none;
+  }
+
   .header__icon--menu {
     position: initial;
   }
@@ -1083,8 +1187,8 @@
     gap: 5px;
     font-size: 10px;
     font-weight: 600;
-    color: #111111;
-    letter-spacing: 0.04em;
+    color: #121212;
+    letter-spacing: 0.01em;
     white-space: nowrap;
     pointer-events: none;
   }
@@ -1198,7 +1302,8 @@
                 visibility 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     background-color: #ffffff;
     border: none;
-    border-radius: 20px;
+    /* Square top: the panel hangs straight off the header bar */
+    border-radius: 0 0 20px 20px;
     box-shadow: 0 14px 36px rgba(0, 0, 0, 0.13);
 
     @media screen and (min-width: 750px) {
@@ -1240,11 +1345,11 @@
 
   /* ---- Text: black on white ---- */
   .header-drawer .menu-drawer__menu-item--mainlist {
-    color: #111111;
+    color: #121212;
   }
 
   .header-drawer .menu-drawer__menu-item--mainlist:hover {
-    color: #000000;
+    color: #121212;
   }
 
   .header-drawer .menu-drawer__menu-item--parent {
@@ -1252,7 +1357,7 @@
   }
 
   .header-drawer .menu-drawer__menu-item--parent:hover {
-    color: #111111;
+    color: #121212;
   }
 
   .header-drawer .menu-drawer__menu-item--child {
@@ -1277,7 +1382,7 @@
 
   .header-drawer .menu-drawer__close-button:hover,
   .header-drawer .menu-drawer__back-button:hover {
-    color: #000000;
+    color: #121212;
   }
 
   /* Submenus: flow in-place inside the scrollable drawer */

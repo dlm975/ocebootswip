@@ -131,10 +131,10 @@
 
     <!-- Navigation arrows -->
     <button class="cc-nav cc-nav--prev" id="cc-prev-{{ section.id }}" aria-label="Previous">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+      {%- render 'gicon', name: 'chevron_left' -%}
     </button>
     <button class="cc-nav cc-nav--next" id="cc-next-{{ section.id }}" aria-label="Next">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+      {%- render 'gicon', name: 'chevron_right' -%}
     </button>
   </div>
 
@@ -157,7 +157,7 @@
 
   .cc-header__title {
     font-size: clamp(1.5rem, 4vw, 2.4rem);
-    font-weight: 800;
+    font-weight: 750;
     margin: 0 0 6px;
     line-height: 1.1;
   }
@@ -249,7 +249,7 @@
     position: relative;
     aspect-ratio: calc(1 / var(--cc-ratio, 1.333));
     overflow: hidden;
-    background: #1a1a1a;
+    background: #121212;
   }
 
   .cc-card__img {
@@ -302,7 +302,7 @@
     display: block;
     color: #fff;
     font-size: 1.1rem;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.2;
     letter-spacing: -0.01em;
   }
@@ -319,11 +319,11 @@
     margin-top: 10px;
     padding: 8px 20px;
     background: #fff;
-    color: #111;
+    color: #121212;
     font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-transform: none;
     border-radius: var(--brand-radius-md);
     width: fit-content;
     line-height: normal;
@@ -342,7 +342,7 @@
     background: rgba(255, 255, 255, 0.78);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     backdrop-filter: blur(16px) saturate(180%);
-    color: #111;
+    color: #121212;
     box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.18), 0 1px 3px rgba(0, 0, 0, 0.08);
     cursor: pointer;
     display: flex;

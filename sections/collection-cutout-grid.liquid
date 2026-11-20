@@ -47,7 +47,7 @@
       <feMorphology in="SourceAlpha" operator="dilate" radius="4" result="border"/>
       <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="11" result="noise"/>
       <feDisplacementMap in="border" in2="noise" scale="2.5" xChannelSelector="R" yChannelSelector="G" result="rough"/>
-      <feFlood flood-color="#fbfaf6" result="paper"/>
+      <feFlood flood-color="#F1F5F9" result="paper"/>
       <feComposite in="paper" in2="rough" operator="in" result="paper-edge"/>
       <feMerge>
         <feMergeNode in="paper-edge"/>
@@ -140,7 +140,7 @@
 
   .ccg-header__title {
     font-size: clamp(1.5rem, 4vw, 2.4rem);
-    font-weight: 800;
+    font-weight: 750;
     margin: 0 0 6px;
     line-height: 1.1;
     letter-spacing: -0.02em;
@@ -252,9 +252,9 @@
     position: relative;
     z-index: 1;
     font-size: 0.5rem;
-    font-weight: 700;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-transform: none;
     opacity: 0.75;
     text-align: center;
     transition: opacity 0.2s ease;

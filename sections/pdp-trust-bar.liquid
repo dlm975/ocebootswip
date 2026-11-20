@@ -34,11 +34,23 @@
               <span class="ptb__divider" aria-hidden="true"></span>
             {%- endunless -%}
             <div class="ptb__item">
-              {%- if icon != blank -%}
-                <span class="ptb__icon" aria-hidden="true">
-                  <img src="{{ icon | image_url: width: 80 }}" alt="" width="28" height="28" loading="lazy" decoding="async">
-                </span>
-              {%- endif -%}
+              {%- liquid
+                assign symbol_key = 'symbol_' | append: i
+                assign symbol = section.settings[symbol_key]
+                if symbol == blank
+                  case i
+                    when 1
+                      assign symbol = 'verified_user'
+                    when 2
+                      assign symbol = 'local_shipping'
+                    else
+                      assign symbol = 'autorenew'
+                  endcase
+                endif
+              -%}
+              <span class="ptb__icon oce-disk" aria-hidden="true">
+                {%- render 'gicon', name: symbol, size: 18 -%}
+              </span>
               <span class="ptb__text">{{ text }}</span>
             </div>
           {%- endif -%}
@@ -59,53 +71,55 @@
     padding-inline: var(--page-margin, 16px);
   }
 
+  /* The site's newer look: no box, just three holographic disks (assets/base.css .oce-disk) with
+     Google icons and bold labels, split by fine rules */
   .ptb__bar {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 8px;
     width: 100%;
-    padding: 12px 16px;
-    background: var(--ptb-bg, #f8f8f8);
-    border-radius: var(--ptb-radius, 10px);
+    padding: 6px 0;
     box-sizing: border-box;
   }
 
   .ptb__item {
     display: flex;
+    flex: 1;
     flex-direction: column;
     align-items: center;
-    gap: 5px;
-    flex: 1;
+    gap: 8px;
     text-align: center;
   }
 
   .ptb__icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
   }
 
-  .ptb__icon img {
-    width: 28px;
-    height: 28px;
-    object-fit: contain;
+  .ptb__icon svg {
+    position: relative;
+    width: 20px;
+    height: 20px;
   }
 
   .ptb__text {
-    font-size: 0.7rem;
-    font-weight: 600;
+    font-size: 0.75rem;
+    font-weight: 750;
     line-height: 1.2;
-    color: var(--ptb-fg, #333333);
+    letter-spacing: -0.005em;
+    color: #121212;
   }
 
   .ptb__divider {
-    width: 1px;
-    height: 34px;
-    background: rgba(0, 0, 0, 0.12);
+    align-self: center;
     flex-shrink: 0;
+    width: 1px;
+    height: 40px;
+    background: rgb(18 18 18 / 0.1);
   }
 
   /* Inside the product details column the section already has the
@@ -178,19 +192,61 @@
       "type": "header",
       "content": "Item 1"
     },
-    { "type": "image_picker", "id": "icon_1", "label": "Icon" },
+    { "type": "image_picker", "id": "icon_1", "label": "Icon image (no longer shown)" },
+    {
+      "type": "select",
+      "id": "symbol_1",
+      "label": "Icon",
+      "options": [
+        { "value": "verified_user", "label": "Verified" },
+        { "value": "local_shipping", "label": "Shipping" },
+        { "value": "autorenew", "label": "Returns" },
+        { "value": "lock", "label": "Secure" },
+        { "value": "bolt-fill", "label": "Fast" },
+        { "value": "star-fill", "label": "Star" }
+      ],
+      "default": "verified_user"
+    },
     { "type": "text", "id": "text_1", "label": "Text", "default": "Verified Boots" },
     {
       "type": "header",
       "content": "Item 2"
     },
-    { "type": "image_picker", "id": "icon_2", "label": "Icon" },
+    { "type": "image_picker", "id": "icon_2", "label": "Icon image (no longer shown)" },
+    {
+      "type": "select",
+      "id": "symbol_2",
+      "label": "Icon",
+      "options": [
+        { "value": "verified_user", "label": "Verified" },
+        { "value": "local_shipping", "label": "Shipping" },
+        { "value": "autorenew", "label": "Returns" },
+        { "value": "lock", "label": "Secure" },
+        { "value": "bolt-fill", "label": "Fast" },
+        { "value": "star-fill", "label": "Star" }
+      ],
+      "default": "local_shipping"
+    },
     { "type": "text", "id": "text_2", "label": "Text", "default": "Express Shipping" },
     {
       "type": "header",
       "content": "Item 3"
     },
-    { "type": "image_picker", "id": "icon_3", "label": "Icon" },
+    { "type": "image_picker", "id": "icon_3", "label": "Icon image (no longer shown)" },
+    {
+      "type": "select",
+      "id": "symbol_3",
+      "label": "Icon",
+      "options": [
+        { "value": "verified_user", "label": "Verified" },
+        { "value": "local_shipping", "label": "Shipping" },
+        { "value": "autorenew", "label": "Returns" },
+        { "value": "lock", "label": "Secure" },
+        { "value": "bolt-fill", "label": "Fast" },
+        { "value": "star-fill", "label": "Star" }
+      ],
+      "default": "autorenew"
+    },
     { "type": "text", "id": "text_3", "label": "Text", "default": "Accept Returns" },
     {
       "type": "header",
@@ -200,13 +256,13 @@
       "type": "color",
       "id": "background",
       "label": "Background",
-      "default": "#f8f8f8"
+      "default": "#F1F5F9"
     },
     {
       "type": "color",
       "id": "text_color",
       "label": "Text colour",
-      "default": "#333333"
+      "default": "#1F2937"
     },
     {
       "type": "range",

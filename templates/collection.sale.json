@@ -1,9 +1,18 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "sale_hero": {
       "type": "sale-collection-hero",
       "settings": {
-        "label": "LIMITED TIME",
+        "label": "Limited time",
         "heading": "",
         "subtext": "",
         "image": "",
@@ -13,7 +22,7 @@
         "tz_offset": "+12:00",
         "expired_behavior": "message",
         "expired_text": "This sale has ended",
-        "accent": "#d0021b"
+        "accent": "#3897F0"
       }
     },
     "main": {
@@ -30,7 +39,7 @@
             "show_swatch_label": false,
             "show_filter_label": false,
             "enable_sorting": true,
-            "enable_grid_density": true,
+            "enable_grid_density": false,
             "inherit_color_scheme": true,
             "color_scheme": "",
             "padding-block-start": 8,
@@ -90,7 +99,7 @@
                 "wrap": "balance",
                 "color": "var(--color-foreground)",
                 "background": false,
-                "background_color": "#00000026",
+                "background_color": "#12121226",
                 "corner_radius": 0,
                 "padding-block-start": 4,
                 "padding-block-end": 0,

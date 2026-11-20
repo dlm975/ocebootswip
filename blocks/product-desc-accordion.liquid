@@ -15,9 +15,7 @@
 >
   <summary class="pdp-accordion__summary">
     <span>{{ block.settings.heading }}</span>
-    <svg class="pdp-accordion__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="16" height="16">
-      <polyline points="6 9 12 15 18 9"/>
-    </svg>
+    {%- render 'gicon', name: 'keyboard_arrow_down', class: 'pdp-accordion__chevron', size: 16 -%}
   </summary>
   <div class="pdp-accordion__body rte">
     {% if desc != blank %}
@@ -31,12 +29,12 @@
 
 <style>
   .pdp-accordion {
-    border-top: 1px solid var(--color-border, #e2e8f0);
+    border-top: 1px solid var(--color-border, #64748B40);
     width: 100%;
   }
 
   .pdp-accordion:last-of-type {
-    border-bottom: 1px solid var(--color-border, #e2e8f0);
+    border-bottom: 1px solid var(--color-border, #64748B40);
   }
 
   .pdp-accordion__summary {

@@ -42,8 +42,8 @@
     --hf-panel-w: {{ section.settings.panel_width | default: 520 }}px;
     --hf-radius: {{ section.settings.panel_radius | default: 20 }}px;
     --hf-panel-bg: {{ section.settings.panel_background | default: '#ffffff' }};
-    --hf-panel-fg: {{ section.settings.panel_text_color | default: '#111111' }};
-    --hf-btn-bg: {{ section.settings.button_background | default: '#111111' }};
+    --hf-panel-fg: {{ section.settings.panel_text_color | default: '#121212' }};
+    --hf-btn-bg: {{ section.settings.button_background | default: '#121212' }};
     --hf-btn-fg: {{ section.settings.button_text_color | default: '#ffffff' }};
   "
   {{ section.shopify_attributes }}
@@ -185,14 +185,14 @@
     padding: 16px;
     border-radius: var(--hf-radius, 20px);
     background: var(--hf-panel-bg, #fff);
-    color: var(--hf-panel-fg, #111);
+    color: var(--hf-panel-fg, #121212);
     box-shadow: 0 18px 40px -16px rgb(0 0 0 / 45%), 0 2px 8px rgb(0 0 0 / 10%);
   }
 
   .hf__panel-heading {
     margin: 0 0 10px;
     font-size: 0.85rem;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 0.02em;
     text-align: center;
   }
@@ -214,8 +214,8 @@
     margin-bottom: 4px;
     font-size: 0.68rem;
     font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    text-transform: none;
     opacity: 0.65;
   }
 
@@ -266,10 +266,10 @@
     min-height: 46px;
     padding: 0 18px;
     border-radius: var(--brand-radius-md);
-    background: var(--hf-btn-bg, #111);
+    background: var(--hf-btn-bg, #121212);
     color: var(--hf-btn-fg, #fff);
     font-size: 0.85rem;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 0.02em;
     text-align: center;
     text-decoration: none;
@@ -451,7 +451,7 @@
       "type": "color",
       "id": "panel_text_color",
       "label": "Panel text",
-      "default": "#111111"
+      "default": "#121212"
     },
     {
       "type": "header",
@@ -515,7 +515,7 @@
       "type": "color",
       "id": "button_background",
       "label": "Button background",
-      "default": "#111111"
+      "default": "#121212"
     },
     {
       "type": "color",

@@ -26,16 +26,18 @@
 
     {%- render 'meta-tags' -%}
     {%- render 'fonts' -%}
-    {%- # Oswald Bold for the BFSALE "% OFF" badge -%}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    {%- # Oswald Bold for the BFSALE "% OFF" badge -%}
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap">
     {%- # Shrinks sale price lines on product cards to fit one line -%}
     <script src="{{ 'price-fit.js' | asset_url }}" defer></script>
+    <script src="{{ 'wishlist.js' | asset_url }}" defer></script>
     {%- render 'scripts' -%}
     {%- render 'theme-styles-variables' -%}
     {%- render 'cart-customisation' -%}
     {%- render 'color-schemes' -%}
+    {%- render 'brand-typography' -%}
 
     {% if request.design_mode %}
       {%- render 'theme-editor' -%}
@@ -84,16 +86,16 @@
         })();
       </script>
     {%- endif -%}
-    {% if template.name == 'index' or template.name == 'collection' %}
-      {% render 'instagram-widget' %}
-      {%- # The size template has its own size selector in the header -%}
-      {% unless template.suffix == 'size' %}
-        {% render 'size-widget' %}
-      {% endunless %}
-    {% endif %}
+    {%- comment -%}
+      The floating Instagram button (snippets/instagram-widget.liquid) and Shop By Size bar
+      (snippets/size-widget.liquid) are switched off: Shop by Size is in the menu.
+    {%- endcomment -%}
 
     {%- comment -%} Every page, so it lives in the layout rather than a section {%- endcomment -%}
     {% render 'flying-banner' %}
+
+    {%- comment -%} Phones: floating nav with Search and Size (not on product pages) {%- endcomment -%}
+    {% render 'mobile-dock' %}
 
 
     {% if settings.quick_add or settings.mobile_quick_add %}

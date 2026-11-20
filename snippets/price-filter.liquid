@@ -5,6 +5,7 @@
   @param {string} filter_style - The filter style, can be 'horizontal' or 'vertical'.
   @param {boolean} [autofocus] - Whether to autofocus the filter.
   @param {boolean} [should_render_clear] - Whether to render the clear button.
+  @param {boolean} [in_drawer] - Whether the filter is in the filter drawer (closed until tapped, one at a time).
 
   @example
   {% render 'price-filter', filter: filter, filter_style: 'vertical' %}
@@ -17,10 +18,14 @@
     data-close-with-escape="true"
   {% endif %}
 
-  open-by-default-on-mobile
-  {% if filter_style == 'vertical' %}
-    open
-    open-by-default-on-desktop
+  {% if in_drawer %}
+    data-drawer-focus
+  {% else %}
+    open-by-default-on-mobile
+    {% if filter_style == 'vertical' %}
+      open
+      open-by-default-on-desktop
+    {% endif %}
   {% endif %}
 >
   <details
@@ -30,7 +35,7 @@
     {% endif %}
   >
     <summary class="facets__summary">
-      <span class="facets__label">{{ filter.label }}</span>
+      <span class="facets__label">{{ filter.label }} ({{ cart.currency.iso_code }})</span>
       <facet-status-component class="facets__status">
         <template ref="moneyFormat">{{ shop.money_format }}</template>
 
@@ -57,8 +62,13 @@
         </span>
       </facet-status-component>
       <span class="svg-wrapper icon-caret icon-animated">
-        {{- 'icon-caret.svg' | inline_asset_content -}}
+        {{- 'icon-dropdown.svg' | inline_asset_content -}}
       </span>
+      {%- if in_drawer -%}
+        <span class="svg-wrapper facets__drill-close" aria-hidden="true">
+          {{- 'icon-close.svg' | inline_asset_content -}}
+        </span>
+      {%- endif -%}
     </summary>
     <floating-panel-component
       {% unless filter_style == 'vertical' %}

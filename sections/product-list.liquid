@@ -35,6 +35,7 @@
     section--{{ section.settings.section_width }}
     color-{{ section.settings.color_scheme }}
     section-resource-list
+    {% if section.settings.mobile_columns == '4' %}plist--m4{% endif %}
     spacing-style
     gap-style
     {% if request.design_mode == false and section.settings.collection == blank %}
@@ -48,6 +49,7 @@
     {{ styles }}
   "
 >
+  {%- if section.settings.boxed -%}<div class="plist-box">{%- endif -%}
   <div class="section-resource-list__header">
     {%- content_for 'block', type: '_product-list-content', id: 'static-header' -%}
   </div>
@@ -67,13 +69,11 @@
         {% content_for 'block', type: '_product-card', id: 'static-product-card', closest.product: product %}
       </div>
 
-      {% if mobile_max > 0 and forloop.index == mobile_max %}
+      {% if mobile_max > 0 and forloop.index == mobile_max and section.settings.mobile_view_all_card != false %}
         <div class="resource-list__item resource-list__item--view-all-card">
           <a href="{{ section.settings.collection.url }}" class="plist-view-all-card">
             <span class="plist-view-all-card__icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
+              {%- render 'gicon', name: 'arrow_forward', size: 20 -%}
             </span>
             <span class="plist-view-all-card__label">View All</span>
           </a>
@@ -154,9 +154,94 @@
   >
     {%- content_for 'blocks' -%}
   </div>
+  {%- if section.settings.boxed -%}</div>{%- endif -%}
 </div>
 
 {% stylesheet %}
+  /* In a container: a white rounded card holding the heading, the products and the link below them */
+  .plist-box {
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    gap: max(var(--gap, 0px), 16px);
+    min-width: 0;
+    padding: 16px 12px 20px;
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgb(18 18 18 / 0.06), 0 8px 24px rgb(18 18 18 / 0.08);
+  }
+
+  .plist-box > * {
+    min-width: 0;
+  }
+
+  /* Photo-only cards: room under the photo for a sale badge that sits on its edge */
+  .plist-box .product-card__content:not(:has(> :not(.card-gallery, .bfsale-badge-anchor))):has(.bfsale-badge-anchor) {
+    padding-block-end: 12px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .plist-box {
+      padding: 28px 28px 32px;
+      border-radius: 24px;
+    }
+  }
+
+  /* The link below the products: centred, with room above */
+  .plist-box .section-resource-list__content {
+    align-items: center;
+    padding-block-start: 8px;
+  }
+
+  /* Four a row on phones: compact cards, so names and prices fit their narrow column */
+  @media screen and (max-width: 749px) {
+    .plist--m4 .resource-list {
+      column-gap: 6px;
+      row-gap: 14px;
+    }
+
+    .plist--m4 .product-card__content > :not(.card-gallery, .bfsale-badge-anchor),
+    .plist--m4 .product-card__content > :not(.card-gallery, .bfsale-badge-anchor) * {
+      font-size: 0.6875rem !important;
+      line-height: 1.25 !important;
+      letter-spacing: 0 !important;
+    }
+
+    /* Names to two lines */
+    .plist--m4 .product-card__content > :not(.card-gallery, .bfsale-badge-anchor):has(+ * + *) :is(p, h3, h4, a) {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Sale prices: the was-price above, the new price below, without the "NOW" */
+    .plist--m4 .bfsale-fit {
+      white-space: normal;
+    }
+
+    .plist--m4 :is(.bfsale-rrp, .bfsale-now) {
+      display: block;
+    }
+
+    .plist--m4 .bfsale-now > .bfsale-price[aria-hidden] {
+      display: none;
+    }
+
+    .plist--m4 .wishlist-toggle--card {
+      --wishlist-offset: 2px;
+      zoom: 0.6;
+    }
+
+    .plist--m4 .bfsale-badge-anchor {
+      zoom: 0.55;
+    }
+
+    .plist--m4 .slideshow-control {
+      display: none;
+    }
+  }
+
   /* Mobile cap: hide products beyond the mobile_max threshold */
   @media screen and (max-width: 749px) {
     .resource-list__item--mobile-hidden {
@@ -305,6 +390,18 @@
       "info": "Caps visible products on mobile and inserts a View All card in the next slot."
     },
     {
+      "type": "checkbox",
+      "id": "mobile_view_all_card",
+      "label": "Show a View All card after the mobile limit",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "boxed",
+      "label": "Show in a container",
+      "default": false
+    },
+    {
       "type": "range",
       "id": "columns",
       "label": "t:settings.columns",
@@ -330,6 +427,10 @@
         {
           "value": "3",
           "label": "3"
+        },
+        {
+          "value": "4",
+          "label": "4"
         }
       ],
       "default": "2",
