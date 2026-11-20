@@ -4167,9 +4167,14 @@ text-component {
   row-gap: 1em; /* room for the flames on the % OFF badge if it wraps to its own line */
 }
 
-/* Room above the row for the flames rising off the % OFF badge */
+/* A little room above the row; the flames rising off the % OFF badge reach up into the gap above */
 .bfsale-price-line--pdp:has(.bfsale-fire:not([hidden])) {
-  padding-block-start: 1em;
+  padding-block-start: 0.35em;
+}
+
+/* Product page: the price sits closer to the name above and the sizes below */
+.product-information product-price {
+  margin-block-end: -6px;
 }
 
 .bfsale-price-line--pdp > [role='group'] {
