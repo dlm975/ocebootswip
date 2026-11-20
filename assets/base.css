@@ -4612,7 +4612,7 @@ html.wlq-open {
 /*
   Product page, reduced price: "was <price>" small and muted on the line above, the price below,
   and the "% off" in bold red to their right, centred on the two lines and about three quarters of
-  their height (line-height 0.75 wraps Inter's capitals, so the box is the text's own height).
+  their height (line-height 0.75 wraps Inter's capitals, so the box is the text's own height.)
 */
 .pdp-sale {
   display: grid;
