@@ -330,96 +330,95 @@
         "padding-block-end": 0
       }
     },
-    "pro_player_wall": {
-      "type": "pro-player-wall",
+    "worn_by_pros_pdp": {
+      "type": "worn-by-pros",
       "blocks": {
-        "player_mDfxBi": {
-          "type": "player",
+        "league_LB3MjY": {
+          "type": "league",
           "settings": {
-            "image": "shopify://shop_images/0bb8d3c0-20c4-4d54-9d95-7deb1180583d.png",
-            "name": "Cameron Archer",
-            "club": "Southampton F.C.",
-            "club_badge": "shopify://shop_images/FC_Southampton.svg",
-            "flag": "shopify://shop_images/Flag_of_England.svg",
-            "boot_name": "F50 Adizero 2014",
-            "link": ""
+            "logo": "shopify://shop_images/Ligue1_logo.png",
+            "name": "Ligue 1",
+            "player_1": "none",
+            "player_2": "none",
+            "player_3": "4"
           }
         },
-        "player_YGwxeH": {
-          "type": "player",
+        "league_premier": {
+          "type": "league",
           "settings": {
-            "name": "",
-            "club": "",
-            "boot_name": "",
-            "link": ""
+            "logo": "shopify://shop_images/Premier_League_Logo.svg",
+            "name": "Premier League",
+            "player_1": "1",
+            "player_2": "none",
+            "player_3": "none"
           }
         },
-        "player_Nr4hyn": {
-          "type": "player",
+        "league_laliga": {
+          "type": "league",
           "settings": {
-            "name": "",
-            "club": "",
-            "boot_name": "",
-            "link": ""
+            "logo": "shopify://shop_images/LaLiga_EA_Sports_2023_Vertical_Logo.svg",
+            "name": "LaLiga",
+            "player_1": "7",
+            "player_2": "none",
+            "player_3": "none"
           }
         },
-        "player_GFgXXb": {
-          "type": "player",
+        "league_bundesliga": {
+          "type": "league",
           "settings": {
-            "name": "",
-            "club": "",
-            "boot_name": "",
-            "link": ""
+            "logo": "shopify://shop_images/Bundesliga_logo__2017.svg",
+            "name": "Bundesliga",
+            "player_1": "2",
+            "player_2": "none",
+            "player_3": "none"
           }
         },
-        "player_nfExFK": {
-          "type": "player",
+        "league_seriea": {
+          "type": "league",
           "settings": {
-            "name": "",
-            "club": "",
-            "boot_name": "",
-            "link": ""
+            "logo": "shopify://shop_images/Serie_A_ENILIVE_logo.svg",
+            "name": "Serie A",
+            "player_1": "3",
+            "player_2": "none",
+            "player_3": "none"
           }
         },
-        "player_Mk4T4B": {
-          "type": "player",
+        "league_mls": {
+          "type": "league",
           "settings": {
-            "name": "",
-            "club": "",
-            "boot_name": "",
-            "link": ""
+            "logo": "shopify://shop_images/Major_League_Soccer_logo.svg",
+            "name": "MLS",
+            "player_1": "6",
+            "player_2": "none",
+            "player_3": "none"
+          }
+        },
+        "league_saudi": {
+          "type": "league",
+          "settings": {
+            "logo": "shopify://shop_images/Roshn_Saudi_League_Logo.svg",
+            "name": "Saudi Pro League",
+            "player_1": "8",
+            "player_2": "none",
+            "player_3": "none"
           }
         }
       },
       "block_order": [
-        "player_mDfxBi",
-        "player_YGwxeH",
-        "player_Nr4hyn",
-        "player_GFgXXb",
-        "player_nfExFK",
-        "player_Mk4T4B"
+        "league_LB3MjY",
+        "league_premier",
+        "league_laliga",
+        "league_bundesliga",
+        "league_seriea",
+        "league_mls",
+        "league_saudi"
       ],
-      "name": "Pro Player Wall",
       "settings": {
-        "roster_source": "shared",
-        "heading": "Trusted by the pros",
-        "subheading": "",
-        "show_stars": true,
-        "star_color": "#25D366",
-        "star_size": 20,
-        "aspect_ratio": "3 / 4",
-        "cards_mobile": 2.5,
-        "cards_desktop": 4,
-        "gap_mobile": 8,
-        "gap_desktop": 12,
-        "corner_radius": 16,
-        "attach_to": "details",
-        "blur_strength": 16,
-        "tint_opacity": 30,
-        "cross_seconds": 40,
-        "pause_on_hover": true,
-        "padding-block-start": 8,
-        "padding-block-end": 20
+        "heading": "Who we've worked with",
+        "hint": "Tap a league to meet the players",
+        "color_scheme": "scheme-1",
+        "padding-block-start": 24,
+        "padding-block-end": 24
       }
     },
     "pdp_info_panel": {
@@ -688,7 +687,7 @@
   "order": [
     "pdp_gallery_style",
     "main",
-    "pro_player_wall",
+    "worn_by_pros_pdp",
     "pdp_info_panel",
     "pdp_trust_bar",
     "customer_collage",
