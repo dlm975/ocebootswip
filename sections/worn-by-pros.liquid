@@ -423,7 +423,8 @@
      reaches past its edges onto them), still under the sticky header */
   .shopify-section:has(.wbp__layout.is-open) {
     position: relative;
-    z-index: 4;
+    /* Above the "Worn by you" photos (up to 6), under the sticky header (--layer-sticky, 8) */
+    z-index: 7;
   }
 
   /* Free on the page: no container around it */
