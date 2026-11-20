@@ -521,7 +521,7 @@
           "settings": {
             "logo": "shopify://shop_images/LaLiga_EA_Sports_2023_Vertical_Logo.svg",
             "name": "LaLiga",
-            "player_1": "none",
+            "player_1": "7",
             "player_2": "none",
             "player_3": "none"
           }
