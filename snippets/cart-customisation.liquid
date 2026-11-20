@@ -124,6 +124,29 @@
     }
   {%- endif %}
 
+  /* Item names: at most two lines (a longer name ends in an ellipsis) */
+  .cart-drawer .cart-items__title,
+  .cart-page .cart-items__title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+
+  /* The size and condition on one line (cut with an ellipsis if they ever don't fit) */
+  .cart-drawer .cart-items__variants,
+  .cart-page .cart-items__variants {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .cart-drawer .cart-items__variants :is(.cart-items__variant, dd),
+  .cart-page .cart-items__variants :is(.cart-items__variant, dd) {
+    display: inline;
+  }
+
   /* "Total" rather than "Estimated total" — the wording itself lives in
      locales/en.default.json under content.cart_estimated_total. */
   .cart-drawer .cart__total-label,
