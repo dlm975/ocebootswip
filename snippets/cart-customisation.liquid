@@ -134,12 +134,16 @@
     overflow: hidden;
   }
 
-  /* The size and condition on one line (cut with an ellipsis if they ever don't fit) */
+  /* The size and condition on one line, never cut: a script below shrinks the text to fit */
   .cart-drawer .cart-items__variants,
   .cart-page .cart-items__variants {
-    overflow: hidden;
     white-space: nowrap;
-    text-overflow: ellipsis;
+  }
+
+  /* The bin at the foot of the photo: its cell drops to the bottom of the row */
+  .cart-drawer .cart-items__quantity,
+  .cart-page .cart-items__quantity {
+    align-self: end;
   }
 
   .cart-drawer .cart-items__variants :is(.cart-items__variant, dd),
@@ -340,3 +344,36 @@
     }
   {%- endif %}
 {% endstyle %}
+
+<script>
+  /* Cart items: the size and condition line kept whole on one line. If it is wider than its
+     column (a long size or condition on a narrow phone), its text shrinks just enough to fit,
+     down to 7px. Refits when the cart redraws or the drawer opens. */
+  (() => {
+    const fit = (line) => {
+      line.style.removeProperty('font-size');
+      const room = line.clientWidth;
+      if (!room || line.scrollWidth <= room + 0.5) return;
+      const size = parseFloat(getComputedStyle(line).fontSize);
+      line.style.fontSize = Math.max(7, Math.floor(((size * room) / line.scrollWidth) * 10) / 10) + 'px';
+    };
+    const watched = new WeakSet();
+    const resized = new ResizeObserver((entries) => entries.forEach((entry) => fit(entry.target)));
+    let queued = 0;
+    const scan = () => {
+      queued = 0;
+      document.querySelectorAll('.cart-items__variants').forEach((line) => {
+        if (!watched.has(line)) {
+          watched.add(line);
+          resized.observe(line);
+        }
+        fit(line);
+      });
+    };
+    new MutationObserver(() => {
+      if (!queued) queued = requestAnimationFrame(scan);
+    }).observe(document.documentElement, { childList: true, subtree: true });
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan);
+    else scan();
+  })();
+</script>
