@@ -423,7 +423,7 @@
         "league_saudi"
       ],
       "settings": {
-        "heading": "Trusted|By The Pros",
+        "heading": "Trusted|By The|Pros.",
         "hint": "Tap a league to meet the players",
         "color_scheme": "scheme-1",
         "padding-block-start": 24,
@@ -705,4 +705,3 @@
     "product_recommendations_qggXJq"
   ]
 }
-
