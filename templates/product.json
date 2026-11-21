@@ -585,27 +585,45 @@
         },
         "photo_yYV3Eg": {
           "type": "photo",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/IMG_1311.jpg"
+          }
         },
         "photo_zMeEAA": {
           "type": "photo",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/IMG_1305.jpg"
+          }
         },
         "photo_MmFTR8": {
           "type": "photo",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/IMG_1309.jpg"
+          }
         },
         "photo_BYGDif": {
           "type": "photo",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/IMG_1308.jpg"
+          }
         },
         "photo_4J7YBQ": {
           "type": "photo",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/IMG_1307.jpg"
+          }
         },
         "photo_be7Kmr": {
           "type": "photo",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/IMG_1306.jpg"
+          }
+        },
+        "photo_CNX8HJ": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/IMG_1310.jpg"
+          }
         }
       },
       "block_order": [
@@ -631,7 +649,8 @@
         "photo_MmFTR8",
         "photo_BYGDif",
         "photo_4J7YBQ",
-        "photo_be7Kmr"
+        "photo_be7Kmr",
+        "photo_CNX8HJ"
       ],
       "settings": {
         "heading": "Worn by you",
