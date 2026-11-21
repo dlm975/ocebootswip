@@ -367,6 +367,26 @@
         "padding-block-end": 32
       }
     },
+    "pdp_trust_bar": {
+      "type": "pdp-trust-bar",
+      "settings": {
+        "attach_to_details": true,
+        "icon_1": "shopify://shop_images/Twitter_Verified_Badge.svg",
+        "symbol_1": "verified_user",
+        "text_1": "Verified Boots",
+        "icon_2": "shopify://shop_images/Noto_Emoji_v2.034_2708.svg",
+        "symbol_2": "local_shipping",
+        "text_2": "Express Shipping",
+        "icon_3": "shopify://shop_images/RecyclingSymbolGreen.png",
+        "symbol_3": "autorenew",
+        "text_3": "Accept Returns",
+        "background": "#f1f5f9",
+        "text_color": "#1f2937",
+        "corner_radius": 10,
+        "padding-block-start": 8,
+        "padding-block-end": 24
+      }
+    },
     "worn_by_pros_pdp": {
       "type": "worn-by-pros",
       "blocks": {
@@ -455,26 +475,6 @@
         "hint": "Tap a league to meet the players",
         "color_scheme": "scheme-1",
         "padding-block-start": 24,
-        "padding-block-end": 24
-      }
-    },
-    "pdp_trust_bar": {
-      "type": "pdp-trust-bar",
-      "settings": {
-        "attach_to_details": true,
-        "icon_1": "shopify://shop_images/Twitter_Verified_Badge.svg",
-        "symbol_1": "verified_user",
-        "text_1": "Verified Boots",
-        "icon_2": "shopify://shop_images/Noto_Emoji_v2.034_2708.svg",
-        "symbol_2": "local_shipping",
-        "text_2": "Express Shipping",
-        "icon_3": "shopify://shop_images/RecyclingSymbolGreen.png",
-        "symbol_3": "autorenew",
-        "text_3": "Accept Returns",
-        "background": "#f1f5f9",
-        "text_color": "#1f2937",
-        "corner_radius": 10,
-        "padding-block-start": 8,
         "padding-block-end": 24
       }
     },
@@ -582,6 +582,30 @@
           "settings": {
             "image": "shopify://shop_images/IMG_5172_7fee9973-3219-4499-aa91-6959a1619093.jpg"
           }
+        },
+        "photo_yYV3Eg": {
+          "type": "photo",
+          "settings": {}
+        },
+        "photo_zMeEAA": {
+          "type": "photo",
+          "settings": {}
+        },
+        "photo_MmFTR8": {
+          "type": "photo",
+          "settings": {}
+        },
+        "photo_BYGDif": {
+          "type": "photo",
+          "settings": {}
+        },
+        "photo_4J7YBQ": {
+          "type": "photo",
+          "settings": {}
+        },
+        "photo_be7Kmr": {
+          "type": "photo",
+          "settings": {}
         }
       },
       "block_order": [
@@ -601,7 +625,13 @@
         "photo_13",
         "photo_14",
         "photo_15",
-        "photo_16"
+        "photo_16",
+        "photo_yYV3Eg",
+        "photo_zMeEAA",
+        "photo_MmFTR8",
+        "photo_BYGDif",
+        "photo_4J7YBQ",
+        "photo_be7Kmr"
       ],
       "settings": {
         "heading": "Worn by you",
