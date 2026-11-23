@@ -16,12 +16,28 @@
 
   assign keyword = block.settings.match_keyword | strip | downcase
   assign title_lower = p.title | downcase
+  assign brand_lower = p.metafields.custom.brand.value | downcase
 
+  # Boots only (they have a Size option): no add-ons on the studs or socks themselves
+  assign is_boot = false
+  for option_name in p.options
+    assign option_lower = option_name | downcase
+    if option_lower == 'size'
+      assign is_boot = true
+    endif
+  endfor
+
+  # The brand's own list (adidas studs on adidas boots) by the boot's brand, or its title
   assign picks = block.settings.products
   assign matched = false
-  if keyword != blank and title_lower contains keyword
-    assign matched = true
-    assign picks = block.settings.products_alt
+  if keyword != blank
+    if title_lower contains keyword or brand_lower == keyword
+      assign matched = true
+      assign picks = block.settings.products_alt
+    endif
+  endif
+  if is_boot == false and request.design_mode == false
+    assign picks = nil
   endif
 
   assign limit = block.settings.max_items | default: 2
@@ -159,6 +175,26 @@
     <span class="pa__heading">{{ heading }}</span>
     <div class="pa__list">{{ cards }}</div>
   </div>
+
+  {%- comment -%}
+    After this boot is added to the cart (the main button or the floating bar), these add-ons are
+    offered once more in a popup before the cart opens.
+  {%- endcomment -%}
+  <dialog class="pa-pop" data-pa-pop data-product-id="{{ p.id }}" aria-labelledby="pa-pop-title-{{ block.id }}">
+    <div class="pa-pop__scrim" data-pa-pop-close></div>
+    <div class="pa-pop__card" data-pa-pop-card>
+      <p class="pa-pop__done">
+        {%- render 'gicon', name: 'check', class: 'pa-pop__tick', size: 16 -%}
+        <span>In your cart</span>
+      </p>
+      <h2 class="pa-pop__title" id="pa-pop-title-{{ block.id }}">Add these also?</h2>
+      <div class="pa__list pa-pop__list">{{ cards }}</div>
+      <div class="pa-pop__actions">
+        <button type="button" class="pa-pop__skip" data-pa-pop-close>No thanks</button>
+        <button type="button" class="pa-pop__go" data-pa-pop-close>Continue</button>
+      </div>
+    </div>
+  </dialog>
 {%- elsif request.design_mode -%}
   {%- comment -%}
     Editor only. With nothing chosen this renders nothing at all on the
@@ -193,15 +229,126 @@
     font-style: var(--font-body--style);
   }
 
+  /* "Add-ons:" in big bold type */
   .pa__heading {
     display: block;
-    margin-bottom: 4px;
+    margin-bottom: 10px;
     font-family: var(--font-heading--family);
     font-style: var(--font-heading--style);
-    margin-bottom: 8px;
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.035em;
+  }
+
+  /* ---- The popup after adding the boot to the cart ---- */
+  .pa-pop {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 16px;
+    border: 0;
+    background: transparent;
+    overflow: hidden;
+  }
+
+  .pa-pop[open] {
+    display: grid;
+    place-items: center;
+  }
+
+  .pa-pop::backdrop {
+    background: transparent;
+  }
+
+  .pa-pop__scrim {
+    position: absolute;
+    inset: 0;
+    background: rgb(255 255 255 / 0.6);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+
+  .pa-pop__card {
+    position: relative;
+    width: min(440px, 100%);
+    padding: 20px 18px 16px;
+    border-radius: 24px;
+    background: #ffffff;
+    color: #121212;
+    box-shadow: 0 0 0 1px rgb(18 18 18 / 0.06), 0 24px 60px rgb(18 18 18 / 0.22);
+  }
+
+  .pa-pop__done {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 6px;
+    color: rgb(18 18 18 / 0.6);
     font-size: 0.8125rem;
-    font-weight: 750;
-    letter-spacing: -0.005em;
+    font-weight: 650;
+  }
+
+  .pa-pop__tick {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    padding: 2px;
+    border-radius: 50%;
+    background: #25d366;
+    color: #ffffff;
+  }
+
+  .pa-pop__title {
+    margin: 0 0 14px;
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+  }
+
+  .pa-pop__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .pa-pop__skip {
+    padding: 8px 2px;
+    border: 0;
+    background: none;
+    color: rgb(18 18 18 / 0.6);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 650;
+    cursor: pointer;
+  }
+
+  .pa-pop__go {
+    height: 44px;
+    padding: 0 22px;
+    border: 0;
+    border-radius: 999px;
+    background: #121212;
+    color: #ffffff;
+    font: inherit;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* An add-on added from the popup: its button shows it */
+  .pa__add.is-added {
+    pointer-events: none;
+    opacity: 0.55;
   }
 
   /* Side by side rather than the cart's side-scroller: the details column
@@ -413,8 +560,15 @@
             })
           );
 
-          /* Show the shopper it landed. The drawer is the theme's own
-             component, so only ask if it is actually there and openable. */
+          /* In the popup: the button shows it landed, and the cart opens when the popup closes.
+             Elsewhere: show the shopper it landed in the drawer (the theme's own component, so
+             only ask if it is actually there and openable). */
+          if (btn.closest('[data-pa-pop]')) {
+            btn.classList.add('is-added');
+            var label = btn.querySelector('.pa__add-label');
+            if (label) label.textContent = '\u2713 Added';
+            return;
+          }
           var drawer = document.querySelector('cart-drawer-component');
           if (drawer && typeof drawer.open === 'function') drawer.open();
 
@@ -425,6 +579,75 @@
           btn.removeAttribute('disabled');
         });
     });
+
+    /* ---- The popup: offered once a boot from this page lands in the cart ----
+       Listening before the cart drawer does (capture), so the drawer waits behind the popup and
+       opens as it closes. Once per page. */
+    var offered = false;
+    var restoreAutoOpen = false;
+    var reduced = function () { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; };
+    var EASE = 'cubic-bezier(0.3, 0.7, 0.3, 1)';
+
+    document.addEventListener('cart:update', function (event) {
+      var data = event.detail && event.detail.data;
+      if (offered || !data || data.source !== 'product-form-component' || data.didError) return;
+      var pop = document.querySelector('[data-pa-pop]');
+      if (!pop || String(data.productId) !== pop.dataset.productId) return;
+      if (!pop.querySelector('[data-pa-add], .pa__add')) return;
+      offered = true;
+      var drawer = document.querySelector('cart-drawer-component');
+      if (drawer && drawer.hasAttribute('auto-open')) {
+        drawer.removeAttribute('auto-open');
+        restoreAutoOpen = true;
+      }
+      pop.showModal();
+      if (!reduced()) {
+        var card = pop.querySelector('[data-pa-pop-card]');
+        var scrim = pop.querySelector('.pa-pop__scrim');
+        scrim.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, easing: 'linear' });
+        card.animate(
+          [{ opacity: 0, transform: 'translateY(16px) scale(0.96)' }, { opacity: 1, transform: 'none' }],
+          { duration: 550, easing: EASE }
+        );
+      }
+    }, true);
+
+    function closePop(pop) {
+      if (!pop.open || pop.dataset.closing) return;
+      pop.dataset.closing = '1';
+      var finish = function () {
+        pop.close();
+        delete pop.dataset.closing;
+        var drawer = document.querySelector('cart-drawer-component');
+        if (drawer) {
+          if (restoreAutoOpen) drawer.setAttribute('auto-open', '');
+          restoreAutoOpen = false;
+          if (typeof drawer.open === 'function') drawer.open();
+        }
+      };
+      if (reduced()) return finish();
+      var card = pop.querySelector('[data-pa-pop-card]');
+      var scrim = pop.querySelector('.pa-pop__scrim');
+      scrim.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, easing: 'linear', fill: 'forwards' });
+      card.animate(
+        [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(8px) scale(0.98)' }],
+        { duration: 200, easing: 'cubic-bezier(0.4, 0, 1, 1)', fill: 'forwards' }
+      ).finished.then(function () {
+        finish();
+        pop.getAnimations({ subtree: true }).forEach(function (a) { a.cancel(); });
+      });
+    }
+
+    document.addEventListener('click', function (event) {
+      var closer = event.target.closest('[data-pa-pop-close]');
+      if (closer) closePop(closer.closest('[data-pa-pop]'));
+    });
+    document.addEventListener('cancel', function (event) {
+      if (event.target.matches && event.target.matches('[data-pa-pop]')) {
+        event.preventDefault();
+        closePop(event.target);
+      }
+    }, true);
   })();
 </script>
 
@@ -441,7 +664,7 @@
       "type": "text",
       "id": "heading",
       "label": "Heading",
-      "default": "Add to your order"
+      "default": "Add-ons:"
     },
     {
       "type": "range",
