@@ -72,6 +72,18 @@
 
             <div class="ssilo__panel" id="{{ section_id }}-{{ block.id }}" data-panel hidden>
               <div class="ssilo__inner ssilo__inner--brand">
+                {%- liquid
+                  # Desktop shows the silos in two columns, read down the left then down the right:
+                  # each silo's place in that order (the first half on the left, the rest on the right)
+                  assign silo_count = 0
+                  for silo in section.blocks offset: start
+                    if silo.type == 'brand'
+                      break
+                    endif
+                    assign silo_count = silo_count | plus: 1
+                  endfor
+                  assign half = silo_count | plus: 1 | divided_by: 2
+                -%}
                 <ul class="ssilo__silos" role="list">
                   {%- for silo in section.blocks offset: start -%}
                     {%- if silo.type == 'brand' -%}{%- break -%}{%- endif -%}
@@ -107,7 +119,15 @@
                       </span>
                     {%- endcapture -%}
 
-                    <li class="ssilo__silo" data-item="{{ silo.id }}" data-anim {{ silo.shopify_attributes }}>
+                    {%- liquid
+                      assign silo_index = forloop.index0
+                      if silo_index < half
+                        assign desk_order = silo_index | times: 2
+                      else
+                        assign desk_order = silo_index | minus: half | times: 2 | plus: 1
+                      endif
+                    -%}
+                    <li class="ssilo__silo" data-item="{{ silo.id }}" data-order="{{ desk_order }}" style="--desk-order: {{ desk_order }};" data-anim {{ silo.shopify_attributes }}>
                       {%- if shown > 0 -%}
                         <button
                           type="button"
@@ -210,7 +230,7 @@
   import { animate, stagger } from 'motion';
 
   const EASE = [0.3, 0.7, 0.3, 1];
-  const MOVE = 0.55;
+  const MOVE = 0.65; // a touch slower than the house 0.55s: many things move at once here
   const OUT = 0.18;
   const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   // This script's own animations: not the CSS fades (the cards stepping back), which must run on
@@ -319,8 +339,13 @@
     /** Scroll so something (by its page top and height) sits in the middle of the screen below the header */
     centre(top, height) {
       const offset = this.headerOffset();
-      const middle = offset + (window.innerHeight - offset) / 2;
-      this.scrollTo(top + height / 2 - middle);
+      const room = window.innerHeight - offset;
+      // Too tall to fit: its top just under the header instead
+      if (height > room - 16) {
+        this.scrollTo(top - offset);
+        return;
+      }
+      this.scrollTo(top + height / 2 - (offset + room / 2));
     }
 
     /**
@@ -442,7 +467,9 @@
         this.setOpen(target, true);
         // It keeps its own row, at full width; its row-mate moves down
         const columns = parseInt(getComputedStyle(list).getPropertyValue('--per-row'), 10) || 1;
-        target.style.gridRow = String(Math.floor(cards.indexOf(target) / columns) + 1);
+        // Its place as seen: silos on desktop are ordered down one column then the other
+        const place = columns > 1 && target.dataset.order !== undefined ? Number(target.dataset.order) : cards.indexOf(target);
+        target.style.gridRow = String(Math.floor(place / columns) + 1);
         next.panel.querySelectorAll('img[loading="lazy"]').forEach((img) => (img.loading = 'eager'));
         next.panel.hidden = false;
       }
@@ -453,7 +480,9 @@
         // First step of a swap: bring the card about to open up under the header as this one closes
         this.scrollTo(focus.getBoundingClientRect().top + window.scrollY - this.headerOffset(), duration);
       } else if (target) {
-        this.scrollTo(target.getBoundingClientRect().top + window.scrollY - this.headerOffset());
+        // The opened card, at its full size, in the middle of the screen
+        const end = target.getBoundingClientRect();
+        this.centre(end.top + window.scrollY, end.height);
       } else if (previous) {
         const end = previous.getBoundingClientRect();
         this.centre(end.top + window.scrollY, end.height);
@@ -1079,6 +1108,11 @@
       --per-row: 2;
       grid-template-columns: repeat(2, minmax(0, max-content) max-content minmax(40px, 1fr));
       column-gap: 20px;
+    }
+
+    /* Read down the left column, then down the right (each silo's place is set in the markup) */
+    .ssilo__silos > .ssilo__silo {
+      order: var(--desk-order, 0);
     }
 
     .ssilo__row {
