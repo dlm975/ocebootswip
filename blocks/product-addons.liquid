@@ -229,8 +229,12 @@
       <h2 class="pa-pop__title" id="pa-pop-title-{{ block.id }}">Add these also?</h2>
       <div class="pa__list pa-pop__list">{{ cards }}</div>
       <div class="pa-pop__actions">
-        <button type="button" class="pa-pop__skip" data-pa-pop-close>No thanks</button>
-        <button type="button" class="pa-pop__go" data-pa-pop-close>Continue</button>
+        <button type="button" class="pa-pop__go" data-pa-pop-close>
+          <span>Continue</span>
+          <span class="pa-pop__go-disk oce-disk" aria-hidden="true">
+            {%- render 'gicon', name: 'arrow_forward', size: 14 -%}
+          </span>
+        </button>
       </div>
     </div>
   </dialog>
@@ -378,37 +382,55 @@
   .pa-pop__actions {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+    justify-content: flex-end;
     margin-top: 16px;
   }
 
-  .pa-pop__skip {
-    padding: 8px 2px;
+  /* Continue: small bold text and a small holographic disk with an arrow */
+  .pa-pop__go {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0 6px 6px;
     border: 0;
     background: none;
-    color: rgb(18 18 18 / 0.6);
-    font: inherit;
-    font-size: 0.875rem;
-    font-weight: 650;
-    cursor: pointer;
-  }
-
-  .pa-pop__go {
-    height: 44px;
-    padding: 0 22px;
-    border: 0;
-    border-radius: 999px;
-    background: #121212;
-    color: #ffffff;
+    color: #121212;
     font: inherit;
     font-size: 0.9375rem;
-    font-weight: 700;
+    font-weight: 750;
+    letter-spacing: -0.01em;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .pa-pop__go-disk {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    transition: transform 0.25s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  .pa-pop__go-disk svg {
+    position: relative;
+    width: 14px;
+    height: 14px;
+  }
+
+  @media (hover: hover) {
+    .pa-pop__go:hover .pa-pop__go-disk {
+      transform: translateX(3px);
+    }
+  }
+
+  .pa-pop__go:active .pa-pop__go-disk {
+    transform: scale(0.92);
   }
 
   /* The popup is a 3:4 card (shorter screens shrink it to fit); the add-ons inside are big, one per
-     row, filling the space between the heading and the buttons */
+     row, filling the space between the heading and Continue */
   .pa-pop__card {
     display: flex;
     flex-direction: column;
@@ -447,10 +469,6 @@
     min-height: 42px;
     padding: 0 14px;
     font-size: 0.9375rem;
-  }
-
-  .pa-pop__actions {
-    margin-top: 10px;
   }
 
   /* An add-on added from the popup: its button shows it */
