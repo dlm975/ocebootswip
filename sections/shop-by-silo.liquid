@@ -216,7 +216,9 @@
                                       assign label = generation.title | remove_first: brand_prefix
                                     endif
                                     # A bare number or code reads with its model ("6" -> "Phantom 6", "19" -> "X 19")
-                                    if label.size <= 2
+                                    # (only a bare number: "GX" and "GT" read fine on their own)
+                                    assign label_number = label | times: 1 | append: ''
+                                    if label.size <= 2 and label_number == label
                                       assign label = last_word | append: ' ' | append: label
                                     endif
                                   -%}
