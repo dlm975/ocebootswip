@@ -1,6 +1,6 @@
 {%- comment -%}
   Render straight after a collection's heading. On a size page the heading shows just the size that
-  was clicked ("EU 41"): the menu's size links carry it as ?size=EU+41. A size collection reached
+  was clicked ("EU 41"): the menu's size links carry it as ?pick=EU+41 (size= is the short size filter). A size collection reached
   another way (its title is "US 8 - UK 7 - EU 41") shows its size in the shopper's chosen system
   (US / UK / EU, as picked in the size selector), a third read as the nearest whole size.
   Runs as the heading is read, before the page is drawn, so the full title never shows first.
@@ -15,7 +15,7 @@
       return n;
     };
     var text = null;
-    var clicked = (new URLSearchParams(location.search).get('size') || '').trim();
+    var clicked = (new URLSearchParams(location.search).get('pick') || '').trim();
     var asked = clicked.match(/^(US|UK|EU)\s*([0-9]+(?:\.[0-9]+)?(?:\s+[12]\/3)?)$/i);
     if (asked) {
       text = asked[1].toUpperCase() + ' ' + whole(asked[2].replace(/\s+/g, ' '));
