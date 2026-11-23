@@ -37,7 +37,9 @@
 {% liquid
   assign product = closest.product
 
-  assign lazy_image_sizes = 'auto, ' | append: image_sizes
+  # No "auto": the sizes worked out above are already right, and "auto" loads Shopify's sizing
+  # script, which measures every photo of every card's gallery as the page loads (slow on phones)
+  assign lazy_image_sizes = image_sizes
 
   assign image_ratio_setting = block.settings.image_ratio
   assign temp_ratio = 1
