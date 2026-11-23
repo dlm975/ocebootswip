@@ -54,7 +54,7 @@
   -%}
   <h1 class="cslh__title{% if is_sale %} cslh__title--sale{% endif %}">{{ c.title | replace: 'adidas', 'Adidas' | escape }}</h1>
 
-  {%- if keys.size > 0 -%}
+  {%- if keys.size > 0 and section.settings.show_generations -%}
     <nav class="cslh__gens" aria-label="Generations">
       <ul class="cslh__track" role="list">
         {%- for key in keys limit: limit -%}
@@ -221,6 +221,13 @@
     {
       "type": "paragraph",
       "content": "The collection's title, then its generations: read from the boots in it (their gen: tags), newest first."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_generations",
+      "label": "Show generations",
+      "info": "Off where the Shop by silo dropdowns follow this header.",
+      "default": true
     },
     {
       "type": "range",

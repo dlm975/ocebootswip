@@ -17,22 +17,60 @@
 
 {%- liquid
   assign section_id = 'ssilo-' | append: section.id
+
+  # On a collection page: just the brand this collection belongs to (its own page, one of its silos
+  # or one of their generations), already open, its silos as dropdowns. Nothing for any other collection.
+  assign page_mode = false
+  assign match_brand = ''
+  assign match_silo = ''
+  assign here = ''
+  if template.name == 'collection' and collection
+    assign page_mode = true
+    assign here = collection.handle
+    assign current_brand = ''
+    for b in section.blocks
+      if b.type == 'brand'
+        assign current_brand = b.id
+        if b.settings.collection.handle == here and match_brand == ''
+          assign match_brand = b.id
+        endif
+      elsif match_brand == ''
+        assign hit = false
+        if b.settings.collection.handle == here
+          assign hit = true
+        else
+          for g in b.settings.generations
+            if g.handle == here
+              assign hit = true
+              break
+            endif
+          endfor
+        endif
+        if hit
+          assign match_brand = current_brand
+          assign match_silo = b.id
+        endif
+      endif
+    endfor
+  endif
 -%}
 
+{%- unless page_mode and match_brand == '' -%}
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <div class="section section--page-width color-{{ section.settings.color_scheme }}">
   <shop-by-silo
-    class="ssilo spacing-style"
+    class="ssilo spacing-style{% if page_mode %} ssilo--page{% endif %}"
     id="{{ section_id }}"
     style="{% render 'spacing-style', settings: section.settings %}"
   >
-    {%- if section.settings.heading != blank -%}
+    {%- if section.settings.heading != blank and page_mode == false -%}
       <h2 class="ssilo__heading">{{ section.settings.heading | escape }}</h2>
     {%- endif -%}
 
     <ul class="ssilo__brands" role="list">
       {%- for block in section.blocks -%}
         {%- if block.type == 'brand' -%}
+          {%- if page_mode and block.id != match_brand -%}{%- continue -%}{%- endif -%}
           {%- liquid
             assign brand_name = block.settings.title | strip
             assign brand_prefix = brand_name | append: ' '
@@ -40,7 +78,8 @@
             assign brand_image = block.settings.image | default: block.settings.collection.featured_image
             assign start = forloop.index
           -%}
-          <li class="ssilo__brand" data-item="{{ block.id }}" {{ block.shopify_attributes }}>
+          <li class="ssilo__brand{% if page_mode %} ssilo__brand--page is-open{% endif %}" data-item="{{ block.id }}" {{ block.shopify_attributes }}>
+            {%- unless page_mode -%}
             <button
               type="button"
               class="ssilo__brand-head"
@@ -69,8 +108,9 @@
                 {%- render 'gicon', name: 'add', size: 24 -%}
               </span>
             </button>
+            {%- endunless -%}
 
-            <div class="ssilo__panel" id="{{ section_id }}-{{ block.id }}" data-panel hidden>
+            <div class="ssilo__panel" id="{{ section_id }}-{{ block.id }}" data-panel{% unless page_mode %} hidden{% endunless %}>
               <div class="ssilo__inner ssilo__inner--brand">
                 {%- liquid
                   # Desktop shows the silos in two columns, read down the left then down the right:
@@ -127,7 +167,7 @@
                         assign desk_order = silo_index | minus: half | times: 2 | plus: 1
                       endif
                     -%}
-                    <li class="ssilo__silo" data-item="{{ silo.id }}" data-order="{{ desk_order }}" style="--desk-order: {{ desk_order }};" data-anim {{ silo.shopify_attributes }}>
+                    <li class="ssilo__silo{% if silo.id == match_silo %} is-current{% endif %}" data-item="{{ silo.id }}" data-order="{{ desk_order }}" style="--desk-order: {{ desk_order }};" data-anim {{ silo.shopify_attributes }}>
                       {%- if shown > 0 -%}
                         <button
                           type="button"
@@ -158,7 +198,7 @@
                                     endif
                                   -%}
                                   <li data-anim>
-                                    <a class="ssilo__gen" href="{{ generation.url }}">
+                                    <a class="ssilo__gen" href="{{ generation.url }}"{% if generation.handle == here %} aria-current="page"{% endif %}>
                                       <span class="ssilo__row-text">
                                         <span class="ssilo__gen-name">{{ label | escape }}</span>
                                       </span>
@@ -203,6 +243,7 @@
                     </li>
                   {%- endfor -%}
                 </ul>
+                {%- unless page_mode -%}
                 <div class="ssilo__foot" data-anim>
                   {%- if brand_url != blank -%}
                     <a class="ssilo__all" href="{{ brand_url }}">
@@ -217,6 +258,7 @@
                     {%- render 'gicon', name: 'keyboard_arrow_up', size: 18 -%}
                   </button>
                 </div>
+                {%- endunless -%}
               </div>
             </div>
           </li>
@@ -225,6 +267,7 @@
     </ul>
   </shop-by-silo>
 </div>
+{%- endunless -%}
 
 <script type="module">
   import { animate, stagger } from 'motion';
@@ -1173,6 +1216,23 @@
     .ssilo__gens {
       column-gap: 16px;
     }
+  }
+
+  /* On a collection page: the brand's open card alone, no picture head, its silos as dropdowns */
+  .ssilo--page .ssilo__brands {
+    display: block;
+  }
+
+  .ssilo--page .ssilo__inner--brand {
+    padding-block: 10px;
+  }
+
+  /* The silo (or generation) being viewed */
+  .ssilo__silo.is-current > .ssilo__row .ssilo__row-name,
+  .ssilo__gen[aria-current] .ssilo__gen-name {
+    text-decoration: underline;
+    text-decoration-thickness: 0.09em;
+    text-underline-offset: 0.12em;
   }
 
   @media (prefers-reduced-motion: reduce) {
