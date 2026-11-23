@@ -60,6 +60,11 @@
                   assign key = key | plus: fraction_value
                 endif
               endif
+              # A third (EU 41 1/3, 42 2/3) is the same boot size as the nearest whole number: one choice
+              if number contains '/3'
+                assign key = key | round
+                assign number = key | append: ''
+              endif
               assign key = key | times: 100 | round
               assign key = '000000' | append: key | slice: -6, 6
               echo key | append: '~' | append: number | append: '~' | append: count | append: '~' | append: link.url | append: '~' | append: label | append: '^'
@@ -99,6 +104,13 @@
           endfor
           if group_size > 1
             assign url = filter_base | append: '?' | append: filters | remove_first: '&'
+          endif
+          # The page heading shows just the size that was clicked ("EU 41"): see snippets/size-heading
+          assign clicked = system | append: ' ' | append: number | url_encode
+          if url contains '?'
+            assign url = url | append: '&size=' | append: clicked
+          else
+            assign url = url | append: '?size=' | append: clicked
           endif
           assign shown = number | replace: ' 1/3', '⅓' | replace: ' 2/3', '⅔' | replace: ' 1/2', '½'
         -%}

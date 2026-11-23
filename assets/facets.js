@@ -850,7 +850,9 @@ class FacetSizeChips extends HTMLElement {
     let unparsed = 0;
 
     for (const input of this.#inputs) {
-      const size = parseSizeValue(input.value)[this.#system];
+      let size = parseSizeValue(input.value)[this.#system];
+      // A third (EU 41 1/3) is the same boot size as the nearest whole number (EU 41): one chip
+      if (size && / [12]\/3$/.test(size)) size = String(Math.round(sizeToNumber(size)));
       const key = size ?? `raw:${input.value}`;
       let group = groups.get(key);
       if (!group) {

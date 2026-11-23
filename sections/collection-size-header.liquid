@@ -379,8 +379,10 @@
   <div class="csh">
     {% if section.settings.heading_tag == 'h1' %}
       <h1 class="csh__heading{% if is_sale %} csh__heading--sale{% endif %}">{{ heading }}</h1>
+      {%- render 'size-heading' -%}
     {% else %}
       <h2 class="csh__heading{% if is_sale %} csh__heading--sale{% endif %}">{{ heading }}</h2>
+      {%- render 'size-heading' -%}
     {% endif %}
 
     {% if section.settings.show_description and collection.description != blank %}
@@ -543,8 +545,10 @@
       groups() {
         const map = new Map();
         for (const v of this.values) {
-          const size = parse(v.value)[this.sys];
+          let size = parse(v.value)[this.sys];
           if (!size) continue;
+          // A third (EU 41 1/3) is the same boot size as the nearest whole number (EU 41): one chip
+          if (/ [12]\/3$/.test(size)) size = String(Math.round(toNumber(size)));
           if (!map.has(size)) map.set(size, { size, values: [], count: 0 });
           const g = map.get(size);
           g.values.push(v.value);
