@@ -108,9 +108,9 @@
           # The page heading shows just the size that was clicked ("EU 41"): see snippets/size-heading
           assign clicked = system | append: ' ' | append: number | url_encode
           if url contains '?'
-            assign url = url | append: '&size=' | append: clicked
+            assign url = url | append: '&pick=' | append: clicked
           else
-            assign url = url | append: '?size=' | append: clicked
+            assign url = url | append: '?pick=' | append: clicked
           endif
           assign shown = number | replace: ' 1/3', '⅓' | replace: ' 2/3', '⅔' | replace: ' 1/2', '½'
         -%}
