@@ -290,11 +290,17 @@
             "addon_offer_001": {
               "type": "product-addons",
               "settings": {
-                "heading": "Add to your order",
+                "heading": "Add-ons:",
                 "max_items": 2,
-                "products": [],
+                "products": [
+                  "fg-ag-studs-for-nike",
+                  "sock-conversion"
+                ],
                 "match_keyword": "adidas",
-                "products_alt": [],
+                "products_alt": [
+                  "fg-ag-studs-for-adidas",
+                  "sock-conversion"
+                ],
                 "button_label": "Add",
                 "choose_label": "Choose",
                 "radius": 16,
@@ -418,7 +424,8 @@
         "hint": "Tap a league to meet the players",
         "color_scheme": "scheme-1",
         "padding-block-start": 24,
-        "padding-block-end": 24
+        "padding-block-end": 24,
+        "attach_to_details": true
       }
     },
     "pdp_info_panel": {
@@ -687,9 +694,9 @@
   "order": [
     "pdp_gallery_style",
     "main",
-    "worn_by_pros_pdp",
     "pdp_info_panel",
     "pdp_trust_bar",
+    "worn_by_pros_pdp",
     "customer_collage",
     "pdp_about",
     "pdp_sticky_buy",

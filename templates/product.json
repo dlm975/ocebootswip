@@ -286,7 +286,7 @@
             "addon_offer_001": {
               "type": "product-addons",
               "settings": {
-                "heading": "Add-ons +",
+                "heading": "Add-ons:",
                 "max_items": 2,
                 "products": [
                   "fg-ag-studs-for-nike",
@@ -294,8 +294,8 @@
                 ],
                 "match_keyword": "adidas",
                 "products_alt": [
-                  "sock-conversion",
-                  "fg-ag-studs-for-adidas"
+                  "fg-ag-studs-for-adidas",
+                  "sock-conversion"
                 ],
                 "button_label": "Add",
                 "choose_label": "Choose",
@@ -475,7 +475,8 @@
         "hint": "Tap a league to meet the players",
         "color_scheme": "scheme-1",
         "padding-block-start": 24,
-        "padding-block-end": 24
+        "padding-block-end": 24,
+        "attach_to_details": true
       }
     },
     "customer_collage": {
