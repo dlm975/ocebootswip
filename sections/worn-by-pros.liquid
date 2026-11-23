@@ -373,9 +373,23 @@
       logo.setAttribute('aria-expanded', 'true');
       settle(logo);
 
+      centre();
+
       if (reduce.matches) return;
       animate(logo, { transform: [from, to] }, { duration: IN, ease: EASE });
       animate(card, { opacity: [0, 1], transform: ['translateY(14px) scale(0.97)', 'none'] }, { duration: IN, ease: EASE });
+    };
+
+    /** Scroll so the card sits in the middle of the screen below the header (its top just under the
+        header if it is taller than that). The logo flies within the page, so it lands with the card. */
+    const centre = () => {
+      const header = document.querySelector('#header-component[sticky]');
+      const top = header ? Math.max(0, header.getBoundingClientRect().bottom) : 0;
+      const room = window.innerHeight - top;
+      const box = card.getBoundingClientRect();
+      const y = box.height > room - 24 ? box.top - top - 12 : box.top + box.height / 2 - (top + room / 2);
+      if (Math.abs(y) < 4) return;
+      window.scrollTo({ top: window.scrollY + y, behavior: reduce.matches ? 'auto' : 'smooth' });
     };
 
     const close = () => {
