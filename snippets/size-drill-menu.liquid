@@ -105,7 +105,7 @@
           if group_size > 1
             assign url = filter_base | append: '?' | append: filters | remove_first: '&'
           endif
-          # The page heading shows just the size that was clicked ("EU 41"): see snippets/size-heading
+          # The page heading shows just the size that was clicked ("EU 41"), see snippets/size-heading
           assign clicked = system | append: ' ' | append: number | url_encode
           if url contains '?'
             assign url = url | append: '&pick=' | append: clicked
