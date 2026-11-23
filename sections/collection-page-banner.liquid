@@ -1,3 +1,6 @@
+{%- comment -%} Only a player's collection keeps the photo banner; others show the silo header {%- endcomment -%}
+{%- capture is_player -%}{%- render 'is-player-collection', collection: collection -%}{%- endcapture -%}
+{%- if is_player == 'true' -%}
 {%- liquid
   assign use_img       = collection.image | default: section.settings.image
   assign overlay_alpha = section.settings.overlay_opacity | times: 0.01
@@ -52,6 +55,8 @@
   {%- endif -%}
 </div>
 </div>
+
+{%- endif -%}
 
 {% stylesheet %}
   .cpb-outer {

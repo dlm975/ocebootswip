@@ -8,7 +8,15 @@
 {%- liquid
   assign c = collection
   assign keys = ''
+  assign size_prefix = c.handle | slice: 0, 3
+  assign is_size = false
+  if size_prefix == 'us-' or size_prefix == 'uk-' or size_prefix == 'eu-'
+    assign is_size = true
+  endif
   for tag in c.all_tags
+    if is_size
+      break
+    endif
     if tag contains 'gen:'
       assign gen_handle = tag | remove_first: 'gen:' | strip
       assign gen = collections[gen_handle]
@@ -28,6 +36,9 @@
   assign limit = section.settings.limit
 -%}
 
+{%- comment -%} A player's collection has its photo banner instead (snippets/is-player-collection) {%- endcomment -%}
+{%- capture is_player -%}{%- render 'is-player-collection', collection: c -%}{%- endcapture -%}
+{%- if is_player != 'true' -%}
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <div
   class="section section--page-width color-{{ section.settings.color_scheme }} cslh spacing-style"
@@ -68,6 +79,8 @@
     </nav>
   {%- endif -%}
 </div>
+
+{%- endif -%}
 
 {% stylesheet %}
   .cslh__title {

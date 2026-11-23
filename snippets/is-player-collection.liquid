@@ -1,0 +1,15 @@
+{%- doc -%}
+  Prints "true" when the collection is a player's collection (the ones the home page's player
+  reels link to), which keep the photo banner; every other collection shows the silo header
+  (its title and generations) instead. Add a new player's collection handle to the list below.
+
+  @param {object} collection - The collection to check
+{%- enddoc -%}
+{%- liquid
+  assign player_handles = 'neymar-jr,cr7,messi-1,pogba,olise' | split: ','
+  if player_handles contains collection.handle
+    echo 'true'
+  else
+    echo 'false'
+  endif
+-%}
