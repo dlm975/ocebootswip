@@ -585,6 +585,14 @@
       if (next) pin(target, next.inner, next.inner.getBoundingClientRect().width);
       if (was) pin(previous, was.inner, wasWidth);
 
+      // Whichever of a card's moves ends last clears what they all set (each checking only that
+      // nothing else was still running left the clip in place when both ended in the same frame)
+      const settle = (card) => {
+        requestAnimationFrame(() => {
+          if (!moving(card)) clear(card, 'width', 'z-index', 'clip-path', 'transform');
+        });
+      };
+
       cards.forEach((card) => {
         const b = before.get(card);
         const a = after.get(card);
@@ -596,17 +604,16 @@
           card.style.zIndex = card === previous ? '2' : '1';
           const wide = Math.max(b.width, a.width);
           if (b.width > a.width) card.style.width = wide + 'px';
-          const edge = (width) => `inset(0px ${wide - width}px 0px 0px round 20px)`;
-          animate(card, { clipPath: [edge(b.width), edge(a.width)] }, { duration, ease: EASE }).then(() => {
-            if (!moving(card)) clear(card, 'width', 'z-index', 'clip-path');
-          });
+          // Brand cards are rounded; silo rows are plain text, so a square clip (a rounded one cut
+          // into the first letter)
+          const round = card.classList.contains('ssilo__brand') ? 20 : 0;
+          const edge = (width) => `inset(0px ${wide - width}px 0px 0px round ${round}px)`;
+          animate(card, { clipPath: [edge(b.width), edge(a.width)] }, { duration, ease: EASE }).then(() => settle(card));
         }
         const dx = b.left - a.left;
         const dy = b.top - a.top;
         if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-          animate(card, { transform: [`translate(${dx}px, ${dy}px)`, 'translate(0px, 0px)'] }, { duration, ease: EASE }).then(() => {
-            if (!moving(card)) clear(card, 'transform');
-          });
+          animate(card, { transform: [`translate(${dx}px, ${dy}px)`, 'translate(0px, 0px)'] }, { duration, ease: EASE }).then(() => settle(card));
         }
       });
 
