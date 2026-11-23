@@ -312,7 +312,7 @@
         "silo_04": {
           "type": "silo",
           "settings": {
-            "title": "adidas Predator",
+            "title": "Adidas Predator",
             "collection": "predator-1",
             "generations": [
               "adidas-predator-ft",
@@ -325,7 +325,7 @@
         "silo_05": {
           "type": "silo",
           "settings": {
-            "title": "adidas X",
+            "title": "Adidas X",
             "collection": "x",
             "generations": [
               "adidas-x-crazyfast",
@@ -343,7 +343,7 @@
         "silo_06": {
           "type": "silo",
           "settings": {
-            "title": "adidas F50",
+            "title": "Adidas F50",
             "collection": "f50",
             "generations": [
               "adidas-f50-elite",
@@ -356,7 +356,7 @@
         "silo_09": {
           "type": "silo",
           "settings": {
-            "title": "adidas Copa",
+            "title": "Adidas Copa",
             "collection": "copa",
             "generations": [
               "adidas-copa-pure",
@@ -369,7 +369,7 @@
         "silo_10": {
           "type": "silo",
           "settings": {
-            "title": "adidas Nemeziz",
+            "title": "Adidas Nemeziz",
             "collection": "nemeziz",
             "generations": [
               "adidas-nemeziz-19",
@@ -381,7 +381,7 @@
         "silo_16": {
           "type": "silo",
           "settings": {
-            "title": "adidas 11Pro",
+            "title": "Adidas 11Pro",
             "collection": "11pro",
             "generations": [
               "adidas-11pro-elite",
@@ -393,7 +393,7 @@
         "silo_13": {
           "type": "silo",
           "settings": {
-            "title": "adidas Ace",
+            "title": "Adidas Ace",
             "collection": "",
             "generations": [
               "adidas-ace-17",
@@ -969,7 +969,7 @@
         "cat_4": {
           "type": "category",
           "settings": {
-            "title": "adidas",
+            "title": "Adidas",
             "link": "shopify://collections/adidas"
           }
         },

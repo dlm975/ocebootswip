@@ -65,7 +65,7 @@
           {% endif %}
           data-brand-drill-brand
         >
-          <span class="brand-drill__name">{{ brand.title | escape }}</span>
+          <span class="brand-drill__name">{{ brand.title | replace: 'adidas', 'Adidas' | escape }}</span>
           {%- if brand_count > 0 -%}
             <span class="brand-drill__count">{{ brand_count }}</span>
           {%- endif -%}
@@ -86,7 +86,7 @@
                     aria-current="page"
                   {% endif %}
                 >
-                  <span class="brand-drill__name">{{ model.title | escape }}</span>
+                  <span class="brand-drill__name">{{ model.title | replace: 'adidas', 'Adidas' | escape }}</span>
                   {%- if model.type == 'collection_link' -%}
                     <span class="brand-drill__count">{{ model.object.all_products_count }}</span>
                   {%- endif -%}

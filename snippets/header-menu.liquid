@@ -70,7 +70,7 @@
         {%- if dock_icon != '' -%}
           {%- render 'gicon', name: dock_icon, class: 'menu-list__icon', size: 22 -%}
         {%- endif -%}
-        <span class="menu-list__link-title{% if title_key == 'sale' %} menu-item--sale{% endif %}">{{- link.title -}}</span>
+        <span class="menu-list__link-title{% if title_key == 'sale' %} menu-item--sale{% endif %}">{{- link.title | replace: 'adidas', 'Adidas' -}}</span>
       </a>
       {%- if link.links != blank -%}
         <div class="menu-list__submenu{{ color_scheme_classes }}" ref="submenu[]">

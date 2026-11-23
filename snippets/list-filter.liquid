@@ -494,6 +494,8 @@
                     </div>
                   {% else %}
                     {% liquid
+                      # The brand written as a name: Adidas, not adidas
+                      assign value_label = value.label | replace: 'adidas', 'Adidas'
                       # Hidden inputs behind the size buttons never take focus when the drawer opens
                       assign checkbox_autofocus = autofocus
                       if is_size_chips
@@ -503,7 +505,7 @@
                     {% render 'checkbox',
                       name: value.param_name,
                       value: value.value,
-                      label: value.label,
+                      label: value_label,
                       checked: value.active,
                       id: input_id,
                       disabled: is_disabled,
