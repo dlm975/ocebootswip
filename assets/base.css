@@ -9,6 +9,9 @@ body {
   flex-direction: column;
   margin: 0;
   min-height: 100svh;
+  /* iPhone Safari ignores the page's own sideways clip when swiping; clipping the body (clip, not
+     hidden, so the sticky header still sticks) stops anything wider than the screen sliding the page */
+  overflow-x: clip;
 }
 
 :root {
