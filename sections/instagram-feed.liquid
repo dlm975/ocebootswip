@@ -21,17 +21,44 @@
 
   # The newest posts, shown alternating post, reel, post, reel (each most-liked first; once one kind
   # runs out the other carries on): "likes|handle" keys, padded so they sort as numbers
+  # Half the row from the newest posts, half from the newest reels (the other kind fills in if one
+  # is short)
+  assign half_posts = limit | plus: 1 | divided_by: 2
+  assign half_reels = limit | divided_by: 2
+  assign post_total = 0
+  assign reel_total = 0
+  for key in keys
+    assign post_handle = key | split: '|' | last
+    assign post = shop.metaobjects.instagram_post[post_handle]
+    if post.is_video.value
+      assign reel_total = reel_total | plus: 1
+    else
+      assign post_total = post_total | plus: 1
+    endif
+  endfor
+  if post_total < half_posts
+    assign half_reels = limit | minus: post_total
+  endif
+  if reel_total < half_reels
+    assign half_posts = limit | minus: reel_total
+  endif
   assign ranked_posts = ''
   assign ranked_reels = ''
-  for key in keys limit: limit
+  assign took_posts = 0
+  assign took_reels = 0
+  for key in keys
     assign post_handle = key | split: '|' | last
     assign post = shop.metaobjects.instagram_post[post_handle]
     assign likes = post.like_count.value | default: 0
     assign rank = likes | prepend: '000000000' | slice: -9, 9 | append: '|' | append: post_handle
     if post.is_video.value
-      assign ranked_reels = ranked_reels | append: rank | append: ','
-    else
+      if took_reels < half_reels
+        assign ranked_reels = ranked_reels | append: rank | append: ','
+        assign took_reels = took_reels | plus: 1
+      endif
+    elsif took_posts < half_posts
       assign ranked_posts = ranked_posts | append: rank | append: ','
+      assign took_posts = took_posts | plus: 1
     endif
   endfor
   assign ranked_posts = ranked_posts | split: ',' | sort | reverse
