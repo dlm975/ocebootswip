@@ -236,7 +236,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 0 10px calc(10px + env(safe-area-inset-bottom, 0px));
+    margin: 0 10px calc(16px + max(env(safe-area-inset-bottom, 0px), 14px));
     padding: 8px 8px 8px 8px;
     border-radius: 22px;
     background: rgb(255 255 255 / 0.62);
@@ -403,7 +403,7 @@
   .psb__sheet {
     pointer-events: auto;
     position: fixed;
-    inset: auto 10px calc(10px + env(safe-area-inset-bottom, 0px));
+    inset: auto 10px calc(16px + max(env(safe-area-inset-bottom, 0px), 14px));
     display: flex;
     flex-direction: column;
     max-height: min(70vh, 560px);
@@ -533,7 +533,7 @@
 
   /* Keep page content clear of the bar */
   body:has(.psb) {
-    padding-bottom: 88px;
+    padding-bottom: 108px;
   }
 
   @media (prefers-reduced-motion: reduce) {
