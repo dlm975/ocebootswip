@@ -172,7 +172,37 @@
     "
     {{ block.shopify_attributes }}
   >
-    <span class="pa__heading">{{ heading }}</span>
+    <span class="pa__heading">
+      {%- comment -%} An iridescent plus, raised like the size keys {%- endcomment -%}
+      <svg class="pa__plus" viewBox="0 0 34 34" aria-hidden="true" focusable="false">
+        <defs>
+          <linearGradient id="pa-irid-{{ block.id }}" x1="3" y1="3" x2="31" y2="31" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#ff9fd6"/>
+            <stop offset="0.28" stop-color="#c7a8ff"/>
+            <stop offset="0.52" stop-color="#8fd0ff"/>
+            <stop offset="0.76" stop-color="#8ef2d4"/>
+            <stop offset="1" stop-color="#fff0a0"/>
+          </linearGradient>
+          <linearGradient id="pa-gloss-{{ block.id }}" x1="0" y1="4" x2="0" y2="20" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#ffffff" stop-opacity="0.9"/>
+            <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <g class="pa__plus-side" transform="translate(-1.5 2.5)" fill="#a9a3cf">
+          <rect x="13" y="4" width="8" height="26" rx="3"/>
+          <rect x="4" y="13" width="26" height="8" rx="3"/>
+        </g>
+        <g fill="url(#pa-irid-{{ block.id }})">
+          <rect x="13" y="4" width="8" height="26" rx="3"/>
+          <rect x="4" y="13" width="26" height="8" rx="3"/>
+        </g>
+        <g fill="url(#pa-gloss-{{ block.id }})">
+          <rect x="14" y="5" width="6" height="11" rx="2.5"/>
+          <rect x="5" y="14" width="24" height="3.5" rx="1.75"/>
+        </g>
+      </svg>
+      <span>{{ heading }}</span>
+    </span>
     <div class="pa__list">{{ cards }}</div>
   </div>
 
@@ -231,7 +261,9 @@
 
   /* "Add-ons:" in big bold type */
   .pa__heading {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     margin-bottom: 10px;
     font-family: var(--font-heading--family);
     font-style: var(--font-heading--style);
@@ -239,6 +271,27 @@
     font-weight: 800;
     line-height: 1;
     letter-spacing: -0.035em;
+  }
+
+  .pa__plus {
+    flex: none;
+    width: 0.95em;
+    height: 0.95em;
+    overflow: visible;
+    filter: drop-shadow(-1px 3px 4px rgb(90 80 160 / 0.28));
+    transition: filter 0.6s ease;
+  }
+
+  @media (hover: hover) {
+    .pa:hover .pa__plus {
+      filter: drop-shadow(-1px 3px 4px rgb(90 80 160 / 0.28)) hue-rotate(60deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pa__plus {
+      transition: none;
+    }
   }
 
   /* ---- The popup after adding the boot to the cart ---- */
