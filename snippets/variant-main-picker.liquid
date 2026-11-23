@@ -44,6 +44,17 @@
             assign option_name_lower = product_option.name | downcase
             assign is_size_grid = false
             assign hide_option = false
+            # Only one size that can be bought: it starts chosen, as if the shopper had picked it
+            assign only_size = false
+            assign buyable = 0
+            for v in product_option.values
+              if v.available
+                assign buyable = buyable | plus: 1
+              endif
+            endfor
+            if buyable == 1
+              assign only_size = true
+            endif
             if block.settings.variant_style == 'size_grid'
               if option_name_lower contains 'size'
                 assign is_size_grid = true
@@ -56,7 +67,7 @@
           <div
             class="pill-option{% if has_multiple and is_size_grid == false %} pill-option--interactive{% endif %}{% if is_size_grid %} size-grid{% endif %}"
             data-option-name="{{ product_option.name | escape }}"
-            {% if is_size_grid %}data-product-id="{{ product_resource.id }}"{% if product_resource.selected_variant %} data-chosen{% endif %}{% endif %}
+            {% if is_size_grid %}data-product-id="{{ product_resource.id }}"{% if product_resource.selected_variant or only_size %} data-chosen{% endif %}{% endif %}
             {% if hide_option %}hidden{% endif %}
           >
             {%- if is_size_grid -%}
@@ -89,6 +100,9 @@
                     assign value_parts = value_text | split: ' - '
                     assign is_chosen = false
                     if product_option_value.selected and product_resource.selected_variant
+                      assign is_chosen = true
+                    endif
+                    if only_size and product_option_value.available
                       assign is_chosen = true
                     endif
                     # The current variant's size; it only looks selected once the shopper has chosen (data-chosen)
