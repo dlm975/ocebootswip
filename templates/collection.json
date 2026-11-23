@@ -286,9 +286,9 @@
             "collection": "phantom-1",
             "generations": [
               "nike-phantom-6",
-              "nike-phantom-luna",
               "nike-phantom-gx-2",
               "nike-phantom-gx",
+              "nike-phantom-luna",
               "nike-phantom-gt-2",
               "nike-phantom-gt",
               "nike-phantom-vision-2",
@@ -303,8 +303,8 @@
             "title": "Nike Tiempo",
             "collection": "tiempo-1",
             "generations": [
-              "nike-tiempo-legend-10",
               "nike-tiempo-maestro",
+              "nike-tiempo-legend-10",
               "nike-tiempo-legend-9",
               "nike-tiempo-legend-8",
               "nike-tiempo-legend-7",
@@ -334,8 +334,8 @@
             "collection": "magista-1",
             "generations": [
               "nike-magista-obra-2",
-              "nike-magista-opus-2",
               "nike-magista-obra-1",
+              "nike-magista-opus-2",
               "nike-magista-opus-1"
             ]
           }
@@ -407,10 +407,10 @@
             "title": "Adidas F50",
             "collection": "f50",
             "generations": [
+              "adidas-f50-hyperfast",
               "adidas-f50-elite",
               "adidas-f50-adizero",
-              "adidas-f50-itunit",
-              "adidas-f50-hyperfast"
+              "adidas-f50-itunit"
             ]
           }
         },

@@ -123,8 +123,19 @@
                     assign silo_count = silo_count | plus: 1
                   endfor
                   assign half = silo_count | plus: 1 | divided_by: 2
+                  # On a collection page: at most 3 rows on phones and 2 on desktop, read down each column
+                  assign rows_m = 3
+                  if silo_count < 3
+                    assign rows_m = silo_count
+                  endif
+                  assign rows_d = 2
+                  if silo_count < 2
+                    assign rows_d = silo_count
+                  endif
+                  assign cols_m = silo_count | plus: rows_m | minus: 1 | divided_by: rows_m
+                  assign cols_d = silo_count | plus: rows_d | minus: 1 | divided_by: rows_d
                 -%}
-                <ul class="ssilo__silos" role="list">
+                <ul class="ssilo__silos" role="list"{% if page_mode %} style="--cols-m: {{ cols_m }}; --cols-d: {{ cols_d }}; --open-m: {{ rows_m | plus: 1 }}; --open-d: {{ rows_d | plus: 1 }};"{% endif %}>
                   {%- for silo in section.blocks offset: start -%}
                     {%- if silo.type == 'brand' -%}{%- break -%}{%- endif -%}
                     {%- liquid
@@ -166,8 +177,20 @@
                       else
                         assign desk_order = silo_index | minus: half | times: 2 | plus: 1
                       endif
+                      assign place = ''
+                      if page_mode
+                        assign r_m = silo_index | modulo: rows_m | plus: 1
+                        assign c_m = silo_index | divided_by: rows_m | times: 3 | plus: 1
+                        assign r_d = silo_index | modulo: rows_d | plus: 1
+                        assign c_d = silo_index | divided_by: rows_d | times: 3 | plus: 1
+                        assign place = ' --pr-m: ' | append: r_m | append: '; --pc-m: ' | append: c_m | append: '; --pr-d: ' | append: r_d | append: '; --pc-d: ' | append: c_d | append: ';'
+                      endif
+                      # Generations read down each column: the rows each column count needs
+                      assign rows_2 = shown | plus: 1 | divided_by: 2
+                      assign rows_3 = shown | plus: 2 | divided_by: 3
+                      assign rows_6 = shown | plus: 5 | divided_by: 6
                     -%}
-                    <li class="ssilo__silo{% if silo.id == match_silo %} is-current{% endif %}" data-item="{{ silo.id }}" data-order="{{ desk_order }}" style="--desk-order: {{ desk_order }};" data-anim {{ silo.shopify_attributes }}>
+                    <li class="ssilo__silo{% if silo.id == match_silo %} is-current{% endif %}" data-item="{{ silo.id }}" data-order="{{ desk_order }}" style="--desk-order: {{ desk_order }};{{ place }}" data-anim {{ silo.shopify_attributes }}>
                       {%- if shown > 0 -%}
                         <button
                           type="button"
@@ -184,7 +207,7 @@
 
                         <div class="ssilo__panel" id="{{ section_id }}-{{ silo.id }}" data-panel hidden>
                           <div class="ssilo__inner ssilo__inner--silo">
-                            <ul class="ssilo__gens" role="list">
+                            <ul class="ssilo__gens" role="list" style="--rows-2: {{ rows_2 }}; --rows-3: {{ rows_3 }}; --rows-6: {{ rows_6 }};">
                               {%- for generation in silo.settings.generations -%}
                                 {%- if generation.products_count > 0 -%}
                                   {%- liquid
@@ -512,7 +535,7 @@
         const columns = parseInt(getComputedStyle(list).getPropertyValue('--per-row'), 10) || 1;
         // Its place as seen: silos on desktop are ordered down one column then the other
         const place = columns > 1 && target.dataset.order !== undefined ? Number(target.dataset.order) : cards.indexOf(target);
-        target.style.gridRow = String(Math.floor(place / columns) + 1);
+        if (!this.classList.contains('ssilo--page')) target.style.gridRow = String(Math.floor(place / columns) + 1);
         next.panel.querySelectorAll('img[loading="lazy"]').forEach((img) => (img.loading = 'eager'));
         next.panel.hidden = false;
       }
@@ -984,9 +1007,12 @@
   }
 
   /* Generations: plain lines, the name on the left and a picture on the right */
+  /* Read down each column, newest first (Vapor 17 down, then Superfly 11 down) */
   .ssilo__gens {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, max-content) max-content minmax(0, 1fr));
+    grid-template-rows: repeat(var(--rows-2, 1), auto);
+    grid-auto-flow: column;
     column-gap: 8px;
   }
 
@@ -1201,6 +1227,7 @@
     /* Three generations a row, each column lined up on its own longest name */
     .ssilo__gens {
       grid-template-columns: repeat(3, minmax(0, max-content) max-content minmax(24px, 1fr));
+      grid-template-rows: repeat(var(--rows-3, 1), auto);
     }
 
     .ssilo__row .ssilo__plus {
@@ -1218,13 +1245,168 @@
     }
   }
 
-  /* On a collection page: the brand's open card alone, no picture head, its silos as dropdowns */
+  /* On a collection page: the brand's silos as a compact grid of dropdowns, no card around them.
+     At most 3 rows on phones, 2 on desktop, read down each column; an open silo drops to its own
+     full-width row beneath them, its generations under it */
   .ssilo--page .ssilo__brands {
     display: block;
   }
 
+  .ssilo--page .ssilo__brand,
+  .ssilo--page .ssilo__brand.is-open {
+    overflow: visible;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
   .ssilo--page .ssilo__inner--brand {
-    padding-block: 10px;
+    padding: 0;
+  }
+
+  .ssilo--page .ssilo__silos {
+    grid-template-columns: repeat(var(--cols-m, 1), minmax(0, max-content) 0 minmax(14px, 1fr));
+    column-gap: 6px;
+  }
+
+  .ssilo--page .ssilo__silo {
+    grid-row: var(--pr-m);
+    grid-column: var(--pc-m) / span 3;
+  }
+
+  .ssilo--page .ssilo__silo.is-open {
+    grid-row: var(--open-m);
+    grid-column: 1 / -1;
+  }
+
+  .ssilo--page .ssilo__row {
+    padding: 2px 0;
+  }
+
+  /* The others stay readable while one is open (it is a menu here, not a showcase) */
+  .ssilo--page .ssilo__silos.has-open > .ssilo__silo:not(.is-open):not(.is-next) > .ssilo__row {
+    opacity: 0.4;
+  }
+
+  .ssilo--page .ssilo__row-name {
+    font-size: 1.0625rem;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+  }
+
+  .ssilo--page .ssilo__thumb {
+    display: none;
+  }
+
+  .ssilo--page .ssilo__row .ssilo__plus {
+    width: 18px;
+    height: 18px;
+  }
+
+  .ssilo--page .ssilo__row .ssilo__plus svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .ssilo--page .ssilo__gens {
+    grid-template-columns: repeat(3, minmax(0, max-content) 0 minmax(6px, 1fr));
+    grid-template-rows: repeat(var(--rows-3, 1), auto);
+    column-gap: 6px;
+  }
+
+  .ssilo--page .ssilo__gen {
+    padding: 2px 0;
+  }
+
+  .ssilo--page .ssilo__gen-name {
+    font-size: 0.875rem;
+    font-weight: 650;
+  }
+
+  .ssilo--page .ssilo__gen-pic {
+    display: none;
+  }
+
+  .ssilo--page .ssilo__inner--silo {
+    padding: 2px 0 4px;
+  }
+
+  .ssilo--page .ssilo__foot {
+    padding: 6px 0 2px;
+  }
+
+  .ssilo--page .ssilo__all,
+  .ssilo--page .ssilo__close {
+    font-size: 0.8125rem;
+  }
+
+  @media screen and (min-width: 750px) {
+    .ssilo--page .ssilo__silos {
+      grid-template-columns: repeat(var(--cols-d, 1), minmax(0, max-content) max-content minmax(24px, 1fr));
+      column-gap: 12px;
+    }
+
+    .ssilo--page .ssilo__silo {
+      grid-row: var(--pr-d);
+      grid-column: var(--pc-d) / span 3;
+    }
+
+    .ssilo--page .ssilo__silo.is-open {
+      grid-row: var(--open-d);
+      grid-column: 1 / -1;
+    }
+
+    .ssilo--page .ssilo__row {
+      padding-block: 3px;
+    }
+
+    .ssilo--page .ssilo__row-name {
+      font-size: 1.5rem;
+      letter-spacing: -0.025em;
+    }
+
+    .ssilo--page .ssilo__thumb {
+      display: block;
+      width: 44px;
+      height: 26px;
+      border-radius: 6px;
+    }
+
+    .ssilo--page .ssilo__row .ssilo__plus {
+      width: 22px;
+      height: 22px;
+    }
+
+    .ssilo--page .ssilo__row .ssilo__plus svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .ssilo--page .ssilo__gens {
+      grid-template-columns: repeat(6, minmax(0, max-content) max-content minmax(12px, 1fr));
+      grid-template-rows: repeat(var(--rows-6, 1), auto);
+      column-gap: 10px;
+    }
+
+    .ssilo--page .ssilo__gen {
+      padding-block: 3px;
+    }
+
+    .ssilo--page .ssilo__gen-name {
+      font-size: 1rem;
+      letter-spacing: -0.01em;
+    }
+
+    .ssilo--page .ssilo__gen-pic {
+      display: block;
+      width: 36px;
+      height: 20px;
+    }
+
+    .ssilo--page .ssilo__all,
+    .ssilo--page .ssilo__close {
+      font-size: 0.9375rem;
+    }
   }
 
   /* The silo (or generation) being viewed */
