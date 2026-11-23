@@ -25,6 +25,8 @@ html {
   scrollbar-width: thin;
   scrollbar-color: rgb(var(--color-foreground-rgb) / var(--opacity-40)) var(--color-background);
   scroll-behavior: smooth;
+  /* Nothing may make the page slide sideways on phones (clip, unlike hidden, keeps the sticky header) */
+  overflow-x: clip;
 }
 
 html[scroll-lock] {

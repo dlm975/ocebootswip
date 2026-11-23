@@ -1324,8 +1324,13 @@
   }
 
   /* Backdrop: covers page below the pill, never the header itself */
+  /* Pinned to the screen's left edge and width: left to its own place it sat where the menu button
+     is and hung past the right edge, which let the page slide sideways on iPhones */
   .header-drawer .menu-drawer__backdrop {
     top: var(--header-height, 60px);
+    left: 0;
+    right: 0;
+    width: auto;
     z-index: -1;
   }
 
