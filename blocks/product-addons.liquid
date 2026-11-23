@@ -383,7 +383,7 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    margin-top: 16px;
+    margin-top: 10px;
   }
 
   /* Continue: small bold text and a small holographic disk with an arrow */
@@ -429,19 +429,17 @@
     transform: scale(0.92);
   }
 
-  /* The popup is a 3:4 card (shorter screens shrink it to fit); the add-ons inside are big, one per
-     row, filling the space between the heading and Continue */
+  /* The popup is as tall as what is in it; the add-ons inside are big, one per row */
   .pa-pop__card {
     display: flex;
     flex-direction: column;
-    width: min(420px, 100%, calc((100svh - 32px) * 0.75));
-    aspect-ratio: 3 / 4;
+    width: min(420px, 100%);
+    max-height: calc(100svh - 32px);
     padding: 20px 18px 14px;
     box-sizing: border-box;
   }
 
   .pa-pop .pa-pop__list {
-    flex: 1;
     grid-template-columns: 1fr;
     align-content: center;
     gap: 10px;

@@ -144,12 +144,6 @@
                     </span>
                   {%- endif -%}
                 {%- endif -%}
-                {%- comment -%} How long ago it was posted, worked out in the browser (the page itself is cached) {%- endcomment -%}
-                {%- if post.posted_at.value != blank -%}
-                  <time class="igf__ago" datetime="{{ post.posted_at.value | date: '%Y-%m-%dT%H:%M:%SZ' }}" data-igf-ago>
-                    {{- post.posted_at.value | date: '%b %-d' -}}
-                  </time>
-                {%- endif -%}
               </div>
               <div class="igf__actions">
                 <a class="igf__action" href="{{ link }}" target="_blank" rel="noopener" aria-label="Like on Instagram{% if likes > 0 %}, {{ likes }} likes{% endif %}">
@@ -183,26 +177,6 @@
     if (!root) return;
     // 1234 -> 1,234 (the shopper's own way of writing numbers)
     var format = new Intl.NumberFormat();
-    // "2 days ago", "1 hour ago": each post's age, at the time the page is looked at
-    try {
-      var rel = new Intl.RelativeTimeFormat('en', { numeric: 'always' });
-      var steps = [['year', 31536000], ['month', 2592000], ['week', 604800], ['day', 86400], ['hour', 3600], ['minute', 60]];
-      root.querySelectorAll('[data-igf-ago]').forEach(function (el) {
-        var when = Date.parse(el.getAttribute('datetime'));
-        if (isNaN(when)) return;
-        var secs = Math.max(0, (Date.now() - when) / 1000);
-        if (secs < 60) {
-          el.textContent = 'Just now';
-          return;
-        }
-        for (var i = 0; i < steps.length; i++) {
-          if (secs >= steps[i][1]) {
-            el.textContent = rel.format(-Math.floor(secs / steps[i][1]), steps[i][0]);
-            return;
-          }
-        }
-      });
-    } catch (e) {}
     root.querySelectorAll('[data-igf-count]').forEach(function (el) {
       var n = Number(el.dataset.igfCount);
       if (!isNaN(n)) el.textContent = format.format(n);
@@ -535,24 +509,6 @@
     flex: 0 0 100%;
     scroll-snap-align: start;
     scroll-snap-stop: always;
-  }
-
-  /* "2 days ago" at the top left, in the same dark glass as the photo counter */
-  .igf__ago {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    padding: 5px 9px;
-    border-radius: 999px;
-    background: rgb(18 18 18 / 0.6);
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
-    color: #ffffff;
-    font-size: 0.75rem;
-    font-weight: 650;
-    line-height: 1;
-    white-space: nowrap;
-    pointer-events: none;
   }
 
   /* "1/6" at the top right, in the same glass as the play mark */
