@@ -30,14 +30,14 @@
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <div
-  class="section section--page-width color-{{ section.settings.color_scheme }} csh spacing-style"
+  class="section section--page-width color-{{ section.settings.color_scheme }} cslh spacing-style"
   style="{% render 'spacing-style', settings: section.settings %}"
 >
-  <h1 class="csh__title">{{ c.title | replace: 'adidas', 'Adidas' | escape }}</h1>
+  <h1 class="cslh__title">{{ c.title | replace: 'adidas', 'Adidas' | escape }}</h1>
 
   {%- if keys.size > 0 -%}
-    <nav class="csh__gens" aria-label="Generations">
-      <ul class="csh__track" role="list">
+    <nav class="cslh__gens" aria-label="Generations">
+      <ul class="cslh__track" role="list">
         {%- for key in keys limit: limit -%}
           {%- liquid
             assign gen_handle = key | split: '|' | last
@@ -45,14 +45,14 @@
             assign label = gen.title | remove_first: 'Nike ' | remove_first: 'Adidas ' | remove_first: 'adidas ' | remove_first: 'Puma ' | remove_first: 'Mizuno '
           -%}
           <li>
-            <a class="csh__gen" href="{{ gen.url }}">
-              <span class="csh__pic">
+            <a class="cslh__gen" href="{{ gen.url }}">
+              <span class="cslh__pic">
                 {%- if gen.featured_image -%}
-                  {{ gen.featured_image | image_url: width: 160 | image_tag: widths: '80, 160', sizes: '52px', loading: 'lazy', class: 'csh__image', alt: '' }}
+                  {{ gen.featured_image | image_url: width: 160 | image_tag: widths: '80, 160', sizes: '52px', loading: 'lazy', class: 'cslh__image', alt: '' }}
                 {%- endif -%}
               </span>
-              <span class="csh__name">{{ label | escape }}</span>
-              <span class="csh__count">{{ gen.products_count }}</span>
+              <span class="cslh__name">{{ label | escape }}</span>
+              <span class="cslh__count">{{ gen.products_count }}</span>
             </a>
           </li>
         {%- endfor -%}
@@ -62,7 +62,7 @@
 </div>
 
 {% stylesheet %}
-  .csh__title {
+  .cslh__title {
     margin: 0;
     font-size: clamp(2.5rem, 11vw, 5rem);
     font-weight: 800;
@@ -73,11 +73,11 @@
   }
 
   /* The generations: a row of raised pills that scrolls sideways, edge to edge on phones */
-  .csh__gens {
+  .cslh__gens {
     margin-top: 16px;
   }
 
-  .csh__track {
+  .cslh__track {
     display: flex;
     gap: 10px;
     margin: 0 calc(-1 * var(--page-margin, 16px));
@@ -90,16 +90,16 @@
     scrollbar-width: none;
   }
 
-  .csh__track::-webkit-scrollbar {
+  .cslh__track::-webkit-scrollbar {
     display: none;
   }
 
-  .csh__track > li {
+  .cslh__track > li {
     flex: none;
     scroll-snap-align: start;
   }
 
-  .csh__gen {
+  .cslh__gen {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -119,12 +119,12 @@
     transition: transform 0.2s cubic-bezier(0.3, 0.7, 0.3, 1), box-shadow 0.2s ease;
   }
 
-  .csh__gen:active {
+  .cslh__gen:active {
     transform: translate(-1px, 2px);
     box-shadow: inset 0 1px 0 #ffffff, -1px 1px 0 #d4d4d8;
   }
 
-  .csh__pic {
+  .cslh__pic {
     flex: none;
     width: 52px;
     height: 52px;
@@ -133,20 +133,20 @@
     background: #f1f1f1;
   }
 
-  .csh__image {
+  .cslh__image {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
 
-  .csh__name {
+  .cslh__name {
     font-size: 1rem;
     font-weight: 750;
     letter-spacing: -0.02em;
   }
 
-  .csh__count {
+  .cslh__count {
     align-self: flex-start;
     margin-top: 12px;
     margin-left: -6px;
@@ -157,7 +157,7 @@
   }
 
   @media (hover: hover) {
-    .csh__gen:hover .csh__name {
+    .cslh__gen:hover .cslh__name {
       text-decoration: underline;
       text-decoration-thickness: 2px;
       text-underline-offset: 4px;
@@ -165,13 +165,13 @@
   }
 
   @media screen and (min-width: 750px) {
-    .csh__gens {
+    .cslh__gens {
       margin-top: 20px;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .csh__gen {
+    .cslh__gen {
       transition: none;
     }
   }
