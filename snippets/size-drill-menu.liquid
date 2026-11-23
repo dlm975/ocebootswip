@@ -60,7 +60,7 @@
                   assign key = key | plus: fraction_value
                 endif
               endif
-              # A third (EU 41 1/3, 42 2/3) is the same boot size as the nearest whole number: one choice
+              # A third (EU 41 1/3, 42 2/3) is the same boot size as the nearest whole one: one choice
               if number contains '/3'
                 assign key = key | round
                 assign number = key | append: ''

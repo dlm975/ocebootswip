@@ -53,7 +53,7 @@
     endif
   -%}
   <h1 class="cslh__title{% if is_sale %} cslh__title--sale{% endif %}">{{ c.title | replace: 'adidas', 'Adidas' | escape }}</h1>
-  {%- render 'size-heading' -%}
+  {%- render 'size-heading' -%}{%- comment -%} heading shows just the clicked size {%- endcomment -%}
 
   {%- if keys.size > 0 and section.settings.show_generations -%}
     <nav class="cslh__gens" aria-label="Generations">

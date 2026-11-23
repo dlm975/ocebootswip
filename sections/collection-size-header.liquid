@@ -547,7 +547,7 @@
         for (const v of this.values) {
           let size = parse(v.value)[this.sys];
           if (!size) continue;
-          // A third (EU 41 1/3) is the same boot size as the nearest whole number (EU 41): one chip
+          // A third (EU 41 1/3) is the same boot size as the nearest whole one (EU 41): one chip
           if (/ [12]\/3$/.test(size)) size = String(Math.round(toNumber(size)));
           if (!map.has(size)) map.set(size, { size, values: [], count: 0 });
           const g = map.get(size);
