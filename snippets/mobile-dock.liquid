@@ -579,8 +579,13 @@
       transform: translateX(-50%);
     }
 
-    /* Room at the foot of the page so the nav never hides the last of it */
-    body:has(.mdock) {
+    /* Room at the foot of the page so the nav never hides the last of it: given inside the
+       (dark) footer, so the page ends on the footer and never on a white strip */
+    body:has(.mdock) footer.section-wrapper:last-of-type {
+      padding-block-end: calc(76px + env(safe-area-inset-bottom, 0px));
+    }
+
+    body:has(.mdock):not(:has(footer.section-wrapper)) {
       padding-block-end: 76px;
     }
 
