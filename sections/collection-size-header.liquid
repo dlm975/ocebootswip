@@ -27,6 +27,13 @@
   endfor
 
   assign heading = section.settings.heading | default: collection.title
+  # A sale collection's heading is written as the menu's "Sale": bold red
+  assign heading_lower = heading | downcase
+  assign handle_lower = collection.handle | downcase
+  assign is_sale = false
+  if heading_lower contains 'sale' or handle_lower contains 'sale' or handle_lower contains 'outlet' or handle_lower contains 'black-friday'
+    assign is_sale = true
+  endif
 -%}
 
 {% style %}
@@ -279,14 +286,101 @@
       border-radius: {{ section.settings.chip_radius | times: 0.8 | round }}px;
     }
   }
+  /* ---- The site's style (as the collection filters and the menus) ---- */
+
+  /* A sale heading: bold red, as "Sale" in the menu (lowercase, a capital first letter) */
+  #csh-{{ section.id }}.csh-section .csh__heading--sale {
+    color: #e8323c;
+    font-family: var(--font-oce, 'Inter', system-ui, sans-serif);
+    font-weight: 850;
+    font-variation-settings: 'opsz' 32;
+    letter-spacing: -0.04em;
+    text-transform: lowercase;
+  }
+
+  #csh-{{ section.id }}.csh-section .csh__heading--sale::first-letter {
+    text-transform: uppercase;
+  }
+
+  /* US / UK / EU as big bold words, the chosen one dark and the others faded (no switch) */
+  #csh-{{ section.id }}.csh-section .csh__toggle {
+    display: flex;
+    gap: 18px;
+    width: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  #csh-{{ section.id }}.csh-section .csh__thumb {
+    display: none;
+  }
+
+  #csh-{{ section.id }}.csh-section .csh__toggle label {
+    min-width: 0;
+    height: auto;
+    padding: 0;
+    background: none;
+    color: #121212;
+    font-family: var(--font-oce, 'Inter', system-ui, sans-serif);
+    font-size: 2.25rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    opacity: 0.22;
+    transition: opacity 0.2s ease;
+  }
+
+  #csh-{{ section.id }}.csh-section .csh__toggle input:checked + label {
+    background: none;
+    color: #121212;
+    opacity: 1;
+  }
+
+  #csh-{{ section.id }}.csh-section .csh__label {
+    color: rgb(18 18 18 / 0.55);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  /* The sizes: bold numbers, no boxes; a chosen size a dark pill */
+  #csh-{{ section.id }}.csh-section .csh__chip {
+    height: 40px;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    box-shadow: none;
+    color: #121212;
+    font-family: var(--font-oce, 'Inter', system-ui, sans-serif);
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (hover: hover) {
+    #csh-{{ section.id }}.csh-section .csh__chip:hover:not(:disabled, [aria-pressed='true']) {
+      background: #f1f1f1;
+    }
+  }
+
+  #csh-{{ section.id }}.csh-section .csh__chip[aria-pressed='true'] {
+    background: #121212;
+    color: #ffffff;
+  }
+
+  #csh-{{ section.id }}.csh-section .csh__chip:disabled {
+    opacity: 0.25;
+  }
 {% endstyle %}
 
 <div id="csh-{{ section.id }}" class="csh-section">
   <div class="csh">
     {% if section.settings.heading_tag == 'h1' %}
-      <h1 class="csh__heading">{{ heading }}</h1>
+      <h1 class="csh__heading{% if is_sale %} csh__heading--sale{% endif %}">{{ heading }}</h1>
     {% else %}
-      <h2 class="csh__heading">{{ heading }}</h2>
+      <h2 class="csh__heading{% if is_sale %} csh__heading--sale{% endif %}">{{ heading }}</h2>
     {% endif %}
 
     {% if section.settings.show_description and collection.description != blank %}

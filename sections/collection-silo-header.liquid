@@ -33,7 +33,15 @@
   class="section section--page-width color-{{ section.settings.color_scheme }} cslh spacing-style"
   style="{% render 'spacing-style', settings: section.settings %}"
 >
-  <h1 class="cslh__title">{{ c.title | replace: 'adidas', 'Adidas' | escape }}</h1>
+  {%- liquid
+    assign title_lower = c.title | downcase
+    assign handle_lower = c.handle | downcase
+    assign is_sale = false
+    if title_lower contains 'sale' or handle_lower contains 'sale' or handle_lower contains 'outlet'
+      assign is_sale = true
+    endif
+  -%}
+  <h1 class="cslh__title{% if is_sale %} cslh__title--sale{% endif %}">{{ c.title | replace: 'adidas', 'Adidas' | escape }}</h1>
 
   {%- if keys.size > 0 -%}
     <nav class="cslh__gens" aria-label="Generations">
@@ -70,6 +78,17 @@
     letter-spacing: -0.045em;
     font-variation-settings: 'opsz' 32;
     text-wrap: balance;
+  }
+
+  /* A sale collection: bold red, as "Sale" in the menu */
+  .cslh__title--sale {
+    color: #e8323c;
+    font-weight: 850;
+    text-transform: lowercase;
+  }
+
+  .cslh__title--sale::first-letter {
+    text-transform: uppercase;
   }
 
   /* The generations: a row of raised pills that scrolls sideways, edge to edge on phones */
