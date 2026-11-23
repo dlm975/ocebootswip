@@ -636,20 +636,24 @@
     box-shadow: none;
   }
 
-  /* A soft shadow under the whole header bar, so it lifts off the page as it rides along */
+  /* A soft shadow under the whole header bar, so it lifts off the page as it rides along (no hard
+     line along its edge) */
   #header-component {
-    box-shadow:
-      0 1px 0 rgb(18 18 18 / 0.05),
-      0 8px 20px -12px rgb(18 18 18 / 0.28);
+    box-shadow: 0 8px 20px -12px rgb(18 18 18 / 0.28);
+    transition: box-shadow 0.2s ease;
+  }
+
+  /* The menu open: it hangs straight off the bar as one piece, so no shadow between them */
+  #header-component:has(.menu-drawer-container[open]),
+  #header-component:has(.menu-drawer-container[open]) .header__row--top {
+    box-shadow: none !important;
   }
 
   /* Collection pages: the lower row is see-through (the dock and the currency tab hang from the
      bar), so the shadow sits under the top bar instead; the dock pieces, drawn above it, cover it
      where they join */
   #header-component:has(.header-menu--dock) .header__row--top {
-    box-shadow:
-      0 1px 0 rgb(18 18 18 / 0.05),
-      0 8px 20px -12px rgb(18 18 18 / 0.28);
+    box-shadow: 0 8px 20px -12px rgb(18 18 18 / 0.28);
   }
 
   /* Gutters are set here, not by the page-width grid, so both rows share one left edge */

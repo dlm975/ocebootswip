@@ -226,10 +226,20 @@
         "padding-block-start": 0,
         "padding-block-end": 32
       }
+    },
+    "silo_header": {
+      "type": "collection-silo-header",
+      "settings": {
+        "limit": 24,
+        "color_scheme": "scheme-1",
+        "padding-block-start": 16,
+        "padding-block-end": 4
+      }
     }
   },
   "order": [
     "section",
+    "silo_header",
     "main"
   ]
 }

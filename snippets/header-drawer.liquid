@@ -1290,8 +1290,12 @@
     width: 100%;
     max-width: none;
     height: auto;
+    /* The screen actually seen (Safari's bottom bar showing), less the header: never under the bar,
+       and no change as the bar comes and goes */
     max-height: 75vh;
+    max-height: min(75svh, calc(100svh - var(--header-height, 60px) - 12px));
     overflow-y: auto;
+    overscroll-behavior: contain;
     /* Closed: fades up slightly */
     transform: translateY(-10px);
     opacity: 0;
