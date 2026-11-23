@@ -69,7 +69,7 @@
 {%- endcapture -%}
 
 {%- if count > 0 or request.design_mode -%}
-  <div class="section-background color-{{ section.settings.color_scheme }}"></div>
+  <div class="section-background wbp-section-background color-{{ section.settings.color_scheme }}"></div>
   <div
     class="section section--page-width color-{{ section.settings.color_scheme }} wbp{% if section.settings.heading contains '|' %} wbp--compact{% endif %} spacing-style"
     style="{% render 'spacing-style', settings: section.settings %}"
@@ -213,6 +213,38 @@
       </div>
     </div>
   </div>
+{%- endif -%}
+
+{%- if section.settings.attach_to_details -%}
+  <script>
+    /* Product page, desktop: this section moves into the details column on the right, after
+       what is already there (the trust icons); on phones it stays where it sits in the page */
+    (function () {
+      var el = document.getElementById('shopify-section-{{ section.id }}');
+      if (!el) return;
+      var home = null;
+      function sync() {
+        var column = document.querySelector('.product-details > .group-block > .group-block-content');
+        if (!column) return;
+        if (window.matchMedia('(min-width: 750px)').matches) {
+          if (el.parentElement === column) return;
+          if (!home) {
+            home = document.createComment('worn-by-pros-home');
+            el.parentElement.insertBefore(home, el);
+          }
+          column.appendChild(el);
+        } else if (home && el.parentElement !== home.parentElement) {
+          home.parentElement.insertBefore(el, home);
+        }
+      }
+      sync();
+      var timer;
+      window.addEventListener('resize', function () {
+        clearTimeout(timer);
+        timer = setTimeout(sync, 200);
+      }, { passive: true });
+    })();
+  </script>
 {%- endif -%}
 
 <script type="module">
@@ -1048,13 +1080,15 @@
   }
 
   /* Compact (a heading in chosen lines, e.g. "Trusted | By The Pros"): smaller text kept to its
-     lines, and the logos and their field scaled down to match */
-  .wbp--compact .wbp__heading {
-    font-size: clamp(2rem, 9vw, 6.5rem);
+     lines, and the logos and their field scaled to match. Sized by the section's own width (not
+     the screen's), so it fits the same whether across the page or in the product page's column. */
+  .wbp--compact .wbp__box {
+    container-type: inline-size;
   }
 
   .wbp--compact .wbp__heading {
     align-items: flex-start;
+    font-size: 13cqi;
   }
 
   /* Each line its own width, so the last can be sized to match the widest (script below) */
@@ -1063,34 +1097,31 @@
     white-space: nowrap;
   }
 
-  /* The logos a little closer together */
-  .wbp--compact .wbp__stage {
+  /* The logos, a little closer together, in a field as tall as the text beside them */
+  .wbp--compact .wbp__stage.wbp__stage {
     --tight: 0.8;
+    --wbp-logo: 12.5cqi;
+    align-self: stretch;
+    height: auto;
+    min-height: 140px;
   }
 
-  @media screen and (max-width: 749px) {
-    .wbp--compact .wbp__heading {
-      font-size: 12vw;
-    }
-
-    .wbp--compact .wbp__stage {
-      --wbp-logo: 44px;
-      min-height: 140px;
-    }
-
-    /* Phones: every logo, drift included, stays within the height of the text beside it (the
-       drift reaches up to 14px up, 8px left and 6px right of a logo's place) */
-    .wbp--compact .wbp__logo {
-      top: clamp(14px, calc(var(--cy) - var(--size) / 2), calc(100% - var(--size)));
-      left: clamp(8px, calc(var(--cx) - var(--size) / 2), calc(100% - var(--size) - 6px));
-    }
+  /* Every logo, drift included, stays within the height of the text beside it (the drift reaches
+     up to 14px up, 8px left and 6px right of a logo's place) */
+  .wbp--compact .wbp__logo.wbp__logo {
+    top: clamp(14px, calc(var(--cy) - var(--size) / 2), calc(100% - var(--size)));
+    left: clamp(8px, calc(var(--cx) - var(--size) / 2), calc(100% - var(--size) - 6px));
   }
 
-  @media screen and (min-width: 750px) {
-    .wbp--compact .wbp__stage {
-      --wbp-logo: 104px;
-      height: 340px;
-    }
+  /* In the product page's right-hand column (desktop): the column sets the width and the padding */
+  .product-details .wbp.section {
+    display: block;
+    padding-inline: 0;
+    max-width: none;
+  }
+
+  .product-details .wbp-section-background {
+    display: none;
   }
 {% endstylesheet %}
 
@@ -1116,6 +1147,13 @@
       "id": "hint",
       "label": "Prompt",
       "default": "Tap a league to meet the players"
+    },
+    {
+      "type": "checkbox",
+      "id": "attach_to_details",
+      "label": "Sit in the buy button column (desktop, product page)",
+      "info": "Moves this section into the product details column on the right, after what's already there (put it after the trust icons in the page). On phones it stays where it sits in the page.",
+      "default": false
     },
     {
       "type": "color_scheme",
