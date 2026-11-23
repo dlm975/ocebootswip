@@ -383,10 +383,23 @@
       // Every row, with or without a size line (accessories too)
       document.querySelectorAll('.cart-items__table-row').forEach(alignBin);
     };
-    new MutationObserver(() => {
-      if (!queued) queued = requestAnimationFrame(scan);
-    }).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['open'] });
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan);
-    else scan();
+    // Only changes that bring in cart rows (or open the cart) set off a pass, and the watch starts once
+    // the page has been read: every element added while loading would otherwise re-scan the page
+    const ROWS = '.cart-items__table-row, .cart-items__variants';
+    const relevant = (record) => {
+      if (record.type === 'attributes') return true;
+      for (const node of record.addedNodes) {
+        if (node.nodeType === 1 && (node.matches(ROWS) || node.querySelector(ROWS))) return true;
+      }
+      return false;
+    };
+    const watch = () => {
+      scan();
+      new MutationObserver((records) => {
+        if (!queued && records.some(relevant)) queued = requestAnimationFrame(scan);
+      }).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['open'] });
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watch);
+    else watch();
   })();
 </script>

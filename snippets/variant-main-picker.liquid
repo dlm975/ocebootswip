@@ -840,7 +840,18 @@
         });
       });
     }
-    new MutationObserver(syncChosen).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-chosen'] });
+    // Only a re-rendered size grid (or a data-chosen change) sets off a pass, not every element the page adds
+    new MutationObserver(function (records) {
+      var hit = records.some(function (record) {
+        if (record.type === 'attributes') return true;
+        for (var i = 0; i < record.addedNodes.length; i++) {
+          var node = record.addedNodes[i];
+          if (node.nodeType === 1 && (node.matches('.size-grid, .size-grid__item') || node.querySelector('.size-grid'))) return true;
+        }
+        return false;
+      });
+      if (hit) syncChosen();
+    }).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-chosen'] });
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', syncChosen);
     } else {

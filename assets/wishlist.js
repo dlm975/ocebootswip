@@ -226,16 +226,33 @@
     document.dispatchEvent(new CustomEvent('oce-wishlist:change', { detail: { items: items.slice() } }));
   });
 
-  // Hearts rendered later (filtered grids, more products, search results) show their state at once
+  // Hearts rendered later (filtered grids, more products, search results) show their state at once.
+  // Only additions that hold a heart (or the count) set off a pass, and the watch starts once the
+  // page has been read: every element the page adds while loading would otherwise re-scan it all.
+  const WATCHED = '[data-wishlist-toggle], [data-wishlist-count]';
+  const holdsHeart = function (node) {
+    return node.nodeType === 1 && (node.matches(WATCHED) || node.querySelector(WATCHED) !== null);
+  };
   let queued = false;
-  new MutationObserver(function () {
-    if (queued) return;
-    queued = true;
-    queueMicrotask(function () {
-      queued = false;
-      sync(document);
-    });
-  }).observe(document.documentElement, { childList: true, subtree: true });
+  const watch = function () {
+    sync(document);
+    new MutationObserver(function (records) {
+      if (queued) return;
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          if (!holdsHeart(node)) continue;
+          queued = true;
+          queueMicrotask(function () {
+            queued = false;
+            sync(document);
+          });
+          return;
+        }
+      }
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watch);
+  else watch();
 
   sync(document);
   // Saved hearts are drawn filled straight away; only later changes animate
