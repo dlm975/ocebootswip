@@ -19,17 +19,33 @@
   endfor
   assign keys = keys | split: ',' | sort | reverse
 
-  # The newest posts (reels too), shown most-liked first: "likes|handle" keys, padded so they sort
-  # as numbers
-  assign ranked = ''
+  # The newest posts, shown alternating post, reel, post, reel (each most-liked first; once one kind
+  # runs out the other carries on): "likes|handle" keys, padded so they sort as numbers
+  assign ranked_posts = ''
+  assign ranked_reels = ''
   for key in keys limit: limit
     assign post_handle = key | split: '|' | last
     assign post = shop.metaobjects.instagram_post[post_handle]
     assign likes = post.like_count.value | default: 0
     assign rank = likes | prepend: '000000000' | slice: -9, 9 | append: '|' | append: post_handle
-    assign ranked = ranked | append: rank | append: ','
+    if post.is_video.value
+      assign ranked_reels = ranked_reels | append: rank | append: ','
+    else
+      assign ranked_posts = ranked_posts | append: rank | append: ','
+    endif
   endfor
-  assign keys = ranked | split: ',' | sort | reverse
+  assign ranked_posts = ranked_posts | split: ',' | sort | reverse
+  assign ranked_reels = ranked_reels | split: ',' | sort | reverse
+  assign mixed = ''
+  for n in (0..limit)
+    if n < ranked_posts.size
+      assign mixed = mixed | append: ranked_posts[n] | append: ','
+    endif
+    if n < ranked_reels.size
+      assign mixed = mixed | append: ranked_reels[n] | append: ','
+    endif
+  endfor
+  assign keys = mixed | split: ','
 -%}
 
 {%- if keys.size > 0 or request.design_mode -%}
