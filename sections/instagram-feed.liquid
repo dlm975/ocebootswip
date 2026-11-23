@@ -1,5 +1,5 @@
 {%- comment -%}
-  "What's new on @oceboots ✓": the newest Instagram photo and carousel posts (not reels) as cards, from the "Instagram post"
+  "What's new on @oceboots ✓": the newest Instagram posts (reels too), most-liked first, as cards, from the "Instagram post"
   metaobjects (Shopify admin: Content > Metaobjects), newest first by Posted at. Posts are added by
   hand, or by the automatic Instagram sync once it is connected. Hidden on the storefront until
   there is at least one post.
@@ -18,6 +18,18 @@
     assign keys = keys | append: key | append: ','
   endfor
   assign keys = keys | split: ',' | sort | reverse
+
+  # The newest posts (reels too), shown most-liked first: "likes|handle" keys, padded so they sort
+  # as numbers
+  assign ranked = ''
+  for key in keys limit: limit
+    assign post_handle = key | split: '|' | last
+    assign post = shop.metaobjects.instagram_post[post_handle]
+    assign likes = post.like_count.value | default: 0
+    assign rank = likes | prepend: '000000000' | slice: -9, 9 | append: '|' | append: post_handle
+    assign ranked = ranked | append: rank | append: ','
+  endfor
+  assign keys = ranked | split: ',' | sort | reverse
 -%}
 
 {%- if keys.size > 0 or request.design_mode -%}
@@ -48,22 +60,22 @@
 
     {%- if keys.size > 0 -%}
       <ul class="igf__track" role="list">
-        {%- assign shown = 0 -%}
         {%- for key in keys -%}
           {%- liquid
-            if shown >= limit
-              break
-            endif
             assign post_handle = key | split: '|' | last
             assign post = shop.metaobjects.instagram_post[post_handle]
             assign media = post.media.value
-            # Photo and carousel posts only: reels are left out
-            if post.is_video.value == true or media.media_type == 'video'
-              continue
-            endif
+            # A reel shows its cover still, with the play mark
             assign is_video = false
-            assign still = media
-            assign shown = shown | plus: 1
+            if media.media_type == 'video'
+              assign is_video = true
+              assign still = media.preview_image
+            else
+              assign still = media
+            endif
+            if post.is_video.value == true
+              assign is_video = true
+            endif
             assign link = post.permalink.value | default: profile_url
           -%}
           {%- liquid
