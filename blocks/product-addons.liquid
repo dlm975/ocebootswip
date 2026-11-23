@@ -108,7 +108,7 @@
         <a class="pa__media" href="{{ item.url }}" tabindex="-1" aria-hidden="true">
           {%- if item.featured_image -%}
             <img
-              src="{{ item.featured_image | image_url: width: 160 }}"
+              src="{{ item.featured_image | image_url: width: 320 }}"
               alt=""
               width="60"
               height="60"
@@ -405,6 +405,52 @@
     font-size: 0.9375rem;
     font-weight: 700;
     cursor: pointer;
+  }
+
+  /* The popup is a 3:4 card (shorter screens shrink it to fit); the add-ons inside are big, one per
+     row, filling the space between the heading and the buttons */
+  .pa-pop__card {
+    display: flex;
+    flex-direction: column;
+    width: min(420px, 100%, calc((100svh - 32px) * 0.75));
+    aspect-ratio: 3 / 4;
+    padding: 24px 20px 18px;
+    box-sizing: border-box;
+  }
+
+  .pa-pop__list {
+    flex: 1;
+    grid-template-columns: 1fr;
+    align-content: center;
+    gap: 14px;
+  }
+
+  .pa-pop__list .pa__card {
+    gap: 12px 14px;
+    padding: 14px;
+    border-radius: 18px;
+  }
+
+  .pa-pop__list .pa__media {
+    width: 72px;
+    height: 72px;
+    border-radius: 12px;
+  }
+
+  .pa-pop__list .pa__title {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .pa-pop__list .pa__add {
+    min-height: 42px;
+    padding: 0 14px;
+    font-size: 0.9375rem;
+  }
+
+  .pa-pop__actions {
+    margin-top: 18px;
   }
 
   /* An add-on added from the popup: its button shows it */
