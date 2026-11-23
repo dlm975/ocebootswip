@@ -173,6 +173,7 @@
     {{ block.shopify_attributes }}
   >
     <span class="pa__heading">
+      <span>{{ heading }}</span>
       {%- comment -%} An iridescent plus, raised like the size keys {%- endcomment -%}
       <svg class="pa__plus" viewBox="0 0 34 34" aria-hidden="true" focusable="false">
         <defs>
@@ -188,7 +189,16 @@
             <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
           </linearGradient>
         </defs>
+        {%- comment -%} Each layer drawn twice: a black stroke, then the fill over its inner half, so only the outer edge shows {%- endcomment -%}
+        <g transform="translate(-1.5 2.5)" fill="none" stroke="#121212" stroke-width="3.2">
+          <rect x="13" y="4" width="8" height="26" rx="3"/>
+          <rect x="4" y="13" width="26" height="8" rx="3"/>
+        </g>
         <g class="pa__plus-side" transform="translate(-1.5 2.5)" fill="#a9a3cf">
+          <rect x="13" y="4" width="8" height="26" rx="3"/>
+          <rect x="4" y="13" width="26" height="8" rx="3"/>
+        </g>
+        <g fill="none" stroke="#121212" stroke-width="3.2">
           <rect x="13" y="4" width="8" height="26" rx="3"/>
           <rect x="4" y="13" width="26" height="8" rx="3"/>
         </g>
@@ -201,7 +211,6 @@
           <rect x="5" y="14" width="24" height="3.5" rx="1.75"/>
         </g>
       </svg>
-      <span>{{ heading }}</span>
     </span>
     <div class="pa__list">{{ cards }}</div>
   </div>
