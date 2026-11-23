@@ -53,13 +53,18 @@
       endif
     endfor
   endif
+  # A silo's own page (or one of its generations'): just that silo's generations, no other silos
+  assign silo_page = false
+  if page_mode and match_silo != ''
+    assign silo_page = true
+  endif
 -%}
 
 {%- unless page_mode and match_brand == '' -%}
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <div class="section section--page-width color-{{ section.settings.color_scheme }}">
   <shop-by-silo
-    class="ssilo spacing-style{% if page_mode %} ssilo--page{% endif %}"
+    class="ssilo spacing-style{% if page_mode %} ssilo--page{% endif %}{% if silo_page %} ssilo--silo-page{% endif %}"
     id="{{ section_id }}"
     style="{% render 'spacing-style', settings: section.settings %}"
   >
@@ -138,6 +143,7 @@
                 <ul class="ssilo__silos" role="list"{% if page_mode %} style="--cols-m: {{ cols_m }}; --cols-d: {{ cols_d }}; --open-m: {{ rows_m | plus: 1 }}; --open-d: {{ rows_d | plus: 1 }};"{% endif %}>
                   {%- for silo in section.blocks offset: start -%}
                     {%- if silo.type == 'brand' -%}{%- break -%}{%- endif -%}
+                    {%- if silo_page and silo.id != match_silo -%}{%- continue -%}{%- endif -%}
                     {%- liquid
                       assign silo_title = silo.settings.title | strip
                       assign silo_prefix = silo_title | append: ' '
@@ -205,7 +211,7 @@
                           </span>
                         </button>
 
-                        <div class="ssilo__panel" id="{{ section_id }}-{{ silo.id }}" data-panel hidden>
+                        <div class="ssilo__panel" id="{{ section_id }}-{{ silo.id }}" data-panel{% unless silo_page %} hidden{% endunless %}>
                           <div class="ssilo__inner ssilo__inner--silo">
                             <ul class="ssilo__gens" role="list" style="--rows-2: {{ rows_2 }}; --rows-3: {{ rows_3 }}; --rows-6: {{ rows_6 }};">
                               {%- for generation in silo.settings.generations -%}
@@ -241,6 +247,7 @@
                                 {%- endif -%}
                               {%- endfor -%}
                             </ul>
+                            {%- unless silo_page and silo.settings.collection.handle == here -%}
                             <div class="ssilo__foot" data-anim>
                               {%- if silo.settings.collection != blank -%}
                                 <a class="ssilo__all" href="{{ silo.settings.collection.url }}">
@@ -250,11 +257,14 @@
                               {%- else -%}
                                 <span></span>
                               {%- endif -%}
+                              {%- unless silo_page -%}
                               <button type="button" class="ssilo__close" data-close="{{ silo.id }}">
                                 Close
                                 {%- render 'gicon', name: 'keyboard_arrow_up', size: 18 -%}
                               </button>
+                              {%- endunless -%}
                             </div>
+                            {%- endunless -%}
                           </div>
                         </div>
                       {%- else -%}
@@ -1416,6 +1426,21 @@
     .ssilo--page .ssilo__close {
       font-size: 0.9375rem;
     }
+  }
+
+  /* A silo's own page: its generations laid out, no silo row above them */
+  .ssilo--silo-page .ssilo__silo,
+  .ssilo--silo-page .ssilo__silo.is-open {
+    grid-row: auto;
+    grid-column: 1 / -1;
+  }
+
+  .ssilo--silo-page .ssilo__silo > .ssilo__row {
+    display: none;
+  }
+
+  .ssilo--silo-page .ssilo__inner--silo {
+    padding-top: 0;
   }
 
   /* The silo (or generation) being viewed */
