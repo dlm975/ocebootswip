@@ -443,6 +443,7 @@
           "type": "silo",
           "settings": {
             "title": "Puma Future",
+            "image": "shopify://shop_images/silo-puma-future.jpg",
             "collection": "puma-future",
             "generations": []
           }
@@ -451,6 +452,7 @@
           "type": "silo",
           "settings": {
             "title": "Puma Ultra",
+            "image": "shopify://shop_images/silo-puma-ultra.jpg",
             "collection": "puma-ultra",
             "generations": []
           }
@@ -459,6 +461,7 @@
           "type": "silo",
           "settings": {
             "title": "Puma evoPOWER",
+            "image": "shopify://shop_images/silo-puma-evopower.jpg",
             "collection": "puma-evopower",
             "generations": []
           }
