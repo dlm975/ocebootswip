@@ -90,6 +90,7 @@
           assign number = ''
           assign url = ''
           assign filters = ''
+          assign size_values = ''
           for row in rows
             assign row_key = row | slice: 0, 6
             if row_key == key
@@ -100,6 +101,7 @@
               assign group_size = group_size | plus: 1
               assign size_param = fields[4] | url_encode
               assign filters = filters | append: '&filter.v.option.size=' | append: size_param
+              assign size_values = size_values | append: fields[4] | append: '|'
             endif
           endfor
           if group_size > 1
@@ -121,6 +123,8 @@
             href="{{ url }}"
             class="size-drill__size"
             aria-label="{{ system }} {{ number }}"
+            data-size-values="{{ size_values | escape }}"
+            data-size-pick="{{ system }} {{ number }}"
           >
             <span class="size-drill__value">{{ shown }}</span>
             {%- if total > 0 -%}

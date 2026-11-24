@@ -305,6 +305,42 @@
         sheet.addEventListener('click', (event) => {
           if (event.target.closest('a[href]')) close();
         });
+
+        // On a collection or search page, a size filters the page being looked at (keeping its
+        // other filters and sort) rather than leaving for All Football Boots. A size collection's
+        // own page goes to the other size as before.
+        {%- liquid
+          assign dock_filters = false
+          if template.name == 'search'
+            assign dock_filters = true
+          elsif template.name == 'collection' and collection
+            assign dock_prefix = collection.handle | slice: 0, 3
+            unless dock_prefix == 'us-' or dock_prefix == 'uk-' or dock_prefix == 'eu-'
+              assign dock_filters = true
+            endunless
+          endif
+        -%}
+        {%- if dock_filters %}
+        sheet.classList.add('mdock-sheet--filters');
+        sheet.addEventListener('click', (event) => {
+          const link = event.target.closest('.size-drill__size[data-size-values]');
+          if (!link) return;
+          const values = link.dataset.sizeValues.split('|').filter(Boolean);
+          if (!values.length) return;
+          event.preventDefault();
+          const url = window.OceFilterUrl?.expand(window.location.href) ?? new URL(window.location.href);
+          url.searchParams.delete('filter.v.option.size');
+          url.searchParams.delete('page');
+          values.forEach((value) => url.searchParams.append('filter.v.option.size', value));
+          // All Football Boots is headed by the size chosen ("EU 41"); a brand or silo keeps its own title
+          {%- if template.name == 'collection' and collection.handle == 'all-football-boots' %}
+          url.searchParams.set('pick', link.dataset.sizePick);
+          {%- else %}
+          url.searchParams.delete('pick');
+          {%- endif %}
+          window.location.assign(url.toString());
+        });
+        {%- endif %}
       }
     }
 
@@ -552,6 +588,11 @@
 
 {% stylesheet %}
   .mdock,
+  /* Filtering the page being looked at: the store-wide counts would not match it */
+  .mdock-sheet--filters .size-drill__count {
+    display: none;
+  }
+
   .mdock-sheet {
     display: none;
   }
