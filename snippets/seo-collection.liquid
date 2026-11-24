@@ -308,7 +308,7 @@
     {%- endif -%}
     {%- case kind -%}
       {%- when 'generation' -%}
-        <p>Shop {{ name | escape }} football boots at OCEBOOTS, with {{ count }} pair{% if count != 1 %}s{% endif %} listed now. The {{ name | escape }} is part of the {{ brand_word }} {{ line[1] }} line: {{ about }}</p>
+        <p>Shop {{ name | escape }} football boots at OCEBOOTS, with {{ count }} pair{% if count != 1 %}s{% endif %} listed now. The {{ name | escape }} is part of the {{ brand_word }} {{ line[1] }} line. {{ about | replace: 'Nike’s', 'It’s Nike’s' | replace: 'adidas’', 'It’s adidas’' | replace: 'Puma’s', 'It’s Puma’s' | replace: 'Mizuno’s', 'It’s Mizuno’s' }}</p>
         <p>Whether you want a pair to play in or a clean pair for the collection, each one is listed on its own with its exact size, its condition and real photos of that pair.</p>
       {%- when 'silo', 'line' -%}
         <p>{{ name | escape }} football boots at OCEBOOTS, across every generation. {{ about }}</p>
