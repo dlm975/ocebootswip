@@ -342,6 +342,7 @@
           "type": "silo",
           "settings": {
             "title": "Adidas Predator",
+            "image": "shopify://shop_images/silo-adidas-predator.jpg",
             "collection": "predator-1",
             "generations": [
               "adidas-predator-ft",
@@ -358,6 +359,7 @@
           "type": "silo",
           "settings": {
             "title": "Adidas X",
+            "image": "shopify://shop_images/silo-adidas-x.jpg",
             "collection": "x",
             "generations": [
               "adidas-x-crazyfast",
@@ -380,6 +382,7 @@
           "type": "silo",
           "settings": {
             "title": "Adidas F50",
+            "image": "shopify://shop_images/silo-adidas-f50.jpg",
             "collection": "f50",
             "generations": [
               "adidas-f50-hyperfast",
@@ -396,6 +399,7 @@
           "type": "silo",
           "settings": {
             "title": "Adidas Copa",
+            "image": "shopify://shop_images/silo-adidas-copa.jpg",
             "collection": "copa",
             "generations": [
               "adidas-copa-pure",
@@ -409,6 +413,7 @@
           "type": "silo",
           "settings": {
             "title": "Adidas Nemeziz",
+            "image": "shopify://shop_images/silo-adidas-nemeziz.jpg",
             "collection": "nemeziz",
             "generations": [
               "adidas-nemeziz-19",
@@ -421,6 +426,7 @@
           "type": "silo",
           "settings": {
             "title": "Adidas 11Pro",
+            "image": "shopify://shop_images/silo-adidas-11pro.jpg",
             "collection": "11pro",
             "generations": [
               "adidas-11pro-elite",
@@ -433,6 +439,7 @@
           "type": "silo",
           "settings": {
             "title": "Adidas Ace",
+            "image": "shopify://shop_images/silo-adidas-ace.jpg",
             "collection": "",
             "generations": [
               "adidas-ace-17",
