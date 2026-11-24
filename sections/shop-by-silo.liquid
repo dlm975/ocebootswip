@@ -79,7 +79,8 @@
   # that some generation's title contains is the line; if none does, every generation shows.
   assign gen_filter = ''
   if via_alias
-    assign alias_words = collection.title | downcase | split: ' '
+    # "TOTAL-90", "Crazyfast+", "VAPOR 14 ELITE'S" read as "total 90", "crazyfast", "vapor 14 elite"
+    assign alias_words = collection.title | downcase | replace: '-', ' ' | remove: "'s" | remove: "'" | remove: '+' | split: ' '
     for b in section.blocks
       if b.id != match_silo
         continue
