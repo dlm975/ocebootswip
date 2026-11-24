@@ -603,14 +603,14 @@
   }
 
   .bm-result__media {
-    display: grid;
-    place-items: center;
-    aspect-ratio: 16 / 10;
+    display: block;
+    height: clamp(140px, 30svh, 240px);
     padding: 10px;
     background: #ffffff;
   }
 
   .bm-result__media img {
+    display: block;
     width: 100%;
     height: 100%;
     object-fit: contain;
