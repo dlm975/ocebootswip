@@ -215,6 +215,11 @@
               "nike-mercurial-superfly-5",
               "nike-mercurial-superfly-4",
               "nike-mercurial-superfly-3"
+            ],
+            "aliases": [
+              "superfly-copy",
+              "mercurial",
+              "vapor-14-elite"
             ]
           }
         },
@@ -233,6 +238,9 @@
               "nike-phantom-vision-2",
               "nike-phantom-vision",
               "nike-phantom-venom"
+            ],
+            "aliases": [
+              "phantom"
             ]
           }
         },
@@ -251,6 +259,9 @@
               "nike-tiempo-legend-5",
               "nike-tiempo-legend-4",
               "nike-tiempo-legend-3"
+            ],
+            "aliases": [
+              "tiempo"
             ]
           }
         },
@@ -263,6 +274,9 @@
               "nike-hypervenom-phantom-3",
               "nike-hypervenom-phantom-2",
               "nike-hypervenom-phantom-1"
+            ],
+            "aliases": [
+              "hypervenom"
             ]
           }
         },
@@ -276,6 +290,9 @@
               "nike-magista-obra-1",
               "nike-magista-opus-2",
               "nike-magista-opus-1"
+            ],
+            "aliases": [
+              "magista"
             ]
           }
         },
@@ -288,6 +305,9 @@
               "nike-ctr360-maestri-3",
               "nike-ctr360-maestri-2",
               "nike-ctr360-maestri-1"
+            ],
+            "aliases": [
+              "ctr360"
             ]
           }
         },
@@ -299,6 +319,9 @@
             "generations": [
               "nike-total-90-laser-4",
               "nike-total-90-laser-3"
+            ],
+            "aliases": [
+              "total-90"
             ]
           }
         },
@@ -319,6 +342,9 @@
               "adidas-predator-accuracy",
               "adidas-predator-instinct",
               "adidas-predator-lz"
+            ],
+            "aliases": [
+              "predator"
             ]
           }
         },
@@ -337,6 +363,10 @@
               "adidas-x-17",
               "adidas-x-16",
               "adidas-x-15"
+            ],
+            "aliases": [
+              "adidas-x",
+              "crazyfast"
             ]
           }
         },
@@ -350,6 +380,9 @@
               "adidas-f50-elite",
               "adidas-f50-adizero",
               "adidas-f50-itunit"
+            ],
+            "aliases": [
+              "adidas-f50"
             ]
           }
         },
@@ -406,7 +439,10 @@
           "type": "brand",
           "settings": {
             "title": "Puma",
-            "collection": "puma-1"
+            "collection": "puma-1",
+            "aliases": [
+              "puma"
+            ]
           }
         },
         "silo_14": {
