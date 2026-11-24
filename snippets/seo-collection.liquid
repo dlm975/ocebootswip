@@ -228,11 +228,15 @@
   assign brand_word = line[2] | default: ''
   case kind
     when 'brand'
-      assign seo_title = name | append: ' Football Boots | New & Pre-Owned'
+      assign seo_title = name | append: ' Football Boots'
+      if seo_title.size <= 30
+        assign seo_title = seo_title | append: ' | New & Pre-Owned'
+      endif
       assign seo_desc = 'Shop ' | append: name | append: ' football boots at OCEBOOTS: ' | append: count | append: ' pairs from current releases to rare classics, each with its size, condition and real photos.'
     when 'silo', 'line'
       assign seo_title = name | append: ' Football Boots'
-      if name.size <= 20
+      # The tagline only where the whole title stays inside what search results show (~60 with " – Oce Boots")
+      if seo_title.size <= 27
         assign seo_title = seo_title | append: ' | Every Generation'
       endif
       assign seo_desc = 'Shop ' | append: name | append: ' football boots at OCEBOOTS: every generation, new and pre-owned, with exact sizes, condition notes and real photos.'
@@ -246,8 +250,11 @@
       assign seo_title = name | append: ' Football Boots'
       assign seo_desc = 'Shop ' | append: name | append: ' football boots at OCEBOOTS: signature editions and the models they wore, new and pre-owned, with real photos.'
     when 'condition'
-      assign seo_title = name | append: ' Football Boots | Graded & Photographed'
-      assign seo_desc = name | append: ' football boots at OCEBOOTS: ' | append: grade | append: '. Every pair is checked by hand and shown in real photos.'
+      assign seo_title = name | append: ' Football Boots'
+      if seo_title.size <= 24
+        assign seo_title = seo_title | append: ' | Graded & Photographed'
+      endif
+      assign seo_desc = name | append: ' football boots at OCEBOOTS: ' | append: grade | append: '. Hand-checked, with real photos.'
     when 'style'
       assign seo_title = 'Football Boots for ' | append: name
       assign seo_desc = 'Football boots built for ' | append: name | downcase | append: ': the right boot for how you play, new and pre-owned, each with its size, condition and real photos.'
