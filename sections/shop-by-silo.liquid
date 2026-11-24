@@ -21,6 +21,7 @@
   # On a collection page: just the brand this collection belongs to (its own page, one of its silos
   # or one of their generations), already open, its silos as dropdowns. Nothing for any other collection.
   assign page_mode = false
+  assign via_alias = false
   assign match_brand = ''
   assign match_silo = ''
   assign here = ''
@@ -31,8 +32,17 @@
     for b in section.blocks
       if b.type == 'brand'
         assign current_brand = b.id
-        if b.settings.collection.handle == here and match_brand == ''
-          assign match_brand = b.id
+        if match_brand == ''
+          if b.settings.collection.handle == here
+            assign match_brand = b.id
+          else
+            for a in b.settings.aliases
+              if a.handle == here
+                assign match_brand = b.id
+                break
+              endif
+            endfor
+          endif
         endif
       elsif match_brand == ''
         assign hit = false
@@ -45,12 +55,48 @@
               break
             endif
           endfor
+          # One of the silo's other collections (an older "VAPOR" or "SUPERFLY" collection)
+          unless hit
+            for a in b.settings.aliases
+              if a.handle == here
+                assign hit = true
+                assign via_alias = true
+                break
+              endif
+            endfor
+          endunless
         endif
         if hit
           assign match_brand = current_brand
           assign match_silo = b.id
         endif
       endif
+    endfor
+  endif
+
+  # Reached through one of a silo's other collections: when its title names one line of the silo
+  # ("VAPOR", "Vapor 14 Elite"), only that line's generations show. The longest start of the title
+  # that some generation's title contains is the line; if none does, every generation shows.
+  assign gen_filter = ''
+  if via_alias
+    assign alias_words = collection.title | downcase | split: ' '
+    for b in section.blocks
+      if b.id != match_silo
+        continue
+      endif
+      for n in (1..alias_words.size) reversed
+        assign phrase = alias_words | slice: 0, n | join: ' '
+        for g in b.settings.generations
+          assign g_title = g.title | downcase
+          if g_title contains phrase and g.products_count > 0
+            assign gen_filter = phrase
+            break
+          endif
+        endfor
+        if gen_filter != ''
+          break
+        endif
+      endfor
     endfor
   endif
   # A silo's own page (or one of its generations'): just that silo's generations, no other silos
@@ -152,6 +198,12 @@
                       assign shown = 0
                       assign first_image = nil
                       for generation in silo.settings.generations
+                        assign gen_lower = generation.title | downcase
+                        if gen_filter != '' and silo.id == match_silo
+                          unless gen_lower contains gen_filter
+                            continue
+                          endunless
+                        endif
                         if generation.products_count > 0
                           assign shown = shown | plus: 1
                           if first_image == nil
@@ -215,7 +267,16 @@
                           <div class="ssilo__inner ssilo__inner--silo">
                             <ul class="ssilo__gens" role="list" style="--rows-2: {{ rows_2 }}; --rows-3: {{ rows_3 }}; --rows-6: {{ rows_6 }};">
                               {%- for generation in silo.settings.generations -%}
-                                {%- if generation.products_count > 0 -%}
+                                {%- liquid
+                                  assign gen_lower = generation.title | downcase
+                                  assign gen_hidden = false
+                                  if gen_filter != '' and silo.id == match_silo
+                                    unless gen_lower contains gen_filter
+                                      assign gen_hidden = true
+                                    endunless
+                                  endif
+                                -%}
+                                {%- if generation.products_count > 0 and gen_hidden == false -%}
                                   {%- liquid
                                     assign label = generation.title | remove_first: silo_prefix | strip
                                     if label == generation.title
@@ -1530,6 +1591,13 @@
           "info": "For 'Shop all', and the card's image if none is chosen."
         },
         {
+          "type": "collection_list",
+          "id": "aliases",
+          "label": "Other collections for this brand",
+          "info": "Older or duplicate collections (e.g. PUMA) whose pages should show this brand's silos too.",
+          "limit": 10
+        },
+        {
           "type": "image_picker",
           "id": "image",
           "label": "Card image"
@@ -1565,6 +1633,13 @@
           "label": "Generations",
           "info": "In the order to show them, newest first. Empty ones are hidden.",
           "limit": 50
+        },
+        {
+          "type": "collection_list",
+          "id": "aliases",
+          "label": "Other collections for this silo",
+          "info": "Older or duplicate collections (e.g. VAPOR, SUPERFLY) whose pages should show this silo's generations. A title naming one line of the silo (Vapor) shows only that line.",
+          "limit": 10
         }
       ]
     }
