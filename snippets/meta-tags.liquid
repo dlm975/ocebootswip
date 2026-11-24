@@ -48,6 +48,35 @@
       assign seo_canonical = seo_canon_out
     endif
   endif
+  # The home page: what the site is, not the store's internal title ("oceboots.com")
+  if request.page_type == 'index'
+    assign range_count = collections['all-football-boots'].all_products_count | default: 1000
+    assign page_title = 'OCEBOOTS | Football Boots NZ – New, Pre-Owned & Rare'
+    assign page_description = 'New Zealand’s largest range of football boots: ' | append: range_count | append: ' pairs of Nike Mercurial, Phantom, Tiempo, adidas Predator, F50 and more, new and pre-owned. Shipped worldwide.'
+  endif
+
+  # Pages without a description of their own get one, so search results show something useful
+  if page_description == blank
+    case request.page_type
+      when 'page'
+        assign page_description = page.content | strip_html | strip_newlines | strip | truncate: 155
+      when 'article'
+        assign page_description = article.excerpt_or_content | strip_html | strip_newlines | strip | truncate: 155
+      when 'blog'
+        assign page_description = 'Football boot news, releases and stories from OCEBOOTS.'
+      when 'policy'
+        assign page_description = page_title | append: ' for OCEBOOTS, New Zealand’s football boot store.'
+    endcase
+    if page_description == blank
+      assign page_description = 'OCEBOOTS: New Zealand’s largest range of football boots, new and pre-owned, from Nike, adidas, Puma and Mizuno. Shipped worldwide.'
+    endif
+  endif
+
+  # Search results, the cart and account pages are not pages to find in Google
+  if request.page_type == 'search' or request.page_type == 'cart' or request.page_type contains 'customers/'
+    assign seo_robots = 'noindex'
+  endif
+
   # A filtered or sorted collection is the same page: it stays out of search results
   if request.page_type == 'collection' and seo_robots == blank
     if current_tags or request.path contains '+'
@@ -71,7 +100,7 @@
 
 <meta
   property="og:site_name"
-  content="{{ shop.name }}"
+  content="OCEBOOTS"
 >
 <meta
   property="og:url"
@@ -143,7 +172,12 @@
   {{ page_title }}
   {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}
   {%- if current_page != 1 %} &ndash; Page {{ current_page }}{% endif -%}
-  {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+  {%- liquid
+    # The site's name after the page's ("… – OCEBOOTS"), unless the title already carries it
+    assign title_lower = page_title | downcase
+    assign shop_lower = shop.name | downcase
+  -%}
+  {%- unless title_lower contains 'oceboots' or title_lower contains shop_lower %} &ndash; OCEBOOTS{% endunless -%}
 </title>
 
 <link
@@ -160,3 +194,5 @@
     content="{{ page_description | escape }}"
   >
 {% endif %}
+
+{%- render 'seo-site' -%}

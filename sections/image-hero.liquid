@@ -78,8 +78,19 @@
     {%- if section.settings.eyebrow != blank -%}
       <p class="ih__eyebrow" data-ih-piece>{{ section.settings.eyebrow | escape }}</p>
     {%- endif -%}
+    {%- comment -%}
+      On the home page the page's main heading says what the site is (for search engines and screen
+      readers); the hero's own line ("Sale is LIVE!") is then a second-level heading that looks the same.
+    {%- endcomment -%}
+    {%- if template.name == 'index' and section.index == 1 -%}
+      <h1 class="visually-hidden">OCEBOOTS: football boots, new, pre-owned and rare</h1>
+    {%- endif -%}
     {%- if section.settings.heading != blank -%}
-      <h1 class="ih__heading" data-ih-piece>{{ section.settings.heading | escape }}</h1>
+      {%- if template.name == 'index' -%}
+        <h2 class="ih__heading" data-ih-piece>{{ section.settings.heading | escape }}</h2>
+      {%- else -%}
+        <h1 class="ih__heading" data-ih-piece>{{ section.settings.heading | escape }}</h1>
+      {%- endif -%}
     {%- endif -%}
     {%- if section.settings.text != blank -%}
       <p class="ih__text" data-ih-piece>{{ section.settings.text | escape }}</p>

@@ -161,17 +161,7 @@
   endif
 %}
 
-<script type="application/ld+json">
-  {
-    "@context": "http://schema.org",
-    "@type": "Organization",
-    "name": {{ shop.name | json }},
-    {% if settings.logo %}
-      "logo": {{ settings.logo | image_url: width: 500 | prepend: "https:" | json }},
-    {% endif %}
-    "url": {{ request.origin | append: page.url | json }}
-  }
-</script>
+{%- comment -%} The business's structured data is in snippets/seo-site (every page) {%- endcomment -%}
 
 {%- if section.settings.invert_logo -%}
   {% style %}

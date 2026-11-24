@@ -1,0 +1,171 @@
+{%- comment -%}
+  Structured data for a product page, written from the product's own fields so Google shows the
+  right details:
+  - brand: the product's custom.brand (Nike, adidas, Puma, Mizuno), not the store's name
+  - condition: the Condition option ("New" is new; Like New, Lightly Worn and the other grades are used)
+  - mpn: the style code (global.MPN, e.g. IF8508-001); gtin: the barcode when it is one
+  - one Product, or a ProductGroup varying by size when the listing has more than one size
+  Plus breadcrumbs: Home > brand > generation > this boot.
+
+  @param {object} product
+{%- endcomment -%}
+
+{%- liquid
+  assign p = product
+  assign origin = request.origin
+  assign brand = p.metafields.custom.brand.value | default: p.metafields.custom.brand
+  if brand == blank
+    assign first_word = p.title | split: ' ' | first | downcase
+    case first_word
+      when 'nike'
+        assign brand = 'Nike'
+      when 'adidas'
+        assign brand = 'adidas'
+      when 'puma'
+        assign brand = 'Puma'
+      when 'mizuno'
+        assign brand = 'Mizuno'
+      else
+        assign brand = 'OCEBOOTS'
+    endcase
+  endif
+  assign mpn = p.metafields.global.MPN.value | default: p.metafields.global.MPN
+  assign currency = cart.currency.iso_code
+  assign description = p.description | strip_html | strip_newlines | replace: '  ', ' ' | strip | truncate: 600
+  if description == blank
+    assign description = p.metafields.global.description_tag | default: p.title
+  endif
+
+  assign condition_index = nil
+  assign size_index = nil
+  for option in p.options_with_values
+    assign option_lower = option.name | downcase
+    if option_lower contains 'condition'
+      assign condition_index = forloop.index0
+    elsif option_lower contains 'size'
+      assign size_index = forloop.index0
+    endif
+  endfor
+-%}
+
+{%- capture images -%}
+  [
+    {%- for image in p.images limit: 6 -%}
+      {{ image | image_url: width: 1600 | prepend: 'https:' | json }}{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  ]
+{%- endcapture -%}
+
+{%- capture variant_json -%}
+  {%- for v in p.variants limit: 60 -%}
+    {%- liquid
+      assign condition = 'https://schema.org/NewCondition'
+      if condition_index != nil
+        assign grade = v.options[condition_index] | downcase | strip
+        if grade != 'new' and grade != 'brand new'
+          assign condition = 'https://schema.org/UsedCondition'
+        endif
+      endif
+      assign price = v.price | money_without_currency | remove: ','
+      assign code = v.barcode | strip | remove: ' '
+      assign code_digits = code | remove: '0' | remove: '1' | remove: '2' | remove: '3' | remove: '4' | remove: '5' | remove: '6' | remove: '7' | remove: '8' | remove: '9'
+      assign is_gtin = false
+      if code != blank and code_digits == blank and code.size >= 8 and code.size <= 14
+        assign is_gtin = true
+      endif
+      assign variant_name = p.title
+      if p.variants.size > 1
+        assign variant_name = p.title | append: ' – ' | append: v.title
+      endif
+    -%}
+    {
+      "@type": "Product",
+      "name": {{ variant_name | json }},
+      {%- if v.sku != blank %}"sku": {{ v.sku | json }},{% endif -%}
+      {%- if mpn != blank %}"mpn": {{ mpn | json }},{% endif -%}
+      {%- if is_gtin %}"gtin": {{ code | json }},{% endif -%}
+      {%- if size_index != nil %}"size": {{ v.options[size_index] | json }},{% endif -%}
+      {%- if v.featured_image %}"image": {{ v.featured_image | image_url: width: 1600 | prepend: 'https:' | json }},{% else %}"image": {{ images }},{% endif -%}
+      "brand": { "@type": "Brand", "name": {{ brand | json }} },
+      "offers": {
+        "@type": "Offer",
+        "url": {{ origin | append: v.url | json }},
+        "price": {{ price | json }},
+        "priceCurrency": {{ currency | json }},
+        "itemCondition": {{ condition | json }},
+        "availability": "https://schema.org/{% if v.available %}InStock{% else %}SoldOut{% endif %}",
+        "seller": { "@type": "Organization", "name": "OCEBOOTS" }
+      }
+    }{% unless forloop.last %},{% endunless %}
+  {%- endfor -%}
+{%- endcapture -%}
+
+<script type="application/ld+json">
+  {%- if p.variants.size > 1 -%}
+    {
+      "@context": "https://schema.org",
+      "@type": "ProductGroup",
+      "name": {{ p.title | json }},
+      "description": {{ description | json }},
+      "url": {{ origin | append: p.url | json }},
+      "productGroupID": {{ p.id | append: '' | json }},
+      "image": {{ images }},
+      "brand": { "@type": "Brand", "name": {{ brand | json }} },
+      {%- if mpn != blank %}"mpn": {{ mpn | json }},{% endif -%}
+      "variesBy": [{% if size_index != nil %}"https://schema.org/size"{% endif %}{% if size_index != nil and condition_index != nil %},{% endif %}{% if condition_index != nil %}"https://schema.org/itemCondition"{% endif %}],
+      "hasVariant": [{{ variant_json }}]
+    }
+  {%- else -%}
+    {%- assign single = variant_json | strip | remove_first: '{' -%}
+    {
+      "@context": "https://schema.org",
+      "description": {{ description | json }},
+      "url": {{ origin | append: p.url | json }},
+      {{ single }}
+  {%- endif -%}
+</script>
+
+{%- liquid
+  # Breadcrumbs: the brand's collection and the boot's generation (its gen: tag)
+  assign brand_lower = brand | downcase
+  case brand_lower
+    when 'nike'
+      assign brand_collection = collections['nike']
+    when 'adidas'
+      assign brand_collection = collections['adidas']
+    when 'puma'
+      assign brand_collection = collections['puma-1']
+    when 'mizuno'
+      assign brand_collection = collections['mizuno']
+    else
+      assign brand_collection = nil
+  endcase
+  assign gen_collection = nil
+  for tag in p.tags
+    if tag contains 'gen:'
+      assign gen_handle = tag | remove_first: 'gen:' | strip
+      assign gen_collection = collections[gen_handle]
+      break
+    endif
+  endfor
+  assign crumb = 1
+-%}
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": {{ origin | append: '/' | json }} }
+      {%- if brand_collection != blank -%}
+        {%- assign crumb = crumb | plus: 1 -%}
+        ,{ "@type": "ListItem", "position": {{ crumb }}, "name": {{ brand_collection.title | replace: 'adidas', 'Adidas' | json }}, "item": {{ origin | append: brand_collection.url | json }} }
+      {%- endif -%}
+      {%- if gen_collection != blank -%}
+        {%- assign crumb = crumb | plus: 1 -%}
+        ,{ "@type": "ListItem", "position": {{ crumb }}, "name": {{ gen_collection.title | replace: 'adidas', 'Adidas' | json }}, "item": {{ origin | append: gen_collection.url | json }} }
+      {%- endif -%}
+      {%- assign crumb = crumb | plus: 1 -%}
+      ,{ "@type": "ListItem", "position": {{ crumb }}, "name": {{ p.title | json }}, "item": {{ origin | append: p.url | json }} }
+    ]
+  }
+</script>

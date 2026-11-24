@@ -1,0 +1,43 @@
+{%- comment -%}
+  Who the site is, for search engines, on every page: the business (Organization: name, logo, the
+  Instagram profile) and the website itself (WebSite), so Google shows the site's name as
+  "OCEBOOTS" in results.
+{%- endcomment -%}
+
+{%- liquid
+  assign origin = request.origin
+  assign site_name = 'OCEBOOTS'
+-%}
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": {{ origin | append: '/#organization' | json }},
+    "name": {{ site_name | json }},
+    "alternateName": {{ shop.name | json }},
+    "url": {{ origin | append: '/' | json }},
+    {%- if settings.logo -%}
+      "logo": {{ settings.logo | image_url: width: 600 | prepend: 'https:' | json }},
+    {%- endif -%}
+    {%- if shop.description != blank -%}
+      "description": {{ shop.description | strip | json }},
+    {%- endif -%}
+    {%- if shop.email != blank -%}
+      "email": {{ shop.email | json }},
+    {%- endif -%}
+    "sameAs": ["https://www.instagram.com/oceboots/"]
+  }
+</script>
+{%- if request.page_type == 'index' -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "@id": {{ origin | append: '/#website' | json }},
+      "name": {{ site_name | json }},
+      "alternateName": [{{ shop.name | json }}, "oceboots.com"],
+      "url": {{ origin | append: '/' | json }},
+      "publisher": { "@id": {{ origin | append: '/#organization' | json }} }
+    }
+  </script>
+{%- endif -%}

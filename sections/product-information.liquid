@@ -38,9 +38,7 @@
   endcase
 %}
 
-<script type="application/ld+json">
-  {{ closest.product | structured_data }}
-</script>
+{%- render 'seo-product', product: closest.product -%}
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 {%- comment -%}
