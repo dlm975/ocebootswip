@@ -133,6 +133,12 @@
     table-layout: fixed;
   }
 
+  /* Four or more columns (the comparison): kept readable and scrolled sideways on phones */
+  :root .page-article .rte table:has(th:nth-child(4)) thead,
+  :root .page-article .rte table:has(th:nth-child(4)) tbody {
+    min-width: 600px;
+  }
+
   :root .page-article .rte th,
   :root .page-article .rte td {
     padding: 10px 14px;
