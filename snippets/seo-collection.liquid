@@ -235,7 +235,7 @@
       if name.size <= 20
         assign seo_title = seo_title | append: ' | Every Generation'
       endif
-      assign seo_desc = 'Shop ' | append: name | append: ' football boots at OCEBOOTS: every generation, new and pre-owned, each with its size, condition and real photos. Verified, fast shipping.'
+      assign seo_desc = 'Shop ' | append: name | append: ' football boots at OCEBOOTS: every generation, new and pre-owned, with exact sizes, condition notes and real photos.'
     when 'generation'
       assign seo_title = name | append: ' Football Boots'
       assign seo_desc = 'Shop ' | append: name | append: ' football boots at OCEBOOTS. ' | append: count | append: ' pairs, new and pre-owned, each with its exact size, condition and real photos.'
@@ -277,7 +277,7 @@
 
 {%- case mode -%}
   {%- when 'name' -%}
-    {%- if kind == 'size' or kind == 'condition' or kind == 'style' -%}{{ name }} football boots{%- elsif kind == 'all' -%}Football boots{%- elsif kind == 'grails' -%}Grail football boots{%- elsif kind == 'accessories' -%}Accessories{%- else -%}{{ name }} football boots{%- endif -%}
+    {%- if kind == 'size' or kind == 'condition' or kind == 'style' -%}{{ name }} football boots{%- elsif kind == 'all' -%}our football boots{%- elsif kind == 'grails' -%}Grail football boots{%- elsif kind == 'accessories' -%}Accessories{%- else -%}{{ name }} football boots{%- endif -%}
   {%- when 'title' -%}
     {%- if keep_admin -%}{{ page_title }}{%- else -%}{{ seo_title }}{%- endif -%}
   {%- when 'description' -%}
