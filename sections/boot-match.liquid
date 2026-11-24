@@ -1,0 +1,1472 @@
+{%- doc -%}
+  Boot Match: a swipe game that finds a shopper their boot. A round button (the flame-and-ball
+  mark) floats in the bottom-right corner; it opens a window where boots in stock come up one at a
+  time. Swipe right (or tap the heart) on ones you like, left (or the cross) on ones you don't.
+  Each swipe teaches it what you like: the silo (Mercurial, Predator...), the line within it
+  (Vapor, Superfly), the brand, the condition and the price range. The next boots lean that way,
+  and after a few likes it shows "your match": the boot in stock that best fits everything liked
+  so far, plus the boots you liked, which can be saved to the wishlist in one tap.
+
+  - Boots come from a JSON feed (templates/collection.bootmatch.liquid), loaded only when the game
+    opens: the first 250 at once, the rest behind them.
+  - The shopper can pick their US size first; only boots in that size come up.
+  - Everything stays in this browser; nothing is sent anywhere.
+  - Animations: Motion (the house timing); reduced motion: no flying or tilting, just changes.
+{%- enddoc -%}
+
+{%- liquid
+  assign bm_collection = section.settings.collection | default: collections['all-football-boots']
+  if bm_collection == blank
+    assign bm_collection = collections.all
+  endif
+  assign bm_feed = bm_collection.url | append: '?view=bootmatch'
+-%}
+
+{%- if section.settings.enabled -%}
+  <div
+    class="bm"
+    data-bm
+    data-feed="{{ bm_feed }}"
+    data-likes-to-match="{{ section.settings.likes_to_match }}"
+    data-wishlist-url="{{ routes.all_products_collection_url }}?view=wishlist"
+  >
+    <div class="bm-dock" data-bm-dock>
+      <span class="bm-tip" data-bm-tip hidden>{{ section.settings.tip | escape }}</span>
+      <button
+        type="button"
+        class="bm-launch"
+        data-bm-open
+        aria-haspopup="dialog"
+        aria-label="{{ section.settings.heading | escape }}: find your perfect boot"
+      >
+        <span class="bm-launch__coin oce-disk" aria-hidden="true"></span>
+        {%- render 'boot-match-logo', id: 'bm-flame-launch', class: 'bm-launch__logo' -%}
+      </button>
+    </div>
+
+    <dialog class="bm-dlg" data-bm-dlg aria-labelledby="bm-title-{{ section.id }}">
+      <div class="bm-scrim" data-bm-close></div>
+      <div class="bm-panel" data-bm-panel>
+        <header class="bm-head">
+          {%- render 'boot-match-logo', id: 'bm-flame-head', class: 'bm-head__logo' -%}
+          <h2 class="bm-head__title" id="bm-title-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+          <button type="button" class="bm-icon-btn bm-head__close" data-bm-close aria-label="Close">
+            {%- render 'gicon', name: 'close', size: 22 -%}
+          </button>
+        </header>
+
+        {%- comment -%} 1. Start: what it is, and the shopper's size {%- endcomment -%}
+        <div class="bm-screen bm-intro" data-bm-screen="intro">
+          <p class="bm-intro__lead">{{ section.settings.intro | escape }}</p>
+          <p class="bm-label" id="bm-size-label-{{ section.id }}">Your size (US)</p>
+          <div
+            class="bm-sizes"
+            data-bm-sizes
+            role="radiogroup"
+            aria-labelledby="bm-size-label-{{ section.id }}"
+          ></div>
+          <button type="button" class="bm-primary" data-bm-start>Start swiping</button>
+        </div>
+
+        {%- comment -%} 2. The deck {%- endcomment -%}
+        <div class="bm-screen bm-play" data-bm-screen="play" hidden>
+          <p class="bm-status" data-bm-status aria-live="polite"></p>
+          <div class="bm-deck" data-bm-deck></div>
+          <div class="bm-actions">
+            <button type="button" class="bm-round bm-round--small" data-bm-undo aria-label="Undo last swipe" disabled>
+              {%- render 'gicon', name: 'undo', size: 22 -%}
+            </button>
+            <button type="button" class="bm-round bm-round--nope" data-bm-nope aria-label="Not for me">
+              {%- render 'gicon', name: 'close', size: 30 -%}
+            </button>
+            <button type="button" class="bm-round bm-round--like oce-disk" data-bm-like aria-label="Love it">
+              {%- render 'gicon', name: 'favorite-fill', size: 30 -%}
+            </button>
+          </div>
+        </div>
+
+        {%- comment -%} 3. The match {%- endcomment -%}
+        <div class="bm-screen bm-result" data-bm-screen="match" hidden>
+          <p class="bm-result__kicker">
+            {%- render 'boot-match-logo', id: 'bm-flame-match', class: 'bm-result__logo' -%}
+            <span>It’s a match</span>
+          </p>
+          <a class="bm-result__card" data-bm-match-link href="#">
+            <span class="bm-result__media"><img data-bm-match-img alt="" width="640" height="640"></span>
+            <span class="bm-result__info">
+              <span class="bm-result__name" data-bm-match-title></span>
+              <span class="bm-result__meta" data-bm-match-meta></span>
+              <span class="bm-result__price" data-bm-match-price></span>
+            </span>
+          </a>
+          <div class="bm-result__buttons">
+            <a class="bm-primary" data-bm-match-cta href="#">View this boot</a>
+            <button type="button" class="bm-secondary" data-bm-again>Keep swiping</button>
+          </div>
+          <div class="bm-likes" data-bm-likes-wrap hidden>
+            <div class="bm-likes__head">
+              <p class="bm-label">Boots you liked</p>
+              <button type="button" class="bm-link" data-bm-save>Save all to wishlist</button>
+            </div>
+            <div class="bm-likes__row" data-bm-likes></div>
+          </div>
+        </div>
+      </div>
+    </dialog>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  /* ---- Launcher: a foil coin with the mark, bottom right ---- */
+  .bm-dock {
+    position: fixed;
+    right: max(16px, env(safe-area-inset-right, 0px));
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .bm-dock.is-shown {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .bm-launch {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 60px;
+    height: 60px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    cursor: pointer;
+    filter: drop-shadow(0 6px 16px rgb(18 18 18 / 0.22));
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.2s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  .bm .bm-launch__coin {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+  }
+
+  .bm-launch__logo {
+    position: relative;
+    width: 34px;
+    height: 38px;
+  }
+
+  @media (hover: hover) {
+    .bm-launch:hover {
+      transform: scale(1.06);
+    }
+  }
+
+  .bm-launch:active {
+    transform: scale(0.95);
+  }
+
+  .bm-launch:focus-visible {
+    outline: 2px solid #121212;
+    outline-offset: 3px;
+  }
+
+  .bm-tip {
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: #121212;
+    color: #ffffff;
+    font-family: var(--font-body--family);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    box-shadow: 0 6px 16px rgb(18 18 18 / 0.2);
+  }
+
+  /* ---- The window ---- */
+  .bm-dlg {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: hidden;
+    color: #121212;
+  }
+
+  .bm-dlg::backdrop {
+    background: transparent;
+  }
+
+  .bm-scrim {
+    position: absolute;
+    inset: 0;
+    background: rgb(18 18 18 / 0.32);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+  }
+
+  .bm-panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    height: min(calc(100svh - 24px), 760px);
+    padding: 14px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+    border-radius: 24px 24px 0 0;
+    background: #ffffff;
+    box-shadow: 0 -10px 40px rgb(18 18 18 / 0.18);
+    font-family: var(--font-body--family);
+    overscroll-behavior: contain;
+  }
+
+  @media screen and (min-width: 750px) {
+    .bm-panel {
+      left: auto;
+      right: 24px;
+      bottom: 96px;
+      width: 400px;
+      height: min(calc(100vh - 120px), 700px);
+      padding: 14px 18px 18px;
+      border-radius: 24px;
+      box-shadow: 0 0 0 1px rgb(18 18 18 / 0.06), 0 24px 60px rgb(18 18 18 / 0.24);
+      transform-origin: 100% 100%;
+    }
+
+    .bm-scrim {
+      background: rgb(18 18 18 / 0.12);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+
+  .bm-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .bm-head__logo {
+    width: 26px;
+    height: 29px;
+    flex: none;
+  }
+
+  .bm-head__title {
+    flex: 1;
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .bm-icon-btn {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(18 18 18 / 0.06);
+    color: #121212;
+    cursor: pointer;
+  }
+
+  .bm-screen {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .bm-screen[hidden] {
+    display: none;
+  }
+
+  .bm-label {
+    margin: 0 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgb(18 18 18 / 0.55);
+  }
+
+  .bm-primary,
+  .bm-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50px;
+    padding: 0 20px;
+    border-radius: 999px;
+    font-family: var(--font-body--family);
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .bm-primary {
+    border: 0;
+    background: #121212;
+    color: #ffffff;
+  }
+
+  .bm-secondary {
+    border: 1.5px solid rgb(18 18 18 / 0.16);
+    background: #ffffff;
+    color: #121212;
+  }
+
+  .bm-link {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #121212;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+  }
+
+  /* ---- 1. Start ---- */
+  .bm-intro__lead {
+    margin: 4px 0 20px;
+    font-size: 16px;
+    line-height: 1.45;
+    color: rgb(18 18 18 / 0.8);
+  }
+
+  .bm-sizes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-content: flex-start;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    margin-bottom: 16px;
+  }
+
+  .bm-size {
+    min-width: 56px;
+    height: 40px;
+    padding: 0 12px;
+    border: 1.5px solid rgb(18 18 18 / 0.14);
+    border-radius: 999px;
+    background: #ffffff;
+    color: #121212;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .bm-size[aria-checked='true'] {
+    border-color: #121212;
+    background: #121212;
+    color: #ffffff;
+  }
+
+  /* ---- 2. The deck ---- */
+  .bm-status {
+    min-height: 18px;
+    margin: 0 0 10px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    color: rgb(18 18 18 / 0.6);
+  }
+
+  .bm-deck {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    margin: 0 4px;
+  }
+
+  .bm-card {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 0 0 1px rgb(18 18 18 / 0.07), 0 10px 30px rgb(18 18 18 / 0.12);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    will-change: transform;
+  }
+
+  .bm-card:not(.is-top) {
+    pointer-events: none;
+  }
+
+  .bm-card.is-top {
+    cursor: grab;
+  }
+
+  .bm-card.is-dragging {
+    cursor: grabbing;
+  }
+
+  .bm-card__media {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    place-items: center;
+    padding: 12px;
+    background: #ffffff;
+  }
+
+  .bm-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    -webkit-user-drag: none;
+  }
+
+  .bm-card__info {
+    padding: 12px 16px 16px;
+    border-top: 1px solid rgb(18 18 18 / 0.06);
+  }
+
+  .bm-card__name {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    margin: 0 0 4px;
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  .bm-card__meta {
+    margin: 0;
+    font-size: 13px;
+    color: rgb(18 18 18 / 0.6);
+  }
+
+  .bm-card__price {
+    margin: 6px 0 0;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .bm-stamp {
+    position: absolute;
+    top: 22px;
+    padding: 4px 12px;
+    border: 3px solid currentColor;
+    border-radius: 10px;
+    font-family: var(--font-heading--family);
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .bm-stamp--like {
+    left: 18px;
+    color: #12a150;
+    transform: rotate(-12deg);
+  }
+
+  .bm-stamp--nope {
+    right: 18px;
+    color: #e0201b;
+    transform: rotate(12deg);
+  }
+
+  .bm-card--empty {
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    box-shadow: none;
+    border: 1.5px dashed rgb(18 18 18 / 0.16);
+    color: rgb(18 18 18 / 0.6);
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .bm-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding-top: 14px;
+  }
+
+  .bm-round {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #ffffff;
+    color: #121212;
+    box-shadow: 0 0 0 1px rgb(18 18 18 / 0.08), 0 6px 16px rgb(18 18 18 / 0.12);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  .bm-round:active {
+    transform: scale(0.92);
+  }
+
+  .bm-round--small {
+    width: 46px;
+    height: 46px;
+    color: rgb(18 18 18 / 0.7);
+  }
+
+  .bm-round--nope {
+    color: #e0201b;
+  }
+
+  .bm .bm-round--like {
+    color: #e0201b !important;
+  }
+
+  .bm-round:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  /* ---- 3. The match ---- */
+  .bm-result {
+    overflow-y: auto;
+  }
+
+  .bm-result__kicker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 2px 0 12px;
+    font-family: var(--font-heading--family);
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+  }
+
+  .bm-result__logo {
+    width: 30px;
+    height: 34px;
+  }
+
+  .bm-result__card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 20px;
+    color: inherit;
+    text-decoration: none;
+    box-shadow: 0 0 0 1px rgb(18 18 18 / 0.07), 0 10px 30px rgb(18 18 18 / 0.12);
+  }
+
+  .bm-result__media {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 16 / 10;
+    padding: 10px;
+    background: #ffffff;
+  }
+
+  .bm-result__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .bm-result__info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 12px 16px 14px;
+    border-top: 1px solid rgb(18 18 18 / 0.06);
+  }
+
+  .bm-result__name {
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .bm-result__meta {
+    font-size: 13px;
+    color: rgb(18 18 18 / 0.6);
+  }
+
+  .bm-result__price {
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .bm-result__buttons {
+    display: grid;
+    gap: 8px;
+    margin: 14px 0 6px;
+  }
+
+  .bm-likes {
+    margin-top: 12px;
+  }
+
+  .bm-likes[hidden] {
+    display: none;
+  }
+
+  .bm-likes__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .bm-likes__row {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 2px 2px 6px;
+    scrollbar-width: none;
+  }
+
+  .bm-likes__row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .bm-like-thumb {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 76px;
+    height: 60px;
+    padding: 4px;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 0 0 1px rgb(18 18 18 / 0.08);
+  }
+
+  .bm-like-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bm-launch,
+    .bm-round {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+<script type="module">
+  import { animate, spring } from 'motion';
+
+  const root = document.querySelector('[data-bm]');
+  if (root && !root.dataset.ready) {
+    root.dataset.ready = '1';
+
+    const $ = (selector) => root.querySelector(selector);
+    const dock = $('[data-bm-dock]');
+    const tip = $('[data-bm-tip]');
+    const dlg = $('[data-bm-dlg]');
+    const panel = $('[data-bm-panel]');
+    const scrim = $('.bm-scrim');
+    const deck = $('[data-bm-deck]');
+    const status = $('[data-bm-status]');
+    const sizesEl = $('[data-bm-sizes]');
+    const undoBtn = $('[data-bm-undo]');
+
+    const EASE = [0.3, 0.7, 0.3, 1];
+    const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const desktop = () => window.matchMedia('(min-width: 750px)').matches;
+    const dur = (seconds) => (reduced() ? 0 : seconds);
+    const LIKES_TO_MATCH = Math.max(2, Number(root.dataset.likesToMatch) || 4);
+    const MAX_SWIPES = 16;
+
+    const store = {
+      get(key) {
+        try {
+          return localStorage.getItem(key);
+        } catch (e) {
+          return null;
+        }
+      },
+      set(key, value) {
+        try {
+          localStorage.setItem(key, value);
+        } catch (e) {
+          /* private mode: nothing remembered */
+        }
+      },
+    };
+
+    /* ---------- The launcher: pops in once the page has settled ---------- */
+    setTimeout(() => {
+      dock.classList.add('is-shown');
+      if (!reduced()) {
+        animate(dock, { opacity: [0, 1], transform: ['translateY(12px) scale(0.8)', 'none'] }, { duration: 0.55, ease: EASE });
+      }
+      if (!store.get('oce-bm-tip')) {
+        setTimeout(showTip, 1400);
+      }
+    }, 1200);
+
+    function showTip() {
+      if (dlg.open) return;
+      tip.hidden = false;
+      animate(tip, { opacity: [0, 1], transform: ['translateX(8px)', 'none'] }, { duration: dur(0.55), ease: EASE });
+      setTimeout(hideTip, 5000);
+    }
+
+    function hideTip() {
+      if (tip.hidden) return;
+      store.set('oce-bm-tip', '1');
+      animate(tip, { opacity: 0 }, { duration: dur(0.2) }).finished.then(() => {
+        tip.hidden = true;
+      });
+    }
+
+    /* ---------- Boots: loaded from the feed when the game first opens ---------- */
+    let boots = [];
+    let loading = null;
+    let fullyLoaded = false;
+
+    function silo(gen) {
+      if (!gen) return '';
+      const parts = gen.split('-');
+      let name = parts[1] || '';
+      if (name === 'adipure') name = '11pro';
+      if (name === 'total') name = 'total-90';
+      return parts[0] + '-' + name;
+    }
+
+    function line(gen) {
+      // The generation without its number: nike-mercurial-vapor-14 -> nike-mercurial-vapor
+      return gen ? gen.replace(/-\d+$/, '') : '';
+    }
+
+    function usSizes(labels) {
+      const out = [];
+      (labels || []).forEach((label) => {
+        const found = /US\s*([\d.]+)/i.exec(label);
+        if (found) out.push(found[1]);
+      });
+      return out;
+    }
+
+    function priceValue(text) {
+      const n = parseFloat(String(text).replace(/[^\d.]/g, ''));
+      return isNaN(n) ? 0 : n;
+    }
+
+    function prepare(item) {
+      const brand = (item.t.split(' ')[0] || '').toLowerCase();
+      const price = priceValue(item.m);
+      return {
+        handle: item.h,
+        title: item.t,
+        url: item.u,
+        image: item.i,
+        price: item.m,
+        sizes: item.s || [],
+        us: usSizes(item.s),
+        condition: item.k || '',
+        silo: silo(item.g) || brand,
+        line: line(item.g) || brand,
+        brand: brand,
+        band: price > 0 ? Math.round(Math.log2(price / 50)) : 0,
+      };
+    }
+
+    async function fetchPage(page) {
+      const response = await fetch(root.dataset.feed + '&page=' + page, { credentials: 'same-origin' });
+      if (!response.ok) throw new Error('Boot Match feed: ' + response.status);
+      return response.json();
+    }
+
+    function load() {
+      if (loading) return loading;
+      loading = fetchPage(1).then((first) => {
+        boots = first.items.filter((item) => item.i).map(prepare);
+        const pages = Math.min(first.pages || 1, 8);
+        // The rest arrive behind the first page, one after another
+        (async () => {
+          for (let page = 2; page <= pages; page++) {
+            try {
+              const next = await fetchPage(page);
+              boots = boots.concat(next.items.filter((item) => item.i).map(prepare));
+              onMoreBoots();
+            } catch (e) {
+              break;
+            }
+          }
+          fullyLoaded = true;
+          onMoreBoots();
+        })();
+      });
+      loading.catch(() => {
+        loading = null;
+      });
+      return loading;
+    }
+
+    /* ---------- Size ---------- */
+    let size = store.get('oce-bm-size') || '';
+
+    function renderSizes() {
+      const counts = new Map();
+      boots.forEach((boot) => boot.us.forEach((us) => counts.set(us, (counts.get(us) || 0) + 1)));
+      const list = Array.from(counts.keys()).sort((a, b) => parseFloat(a) - parseFloat(b));
+      if (size && !counts.has(size) && fullyLoaded) size = '';
+      sizesEl.replaceChildren();
+      const add = (value, label) => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'bm-size';
+        chip.setAttribute('role', 'radio');
+        chip.setAttribute('aria-checked', String(value === size));
+        chip.dataset.size = value;
+        chip.textContent = label;
+        sizesEl.appendChild(chip);
+      };
+      add('', 'Any size');
+      list.forEach((us) => add(us, 'US ' + us));
+    }
+
+    sizesEl.addEventListener('click', (event) => {
+      const chip = event.target.closest('[data-size]');
+      if (!chip) return;
+      size = chip.dataset.size;
+      store.set('oce-bm-size', size);
+      sizesEl.querySelectorAll('[data-size]').forEach((other) => {
+        other.setAttribute('aria-checked', String(other === chip));
+      });
+    });
+
+    /* ---------- What the shopper likes ---------- */
+    let taste;
+    let seen;
+    let liked;
+    let history;
+    let swipes;
+    let target;
+
+    function reset() {
+      taste = { silo: {}, line: {}, brand: {}, condition: {}, band: {} };
+      seen = new Set();
+      liked = [];
+      history = [];
+      swipes = 0;
+      target = LIKES_TO_MATCH;
+    }
+    reset();
+
+    const WEIGHTS = { silo: 3, line: 1.5, brand: 1, condition: 0.8, band: 0.8 };
+
+    function learn(boot, amount) {
+      Object.keys(WEIGHTS).forEach((key) => {
+        const value = boot[key];
+        taste[key][value] = (taste[key][value] || 0) + amount;
+      });
+    }
+
+    function fit(boot) {
+      let total = 0;
+      Object.keys(WEIGHTS).forEach((key) => {
+        total += WEIGHTS[key] * (taste[key][boot[key]] || 0);
+      });
+      return total;
+    }
+
+    function inSize(boot) {
+      return !size || boot.us.includes(size);
+    }
+
+    function available() {
+      return boots.filter((boot) => !seen.has(boot.handle) && inSize(boot));
+    }
+
+    function pickNext(exclude) {
+      const pool = available().filter((boot) => !exclude.has(boot.handle));
+      if (!pool.length) return null;
+      // Early on (or with nothing liked yet), show the range: a silo not shown recently
+      if (liked.length === 0 || swipes < 4) {
+        const shownSilos = new Set(history.slice(-6).map((step) => step.boot.silo));
+        const fresh = pool.filter((boot) => !shownSilos.has(boot.silo));
+        const from = fresh.length ? fresh : pool;
+        return from[Math.floor(Math.random() * from.length)];
+      }
+      // Then lean towards what's liked, with some surprise (one in four is a wildcard)
+      if (Math.random() < 0.25) return pool[Math.floor(Math.random() * pool.length)];
+      let best = null;
+      let bestScore = -Infinity;
+      const sample = pool.length > 120 ? pool.slice().sort(() => Math.random() - 0.5).slice(0, 120) : pool;
+      sample.forEach((boot) => {
+        const score = fit(boot) + Math.random() * 1.2;
+        if (score > bestScore) {
+          bestScore = score;
+          best = boot;
+        }
+      });
+      return best;
+    }
+
+    function bestMatch() {
+      // The boot in stock (in their size) that best fits everything liked, seen or not
+      const likedHandles = new Set(liked.map((boot) => boot.handle));
+      const pool = boots.filter((boot) => inSize(boot));
+      let best = null;
+      let bestScore = -Infinity;
+      pool.forEach((boot) => {
+        const score = fit(boot) + (likedHandles.has(boot.handle) ? 0.5 : 0);
+        if (score > bestScore) {
+          bestScore = score;
+          best = boot;
+        }
+      });
+      return best || liked[0] || null;
+    }
+
+    /* ---------- Cards ---------- */
+    function cardFor(boot) {
+      const card = document.createElement('article');
+      card.className = 'bm-card';
+      card.dataset.handle = boot.handle;
+      card.setAttribute('aria-label', boot.title);
+
+      const media = document.createElement('div');
+      media.className = 'bm-card__media';
+      const img = document.createElement('img');
+      img.src = boot.image;
+      img.alt = boot.title;
+      img.width = 640;
+      img.height = 640;
+      img.draggable = false;
+      img.decoding = 'async';
+      media.appendChild(img);
+
+      const info = document.createElement('div');
+      info.className = 'bm-card__info';
+      const name = document.createElement('h3');
+      name.className = 'bm-card__name';
+      name.textContent = boot.title;
+      const meta = document.createElement('p');
+      meta.className = 'bm-card__meta';
+      meta.textContent = metaText(boot);
+      const price = document.createElement('p');
+      price.className = 'bm-card__price';
+      price.textContent = boot.price;
+      info.append(name, meta, price);
+
+      const like = document.createElement('span');
+      like.className = 'bm-stamp bm-stamp--like';
+      like.textContent = 'LOVE';
+      like.setAttribute('aria-hidden', 'true');
+      const nope = document.createElement('span');
+      nope.className = 'bm-stamp bm-stamp--nope';
+      nope.textContent = 'PASS';
+      nope.setAttribute('aria-hidden', 'true');
+
+      card.append(media, info, like, nope);
+      card._boot = boot;
+      return card;
+    }
+
+    function metaText(boot) {
+      const parts = [];
+      if (boot.condition) parts.push(boot.condition);
+      const shown = size ? boot.sizes.find((label) => new RegExp('US\\s*' + size.replace('.', '\\.') + '(\\s|$)', 'i').test(label)) : boot.sizes[0];
+      if (shown) parts.push(shown.replace(/\s*-\s*/g, ' · '));
+      else if (boot.sizes.length > 1) parts.push(boot.sizes.length + ' sizes');
+      return parts.join(' · ');
+    }
+
+    // Cards below the top one sit a little smaller and lower, like a stack
+    const STACK = [
+      { transform: 'none', opacity: 1 },
+      { transform: 'translateY(10px) scale(0.955)', opacity: 1 },
+      { transform: 'translateY(20px) scale(0.91)', opacity: 0.9 },
+    ];
+
+    function cards() {
+      return Array.from(deck.querySelectorAll('.bm-card:not(.is-leaving)'));
+    }
+
+    function layout(animated) {
+      const list = cards();
+      list.forEach((card, index) => {
+        card.style.zIndex = String(10 - index);
+        card.classList.toggle('is-top', index === 0);
+        const place = STACK[Math.min(index, STACK.length - 1)];
+        if (animated && !reduced()) {
+          animate(card, place, { duration: 0.4, ease: EASE });
+        } else {
+          card.style.transform = place.transform;
+          card.style.opacity = String(place.opacity);
+        }
+      });
+      undoBtn.disabled = history.length === 0;
+    }
+
+    function fill() {
+      // The empty note is never part of the stack
+      deck.querySelectorAll('.bm-card--empty').forEach((note) => note.remove());
+      const showing = new Set(cards().map((card) => card.dataset.handle));
+      while (cards().length < 3) {
+        const boot = pickNext(showing);
+        if (!boot) break;
+        showing.add(boot.handle);
+        const card = cardFor(boot);
+        card.style.transform = STACK[2].transform;
+        card.style.opacity = '0';
+        deck.appendChild(card);
+      }
+      if (!cards().length) {
+        const empty = document.createElement('div');
+        empty.className = 'bm-card bm-card--empty';
+        empty.textContent = fullyLoaded
+          ? 'That’s every boot' + (size ? ' in US ' + size : '') + '. Here’s your match.'
+          : 'Loading more boots…';
+        deck.appendChild(empty);
+        if (fullyLoaded) setTimeout(showMatch, 900);
+      }
+      layout(true);
+      updateStatus();
+    }
+
+    function onMoreBoots() {
+      if (!dlg.open) return;
+      if (!$('[data-bm-screen="intro"]').hidden) renderSizes();
+      if (!$('[data-bm-screen="play"]').hidden && cards().length < 3) {
+        deck.querySelectorAll('.bm-card--empty').forEach((note) => note.remove());
+        fill();
+      }
+    }
+
+    function updateStatus() {
+      const left = Math.max(0, target - liked.length);
+      status.textContent = liked.length === 0
+        ? 'Swipe right on boots you love'
+        : left > 0
+          ? left + (left === 1 ? ' more like' : ' more likes') + ' to find your match'
+          : 'Finding your match…';
+    }
+
+    /* ---------- Swiping ---------- */
+    let flying = null;
+
+    function decide(card, liking) {
+      const boot = card._boot;
+      if (!boot) return;
+      seen.add(boot.handle);
+      swipes += 1;
+      history.push({ boot: boot, liked: liking });
+      if (liking) {
+        liked.push(boot);
+        learn(boot, 1);
+      } else {
+        learn(boot, -0.6);
+      }
+      updateStatus();
+    }
+
+    function afterDecision() {
+      if (liked.length >= target || (swipes >= MAX_SWIPES && liked.length > 0)) {
+        showMatch();
+      } else {
+        fill();
+      }
+    }
+
+    function stamps(card, x) {
+      const amount = Math.max(-1, Math.min(1, x / 110));
+      card.querySelector('.bm-stamp--like').style.opacity = String(Math.max(0, amount));
+      card.querySelector('.bm-stamp--nope').style.opacity = String(Math.max(0, -amount));
+    }
+
+    function fling(card, liking, from) {
+      const start = from || { x: 0, y: 0 };
+      const direction = liking ? 1 : -1;
+      card.classList.add('is-leaving');
+      card.classList.remove('is-top');
+      decide(card, liking);
+      const distance = Math.max(window.innerWidth, 500) * direction;
+      stamps(card, direction * 110);
+      const done = () => {
+        card.remove();
+        flying = null;
+        afterDecision();
+      };
+      if (reduced()) {
+        done();
+        return;
+      }
+      flying = animate(
+        card,
+        {
+          transform: [
+            'translate(' + start.x + 'px,' + start.y + 'px) rotate(' + start.x * 0.06 + 'deg)',
+            'translate(' + distance + 'px,' + (start.y + 40) + 'px) rotate(' + direction * 28 + 'deg)',
+          ],
+        },
+        { duration: 0.32, ease: [0.4, 0, 1, 1] }
+      );
+      flying.finished.then(done);
+      // The next card moves up while this one flies off
+      layout(true);
+    }
+
+    function topCard() {
+      const card = cards()[0];
+      return card && card._boot ? card : null;
+    }
+
+    function choose(liking) {
+      if (flying) flying.complete();
+      const card = topCard();
+      if (card) fling(card, liking);
+    }
+
+    $('[data-bm-like]').addEventListener('click', () => choose(true));
+    $('[data-bm-nope]').addEventListener('click', () => choose(false));
+
+    undoBtn.addEventListener('click', () => {
+      if (flying) flying.complete();
+      const step = history.pop();
+      if (!step) return;
+      seen.delete(step.boot.handle);
+      swipes = Math.max(0, swipes - 1);
+      if (step.liked) {
+        liked = liked.filter((boot) => boot.handle !== step.boot.handle);
+        learn(step.boot, -1);
+      } else {
+        learn(step.boot, 0.6);
+      }
+      // The card comes back on top, from the side it left
+      const card = cardFor(step.boot);
+      deck.querySelectorAll('.bm-card--empty').forEach((note) => note.remove());
+      deck.prepend(card);
+      const extra = cards().slice(3);
+      extra.forEach((spare) => spare.remove());
+      layout(true);
+      if (!reduced()) {
+        const side = step.liked ? 1 : -1;
+        animate(
+          card,
+          { transform: ['translateX(' + side * 420 + 'px) rotate(' + side * 20 + 'deg)', 'none'], opacity: [0, 1] },
+          { duration: 0.55, ease: EASE }
+        );
+      }
+      updateStatus();
+    });
+
+    // Dragging the top card
+    let drag = null;
+
+    deck.addEventListener('pointerdown', (event) => {
+      const card = event.target.closest('.bm-card.is-top');
+      if (!card || !card._boot || event.button > 0) return;
+      if (flying) flying.complete();
+      card.getAnimations().forEach((animation) => animation.cancel());
+      card.setPointerCapture(event.pointerId);
+      card.classList.add('is-dragging');
+      drag = { card: card, id: event.pointerId, x0: event.clientX, y0: event.clientY, x: 0, y: 0, t: performance.now(), vx: 0 };
+    });
+
+    deck.addEventListener('pointermove', (event) => {
+      if (!drag || event.pointerId !== drag.id) return;
+      const x = event.clientX - drag.x0;
+      const y = event.clientY - drag.y0;
+      const now = performance.now();
+      const elapsed = Math.max(1, now - drag.t);
+      drag.vx = (x - drag.x) / elapsed;
+      drag.x = x;
+      drag.y = y;
+      drag.t = now;
+      drag.card.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(' + (reduced() ? 0 : x * 0.06) + 'deg)';
+      stamps(drag.card, x);
+    });
+
+    function endDrag(event) {
+      if (!drag || event.pointerId !== drag.id) return;
+      const { card, x, y, vx } = drag;
+      drag = null;
+      card.classList.remove('is-dragging');
+      const far = Math.abs(x) > Math.min(120, deck.clientWidth * 0.3);
+      const fast = Math.abs(vx) > 0.6 && Math.abs(x) > 30;
+      if (far || fast) {
+        fling(card, (fast ? vx : x) > 0, { x: x, y: y });
+        return;
+      }
+      // Not far enough: it springs back to the middle
+      stamps(card, 0);
+      if (reduced()) {
+        card.style.transform = 'none';
+        return;
+      }
+      animate(
+        card,
+        { transform: ['translate(' + x + 'px,' + y + 'px) rotate(' + x * 0.06 + 'deg)', 'translate(0px,0px) rotate(0deg)'] },
+        { type: spring, visualDuration: 0.35, bounce: 0.3 }
+      );
+    }
+
+    deck.addEventListener('pointerup', endDrag);
+    deck.addEventListener('pointercancel', endDrag);
+
+    dlg.addEventListener('keydown', (event) => {
+      if ($('[data-bm-screen="play"]').hidden) return;
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        choose(true);
+      } else if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        choose(false);
+      }
+    });
+
+    /* ---------- Screens ---------- */
+    function show(name) {
+      root.querySelectorAll('[data-bm-screen]').forEach((screen) => {
+        screen.hidden = screen.dataset.bmScreen !== name;
+      });
+      const screen = $('[data-bm-screen="' + name + '"]');
+      if (!reduced()) animate(screen, { opacity: [0, 1] }, { duration: 0.25 });
+    }
+
+    async function start() {
+      reset();
+      deck.replaceChildren();
+      show('play');
+      if (!boots.length) {
+        status.textContent = 'Loading boots…';
+        try {
+          await load();
+        } catch (e) {
+          status.textContent = 'Couldn’t load the boots. Please try again.';
+          return;
+        }
+      }
+      fill();
+    }
+
+    $('[data-bm-start]').addEventListener('click', start);
+
+    function showMatch() {
+      const match = bestMatch();
+      if (!match) {
+        show('intro');
+        return;
+      }
+      $('[data-bm-match-link]').href = match.url;
+      $('[data-bm-match-cta]').href = match.url;
+      const img = $('[data-bm-match-img]');
+      img.src = match.image;
+      img.alt = match.title;
+      $('[data-bm-match-title]').textContent = match.title;
+      $('[data-bm-match-meta]').textContent = metaText(match);
+      $('[data-bm-match-price]').textContent = match.price;
+
+      const wrap = $('[data-bm-likes-wrap]');
+      const row = $('[data-bm-likes]');
+      row.replaceChildren();
+      liked.forEach((boot) => {
+        const link = document.createElement('a');
+        link.className = 'bm-like-thumb';
+        link.href = boot.url;
+        link.title = boot.title;
+        const thumb = document.createElement('img');
+        thumb.src = boot.image;
+        thumb.alt = boot.title;
+        thumb.loading = 'lazy';
+        link.appendChild(thumb);
+        row.appendChild(link);
+      });
+      wrap.hidden = liked.length === 0;
+      const save = $('[data-bm-save]');
+      save.textContent = 'Save all to wishlist';
+      save.disabled = false;
+
+      show('match');
+      if (!reduced()) {
+        animate($('[data-bm-match-link]'), { transform: ['scale(0.85)', 'none'], opacity: [0, 1] }, { type: spring, visualDuration: 0.45, bounce: 0.35 });
+        animate($('.bm-result__kicker'), { transform: ['translateY(10px)', 'none'], opacity: [0, 1] }, { duration: 0.55, ease: EASE });
+      }
+    }
+
+    $('[data-bm-again]').addEventListener('click', () => {
+      target = liked.length + 3;
+      deck.querySelectorAll('.bm-card--empty').forEach((note) => note.remove());
+      show('play');
+      fill();
+    });
+
+    $('[data-bm-save]').addEventListener('click', (event) => {
+      const button = event.currentTarget;
+      const wishlist = window.OceWishlist;
+      if (!wishlist) {
+        window.location.href = root.dataset.wishlistUrl;
+        return;
+      }
+      liked.slice().reverse().forEach((boot) => wishlist.set(boot.handle, true));
+      button.textContent = 'Saved ✓ View wishlist';
+      button.onclick = () => {
+        window.location.href = root.dataset.wishlistUrl;
+      };
+    });
+
+    /* ---------- Opening and closing ---------- */
+    let closing = false;
+
+    function open() {
+      hideTip();
+      if (dlg.open) return;
+      dlg.showModal();
+      document.documentElement.style.overflow = 'hidden';
+      if (!boots.length) {
+        load().then(renderSizes).catch(() => {});
+      }
+      renderSizes();
+      if (!$('[data-bm-screen="play"]').hidden && !cards().length) show('intro');
+      if (!reduced()) {
+        animate(scrim, { opacity: [0, 1] }, { duration: 0.3 });
+        animate(
+          panel,
+          desktop()
+            ? { opacity: [0, 1], transform: ['translateY(16px) scale(0.92)', 'none'] }
+            : { transform: ['translateY(100%)', 'none'] },
+          { duration: 0.55, ease: EASE }
+        );
+      }
+    }
+
+    function close() {
+      if (!dlg.open || closing) return;
+      closing = true;
+      const finish = () => {
+        dlg.close();
+        document.documentElement.style.overflow = '';
+        closing = false;
+        panel.style.transform = '';
+        panel.style.opacity = '';
+        scrim.style.opacity = '';
+        $('[data-bm-open]').focus({ preventScroll: true });
+      };
+      if (reduced()) {
+        finish();
+        return;
+      }
+      animate(scrim, { opacity: 0 }, { duration: 0.22 });
+      animate(
+        panel,
+        desktop() ? { opacity: 0, transform: 'translateY(10px) scale(0.96)' } : { transform: 'translateY(100%)' },
+        { duration: desktop() ? 0.2 : 0.28, ease: [0.4, 0, 1, 1] }
+      ).finished.then(() => {
+        panel.getAnimations().forEach((animation) => animation.cancel());
+        scrim.getAnimations().forEach((animation) => animation.cancel());
+        finish();
+      });
+    }
+
+    $('[data-bm-open]').addEventListener('click', open);
+    root.querySelectorAll('[data-bm-close]').forEach((button) => button.addEventListener('click', close));
+    dlg.addEventListener('cancel', (event) => {
+      event.preventDefault();
+      close();
+    });
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Boot Match",
+  "tag": "section",
+  "class": "boot-match-section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "A swipe game in a round button in the bottom-right corner: shoppers swipe boots left or right and get matched with the boot that best fits what they liked."
+    },
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Show Boot Match",
+      "default": true
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Boots to swipe through",
+      "info": "Defaults to All football boots. Only boots in stock come up."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Name",
+      "default": "Boot Match"
+    },
+    {
+      "type": "text",
+      "id": "tip",
+      "label": "First-visit hint beside the button",
+      "default": "Find your boot match"
+    },
+    {
+      "type": "textarea",
+      "id": "intro",
+      "label": "Intro",
+      "default": "Swipe right on boots you love and left on the ones you don’t. After a few likes we’ll find your perfect match."
+    },
+    {
+      "type": "range",
+      "id": "likes_to_match",
+      "label": "Likes before the match",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "default": 4
+    }
+  ],
+  "presets": [
+    {
+      "name": "Boot Match"
+    }
+  ]
+}
+{% endschema %}
