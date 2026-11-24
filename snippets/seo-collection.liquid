@@ -1,0 +1,339 @@
+{%- doc -%}
+  Search-engine copy for a collection page, written from what the collection is, so every
+  collection (new ones included) gets a proper title, meta description and on-page text.
+
+  Kinds: brand, silo (and a silo's older duplicates), line (one line of a silo, e.g. VAPOR),
+  generation, size, player, condition, playing style, surface, sale, the whole range, and the rest.
+
+  Modes (one per render, so the head and the page can each take what they need):
+  - 'title'       the page title (the theme adds " – Oce Boots")
+  - 'description' the meta description (under ~155 characters)
+  - 'canonical'   another collection's URL when this one is an older duplicate of it, else nothing
+  - 'robots'      'noindex' for empty or internal working collections, else nothing
+  - 'body'        the copy shown under the products
+  - 'name'        what the collection is, for the copy's heading ("Nike Mercurial Vapor football boots")
+
+  The admin's own SEO title and description are used instead when the collection's
+  custom.seo_keep metafield is true.
+
+  @param {string} mode - title | description | canonical | robots | body
+  @param {object} [c] - The collection (defaults to the page's collection)
+{%- enddoc -%}
+
+{%- liquid
+  assign c = c | default: collection
+  assign h = c.handle
+  assign count = c.all_products_count | default: c.products_count
+  assign title_clean = c.title | replace: 'adidas', 'Adidas' | replace: 'ADIDAS', 'Adidas' | strip
+  assign kind = 'other'
+  assign name = title_clean
+  assign line = ''
+  assign line_key = ''
+  assign canonical_to = ''
+  assign noindex = false
+
+  # Lines of boots: handle prefix ^ name ^ brand ^ what it is for ^ about it
+  capture lines
+    echo 'nike-mercurial-vapor^Mercurial Vapor^Nike^speed^Nike’s low-cut speed boot: a light, close-fitting upper over an aggressive soleplate built for acceleration and quick changes of pace. The boot of choice for wingers and forwards who play on the shoulder.~'
+    echo 'nike-mercurial-superfly^Mercurial Superfly^Nike^speed^The Mercurial with the sock-style Dynamic Fit collar: the same speed-first design as the Vapor, with a snug, high-cut fit that locks the foot in.~'
+    echo 'nike-mercurial^Mercurial^Nike^speed^Nike’s speed line, in two cuts: the low-cut Vapor and the sock-collared Superfly. Light uppers and aggressive plates made for explosive pace.~'
+    echo 'nike-phantom^Phantom^Nike^touch and creativity^Nike’s boot for creative attackers and playmakers, with textured, grippy uppers for touch, passing and finishing, from the Phantom Venom and Vision to the GT, GX, Luna and Phantom 6.~'
+    echo 'nike-hypervenom^Hypervenom^Nike^agility^Nike’s agility boot for strikers, built for sharp turns and quick shots in tight spaces: the Hypervenom Phantom range.~'
+    echo 'nike-tiempo^Tiempo^Nike^touch^Nike’s classic touch boot, famous for its soft feel on the ball, comfort and secure fit, worn by defenders and playmakers alike: the Tiempo Legend and Maestro.~'
+    echo 'nike-magista^Magista^Nike^control^Nike’s knitted playmaker boot, made for close control and passing, in the high-collared Obra and the low-cut Opus.~'
+    echo 'nike-ctr360^CTR360 Maestri^Nike^control^Nike’s control boot for midfielders, with a cushioned, precise touch for receiving and passing.~'
+    echo 'nike-total-90^Total 90^Nike^power^The T90: Nike’s striking boot, built around a strike zone for power and accuracy, in its Laser editions.~'
+    echo 'adidas-predator^Predator^Adidas^control and striking^adidas’ iconic Predator, with grippy elements on the upper for swerve, spin and striking: Predator FT, Accuracy, Instinct and LZ.~'
+    echo 'adidas-x^X^Adidas^speed^adidas’ speed line: light, locked-in boots for fast players, from the X 15 to 19 era to Ghosted, Speedflow, Speedportal and Crazyfast.~'
+    echo 'adidas-f50^F50^Adidas^speed^adidas’ lightweight speed boot, from the cult adizero and iTunit pairs to the modern F50 Elite and Hyperfast.~'
+    echo 'adidas-copa^Copa^Adidas^touch^adidas’ classic, prized for comfort and a soft, natural touch on the ball.~'
+    echo 'adidas-nemeziz^Nemeziz^Adidas^agility^adidas’ agility boot, with a tape-inspired wrap for lockdown through quick cuts and turns.~'
+    echo 'adidas-adipure-11pro^11Pro^Adidas^touch^adidas’ minimalist boot: a clean, low-profile design with a barefoot feel on the ball.~'
+    echo 'adidas-11pro^11Pro^Adidas^touch^adidas’ minimalist boot: a clean, low-profile design with a barefoot feel on the ball.~'
+    echo 'adidas-ace^Ace^Adidas^control^adidas’ control boot, built for a clean first touch and confident passing.~'
+    echo 'puma-future^Future^Puma^agility^Puma’s agility boot, with an adaptive, compression-style fit for playmakers who change direction all game.~'
+    echo 'puma-ultra^Ultra^Puma^speed^Puma’s lightest speed boot, made for straight-line pace.~'
+    echo 'puma-evopower^evoPOWER^Puma^power^Puma’s power boot, designed to put more into every strike.~'
+    echo 'mizuno-morelia^Morelia^Mizuno^touch^Mizuno’s Japanese-crafted classic, renowned for its soft leather and featherlight feel.~'
+  endcapture
+  assign lines = lines | split: '~'
+
+  # A silo's main collection, or one of its older duplicates: handle ^ line prefix ^ main collection
+  capture silos
+    echo 'nike-mercurial^nike-mercurial^~superfly-copy^nike-mercurial-vapor^~mercurial^nike-mercurial-superfly^~vapor-14-elite^nike-mercurial-vapor^nike-mercurial-vapor-14~'
+    echo 'phantom-1^nike-phantom^~phantom^nike-phantom^phantom-1~tiempo-1^nike-tiempo^~tiempo^nike-tiempo^tiempo-1~'
+    echo 'hypervenom-1^nike-hypervenom^~hypervenom^nike-hypervenom^hypervenom-1~magista-1^nike-magista^~magista^nike-magista^magista-1~'
+    echo 'ctr360-1^nike-ctr360^~ctr360^nike-ctr360^ctr360-1~total-91^nike-total-90^~total-90^nike-total-90^total-91~'
+    echo 'predator-1^adidas-predator^~predator^adidas-predator^predator-1~x^adidas-x^~adidas-x^adidas-x^x~crazyfast^adidas-x^adidas-x-crazyfast~'
+    echo 'f50^adidas-f50^~adidas-f50^adidas-f50^f50~copa^adidas-copa^~nemeziz^adidas-nemeziz^~11pro^adidas-11pro^~'
+  endcapture
+  assign silos = silos | split: '~'
+
+  for row in silos
+    assign f = row | split: '^'
+    if f[0] == h
+      assign kind = 'silo'
+      assign line_key = f[1]
+      assign canonical_to = f[2]
+      break
+    endif
+  endfor
+
+  if kind == 'other'
+    for row in lines
+      assign f = row | split: '^'
+      assign prefix = f[0] | append: '-'
+      assign starts = h | slice: 0, prefix.size
+      if starts == prefix
+        assign kind = 'generation'
+        assign line_key = f[0]
+        break
+      endif
+    endfor
+  endif
+
+  if line_key != blank
+    for row in lines
+      assign f = row | split: '^'
+      if f[0] == line_key
+        assign line = f
+        break
+      endif
+    endfor
+  endif
+
+  if kind == 'silo'
+    if line_key contains 'vapor' or line_key contains 'superfly'
+      assign kind = 'line'
+    endif
+    if line != ''
+      assign name = line[2] | append: ' ' | append: line[1]
+    endif
+    if h == 'vapor-14-elite'
+      assign name = 'Nike Mercurial Vapor 14 Elite'
+    elsif h == 'crazyfast'
+      assign name = 'Adidas X Crazyfast'
+    endif
+  elsif kind == 'generation'
+    assign name = title_clean
+  endif
+
+  # Brands
+  case h
+    when 'nike', 'adidas', 'puma-1', 'puma', 'mizuno', 'new-balance'
+      assign kind = 'brand'
+      assign name = title_clean | remove: ' Football Boots' | remove: ' football boots'
+      if h == 'puma'
+        assign canonical_to = 'puma-1'
+        assign name = 'Puma'
+      endif
+      if h == 'new-balance'
+        assign name = 'New Balance'
+      endif
+  endcase
+
+  # Sizes: "US 9 - UK 8 - EU 42.5", "UK 8", "EU 41", "US 7.5 & Under"
+  assign two = h | slice: 0, 2
+  assign title_up = c.title | upcase
+  assign t2 = title_up | slice: 0, 2
+  if kind == 'other'
+    if two == 'us' or two == 'uk' or two == 'eu'
+      if t2 == 'US' or t2 == 'UK' or t2 == 'EU'
+        unless h contains 'used'
+          assign kind = 'size'
+          assign name = c.title | replace: ' - ', ' / ' | replace: ' 1/3', '⅓' | replace: ' 2/3', '⅔' | replace: 'UK6.5', 'UK 6.5'
+        endunless
+      endif
+    endif
+  endif
+
+  # Players, conditions, playing styles, surfaces, sales and the rest
+  case h
+    when 'neymar-jr'
+      assign kind = 'player'
+      assign name = 'Neymar Jr'
+    when 'cr7'
+      assign kind = 'player'
+      assign name = 'Cristiano Ronaldo (CR7)'
+    when 'messi-1', 'messi'
+      assign kind = 'player'
+      assign name = 'Lionel Messi'
+      if h == 'messi'
+        assign canonical_to = 'messi-1'
+      endif
+    when 'pogba'
+      assign kind = 'player'
+      assign name = 'Paul Pogba'
+    when 'olise'
+      assign kind = 'player'
+      assign name = 'Michael Olise'
+    when 'new'
+      assign kind = 'condition'
+      assign name = 'New'
+      assign grade = 'brand new and unworn'
+    when 'like-new'
+      assign kind = 'condition'
+      assign name = 'Like New'
+      assign grade = 'worn once or twice at most, with barely any signs of use'
+    when 'used-a-2'
+      assign kind = 'condition'
+      assign name = 'Lightly Worn'
+      assign grade = 'used a handful of times, with light marks and plenty of life left'
+    when 'used-a-1'
+      assign kind = 'condition'
+      assign name = 'Moderately Worn'
+      assign grade = 'used regularly, with visible wear and still plenty of games in them'
+    when 'used-a'
+      assign kind = 'condition'
+      assign name = 'Well Worn'
+      assign grade = 'well used, with clear signs of wear, priced to match'
+    when 'used-b'
+      assign kind = 'condition'
+      assign name = 'Heavily Worn'
+      assign grade = 'heavily used, best as a collector’s pair or for training, priced to match'
+    when 'speed', 'power', 'control', 'agility'
+      assign kind = 'style'
+      assign name = title_clean
+    when 'soft-ground', 'firm-ground'
+      assign kind = 'surface'
+      assign name = title_clean | replace: '-', ' '
+    when 'black-friday-2026', 'pre-season-sale', 'outlet'
+      assign kind = 'sale'
+    when 'all-football-boots'
+      assign kind = 'all'
+      assign name = 'All'
+    when 'grails'
+      assign kind = 'grails'
+      assign name = 'Grail'
+    when 'nikeid', 'nikebyyou'
+      assign kind = 'custom'
+      assign name = 'Nike By You (NikeID)'
+    when 'accessories-services'
+      assign kind = 'accessories'
+      assign name = 'Accessories'
+    when 'sfly-to-cut', 'tbc-bfsale'
+      assign noindex = true
+  endcase
+
+  if count == 0
+    assign noindex = true
+  endif
+
+  assign keep_admin = false
+  if c.metafields.custom.seo_keep == true
+    assign keep_admin = true
+  endif
+
+  # Title and description
+  assign brand_word = line[2] | default: ''
+  case kind
+    when 'brand'
+      assign seo_title = name | append: ' Football Boots | New & Pre-Owned'
+      assign seo_desc = 'Shop ' | append: name | append: ' football boots at OCEBOOTS: ' | append: count | append: ' pairs from current releases to rare classics, each with its size, condition and real photos.'
+    when 'silo', 'line'
+      assign seo_title = name | append: ' Football Boots'
+      if name.size <= 20
+        assign seo_title = seo_title | append: ' | Every Generation'
+      endif
+      assign seo_desc = 'Shop ' | append: name | append: ' football boots at OCEBOOTS: every generation, new and pre-owned, each with its size, condition and real photos. Verified, fast shipping.'
+    when 'generation'
+      assign seo_title = name | append: ' Football Boots'
+      assign seo_desc = 'Shop ' | append: name | append: ' football boots at OCEBOOTS. ' | append: count | append: ' pairs, new and pre-owned, each with its exact size, condition and real photos.'
+    when 'size'
+      assign seo_title = name | append: ' Football Boots'
+      assign seo_desc = 'Football boots in ' | append: name | append: ': ' | append: count | append: ' pairs from Nike, adidas, Puma and Mizuno, new and pre-owned, each with condition notes and real photos.'
+    when 'player'
+      assign seo_title = name | append: ' Football Boots'
+      assign seo_desc = 'Shop ' | append: name | append: ' football boots at OCEBOOTS: signature editions and the models they wore, new and pre-owned, with real photos.'
+    when 'condition'
+      assign seo_title = name | append: ' Football Boots | Graded & Photographed'
+      assign seo_desc = name | append: ' football boots at OCEBOOTS: ' | append: grade | append: '. Every pair is checked by hand and shown in real photos.'
+    when 'style'
+      assign seo_title = 'Football Boots for ' | append: name
+      assign seo_desc = 'Football boots built for ' | append: name | downcase | append: ': the right boot for how you play, new and pre-owned, each with its size, condition and real photos.'
+    when 'surface'
+      assign seo_title = name | append: ' Football Boots'
+      assign seo_desc = name | append: ' football boots at OCEBOOTS, new and pre-owned, each with its size, condition and real photos.'
+    when 'sale'
+      assign seo_title = title_clean | append: ' | Football Boots on Sale'
+      assign seo_desc = 'Football boots on sale at OCEBOOTS: ' | append: count | append: ' discounted pairs from Nike, adidas and more, each with its size, condition and real photos.'
+    when 'all'
+      assign seo_title = 'Football Boots | New, Pre-Owned & Rare'
+      assign seo_desc = 'Shop all ' | append: count | append: ' football boots at OCEBOOTS: Nike, adidas, Puma and Mizuno, from new releases to rare and pro-issue pairs, with real photos.'
+    when 'grails'
+      assign seo_title = 'Grail Football Boots | Rare & Collectable'
+      assign seo_desc = 'Rare and collectable grail football boots at OCEBOOTS: hard-to-find pairs, each with its size, condition and real photos.'
+    when 'custom'
+      assign seo_title = 'Nike By You (NikeID) Football Boots'
+      assign seo_desc = 'One-off Nike By You (NikeID) football boots at OCEBOOTS: custom-designed pairs, each with its size, condition and real photos.'
+    when 'accessories'
+      assign seo_title = 'Football Boot Accessories | Studs & More'
+      assign seo_desc = 'Football boot accessories at OCEBOOTS: replacement studs, sock conversions and more for your boots.'
+    else
+      assign seo_title = title_clean | append: ' | Football Boots'
+      assign seo_desc = 'Shop ' | append: title_clean | append: ' at OCEBOOTS: football boots from Nike, adidas and more, each with its size, condition and real photos.'
+  endcase
+-%}
+
+{%- case mode -%}
+  {%- when 'name' -%}
+    {%- if kind == 'size' or kind == 'condition' or kind == 'style' -%}{{ name }} football boots{%- elsif kind == 'all' -%}Football boots{%- elsif kind == 'grails' -%}Grail football boots{%- elsif kind == 'accessories' -%}Accessories{%- else -%}{{ name }} football boots{%- endif -%}
+  {%- when 'title' -%}
+    {%- if keep_admin -%}{{ page_title }}{%- else -%}{{ seo_title }}{%- endif -%}
+  {%- when 'description' -%}
+    {%- if keep_admin -%}{{ page_description }}{%- else -%}{{ seo_desc }}{%- endif -%}
+  {%- when 'canonical' -%}
+    {%- if canonical_to != blank and collections[canonical_to] != blank -%}{{ request.origin }}{{ collections[canonical_to].url }}{%- endif -%}
+  {%- when 'robots' -%}
+    {%- if noindex -%}noindex{%- endif -%}
+  {%- when 'body' -%}
+    {%- liquid
+      assign about = line[4]
+      assign own = c.description | strip
+      # The admin's own description shows first, unless it is the short stock line every
+      # generation was created with
+      if own contains 'Every pair is listed with its size, condition and real photos'
+        assign own = ''
+      endif
+    -%}
+    {%- if own != blank -%}
+      <div class="cseo__own">{{ c.description }}</div>
+    {%- endif -%}
+    {%- case kind -%}
+      {%- when 'generation' -%}
+        <p>Shop {{ name | escape }} football boots at OCEBOOTS, with {{ count }} pair{% if count != 1 %}s{% endif %} listed now. The {{ name | escape }} is part of the {{ brand_word }} {{ line[1] }} line: {{ about }}</p>
+        <p>Whether you want a pair to play in or a clean pair for the collection, each one is listed on its own with its exact size, its condition and real photos of that pair.</p>
+      {%- when 'silo', 'line' -%}
+        <p>{{ name | escape }} football boots at OCEBOOTS, across every generation. {{ about }}</p>
+        <p>Use the generations above to jump straight to one model, or browse them all here, newest listings first.</p>
+      {%- when 'brand' -%}
+        <p>{{ name | escape }} football boots at OCEBOOTS: {{ count }} pairs across current and classic silos. Pick a silo above to see every generation of it, from today’s releases back to the boots that made the line famous.</p>
+      {%- when 'size' -%}
+        <p>Every football boot we have in {{ name | escape }}: {{ count }} pairs across Nike, adidas, Puma and Mizuno, new and pre-owned.</p>
+        <p>Sizes are listed as US, UK and EU. Nike and adidas convert UK to EU slightly differently (adidas uses thirds, such as EU 42⅔), so go by the US or UK size you usually wear. Speed boots like the Mercurial and X tend to fit snug; leather boots like the Tiempo and Copa give a little with wear.</p>
+      {%- when 'player' -%}
+        <p>Football boots linked to {{ name | escape }}: signature editions, special colourways and the models they made famous, new and pre-owned.</p>
+      {%- when 'condition' -%}
+        <p>{{ name | escape }} football boots are {{ grade }}. We grade every pair by hand so you know exactly what you are getting, and the photos on each listing are of that pair.</p>
+      {%- when 'style' -%}
+        <p>Football boots built for {{ name | downcase | escape }}. Every boot line is designed with a way of playing in mind; these are the ones made for {{ name | downcase | escape }}, across Nike, adidas, Puma and Mizuno.</p>
+      {%- when 'surface' -%}
+        <p>{{ name | escape }} football boots, new and pre-owned. Soft-ground (SG) boots use screw-in or mixed studs for grip on wet, soft natural grass.</p>
+      {%- when 'sale' -%}
+        <p>Football boots on sale: {{ count }} discounted pairs from Nike, adidas and more, while they last.</p>
+      {%- when 'all' -%}
+        <p>Every football boot at OCEBOOTS: {{ count }} pairs from Nike, adidas, Puma and Mizuno, from new releases to rare, pro-issue and classic boots. Filter by size, brand, condition and surface to find your pair.</p>
+      {%- when 'grails' -%}
+        <p>Grail football boots: rare, collectable and hard-to-find pairs, from limited editions to classics that rarely come up.</p>
+      {%- when 'custom' -%}
+        <p>Nike By You (formerly NikeID) football boots: one-off pairs designed by their owners, so each one is unique.</p>
+      {%- when 'accessories' -%}
+        <p>Everything for your boots: replacement studs, sock conversions and more.</p>
+      {%- else -%}
+        <p>{{ title_clean | escape }} at OCEBOOTS: football boots from Nike, adidas and more.</p>
+    {%- endcase -%}
+    {%- unless kind == 'accessories' -%}
+      <h3>Buying from OCEBOOTS</h3>
+      <p>Every pair is checked by hand before it ships and listed with its exact size, condition and real photos, from new and like-new to pre-owned, rare and pro-issue boots. We ship fast and accept returns.</p>
+    {%- endunless -%}
+{%- endcase -%}

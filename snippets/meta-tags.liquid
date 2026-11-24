@@ -17,8 +17,46 @@
 >
 
 {%- liquid
+  # Collection pages: title, description, canonical and indexing written from what the collection
+  # is (snippets/seo-collection)
+  assign seo_canonical = canonical_url
+  assign seo_robots = ''
+  if request.page_type == 'collection' and collection
+    capture seo_title_out
+      render 'seo-collection', mode: 'title', c: collection
+    endcapture
+    capture seo_desc_out
+      render 'seo-collection', mode: 'description', c: collection
+    endcapture
+    capture seo_canon_out
+      render 'seo-collection', mode: 'canonical', c: collection
+    endcapture
+    capture seo_robots
+      render 'seo-collection', mode: 'robots', c: collection
+    endcapture
+    assign seo_title_out = seo_title_out | strip
+    assign seo_desc_out = seo_desc_out | strip
+    assign seo_canon_out = seo_canon_out | strip
+    assign seo_robots = seo_robots | strip
+    if seo_title_out != blank
+      assign page_title = seo_title_out
+    endif
+    if seo_desc_out != blank
+      assign page_description = seo_desc_out
+    endif
+    if seo_canon_out != blank
+      assign seo_canonical = seo_canon_out
+    endif
+  endif
+  # A filtered or sorted collection is the same page: it stays out of search results
+  if request.page_type == 'collection' and seo_robots == blank
+    if current_tags or request.path contains '+'
+      assign seo_robots = 'noindex'
+    endif
+  endif
+
   assign og_title = page_title | default: shop.name
-  assign og_url = canonical_url | default: request.origin
+  assign og_url = seo_canonical | default: request.origin
   assign og_type = 'website'
   assign og_description = page_description | default: shop.description | default: shop.name
 
@@ -110,8 +148,11 @@
 
 <link
   rel="canonical"
-  href="{{ canonical_url }}"
+  href="{{ seo_canonical }}"
 >
+{%- if seo_robots == 'noindex' %}
+  <meta name="robots" content="noindex, follow">
+{%- endif %}
 
 {% if page_description %}
   <meta

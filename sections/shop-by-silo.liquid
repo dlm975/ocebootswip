@@ -107,6 +107,42 @@
   endif
 -%}
 
+{%- if page_mode -%}
+  {%- liquid
+    # Breadcrumbs for search engines: Home > brand > silo > this collection (whichever apply)
+    assign crumb_brand = nil
+    assign crumb_silo = nil
+    for b in section.blocks
+      if b.id == match_brand
+        assign crumb_brand = b.settings.collection
+      endif
+      if b.id == match_silo
+        assign crumb_silo = b.settings.collection
+      endif
+    endfor
+    assign crumbs = 1
+  -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": {{ request.origin | append: '/' | json }} }
+        {%- if crumb_brand != blank and crumb_brand.handle != collection.handle -%}
+          {%- assign crumbs = crumbs | plus: 1 -%}
+          ,{ "@type": "ListItem", "position": {{ crumbs }}, "name": {{ crumb_brand.title | json }}, "item": {{ request.origin | append: crumb_brand.url | json }} }
+        {%- endif -%}
+        {%- if crumb_silo != blank and crumb_silo.handle != collection.handle -%}
+          {%- assign crumbs = crumbs | plus: 1 -%}
+          ,{ "@type": "ListItem", "position": {{ crumbs }}, "name": {{ crumb_silo.title | replace: 'adidas', 'Adidas' | json }}, "item": {{ request.origin | append: crumb_silo.url | json }} }
+        {%- endif -%}
+        {%- assign crumbs = crumbs | plus: 1 -%}
+        ,{ "@type": "ListItem", "position": {{ crumbs }}, "name": {{ collection.title | replace: 'adidas', 'Adidas' | json }}, "item": {{ request.origin | append: collection.url | json }} }
+      ]
+    }
+  </script>
+{%- endif -%}
+
 {%- unless page_mode and match_brand == '' -%}
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <div class="section section--page-width color-{{ section.settings.color_scheme }}">

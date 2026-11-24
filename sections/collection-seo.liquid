@@ -1,0 +1,182 @@
+{%- comment -%}
+  Under a collection's products: what the collection is, in a few short paragraphs written from
+  its kind (snippets/seo-collection), folded to its first lines until "Read more" is tapped. The
+  full text is in the page for search engines either way. Also the page's structured data: the
+  collection and its first products as a list.
+{%- endcomment -%}
+
+{%- liquid
+  capture seo_name
+    render 'seo-collection', mode: 'name', c: collection
+  endcapture
+  capture seo_body
+    render 'seo-collection', mode: 'body', c: collection
+  endcapture
+  capture seo_desc
+    render 'seo-collection', mode: 'description', c: collection
+  endcapture
+  assign seo_name = seo_name | strip
+-%}
+
+{%- if seo_body != blank -%}
+  <div class="section-background color-{{ section.settings.color_scheme }}"></div>
+  <div class="section section--page-width color-{{ section.settings.color_scheme }} cseo spacing-style" style="{% render 'spacing-style', settings: section.settings %}">
+    <details class="cseo__box">
+      <summary class="cseo__head">
+        <h2 class="cseo__title">About {{ seo_name | escape }}</h2>
+        <span class="cseo__more" aria-hidden="true">
+          <span class="cseo__more-open">Read more</span><span class="cseo__more-close">Show less</span>
+          {%- render 'gicon', name: 'keyboard_arrow_down', size: 18 -%}
+        </span>
+      </summary>
+      <div class="cseo__text">{{ seo_body }}</div>
+    </details>
+    <div class="cseo__peek" aria-hidden="true">{{ seo_body | strip_html | truncatewords: 34 }}</div>
+  </div>
+{%- endif -%}
+
+{%- liquid
+  assign page_url = request.origin | append: collection.url
+  assign listed = 0
+-%}
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": {{ seo_name | json }},
+    "url": {{ page_url | json }},
+    "description": {{ seo_desc | strip | json }},
+    {%- if collection.featured_image -%}
+      "image": {{ collection.featured_image | image_url: width: 1200 | prepend: 'https:' | json }},
+    {%- endif -%}
+    "isPartOf": { "@type": "WebSite", "name": {{ shop.name | json }}, "url": {{ request.origin | json }} },
+    "mainEntity": {
+      "@type": "ItemList",
+      "numberOfItems": {{ collection.all_products_count | default: 0 }},
+      "itemListElement": [
+        {%- for product in collection.products limit: 24 -%}
+          {
+            "@type": "ListItem",
+            "position": {{ forloop.index }},
+            "url": {{ request.origin | append: product.url | json }},
+            "name": {{ product.title | json }}
+          }{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      ]
+    }
+  }
+</script>
+
+{% stylesheet %}
+  .cseo__box {
+    max-width: 760px;
+  }
+
+  .cseo__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    list-style: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .cseo__head::-webkit-details-marker {
+    display: none;
+  }
+
+  .cseo__title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  .cseo__more {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 2px;
+    color: rgb(18 18 18 / 0.55);
+    font-size: 0.8125rem;
+    font-weight: 650;
+  }
+
+  .cseo__more svg {
+    transition: transform 0.3s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  .cseo__box[open] .cseo__more svg {
+    transform: rotate(180deg);
+  }
+
+  .cseo__more-close,
+  .cseo__box[open] .cseo__more-open {
+    display: none;
+  }
+
+  .cseo__box[open] .cseo__more-close {
+    display: inline;
+  }
+
+  /* Folded: the first lines, fading out; opened: the full text */
+  .cseo__peek {
+    max-width: 760px;
+    margin-top: 10px;
+    color: rgb(18 18 18 / 0.62);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    -webkit-mask-image: linear-gradient(180deg, #000 40%, transparent);
+    mask-image: linear-gradient(180deg, #000 40%, transparent);
+  }
+
+  .cseo__box[open] + .cseo__peek {
+    display: none;
+  }
+
+  .cseo__text {
+    margin-top: 10px;
+    color: rgb(18 18 18 / 0.72);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+
+  .cseo__text p {
+    margin: 0 0 10px;
+  }
+
+  .cseo__text h3 {
+    margin: 16px 0 6px;
+    color: #121212;
+    font-size: 1rem;
+    font-weight: 750;
+  }
+
+  .cseo__text a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Collection about (SEO)",
+  "tag": "section",
+  "class": "section-collection-seo",
+  "enabled_on": { "templates": ["collection"] },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Writes a short about-this-collection text from what the collection is (brand, silo, generation, size and so on), plus structured data for search engines. A collection's own description shows first when it has one."
+    },
+    { "type": "color_scheme", "id": "color_scheme", "label": "t:settings.color_scheme", "default": "scheme-1" },
+    { "type": "header", "content": "t:content.padding" },
+    { "type": "range", "id": "padding-block-start", "label": "t:settings.top", "min": 0, "max": 100, "step": 4, "unit": "px", "default": 24 },
+    { "type": "range", "id": "padding-block-end", "label": "t:settings.bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "default": 40 }
+  ],
+  "presets": [{ "name": "Collection about (SEO)" }]
+}
+{% endschema %}

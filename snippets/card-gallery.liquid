@@ -158,7 +158,7 @@
 
         {% assign attributes = '' %}
         {% capture slideshow_children %}
-          {%- render 'product-media', media: media, sizes: sizes, loading: loading, preview_image_only: true -%}
+          {%- render 'product-media', media: media, sizes: sizes, loading: loading, preview_image_only: true, alt_fallback: product.title -%}
         {% endcapture %}
         {% capture class %}
           product-media-container media-fit product-media-container--{{ media.media_type }}{% if constrain_to_viewport %} constrain-height{% endif %}
