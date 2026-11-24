@@ -43,6 +43,35 @@ Rebel Sport, Football Central, Puma NZ and overseas eBay listings; rare-boot sea
 specialists (The Boot Chamber, Bootsfinder, Rareboots Marketplace) and Trustpilot review pages.
 OCEBOOTS does not appear yet for any buyer question above.
 
+### Baseline after relaunch (25 Nov 2026, web search)
+
+Site went live on the new theme, Search Console verified, sitemap submitted and the 16 key pages
+sent for indexing on 24–25 Nov. Google's November core update had just finished and another began
+the same day, so compare like for like: wait a full week after a rollout ends.
+
+| Question | OCEBOOTS? | Who appears / is cited instead |
+|---|---|---|
+| oceboots | No (not indexed yet) | Unrelated "ocean boots" pages |
+| where to buy pre-owned football boots NZ | No | Trade Me, Players Sports, Rebel Sport, Stirling Sports, Puma NZ, Football Central |
+| best place to buy rare football boots | No | footballboots.co.uk resellers list (BWBootsUK, RareBoots4u, Bootsfinder, The Boot Room APAC), StockX, eBay |
+| Mercurial Vapor vs Superfly | No | Sports Direct, Pro:Direct, Unisport, Nike, SPT Football (AU) |
+| is it worth buying second-hand football boots | No | Gumtree, Cash Converters, Decathlon Second Life |
+| what does pro-issue / player edition mean | No | Footy Headlines, Sports Direct, Pro:Direct listings |
+| Nike vs adidas football boot sizing | No | footballboots.co.uk, Nike fit guides, RealSport101 |
+| football boot shop Auckland | No | Players Sports (Greenlane), Soccer United, The Athlete's Foot |
+
+What the cited pages answered that ours didn't, fixed on 25 Nov:
+- Vapor vs Superfly: our guide said the Superfly is the collared one; the Superfly 11 is low-cut. Now
+  explains the Vapor 17 / Superfly 11 difference (plate, cushioning, forefoot room) and the older
+  collar difference, with a one-line answer first.
+- Pro-issue: cited pages separate retail "Player Edition" (SG-Pro, no anti-clog, specialist
+  retailers) from boots made for a player. Boot guide and FAQ now say so.
+- Sizing: added which boots run narrow or wide, and "do Mercurials run small".
+- "Is it worth buying second-hand": added a direct answer to the pre-owned buying page.
+
+Still open (outside the site): get listed on footballboots.co.uk's resellers page (the source cited
+for rare boots); Google Business Profile for "football boot shop Auckland"; reviews.
+
 ## 3. What is now on the site (OWN / CLAIM / CONTEST)
 
 | Page | Answers |
@@ -83,3 +112,10 @@ AI assistants trust what independent sources say about you more than what you sa
 2. Search Console: impressions and clicks for the guide pages and collections.
 3. For each miss: is there a page that answers it? If yes, improve that page; if no, write one;
    if the answer exists but OCEBOOTS still isn't cited, work on outside sources for that topic.
+4. Search Console → Search results, and the Generative AI report (AI Overviews / AI Mode
+   impressions) once it shows data. Clicks down but AI impressions steady means you are still in
+   the AI answers: check which pages lost rankings and which lost click-through.
+5. If a competitor replaced OCEBOOTS for a question, read the page that got cited: what did it
+   answer that ours skipped (a current model, a size detail, a price, a clear yes/no)? Fix that.
+6. After a Google core update, wait a full week after the rollout ends, then compare with the week
+   before it started.
