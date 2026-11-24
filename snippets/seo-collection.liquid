@@ -171,27 +171,27 @@
     when 'new'
       assign kind = 'condition'
       assign name = 'New'
-      assign grade = 'brand new and unworn'
+      assign grade = 'unused and in perfect condition'
     when 'like-new'
       assign kind = 'condition'
       assign name = 'Like New'
-      assign grade = 'worn once or twice at most, with barely any signs of use'
+      assign grade = 'barely used, with minimal to no signs of wear'
     when 'used-a-2'
       assign kind = 'condition'
       assign name = 'Lightly Worn'
-      assign grade = 'used a handful of times, with light marks and plenty of life left'
+      assign grade = 'some visible signs of wear, such as creasing or scuffs'
     when 'used-a-1'
       assign kind = 'condition'
       assign name = 'Moderately Worn'
-      assign grade = 'used regularly, with visible wear and still plenty of games in them'
+      assign grade = 'noticeable wear, including creasing, scuffs or slight sole wear, but still presentable'
     when 'used-a'
       assign kind = 'condition'
       assign name = 'Well Worn'
-      assign grade = 'well used, with clear signs of wear, priced to match'
+      assign grade = 'clear and significant signs of use, such as heavy scuffing, fading or noticeable sole wear'
     when 'used-b'
       assign kind = 'condition'
       assign name = 'Heavily Worn'
-      assign grade = 'heavily used, best as a collector’s pair or for training, priced to match'
+      assign grade = 'extensive wear from long-term use, though still functional'
     when 'speed', 'power', 'control', 'agility'
       assign kind = 'style'
       assign name = title_clean
@@ -255,7 +255,7 @@
       if seo_title.size <= 24
         assign seo_title = seo_title | append: ' | Graded & Photographed'
       endif
-      assign seo_desc = name | append: ' football boots at OCEBOOTS: ' | append: grade | append: '. Hand-checked, with real photos.'
+      assign seo_desc = name | append: ' football boots at OCEBOOTS, graded on our six-step condition scale, each with real photos of the pair.'
     when 'style'
       assign seo_title = 'Football Boots for ' | append: name
       assign seo_desc = 'Football boots built for ' | append: name | downcase | append: ': the right boot for how you play, new and pre-owned, each with its size, condition and real photos.'
@@ -310,19 +310,19 @@
     {%- case kind -%}
       {%- when 'generation' -%}
         <p>Shop {{ name | escape }} football boots at OCEBOOTS, with {{ count }} pair{% if count != 1 %}s{% endif %} listed now. The {{ name | escape }} is part of the {{ brand_word }} {{ line[1] }} line. {{ about | replace: 'Nike’s', 'It’s Nike’s' | replace: 'adidas’', 'It’s adidas’' | replace: 'Puma’s', 'It’s Puma’s' | replace: 'Mizuno’s', 'It’s Mizuno’s' }}</p>
-        <p>Whether you want a pair to play in or a clean pair for the collection, each one is listed on its own with its exact size, its condition and real photos of that pair.</p>
+        <p>Whether you want a pair to play in or a clean pair for the collection, each one is listed on its own with its exact size, its <a href="/pages/oceboots-condition-scale">condition grade</a> and real photos of that pair. Check your size in the <a href="/pages/football-boot-size-guide">size guide</a>.</p>
       {%- when 'silo', 'line' -%}
         <p>{{ name | escape }} football boots at OCEBOOTS, across every generation. {{ about }}</p>
-        <p>Use the generations above to jump straight to one model, or browse them all here, newest listings first.</p>
+        <p>Use the generations above to jump straight to one model, or browse them all here, newest listings first. Not sure which boot suits you? See <a href="/pages/football-boot-guide">which football boot is right for you</a>.</p>
       {%- when 'brand' -%}
         <p>{{ name | escape }} football boots at OCEBOOTS: {{ count }} pairs across current and classic silos. Pick a silo above to see every generation of it, from today’s releases back to the boots that made the line famous.</p>
       {%- when 'size' -%}
         <p>Every football boot we have in {{ name | escape }}: {{ count }} pairs across Nike, adidas, Puma and Mizuno, new and pre-owned.</p>
-        <p>Sizes are listed as US, UK and EU. Nike and adidas convert UK to EU slightly differently (adidas uses thirds, such as EU 42⅔), so go by the US or UK size you usually wear. Speed boots like the Mercurial and X tend to fit snug; leather boots like the Tiempo and Copa give a little with wear.</p>
+        <p>Sizes are listed as US, UK and EU. Nike and adidas convert UK to EU slightly differently (adidas uses thirds, such as EU 42⅔), so go by the US or UK size you usually wear; see the <a href="/pages/football-boot-size-guide">football boot size guide</a>. Speed boots like the Mercurial and X tend to fit snug; leather boots like the Tiempo and Copa give a little with wear.</p>
       {%- when 'player' -%}
         <p>Football boots linked to {{ name | escape }}: signature editions, special colourways and the models they made famous, new and pre-owned.</p>
       {%- when 'condition' -%}
-        <p>{{ name | escape }} football boots are {{ grade }}. We grade every pair by hand so you know exactly what you are getting, and the photos on each listing are of that pair.</p>
+        <p>On the OCEBOOTS <a href="/pages/oceboots-condition-scale">condition scale</a>, {{ name | escape }} means {{ grade }}. We grade every pair by hand so you know exactly what you are getting, and the photos on each listing are of that pair.</p>
       {%- when 'style' -%}
         <p>Football boots built for {{ name | downcase | escape }}. Every boot line is designed with a way of playing in mind; these are the ones made for {{ name | downcase | escape }}, across Nike, adidas, Puma and Mizuno.</p>
       {%- when 'surface' -%}
@@ -342,6 +342,6 @@
     {%- endcase -%}
     {%- unless kind == 'accessories' -%}
       <h3>Buying from OCEBOOTS</h3>
-      <p>Every pair is checked by hand before it ships and listed with its exact size, condition and real photos, from new and like-new to pre-owned, rare and pro-issue boots. We ship fast and accept returns.</p>
+      <p>OCEBOOTS is a football boot store in Auckland, New Zealand. Every pair is checked by hand before it ships and listed with its exact size, condition and real photos, from new and like-new to pre-owned, rare and pro-issue boots. Orders are dispatched within 24 hours and shipped worldwide. <a href="/pages/faq">Questions? See the FAQ</a> or read <a href="/pages/about-oceboots">about OCEBOOTS</a>.</p>
     {%- endunless -%}
 {%- endcase -%}
