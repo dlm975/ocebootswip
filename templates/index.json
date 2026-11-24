@@ -228,6 +228,7 @@
           "type": "silo",
           "settings": {
             "title": "Nike Phantom",
+            "image": "shopify://shop_images/silo-nike-phantom.jpg",
             "collection": "phantom-1",
             "generations": [
               "nike-phantom-6",
@@ -496,6 +497,7 @@
           "type": "silo",
           "settings": {
             "title": "Mizuno Morelia",
+            "image": "shopify://shop_images/silo-mizuno-morelia.jpg",
             "collection": "mizuno-morelia",
             "generations": []
           }
