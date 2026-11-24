@@ -13,7 +13,7 @@
 >
 <meta
   name="theme-color"
-  content=""
+  content="#ffffff"
 >
 
 {%- liquid
@@ -83,6 +83,10 @@
       assign seo_robots = 'noindex'
     endif
   endif
+
+  # The store's name is written one way everywhere: OCEBOOTS (older listings say "Oce Boots")
+  assign page_title = page_title | replace: 'Oce Boots', 'OCEBOOTS' | replace: 'OceBoots', 'OCEBOOTS' | replace: 'Oce boots', 'OCEBOOTS'
+  assign page_description = page_description | replace: 'Oce Boots', 'OCEBOOTS' | replace: 'OceBoots', 'OCEBOOTS' | replace: 'Oce boots', 'OCEBOOTS'
 
   assign og_title = page_title | default: shop.name
   assign og_url = seo_canonical | default: request.origin

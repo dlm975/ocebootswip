@@ -8,13 +8,15 @@
  {%- render 'ecom_header' -%}
     {%- render 'stylesheets' -%}
 
-    {%- if settings.favicon != blank -%}
-      <link
-        rel="icon"
-        type="image/png"
-        href="{{ settings.favicon | image_url: width: 32, height: 32 }}"
-      >
-    {%- endif -%}
+    {%- comment -%} The site icon: the O from the OCEBOOTS wordmark (assets/oce-icon-*.png), in the sizes
+      browsers, phones' home screens and search results use {%- endcomment -%}
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ 'oce-icon-32.png' | asset_url }}">
+    <link rel="icon" type="image/png" sizes="48x48" href="{{ 'oce-icon-48.png' | asset_url }}">
+    <link rel="icon" type="image/png" sizes="96x96" href="{{ 'oce-icon-96.png' | asset_url }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ 'oce-icon-192.png' | asset_url }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ 'oce-icon-180.png' | asset_url }}">
+    <meta name="apple-mobile-web-app-title" content="OCEBOOTS">
+    <meta name="application-name" content="OCEBOOTS">
 
     {% comment %} This a way to wait for main content to load when navigating to a new page so that the view transitions can work consistently {% endcomment %}
     <link
