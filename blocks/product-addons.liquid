@@ -684,13 +684,16 @@
             })
           );
 
-          /* In the popup: the button shows it landed, and the cart opens when the popup closes.
+          /* In the popup: the button shows it landed, then the popup closes and the cart opens
+             (closePop), so closing the cart goes back to the product page, not the popup.
              Elsewhere: show the shopper it landed in the drawer (the theme's own component, so
              only ask if it is actually there and openable). */
-          if (btn.closest('[data-pa-pop]')) {
+          var inPop = btn.closest('[data-pa-pop]');
+          if (inPop) {
             btn.classList.add('is-added');
             var label = btn.querySelector('.pa__add-label');
             if (label) label.textContent = '\u2713 Added';
+            setTimeout(function () { closePop(inPop); }, reduced() ? 0 : 450);
             return;
           }
           var drawer = document.querySelector('cart-drawer-component');
