@@ -52,7 +52,7 @@
   if request.page_type == 'index'
     assign range_count = collections['all-football-boots'].all_products_count | default: 1000
     assign page_title = 'OCEBOOTS | Football Boots NZ – New, Pre-Owned & Rare'
-    assign page_description = 'New Zealand’s largest range of football boots: ' | append: range_count | append: ' pairs of Nike Mercurial, Phantom, Tiempo, adidas Predator, F50 and more, new and pre-owned. Shipped worldwide.'
+    assign page_description = 'New Zealand’s largest range of football boots: ' | append: range_count | append: ' pairs of Nike Mercurial, Phantom, Tiempo, adidas Predator & F50. Shipped worldwide.'
   endif
 
   # Pages without a description of their own get one, so search results show something useful
