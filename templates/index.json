@@ -190,6 +190,7 @@
           "type": "silo",
           "settings": {
             "title": "Nike Mercurial",
+            "image": "shopify://shop_images/silo-nike-mercurial.jpg",
             "collection": "nike-mercurial",
             "generations": [
               "nike-mercurial-vapor-17",
@@ -248,6 +249,7 @@
           "type": "silo",
           "settings": {
             "title": "Nike Tiempo",
+            "image": "shopify://shop_images/silo-nike-tiempo.jpg",
             "collection": "tiempo-1",
             "generations": [
               "nike-tiempo-maestro",
@@ -269,6 +271,7 @@
           "type": "silo",
           "settings": {
             "title": "Nike Hypervenom",
+            "image": "shopify://shop_images/silo-nike-hypervenom.jpg",
             "collection": "hypervenom-1",
             "generations": [
               "nike-hypervenom-phantom-3",
@@ -284,6 +287,7 @@
           "type": "silo",
           "settings": {
             "title": "Nike Magista",
+            "image": "shopify://shop_images/silo-nike-magista.jpg",
             "collection": "magista-1",
             "generations": [
               "nike-magista-obra-2",
@@ -300,6 +304,7 @@
           "type": "silo",
           "settings": {
             "title": "Nike CTR360",
+            "image": "shopify://shop_images/silo-nike-ctr360.jpg",
             "collection": "ctr360-1",
             "generations": [
               "nike-ctr360-maestri-3",
@@ -315,6 +320,7 @@
           "type": "silo",
           "settings": {
             "title": "Nike Total 90",
+            "image": "shopify://shop_images/silo-nike-total-90.jpg",
             "collection": "total-91",
             "generations": [
               "nike-total-90-laser-4",
