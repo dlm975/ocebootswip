@@ -1,5 +1,6 @@
 {%- doc -%}
-  Product meta line above the product title: brand · soleplate · condition, e.g. "Nike · FG · New".
+  Product meta line above the product title: brand · soleplate · condition, e.g. "Nike · FG · New"
+  (on the product's own page just "FG · New": the brand and generation are the breadcrumbs).
 
   - Brand: the first word of the title when it is a known boot brand (listings use the shop as vendor),
     otherwise the vendor unless it is the shop itself.
@@ -79,6 +80,12 @@
   if meta_gen != blank
     assign brand_prefix = meta_brand | append: ' '
     assign meta_gen_label = meta_gen.title | replace: 'adidas', 'Adidas' | remove_first: brand_prefix
+  endif
+
+  # On the boot's own page the brand and generation are the breadcrumbs above the photos
+  # (snippets/breadcrumbs.liquid), so this line keeps to soleplate · condition there
+  if template.name == 'product' and meta_product.id == product.id
+    assign meta_brand = ''
   endif
 
   assign meta_text = ''
