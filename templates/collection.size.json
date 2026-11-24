@@ -165,10 +165,19 @@
         "padding-block-end": 32,
         "desktop_columns": 4
       }
+    },
+    "collection_seo": {
+      "type": "collection-seo",
+      "settings": {
+        "color_scheme": "scheme-1",
+        "padding-block-start": 24,
+        "padding-block-end": 40
+      }
     }
   },
   "order": [
     "size_header",
-    "main"
+    "main",
+    "collection_seo"
   ]
 }

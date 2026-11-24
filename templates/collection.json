@@ -576,12 +576,21 @@
         "padding-block-start": 8,
         "padding-block-end": 8
       }
+    },
+    "collection_seo": {
+      "type": "collection-seo",
+      "settings": {
+        "color_scheme": "scheme-1",
+        "padding-block-start": 24,
+        "padding-block-end": 40
+      }
     }
   },
   "order": [
     "section",
     "silo_header",
     "silo_nav",
-    "main"
+    "main",
+    "collection_seo"
   ]
 }
