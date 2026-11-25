@@ -1519,11 +1519,12 @@
     color: rgb(255 255 255 / 0.85);
   }
 
+  /* "SUPER LIKE = $25 OFF" on one line, phones included */
   .bm-intro__deal {
-    flex-wrap: wrap;
-    justify-content: center;
-    text-transform: uppercase;
-    font-size: clamp(30px, 9.5vw, 42px);
+    flex-direction: column;
+    gap: 6px;
+    font-size: clamp(24px, 7.4vw, 38px);
+    white-space: nowrap;
   }
 
   /* Gold foil type: a gold gradient with a light sweeping across it */
