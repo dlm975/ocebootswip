@@ -443,11 +443,13 @@
     flex: none;
   }
 
+  /* The logo image is white on black; inverted, as the header shows it, it's black on white */
   .bm-head__wordmark {
     display: inline-block;
     width: auto;
     height: 19px;
     vertical-align: -1px;
+    filter: invert(1);
   }
 
   .bm-head__wordmark-text {
