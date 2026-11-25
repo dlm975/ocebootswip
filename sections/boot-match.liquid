@@ -15,11 +15,11 @@
   and after a few likes it asks: continue matching, or see "your match": the boot that best fits everything liked so far,
   plus the liked boots, which can be saved to the wishlist in one tap.
 
-  Super Like: one per shopper, unlocked by leaving an email or mobile number (in the welcome or from
+  Super Like: one per shopper, unlocked by leaving an email address (in the welcome or from
   the star in the game). The boot they Super Like gets the reward (section setting, NZD; shown in
   the shopper's currency, rounded) with the discount code in the settings, claimed from the match
-  screen. Emails join the store's customers (marketing consent, tagged boot-match and super-like);
-  mobile numbers come to the store by the contact form.
+  screen. Each email joins the store's customers (marketing consent, tagged boot-match and
+  super-like). Email only: Shopify's theme sign-up form can't save a phone number to a customer.
 
   Welcome: on a shopper's first visit (or with ?bm-intro in the address), the page darkens and
   blurs, the mark pops up and flickers like a flame, and it offers the game, then the Super Like.
@@ -353,13 +353,13 @@
             <span>SUPER LIKE = <span class="bm-gold" data-bm-reward-text></span> OFF</span>
           </h2>
           <label class="bm-intro__field">
-            <span class="visually-hidden">Email or mobile number</span>
+            <span class="visually-hidden">Email address</span>
             <input
-              type="text"
+              type="email"
               name="contact"
               inputmode="email"
               autocomplete="email"
-              placeholder="Email or mobile number"
+              placeholder="Your email"
               data-bm-intro-input
               required
             >
@@ -373,22 +373,14 @@
         </form>
 
         {%- comment -%}
-          The sign-up goes through Shopify's own forms (an email joins the customers with marketing
-          consent, tagged; a mobile number comes to the store by the contact form), submitted into a
-          hidden frame so the shopper stays in the game
+          The sign-up goes through Shopify's own customer form (the email joins the customers with
+          marketing consent, tagged), submitted into a hidden frame so the shopper stays in the game
         {%- endcomment -%}
         <div class="bm-intro__forms" hidden>
           {%- form 'customer', id: 'bm-signup-email' -%}
             <input type="hidden" name="return_to" value="/cart.js">
             <input type="hidden" name="contact[tags]" value="boot-match,super-like,newsletter">
             <input type="email" name="contact[email]" tabindex="-1" autocomplete="off">
-          {%- endform -%}
-          {%- form 'contact', id: 'bm-signup-phone' -%}
-            <input type="hidden" name="return_to" value="/cart.js">
-            <input type="hidden" name="contact[name]" value="Boot Match Super Like">
-            <input type="hidden" name="contact[email]" value="{{ shop.email | escape }}">
-            <input type="tel" name="contact[phone]" tabindex="-1" autocomplete="off">
-            <textarea name="contact[body]" tabindex="-1"></textarea>
           {%- endform -%}
           <iframe name="bm-signup-sink" title="Sign-up" tabindex="-1"></iframe>
         </div>
@@ -4037,16 +4029,9 @@
     // Email: joins the store's customers (marketing consent, tagged); mobile: sent to the store.
     // Through Shopify's own forms, so its spam protection runs, into a hidden frame.
     function signUp(value) {
-      const isEmail = value.includes('@');
-      const form = document.getElementById(isEmail ? 'bm-signup-email' : 'bm-signup-phone');
+      const form = document.getElementById('bm-signup-email');
       if (!form) return Promise.resolve(false);
-      if (isEmail) {
-        form.querySelector('[name="contact[email]"]').value = value;
-      } else {
-        form.querySelector('[name="contact[phone]"]').value = value;
-        form.querySelector('[name="contact[body]"]').value =
-          'Boot Match Super Like sign-up by mobile: ' + value + '. Happy to hear from OCEBOOTS by text.';
-      }
+      form.querySelector('[name="contact[email]"]').value = value;
       form.target = 'bm-signup-sink';
       const sink = root.querySelector('iframe[name="bm-signup-sink"]');
       return new Promise((resolve) => {
@@ -4074,9 +4059,8 @@
       event.preventDefault();
       const value = introInput.value.trim();
       const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
-      const isPhone = /^\+?[\d\s().-]{8,}$/.test(value) && value.replace(/\D/g, '').length >= 8;
-      if (!isEmail && !isPhone) {
-        introError.textContent = 'Enter an email address or a mobile number.';
+      if (!isEmail) {
+        introError.textContent = 'Enter your email address.';
         introInput.focus();
         return;
       }
