@@ -1,20 +1,23 @@
 {%- doc -%}
   Boot Match: a swipe game that finds a shopper their boot. A round button (the flame-and-ball
-  mark) floats in the bottom-right corner; it opens a window that asks three things, then deals
+  mark) floats in the bottom-right corner; it opens a window that asks four things, then deals
   boots one at a time:
   1. Size: US, UK or EU (the same big type and number grid as the Shop by Size menu); one or more
      sizes, thirds counted with the nearest whole size (EU 41 takes in 40⅔ and 41⅓), or any size.
-  2. Price: a two-handled slider over a little chart of how many boots sit at each price, in the
+  2. Ground: firm grass, turf or soft grass (the collection filter's surface pictures), or any.
+  3. Price: a two-handled slider over a little chart of how many boots sit at each price, in the
      shopper's own currency (as the product cards show it).
-  3. Favourite silos (Mercurial, Predator...), as many as they like, as tiles with the silo pictures.
-  Only boots in stock that fit all three come up. Swipe right (or tap the heart) on ones you like,
+  4. Favourite silos: the brands in big type (as US / UK / EU), each opening a short list of its
+     silos to tick, as many as they like.
+  Only boots in stock that fit all four come up. Swipe right (or tap the heart) on ones you like,
   left (or the cross) on ones you don't; each swipe teaches it what you like within those silos:
   the silo, the line (Vapor, Superfly), the condition and the price. The next boots lean that way,
   and after a few likes it shows "your match": the boot that best fits everything liked so far,
   plus the liked boots, which can be saved to the wishlist in one tap.
 
-  - Boots come from a JSON feed (templates/collection.bootmatch.liquid), loaded only when the game
-    opens: the first 250 at once, the rest behind them.
+  - Boots come from a JSON feed (templates/collection.bootmatch.liquid), fetched when the shopper
+    reaches for the button (hover, touch or focus), so the window opens without waiting; the first
+    250 at once, the rest behind them.
   - The size and silos picked are remembered in this browser; nothing is sent anywhere.
   - Animations: Motion (the house timing); reduced motion: no flying or tilting, just changes.
 {%- enddoc -%}
@@ -71,7 +74,6 @@
 
         {%- comment -%} 1. Size, in the Shop by Size menu's style {%- endcomment -%}
         <div class="bm-screen bm-step" data-bm-screen="size">
-          <p class="bm-step__lead">{{ section.settings.intro | escape }}</p>
           <p class="bm-step__q">What size are you? <span class="bm-step__hint">Pick one or more</span></p>
           <div class="size-drill size-drill--drawer bm-sizepick" data-active>
             <ul class="size-drill__systems list-unstyled" role="list">
@@ -104,11 +106,49 @@
           </div>
           <div class="bm-step__foot">
             <button type="button" class="bm-link" data-bm-anysize>Any size</button>
+            <button type="button" class="bm-primary" data-bm-next="ground">Next</button>
+          </div>
+        </div>
+
+        {%- comment -%} 2. Ground: the collection filter's surface pictures {%- endcomment -%}
+        <div class="bm-screen bm-step" data-bm-screen="ground" hidden>
+          <p class="bm-step__q">What do you play on? <span class="bm-step__hint">Pick one or more</span></p>
+          <div class="bm-grounds" data-bm-grounds role="group" aria-label="Ground">
+            {%- for ground in (1..3) -%}
+              {%- liquid
+                case ground
+                  when 1
+                    assign ground_key = 'fg'
+                    assign ground_name = 'Firm grass'
+                    assign ground_code = 'FG'
+                  when 2
+                    assign ground_key = 'ag'
+                    assign ground_name = 'Turf'
+                    assign ground_code = 'AG'
+                  else
+                    assign ground_key = 'sg'
+                    assign ground_name = 'Soft grass'
+                    assign ground_code = 'SG'
+                endcase
+                assign ground_image = 'surface-' | append: ground_key | append: '.webp'
+              -%}
+              <button type="button" class="bm-ground" data-ground="{{ ground_key }}" aria-pressed="false">
+                <span class="bm-ground__media">
+                  <img src="{{ ground_image | asset_url }}" alt="" width="120" height="120">
+                  <span class="bm-ground__tick" aria-hidden="true">{%- render 'gicon', name: 'check', size: 18 -%}</span>
+                </span>
+                <span class="bm-ground__name">{{ ground_name }}</span>
+                <span class="bm-ground__code">{{ ground_code }} · <span data-bm-ground-count></span></span>
+              </button>
+            {%- endfor -%}
+          </div>
+          <div class="bm-step__foot">
+            <button type="button" class="bm-link" data-bm-anyground>Any ground</button>
             <button type="button" class="bm-primary" data-bm-next="price">Next</button>
           </div>
         </div>
 
-        {%- comment -%} 2. Price {%- endcomment -%}
+        {%- comment -%} 3. Price {%- endcomment -%}
         <div class="bm-screen bm-step" data-bm-screen="price" hidden>
           <p class="bm-step__q">What do you want to spend?</p>
           <p class="bm-price__value" data-bm-price-label aria-live="polite"></p>
@@ -127,25 +167,45 @@
           </div>
         </div>
 
-        {%- comment -%} 3. Favourite silos (as many as they like) {%- endcomment -%}
+        {%- comment -%} 4. Favourite silos: brands in big type (as US / UK / EU), each with its silos to tick {%- endcomment -%}
         <div class="bm-screen bm-step" data-bm-screen="silos" hidden>
-          <p class="bm-step__q">Pick your favourite silos</p>
+          <p class="bm-step__q">Favourite silos? <span class="bm-step__hint">Tick as many as you like</span></p>
+          <div class="size-drill size-drill--drawer bm-brandpick" data-active>
+            <ul class="size-drill__systems list-unstyled bm-brandpick__brands" role="list">
+              {%- assign bm_brands = 'Nike,Adidas,Puma,Mizuno' | split: ',' -%}
+              {%- for brand in bm_brands -%}
+                <li class="size-drill__system-item">
+                  <button
+                    type="button"
+                    class="size-drill__system"
+                    aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+                    data-bm-brand="{{ brand | downcase }}"
+                  >
+                    {{- brand -}}<span class="bm-brandpick__n" data-bm-brand-n></span>
+                  </button>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
           <div class="bm-silos" data-bm-silos role="group" aria-label="Favourite silos">
             {%- for entry in bm_silos -%}
               {%- assign bits = entry | split: '|' -%}
-              <button type="button" class="bm-silo" data-silo="{{ bits[0] }}" aria-pressed="false">
+              <button
+                type="button"
+                class="bm-silo"
+                data-silo="{{ bits[0] }}"
+                data-brand="{{ bits[2] | downcase }}"
+                aria-pressed="false"
+                {% unless bits[2] == 'Nike' %}hidden{% endunless %}
+              >
                 <span class="bm-silo__media">
-                  <img
-                    src="{{ bits[3] | file_img_url: '400x' }}"
-                    alt=""
-                    width="400"
-                    height="235"
-                    loading="lazy"
-                  >
+                  <img src="{{ bits[3] | file_img_url: '200x' }}" alt="" width="200" height="118" loading="lazy">
                 </span>
-                <span class="bm-silo__name">{{ bits[1] }}</span>
-                <span class="bm-silo__count" data-bm-silo-count></span>
-                <span class="bm-silo__badge" data-bm-silo-badge aria-hidden="true"></span>
+                <span class="bm-silo__text">
+                  <span class="bm-silo__name">{{ bits[1] }}</span>
+                  <span class="bm-silo__count" data-bm-silo-count></span>
+                </span>
+                <span class="bm-silo__tick" aria-hidden="true">{%- render 'gicon', name: 'check', size: 18 -%}</span>
               </button>
             {%- endfor -%}
           </div>
@@ -303,8 +363,9 @@
     position: absolute;
     inset: 0;
     background: rgb(8 8 8 / 0.62);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    will-change: opacity;
   }
 
   .bm-panel {
@@ -321,6 +382,8 @@
     box-shadow: 0 -10px 40px rgb(18 18 18 / 0.18);
     font-family: var(--font-body--family);
     overscroll-behavior: contain;
+    will-change: transform;
+    backface-visibility: hidden;
   }
 
   @media screen and (min-width: 750px) {
@@ -452,17 +515,10 @@
     color: rgb(18 18 18 / 0.5);
   }
 
-  .bm-step__lead {
-    margin: 0 0 14px;
-    font-size: 15px;
-    line-height: 1.45;
-    color: rgb(18 18 18 / 0.75);
-  }
-
   .bm-step__q {
-    margin: 0 0 12px;
+    margin: 4px 0 16px;
     font-family: var(--font-heading--family);
-    font-size: 24px;
+    font-size: 32px;
     font-weight: 800;
     line-height: 1.1;
     letter-spacing: -0.02em;
@@ -470,9 +526,9 @@
 
   .bm-step__hint {
     display: block;
-    margin-top: 4px;
+    margin-top: 6px;
     font-family: var(--font-body--family);
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 600;
     letter-spacing: 0;
     color: rgb(18 18 18 / 0.5);
@@ -665,52 +721,155 @@
     outline-offset: 2px;
   }
 
-  /* Silos: picture tiles, numbered in the order picked */
-  .bm-silos {
+  /* Ground: three pictures with bold names */
+  .bm-grounds {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    align-content: start;
-    padding: 2px;
+    gap: 10px;
   }
 
-  .bm-silo {
-    position: relative;
+  .bm-ground {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 1px;
-    padding: 6px 6px 8px;
+    gap: 2px;
+    padding: 0;
     border: 0;
-    border-radius: 14px;
-    background: #ffffff;
-    box-shadow: 0 0 0 1px rgb(18 18 18 / 0.1);
+    background: none;
     color: #121212;
     font: inherit;
     text-align: left;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: box-shadow 0.18s, opacity 0.18s;
   }
 
-  .bm-silo[aria-pressed='true'] {
-    box-shadow: 0 0 0 2.5px #121212;
+  .bm-ground__media {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    margin-bottom: 8px;
+    overflow: hidden;
+    border-radius: 16px;
+    box-shadow: 0 0 0 0 #121212;
+    transition: box-shadow 0.18s;
+  }
+
+  .bm-ground__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .bm-ground[aria-pressed='true'] .bm-ground__media {
+    box-shadow: 0 0 0 3px #121212;
+  }
+
+  .bm-ground__name {
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .bm-ground__code {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgb(18 18 18 / 0.5);
+  }
+
+  .bm-ground__tick,
+  .bm-silo__tick {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    color: transparent;
+    transition: background-color 0.18s, color 0.18s, box-shadow 0.18s;
+  }
+
+  .bm-ground__tick {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgb(255 255 255 / 0.85);
+  }
+
+  .bm-ground[aria-pressed='true'] .bm-ground__tick,
+  .bm-silo[aria-pressed='true'] .bm-silo__tick {
+    background: #121212;
+    color: #ffffff;
+  }
+
+  .bm-ground:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  /* Silos: the brands in big type (as US / UK / EU), the chosen brand's silos as a short list */
+  .bm .bm-brandpick {
+    padding-block: 0 6px;
+  }
+
+  .bm .bm-brandpick .size-drill__systems {
+    gap: 0 18px;
+    flex-wrap: wrap;
+  }
+
+  .bm .bm-brandpick .size-drill__system {
+    font-size: 34px;
+  }
+
+  .bm-brandpick__n {
+    align-self: flex-start;
+    margin-inline-start: 2px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  .bm-silos {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .bm-silo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    min-height: 64px;
+    padding: 8px 2px;
+    border: 0;
+    border-bottom: 1px solid rgb(18 18 18 / 0.08);
+    background: none;
+    color: #121212;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .bm-silo[hidden] {
+    display: none;
   }
 
   .bm-silo:disabled {
-    opacity: 0.3;
+    opacity: 0.35;
     cursor: default;
   }
 
   .bm-silo__media {
+    flex: none;
     display: block;
-    width: 100%;
-    aspect-ratio: 1.7;
-    margin-bottom: 4px;
+    width: 72px;
+    height: 42px;
   }
 
   .bm-silo__media img {
@@ -720,36 +879,34 @@
     object-fit: contain;
   }
 
+  .bm-silo__text {
+    display: flex;
+    flex: 1;
+    align-items: baseline;
+    gap: 6px;
+    min-width: 0;
+  }
+
   .bm-silo__name {
-    font-size: 14px;
+    font-size: 22px;
     font-weight: 800;
-    line-height: 1.15;
-    letter-spacing: -0.01em;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
   }
 
   .bm-silo__count {
-    font-size: 11px;
-    font-weight: 500;
-    color: rgb(18 18 18 / 0.55);
-  }
-
-  .bm-silo__badge {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    display: grid;
-    place-items: center;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: #121212;
-    color: #ffffff;
     font-size: 12px;
-    font-weight: 800;
+    font-weight: 600;
+    color: rgb(18 18 18 / 0.5);
   }
 
-  .bm-silo__badge:empty {
-    display: none;
+  .bm-silo__tick {
+    flex: none;
+    box-shadow: inset 0 0 0 2px rgb(18 18 18 / 0.2);
+  }
+
+  .bm-silo[aria-pressed='true'] .bm-silo__tick {
+    box-shadow: none;
   }
 
   /* ---- 4. The deck ---- */
@@ -1203,6 +1360,16 @@
       return set;
     }
 
+    // FG (and HG) is firm grass, AG and TF are turf, SG is soft grass; FG/AG counts for both
+    function groundsOf(title) {
+      const text = ' ' + String(title).toUpperCase().replace(/[-\/]/g, ' ') + ' ';
+      const found = [];
+      if (/ (FG|HG) /.test(text)) found.push('fg');
+      if (/ (AG|TF) /.test(text)) found.push('ag');
+      if (/ SG /.test(text)) found.push('sg');
+      return found;
+    }
+
     function prepare(item) {
       const brand = (item.t.split(' ')[0] || '').toLowerCase();
       const units = (item.p || 0) / 100;
@@ -1217,6 +1384,7 @@
         off: item.o || 0,
         sale: item.o > 0 ? 'yes' : 'no',
         labels: item.s || [],
+        grounds: groundsOf(item.t),
         sizes: (item.s || []).map(sizeSet),
         condition: item.k || '',
         silo: siloOf(item.g) || brand,
@@ -1264,6 +1432,7 @@
     let priceLo = null;
     let priceHi = null;
     let picked = (store.get('oce-bm-silos') || '').split(',').filter(Boolean);
+    let grounds = (store.get('oce-bm-grounds') || '').split(',').filter(Boolean);
 
     function numeric(value) {
       const [whole, fraction] = String(value).split(' ');
@@ -1289,7 +1458,9 @@
     const inSize = (boot) => !sizeValues.length || boot.sizes.some(sizeIn);
     const inPrice = (boot) => (priceLo === null || boot.units >= priceLo) && (priceHi === null || boot.units <= priceHi);
     const inSilos = (boot) => !picked.length || picked.includes(boot.silo);
-    const eligible = (boot) => inSize(boot) && inPrice(boot) && inSilos(boot);
+    // Ground: a boot whose soleplate isn't named in its title counts for any ground
+    const inGround = (boot) => !grounds.length || !boot.grounds.length || grounds.some((ground) => boot.grounds.includes(ground));
+    const eligible = (boot) => inSize(boot) && inGround(boot) && inPrice(boot) && inSilos(boot);
 
     const pretty = (key) => String(key).replace('.5', '½');
     const sizeText = () => sizeValues.map((key) => system + ' ' + pretty(key)).join(', ');
@@ -1401,7 +1572,37 @@
       go('price');
     });
 
-    /* 2. Price: a slider over a chart of how many boots sit at each price */
+    /* 2. Ground */
+    function renderGrounds() {
+      $$('.bm-ground').forEach((tile) => {
+        const key = tile.dataset.ground;
+        const n = boots.filter((boot) => inSize(boot) && boot.grounds.includes(key)).length;
+        tile.setAttribute('aria-pressed', String(grounds.includes(key)));
+        tile.disabled = fullyLoaded && n === 0 && !grounds.includes(key);
+        tile.querySelector('[data-bm-ground-count]').textContent = boots.length ? n + (n === 1 ? ' boot' : ' boots') : '…';
+      });
+      $('[data-bm-anyground]').setAttribute('aria-pressed', String(!grounds.length));
+    }
+
+    $('[data-bm-grounds]').addEventListener('click', (event) => {
+      const tile = event.target.closest('.bm-ground');
+      if (!tile || tile.disabled) return;
+      const key = tile.dataset.ground;
+      grounds = grounds.includes(key) ? grounds.filter((other) => other !== key) : grounds.concat(key);
+      store.set('oce-bm-grounds', grounds.join(','));
+      if (!reduced() && grounds.includes(key)) {
+        animate(tile.querySelector('.bm-ground__media'), { transform: ['scale(0.95)', 'none'] }, { type: spring, visualDuration: 0.3, bounce: 0.4 });
+      }
+      renderGrounds();
+    });
+
+    $('[data-bm-anyground]').addEventListener('click', () => {
+      grounds = [];
+      store.set('oce-bm-grounds', '');
+      go('price');
+    });
+
+    /* 3. Price: a slider over a chart of how many boots sit at each price */
     const minInput = $('[data-bm-min]');
     const maxInput = $('[data-bm-max]');
     const fillEl = $('[data-bm-fill]');
@@ -1410,7 +1611,7 @@
     let bounds = { lo: 0, hi: 0, step: 10 };
 
     function renderPrice() {
-      const pool = boots.filter(inSize);
+      const pool = boots.filter((boot) => inSize(boot) && inGround(boot));
       const prices = pool.map((boot) => boot.units).filter((n) => n > 0);
       if (!prices.length) {
         $('[data-bm-price-label]').textContent = boots.length ? 'No boots in that size yet' : 'Loading…';
@@ -1473,7 +1674,7 @@
       });
       $('[data-bm-price-label]').textContent =
         money(low) + ' – ' + money(high) + (priceHi === null ? '+' : '') + (CURRENCY ? ' ' + CURRENCY : '');
-      const count = boots.filter((boot) => inSize(boot) && inPrice(boot)).length;
+      const count = boots.filter((boot) => inSize(boot) && inGround(boot) && inPrice(boot)).length;
       $('[data-bm-price-count]').textContent =
         count + (count === 1 ? ' boot' : ' boots') + (sizeValues.length ? ' in ' + sizeText() : '') + ' at this price';
       $('[data-bm-next="silos"]').disabled = count === 0;
@@ -1482,27 +1683,68 @@
     minInput.addEventListener('input', updatePrice);
     maxInput.addEventListener('input', updatePrice);
 
-    /* 3. Favourite silos, as many as they like */
+    /* 4. Favourite silos: one brand's silos at a time */
     const silosEl = $('[data-bm-silos]');
+    let brand = '';
+
+    function showBrand(next, animated) {
+      brand = next;
+      $$('[data-bm-brand]').forEach((button) => button.setAttribute('aria-expanded', String(button.dataset.bmBrand === brand)));
+      $$('.bm-silo').forEach((row) => {
+        row.hidden = row.dataset.brand !== brand;
+      });
+      silosEl.scrollTop = 0;
+      if (animated && !reduced()) {
+        animate(silosEl, { opacity: [0, 1], transform: ['translateY(-12px)', 'none'] }, { duration: 0.55, ease: EASE });
+      }
+    }
 
     function renderSilos() {
       const counts = new Map();
       boots.forEach((boot) => {
-        if (inSize(boot) && inPrice(boot)) counts.set(boot.silo, (counts.get(boot.silo) || 0) + 1);
+        if (inSize(boot) && inGround(boot) && inPrice(boot)) counts.set(boot.silo, (counts.get(boot.silo) || 0) + 1);
       });
       if (fullyLoaded) picked = picked.filter((silo) => counts.get(silo));
-      $$('.bm-silo').forEach((tile) => {
-        const n = counts.get(tile.dataset.silo) || 0;
-        const order = picked.indexOf(tile.dataset.silo);
-        tile.setAttribute('aria-pressed', String(order >= 0));
-        tile.disabled = n === 0 && order < 0 && fullyLoaded;
-        tile.querySelector('[data-bm-silo-count]').textContent = n ? n + (n === 1 ? ' boot' : ' boots') : fullyLoaded ? 'None in range' : '…';
-        tile.querySelector('[data-bm-silo-badge]').textContent = order >= 0 ? String(order + 1) : '';
+      const perBrand = new Map();
+      $$('.bm-silo').forEach((row) => {
+        const n = counts.get(row.dataset.silo) || 0;
+        const on = picked.includes(row.dataset.silo);
+        row.setAttribute('aria-pressed', String(on));
+        row.disabled = n === 0 && !on && fullyLoaded;
+        row.querySelector('[data-bm-silo-count]').textContent = n ? String(n) : fullyLoaded ? 'none' : '…';
+        if (on) perBrand.set(row.dataset.brand, (perBrand.get(row.dataset.brand) || 0) + 1);
       });
+      $$('[data-bm-brand]').forEach((button) => {
+        const n = perBrand.get(button.dataset.bmBrand) || 0;
+        button.querySelector('[data-bm-brand-n]').textContent = n ? String(n) : '';
+      });
+      // Open on the brand of their first pick, or the brand with the most boots
+      if (!brand) {
+        const first = picked[0] ? picked[0].split('-')[0] : '';
+        let most = 'nike';
+        let mostN = -1;
+        ['nike', 'adidas', 'puma', 'mizuno'].forEach((name) => {
+          let n = 0;
+          counts.forEach((count, silo) => {
+            if (silo.startsWith(name + '-')) n += count;
+          });
+          if (n > mostN) {
+            mostN = n;
+            most = name;
+          }
+        });
+        showBrand(first || most, false);
+      }
       const start = $('[data-bm-start]');
-      start.textContent = picked.length ? 'Start swiping' : 'Pick a silo';
+      start.textContent = picked.length ? 'Start swiping' : 'Tick a silo';
       start.disabled = !picked.length;
     }
+
+    $$('[data-bm-brand]').forEach((button) => {
+      button.addEventListener('click', () => {
+        if (button.dataset.bmBrand !== brand) showBrand(button.dataset.bmBrand, true);
+      });
+    });
 
     silosEl.addEventListener('click', (event) => {
       const tile = event.target.closest('.bm-silo');
@@ -1512,7 +1754,7 @@
         picked = picked.filter((other) => other !== silo);
       } else {
         picked.push(silo);
-        if (!reduced()) animate(tile, { transform: ['scale(0.94)', 'none'] }, { type: spring, visualDuration: 0.3, bounce: 0.4 });
+        if (!reduced()) animate(tile.querySelector('.bm-silo__tick'), { transform: ['scale(0.6)', 'none'] }, { type: spring, visualDuration: 0.3, bounce: 0.45 });
       }
       store.set('oce-bm-silos', picked.join(','));
       renderSilos();
@@ -1571,7 +1813,8 @@
 
     function nearest(exclude) {
       const open = (boot) => inSize(boot) && !seen.has(boot.handle) && !exclude.has(boot.handle);
-      let pool = boots.filter((boot) => open(boot) && inPrice(boot));
+      let pool = boots.filter((boot) => open(boot) && inGround(boot) && inPrice(boot));
+      if (!pool.length) pool = boots.filter((boot) => open(boot) && inGround(boot));
       if (!pool.length) pool = boots.filter(open);
       if (!pool.length) return null;
       const brands = pickedBrands();
@@ -1671,7 +1914,10 @@
       media.appendChild(img);
 
       const info = el('div', 'bm-card__info');
-      if (!eligible(boot)) info.appendChild(el('p', 'bm-card__note', inPrice(boot) ? 'Outside your silos · close to what you like' : 'Outside your price · close to what you like'));
+      if (!eligible(boot)) {
+        const why = !inGround(boot) ? 'Other ground' : !inPrice(boot) ? 'Outside your price' : 'Outside your silos';
+        info.appendChild(el('p', 'bm-card__note', why + ' · close to what you like'));
+      }
       info.append(el('h3', 'bm-card__name', boot.title), el('p', 'bm-card__meta', metaText(boot)), priceLine(boot, 'bm-card__price'));
 
       const like = el('span', 'bm-stamp bm-stamp--like', 'LOVE');
@@ -1899,17 +2145,18 @@
     });
 
     /* ---------- Screens ---------- */
-    const STEPS = { size: '1/3', price: '2/3', silos: '3/3' };
-    const BACK = { price: 'size', silos: 'price', play: 'silos' };
+    const STEPS = { size: '1/4', ground: '2/4', price: '3/4', silos: '4/4' };
+    const BACK = { ground: 'size', price: 'ground', silos: 'price', play: 'silos' };
     let screen = 'size';
 
     function render(name) {
       if (name === 'size') renderSizes(false);
+      if (name === 'ground') renderGrounds();
       if (name === 'price') renderPrice();
       if (name === 'silos') renderSilos();
     }
 
-    function go(name) {
+    function go(name, quiet) {
       screen = name;
       $$('[data-bm-screen]').forEach((node) => {
         node.hidden = node.dataset.bmScreen !== name;
@@ -1918,12 +2165,20 @@
       backBtn.hidden = !BACK[name];
       render(name);
       const node = $('[data-bm-screen="' + name + '"]');
-      if (!reduced()) animate(node, { opacity: [0, 1], transform: ['translateX(16px)', 'none'] }, { duration: 0.4, ease: EASE });
+      if (!quiet && !reduced()) animate(node, { opacity: [0, 1], transform: ['translateX(16px)', 'none'] }, { duration: 0.4, ease: EASE });
     }
+
+    // Boots arriving while the window is still sliding in wait until it has settled
+    let opening = null;
 
     function refresh() {
       if (!dlg.open) return;
+      if (opening) {
+        opening.then(refresh);
+        return;
+      }
       if (screen === 'size') renderSizes(false);
+      if (screen === 'ground') renderGrounds();
       if (screen === 'price') renderPrice();
       if (screen === 'silos') renderSilos();
       if (screen === 'play' && cards().length < 3) fill();
@@ -2034,21 +2289,60 @@
     /* ---------- Opening and closing ---------- */
     let closing = false;
 
+    // Fetch the boots as soon as the shopper reaches for the button, so they're ready on open
+    const launch = $('[data-bm-open]');
+    const warm = () => {
+      if (!boots.length) load().then(refresh).catch(() => {});
+    };
+    ['pointerenter', 'touchstart', 'focus'].forEach((type) => launch.addEventListener(type, warm, { passive: true, once: true }));
+
+    function lockPage(lock) {
+      const html = document.documentElement;
+      if (lock) {
+        // Keep the page where it is: make up for the scrollbar that hiding overflow removes
+        const bar = window.innerWidth - html.clientWidth;
+        html.style.overflow = 'hidden';
+        if (bar > 0) html.style.paddingRight = bar + 'px';
+      } else {
+        html.style.overflow = '';
+        html.style.paddingRight = '';
+      }
+    }
+
     function open() {
       hideTip();
       if (dlg.open) return;
-      dlg.showModal();
-      document.documentElement.style.overflow = 'hidden';
-      if (!boots.length) load().then(refresh).catch(() => {});
-      if (screen !== 'play' && screen !== 'match') go('size');
+      // Everything is in place before the window shows, so nothing redraws while it moves
+      if (screen !== 'play' && screen !== 'match') go('size', true);
+      warm();
       if (!reduced()) {
-        animate(scrim, { opacity: [0, 1] }, { duration: 0.3 });
-        animate(
-          panel,
-          desktop() ? { opacity: [0, 1], transform: ['translateY(16px) scale(0.92)', 'none'] } : { transform: ['translateY(100%)', 'none'] },
-          { duration: 0.55, ease: EASE }
-        );
+        scrim.style.opacity = '0';
+        panel.style.transform = desktop() ? 'translateY(16px) scale(0.92)' : 'translateY(100%)';
+        if (desktop()) panel.style.opacity = '0';
       }
+      dlg.showModal();
+      lockPage(true);
+      if (reduced()) return;
+      // Start on the next frame, once the window is laid out, so the first frame isn't skipped
+      opening = new Promise((resolve) => {
+        requestAnimationFrame(() => {
+          const moves = [
+            animate(scrim, { opacity: [0, 1] }, { duration: 0.35, ease: 'linear' }),
+            animate(
+              panel,
+              desktop() ? { opacity: [0, 1], transform: ['translateY(16px) scale(0.92)', 'none'] } : { transform: ['translateY(100%)', 'none'] },
+              { duration: 0.55, ease: EASE }
+            ),
+          ];
+          Promise.all(moves.map((move) => move.finished)).then(() => {
+            scrim.style.opacity = '';
+            panel.style.transform = '';
+            panel.style.opacity = '';
+            opening = null;
+            resolve();
+          });
+        });
+      });
     }
 
     function close() {
@@ -2056,7 +2350,7 @@
       closing = true;
       const finish = () => {
         dlg.close();
-        document.documentElement.style.overflow = '';
+        lockPage(false);
         closing = false;
         panel.style.transform = '';
         panel.style.opacity = '';
@@ -2078,7 +2372,7 @@
       });
     }
 
-    $('[data-bm-open]').addEventListener('click', open);
+    launch.addEventListener('click', open);
     $$('[data-bm-close]').forEach((button) => button.addEventListener('click', close));
     dlg.addEventListener('cancel', (event) => {
       event.preventDefault();
@@ -2120,12 +2414,6 @@
       "id": "tip",
       "label": "First-visit hint beside the button",
       "default": "Find your boot match"
-    },
-    {
-      "type": "textarea",
-      "id": "intro",
-      "label": "Intro",
-      "default": "Three quick questions, then swipe right on boots you love and left on the ones you don’t. After a few likes we’ll find your perfect match."
     },
     {
       "type": "range",
