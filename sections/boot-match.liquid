@@ -2469,8 +2469,15 @@
 
     /* The Super Like reward in the shopper's market currency (the cart's currency, which follows
        their market), always with its code. Shopify converts the NZD discount at its own rate at
-       checkout, so the game shows exactly that (e.g. $12.69 AUD), never a rounded figure that
-       checkout wouldn't honour */
+       checkout; the game shows that rounded DOWN to a clean figure (steps of 0.5 for small
+       amounts, 5, 50... for bigger ones: $12.69 AUD -> $12.50, £6.39 -> £6, ¥1,327 -> ¥1,300),
+       so checkout always takes off at least what was promised */
+    function cleanDown(value) {
+      if (value <= 0) return 0;
+      const step = Math.max(0.5, 5 * Math.pow(10, Math.floor(Math.log10(value)) - 2));
+      return Math.floor(value / step + 1e-9) * step;
+    }
+
     const REWARD = Number(root.dataset.reward) || 15;
     const CODE = root.dataset.code || '';
 
@@ -2478,7 +2485,7 @@
       const currency = CURRENCY || 'NZD';
       if (currency === 'NZD') return REWARD;
       const rate = Number(window.Shopify && window.Shopify.currency && window.Shopify.currency.rate) || 1;
-      return Math.round(REWARD * rate * 100) / 100;
+      return cleanDown(REWARD * rate);
     }
 
     // "$25 NZD", "$15 USD", "£10 GBP", "¥2,000 JPY"
@@ -4234,7 +4241,7 @@
       "type": "number",
       "id": "reward_amount",
       "label": "Super Like reward (NZD)",
-      "info": "Shown in NZD in New Zealand; elsewhere converted at Shopify's rate, exactly as checkout converts the discount. Must match the discount code's amount.",
+      "info": "Shown in NZD in New Zealand; elsewhere converted at Shopify's rate and rounded down to a clean figure (checkout takes off at least that). Must match the discount code's amount.",
       "default": 15
     },
     {
