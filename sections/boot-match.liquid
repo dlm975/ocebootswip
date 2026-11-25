@@ -490,6 +490,11 @@
     color: #121212;
   }
 
+  .bm-dlg,
+  .bm-intro {
+    overscroll-behavior: none;
+  }
+
   .bm-dlg::backdrop {
     background: transparent;
   }
@@ -3417,16 +3422,40 @@
     };
     ['pointerenter', 'touchstart', 'focus'].forEach((type) => launch.addEventListener(type, warm, { passive: true, once: true }));
 
+    // Hold the page still while Boot Match is open. Hiding overflow isn't enough on iPhone Safari:
+    // a swipe inside the window still scrolls (rubber-bands) the page behind, and Safari drags the
+    // whole on-top layer with it. So the body is pinned where it is (position: fixed, offset by the
+    // scroll), and put back exactly there on close.
+    let lockedAt = null;
+
     function lockPage(lock) {
       const html = document.documentElement;
+      const body = document.body;
       if (lock) {
-        // Keep the page where it is: make up for the scrollbar that hiding overflow removes
+        if (lockedAt !== null) return;
+        lockedAt = window.scrollY;
         const bar = window.innerWidth - html.clientWidth;
         html.style.overflow = 'hidden';
+        html.style.overscrollBehavior = 'none';
         if (bar > 0) html.style.paddingRight = bar + 'px';
+        body.style.position = 'fixed';
+        body.style.top = -lockedAt + 'px';
+        body.style.left = '0';
+        body.style.right = '0';
+        body.style.width = '100%';
       } else {
+        if (lockedAt === null) return;
+        const y = lockedAt;
+        lockedAt = null;
         html.style.overflow = '';
+        html.style.overscrollBehavior = '';
         html.style.paddingRight = '';
+        body.style.position = '';
+        body.style.top = '';
+        body.style.left = '';
+        body.style.right = '';
+        body.style.width = '';
+        window.scrollTo({ top: y, behavior: 'instant' });
       }
     }
 
