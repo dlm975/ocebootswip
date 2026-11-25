@@ -1493,7 +1493,7 @@
     reset();
 
     // How much each thing counts. Liking sale boots raises "sale" and pulls the price band down,
-    // so a shopper who keeps liking sale boots is shown more sale boots and cheaper ones.
+    // so a shopper who keeps liking sale boots is shown more sale boots, and cheaper ones.
     const WEIGHTS = { silo: 3, line: 1.5, brand: 1, condition: 0.8, band: 1, sale: 1.4 };
 
     function learn(boot, amount) {
