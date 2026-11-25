@@ -232,6 +232,16 @@
         <div class="bm-screen bm-play" data-bm-screen="play" hidden>
           <p class="bm-status" data-bm-status aria-live="polite"></p>
           <div class="bm-deck" data-bm-deck></div>
+          <div class="bm-ask" data-bm-ask hidden>
+            <div class="bm-ask__card" role="dialog" aria-modal="false" aria-labelledby="bm-ask-title-{{ section.id }}">
+              <p class="bm-ask__title" id="bm-ask-title-{{ section.id }}" data-bm-ask-title></p>
+              <p class="bm-ask__text">See your match now, or keep swiping to sharpen it.</p>
+              <div class="bm-ask__buttons">
+                <button type="button" class="bm-secondary" data-bm-keep>Continue matching</button>
+                <button type="button" class="bm-primary" data-bm-shop>Shop now</button>
+              </div>
+            </div>
+          </div>
           <div class="bm-actions">
             <button type="button" class="bm-round bm-round--small" data-bm-undo aria-label="Undo last swipe" disabled>
               {%- render 'gicon', name: 'undo', size: 22 -%}
@@ -1059,6 +1069,61 @@
     font-weight: 600;
     text-align: center;
     color: rgb(18 18 18 / 0.6);
+  }
+
+  /* The question after a few likes: over the cards, at the bottom of the window */
+  .bm-play {
+    position: relative;
+  }
+
+  .bm-ask {
+    position: absolute;
+    inset: -4px;
+    z-index: 20;
+    display: flex;
+    align-items: flex-end;
+    padding: 8px 4px 4px;
+    border-radius: 18px;
+    background: rgb(255 255 255 / 0.72);
+  }
+
+  .bm-ask[hidden] {
+    display: none;
+  }
+
+  .bm-ask__card {
+    width: 100%;
+    padding: 18px 16px 16px;
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 0 0 1px rgb(18 18 18 / 0.06), 0 16px 40px rgb(18 18 18 / 0.18);
+    text-align: center;
+  }
+
+  .bm-ask__title {
+    margin: 0 0 6px;
+    font-family: var(--font-heading--family);
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .bm-ask__text {
+    margin: 0 0 14px;
+    font-size: 15px;
+    color: rgb(18 18 18 / 0.65);
+  }
+
+  .bm-ask__buttons {
+    display: flex;
+    gap: 8px;
+  }
+
+  .bm-ask__buttons > * {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 12px;
+    white-space: nowrap;
   }
 
   .bm-deck {
@@ -2220,7 +2285,7 @@
           ? 'Swipe right on boots you love'
           : left > 0
             ? left + (left === 1 ? ' more like' : ' more likes') + ' to find your match'
-            : 'Finding your match…';
+            : 'Your match is ready';
     }
 
     /* ---------- Swiping ---------- */
@@ -2240,10 +2305,50 @@
       updateStatus();
     }
 
+    // Enough likes (or a long run of swipes with some): ask, rather than ending the game
+    let askedAt = 0;
+    const askEl = $('[data-bm-ask]');
+    const asking = () => !askEl.hidden;
+
     function afterDecision() {
-      if (liked.length >= target || (swipes >= MAX_SWIPES && liked.length > 0)) showMatch();
-      else fill();
+      fill();
+      const ready = liked.length >= target || (swipes >= askedAt + MAX_SWIPES && liked.length > 0);
+      if (ready) ask();
     }
+
+    function ask() {
+      askedAt = swipes;
+      $('[data-bm-ask-title]').textContent = 'You’ve liked ' + liked.length + (liked.length === 1 ? ' boot' : ' boots');
+      askEl.hidden = false;
+      if (!reduced()) {
+        animate(askEl, { opacity: [0, 1] }, { duration: 0.25 });
+        animate($('.bm-ask__card'), { transform: ['translateY(24px)', 'none'], opacity: [0, 1] }, { duration: 0.55, ease: EASE });
+      }
+      $('[data-bm-shop]').focus({ preventScroll: true });
+    }
+
+    function unask() {
+      if (!asking()) return;
+      if (reduced()) {
+        askEl.hidden = true;
+        return;
+      }
+      animate(askEl, { opacity: 0 }, { duration: 0.2 }).finished.then(() => {
+        askEl.hidden = true;
+        askEl.style.opacity = '';
+      });
+    }
+
+    $('[data-bm-keep]').addEventListener('click', () => {
+      target = liked.length + 3;
+      unask();
+      updateStatus();
+    });
+
+    $('[data-bm-shop]').addEventListener('click', () => {
+      askEl.hidden = true;
+      showMatch();
+    });
 
     function stamps(card, x) {
       const amount = Math.max(-1, Math.min(1, x / 110));
@@ -2283,6 +2388,7 @@
     }
 
     function choose(liking) {
+      if (asking()) return;
       if (flying) flying.complete();
       const card = cards()[0];
       if (card && card._boot) fling(card, liking);
@@ -2321,7 +2427,7 @@
 
     deck.addEventListener('pointerdown', (event) => {
       const card = event.target.closest('.bm-card.is-top');
-      if (!card || !card._boot || event.button > 0) return;
+      if (!card || !card._boot || event.button > 0 || asking()) return;
       if (flying) flying.complete();
       card.getAnimations().forEach((animation) => animation.cancel());
       card.setPointerCapture(event.pointerId);
@@ -2424,6 +2530,8 @@
 
     async function start() {
       reset();
+      askedAt = 0;
+      askEl.hidden = true;
       deck.replaceChildren();
       go('play');
       if (!boots.length) {
@@ -2499,6 +2607,8 @@
 
     $('[data-bm-again]').addEventListener('click', () => {
       target = liked.length + 3;
+      askedAt = swipes;
+      askEl.hidden = true;
       go('play');
       fill();
     });
