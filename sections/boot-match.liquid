@@ -301,10 +301,11 @@
             <a class="bm-result__card" data-bm-match-link href="#">
               <span class="bm-result__media"><img data-bm-match-img alt="" width="640" height="640"></span>
               <span class="bm-result__info">
-                <span class="bm-result__name" data-bm-match-title></span>
+                <span class="bm-result__supertag" data-bm-match-supertag hidden>{{ bm_gold }} Super Like</span>
                 <span class="bm-result__meta" data-bm-match-meta></span>
                 <span class="bm-result__price" data-bm-match-price></span>
               </span>
+              <span class="bm-result__name" data-bm-match-title></span>
             </a>
             <div class="bm-likes" data-bm-likes-wrap hidden>
               <div class="bm-likes__head">
@@ -2112,6 +2113,81 @@
     font-weight: 700;
   }
 
+  /* The match card: photo left, condition, size and price right, the name underneath both.
+     Compact, so the card, two rows of liked boots and the buttons all fit */
+  .bm-result .bm-result__card {
+    display: grid;
+    grid-template-columns: 46% minmax(0, 1fr);
+    grid-template-areas:
+      'media info'
+      'name name';
+    transition: box-shadow 0.3s;
+  }
+
+  .bm-result .bm-result__media {
+    grid-area: media;
+    height: clamp(104px, 17svh, 150px);
+    padding: 8px;
+  }
+
+  .bm-result .bm-result__info {
+    grid-area: info;
+    align-self: center;
+    gap: 4px;
+    padding: 10px 14px 10px 4px;
+    border-top: 0;
+  }
+
+  .bm-result .bm-result__meta {
+    white-space: pre-line;
+    line-height: 1.35;
+  }
+
+  .bm-result .bm-result__price {
+    line-height: 1.25;
+  }
+
+  .bm-result .bm-result__name {
+    grid-area: name;
+    padding: 10px 14px 12px;
+    border-top: 1px solid rgb(18 18 18 / 0.06);
+  }
+
+  .bm-result__supertag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #a86f00;
+  }
+
+  .bm-result__supertag[hidden] {
+    display: none;
+  }
+
+  .bm-result__supertag .bm-goldmark {
+    width: 16px;
+  }
+
+  /* The Super Liked boot glows gold */
+  .bm-result .bm-result__card.is-super {
+    box-shadow:
+      0 0 0 2px #e0a514,
+      0 0 22px rgb(255 190 50 / 0.65),
+      0 10px 30px rgb(18 18 18 / 0.12);
+  }
+
+  .bm-like-thumb.is-super {
+    box-shadow: 0 0 0 2px #e0a514, 0 0 10px rgb(255 190 50 / 0.6);
+  }
+
+  .bm-like-thumb.is-super[aria-pressed='true'] {
+    box-shadow: 0 0 0 3px #c98a05, 0 0 12px rgb(255 190 50 / 0.7);
+  }
+
   .bm-result__buttons {
     display: flex;
     gap: 8px;
@@ -2140,18 +2216,25 @@
     gap: 12px;
   }
 
-  /* Two rows of liked boots, scrolling sideways when there are more */
+  /* Liked boots four across: one row up to four, a second row past four (all eight in view);
+     past eight, the two rows scroll sideways */
   .bm-likes__row {
     display: grid;
-    grid-auto-flow: column;
-    grid-template-rows: repeat(2, 62px);
-    grid-auto-columns: 80px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: 58px;
     gap: 8px;
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow: hidden;
     padding: 4px;
     margin: 0 -4px;
     scrollbar-width: none;
+  }
+
+  .bm-likes__row.is-many {
+    grid-template-columns: none;
+    grid-template-rows: repeat(2, 58px);
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - 24px) / 4);
+    overflow-x: auto;
   }
 
   .bm-likes__row::-webkit-scrollbar {
@@ -2167,8 +2250,8 @@
     appearance: none;
     -webkit-tap-highlight-color: transparent;
     transition: box-shadow 0.18s;
-    width: 80px;
-    height: 62px;
+    width: 100%;
+    height: 58px;
     padding: 5px;
     border-radius: 12px;
     background: #ffffff;
@@ -3410,8 +3493,12 @@
       img.src = boot.image;
       img.alt = boot.title;
       $('[data-bm-match-title]').textContent = boot.title;
-      $('[data-bm-match-meta]').textContent = metaText(boot);
+      // Condition on one line, the sizes on the next
+      $('[data-bm-match-meta]').textContent = metaText(boot).replace(' · ', '\n');
       $('[data-bm-match-price]').replaceChildren(...priceLine(boot, '').childNodes);
+      const isSuper = superState().handle === boot.handle;
+      $('[data-bm-match-link]').classList.toggle('is-super', isSuper);
+      $('[data-bm-match-supertag]').hidden = !isSuper;
       $$('.bm-like-thumb').forEach((thumb) => thumb.setAttribute('aria-pressed', String(thumb.dataset.handle === boot.handle)));
       if (animated && !reduced()) {
         animate($('[data-bm-match-link]'), { opacity: [0.4, 1], transform: ['scale(0.97)', 'none'] }, { duration: 0.4, ease: EASE });
@@ -3431,8 +3518,10 @@
         thumb.alt = '';
         button.appendChild(thumb);
         button._boot = boot;
+        button.classList.toggle('is-super', superState().handle === boot.handle);
         row.appendChild(button);
       });
+      row.classList.toggle('is-many', list.length > 8);
     }
 
     $('.bm-result').addEventListener('click', (event) => {
@@ -3441,12 +3530,15 @@
     });
 
     function showMatch() {
-      const match = bestMatch();
+      const superHandle = superState().handle;
+      const superBoot = superHandle ? liked.find((boot) => boot.handle === superHandle) : null;
+      const match = superBoot || bestMatch();
       if (!match) {
         go('silos');
         return;
       }
-      thumbs($('[data-bm-likes]'), liked);
+      const ordered = superBoot ? [superBoot].concat(liked.filter((boot) => boot !== superBoot)) : liked;
+      thumbs($('[data-bm-likes]'), ordered);
       $('[data-bm-likes-wrap]').hidden = liked.length === 0;
       showInCard(match, false);
       const won = superState();
