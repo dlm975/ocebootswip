@@ -37,6 +37,16 @@
     assign bm_collection = collections.all
   endif
   assign bm_feed = bm_collection.url | append: '?view=bootmatch'
+-%}
+{%- capture bm_gold -%}
+  <span class="bm-goldmark" aria-hidden="true"
+    ><span
+      class="bm-goldmark__shape"
+      style="--bm-fill: url({{ 'boot-match-fill.png' | asset_url }}); --bm-line: url({{ 'boot-match-mark.png' | asset_url }});"
+    ></span
+  ></span>
+{%- endcapture -%}
+{%- liquid
   # Its name, as set in the theme editor
   assign bm_full_name = section.settings.heading | strip | default: 'OCEBOOTS Match'
 
@@ -262,7 +272,7 @@
               {%- render 'gicon', name: 'close', size: 30 -%}
             </button>
             <button type="button" class="bm-round bm-round--super" data-bm-super aria-label="Super Like">
-              {%- render 'gicon', name: 'star-fill', size: 26 -%}
+              {{ bm_gold }}
               <span class="bm-round__badge" data-bm-super-badge aria-hidden="true"></span>
             </button>
             <button type="button" class="bm-round bm-round--like oce-disk" data-bm-like aria-label="Love it">
@@ -279,7 +289,7 @@
           </p>
           <div class="bm-result__body">
             <div class="bm-superwin" data-bm-superwin hidden>
-              <span class="bm-superwin__star" aria-hidden="true">{%- render 'gicon', name: 'star-fill', size: 18 -%}</span>
+              <span class="bm-superwin__star">{{ bm_gold }}</span>
               <img class="bm-superwin__img" data-bm-superwin-img alt="" width="96" height="64">
               <span class="bm-superwin__text">
                 <span class="bm-superwin__kicker">Your Super Like</span>
@@ -341,7 +351,7 @@
 
         <form class="bm-intro__step" data-bm-intro-step="offer" hidden novalidate>
           <h2 class="bm-intro__title bm-intro__deal">
-            <span class="bm-intro__star" aria-hidden="true">{%- render 'gicon', name: 'star-fill', size: 30 -%}</span>
+            <span class="bm-intro__star">{{ bm_gold }}</span>
             <span>SUPER LIKE = <span class="bm-gold" data-bm-reward-text></span> OFF</span>
           </h2>
           <label class="bm-intro__field">
@@ -387,7 +397,7 @@
 
         <div class="bm-intro__step" data-bm-intro-step="done" hidden>
           <h2 class="bm-intro__title">
-            <span class="bm-intro__star" aria-hidden="true">{%- render 'gicon', name: 'star-fill', size: 26 -%}</span>
+            <span class="bm-intro__star">{{ bm_gold }}</span>
             Super Like unlocked
           </h2>
           <p class="bm-intro__text">Tap the star on the boot you love most.</p>
@@ -1213,6 +1223,56 @@
     box-shadow: none;
   }
 
+  /* ---- Super Like: the logo in bright, shining gold ---- */
+  .bm-goldmark {
+    display: inline-block;
+    width: 24px;
+    aspect-ratio: 197 / 240;
+    vertical-align: middle;
+    filter: drop-shadow(0 0 3px rgb(255 196 60 / 0.75)) drop-shadow(0 1px 1px rgb(120 70 0 / 0.35));
+  }
+
+  .bm-goldmark__shape {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        115deg,
+        #9a6400 0%,
+        #e0a514 16%,
+        #ffe07a 28%,
+        #fffbe6 34%,
+        #ffd24a 42%,
+        #c98a05 56%,
+        #ffe58f 72%,
+        #fff6cc 78%,
+        #d79c0e 88%,
+        #9a6400 100%
+      )
+      0 0 / 260% 100%;
+    -webkit-mask: var(--bm-line) center / 100% 100% no-repeat, var(--bm-fill) center / 100% 100% no-repeat;
+    mask: var(--bm-line) center / 100% 100% no-repeat, var(--bm-fill) center / 100% 100% no-repeat;
+    animation: bm-gold 2.6s linear infinite;
+  }
+
+  .bm-round--super .bm-goldmark {
+    width: 26px;
+  }
+
+  .bm-superwin__star .bm-goldmark {
+    width: 22px;
+  }
+
+  .bm-intro__star .bm-goldmark {
+    width: 30px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bm-goldmark__shape {
+      animation: none;
+    }
+  }
+
   /* ---- Super Like ---- */
   .bm .bm-round--super {
     position: relative;
@@ -1226,8 +1286,9 @@
     opacity: 0.4;
   }
 
-  .bm .bm-round--super[data-state='locked'] {
-    color: rgb(18 18 18 / 0.35);
+  .bm .bm-round--super[data-state='locked'] .bm-goldmark {
+    filter: grayscale(1);
+    opacity: 0.45;
   }
 
   .bm-round__badge {
@@ -1240,8 +1301,8 @@
     height: 20px;
     padding: 0 5px;
     border-radius: 999px;
-    background: #3897f0;
-    color: #ffffff;
+    background: linear-gradient(135deg, #ffe07a, #d79c0e);
+    color: #3a2600;
     font-size: 11px;
     font-weight: 800;
     box-shadow: 0 0 0 2px #ffffff;
@@ -1259,7 +1320,8 @@
     left: 50%;
     top: auto;
     bottom: 38%;
-    color: #3897f0;
+    color: #d79c0e;
+    background: rgb(255 248 220 / 0.85);
     transform: translateX(-50%) rotate(-4deg);
     white-space: nowrap;
   }
@@ -1271,8 +1333,8 @@
     margin-bottom: 12px;
     padding: 10px 10px 10px 12px;
     border-radius: 16px;
-    background: #eef6ff;
-    box-shadow: inset 0 0 0 1.5px #3897f0;
+    background: #fff8e3;
+    box-shadow: inset 0 0 0 1.5px #e0a514;
   }
 
   .bm-superwin[hidden] {
@@ -1281,7 +1343,7 @@
 
   .bm-superwin__star {
     flex: none;
-    color: #3897f0;
+    display: inline-grid;
   }
 
   .bm-superwin__img {
@@ -1303,7 +1365,7 @@
     font-weight: 800;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: #3897f0;
+    color: #a86f00;
   }
 
   .bm-superwin__name {
@@ -1323,8 +1385,8 @@
     flex: none;
     padding: 8px 14px;
     border-radius: 999px;
-    background: #3897f0;
-    color: #ffffff;
+    background: linear-gradient(115deg, #d79c0e, #ffe07a 45%, #e0a514);
+    color: #3a2600;
     font-size: 14px;
     font-weight: 800;
     text-decoration: none;
@@ -1602,7 +1664,6 @@
   }
 
   .bm-intro__star {
-    color: #3897f0;
     display: inline-grid;
   }
 
@@ -2065,14 +2126,16 @@
     gap: 12px;
   }
 
+  /* Two rows of liked boots, scrolling sideways when there are more */
   .bm-likes__row {
-    display: flex;
-    align-items: flex-start;
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(2, 62px);
+    grid-auto-columns: 80px;
     gap: 8px;
-    height: 72px;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: 4px 4px 0;
+    padding: 4px;
     margin: 0 -4px;
     scrollbar-width: none;
   }
@@ -2968,7 +3031,15 @@
       });
       undoBtn.disabled = history.length === 0;
       const top = cards()[0];
-      $('[data-bm-super]').toggleAttribute('data-sale', Boolean(top && top._boot && top._boot.off > 0));
+      const onSale = Boolean(top && top._boot && top._boot.off > 0);
+      $('[data-bm-super]').toggleAttribute('data-sale', onSale);
+      if (onSale && superState().status === 'ready') {
+        status.textContent = 'Sale boot: Super Likes are for full-price boots';
+        status.dataset.sale = '1';
+      } else if (status.dataset.sale) {
+        delete status.dataset.sale;
+        updateStatus();
+      }
     }
 
     function fill() {
