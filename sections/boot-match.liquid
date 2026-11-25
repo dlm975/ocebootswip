@@ -15,6 +15,15 @@
   and after a few likes it asks: continue matching, or see "your match": the boot that best fits everything liked so far,
   plus the liked boots, which can be saved to the wishlist in one tap.
 
+  Super Like: one per shopper, unlocked by leaving an email or mobile number (in the welcome or from
+  the star in the game). The boot they Super Like gets the reward (section setting, NZD; shown in
+  the shopper's currency, rounded) with the discount code in the settings, claimed from the match
+  screen. Emails join the store's customers (marketing consent, tagged boot-match and super-like);
+  mobile numbers come to the store by the contact form.
+
+  Welcome: on a shopper's first visit (or with ?bm-intro in the address), the page darkens and
+  blurs, the mark pops up and flickers like a flame, and it offers the game, then the Super Like.
+
   - Boots come from a JSON feed (templates/collection.bootmatch.liquid), fetched when the shopper
     reaches for the button (hover, touch or focus), so the window opens without waiting; the first
     250 at once, the rest behind them.
@@ -44,6 +53,9 @@
     data-wishlist-url="{{ routes.all_products_collection_url }}?view=wishlist"
     data-money-format="{{ shop.money_format | strip_html | escape }}"
     data-currency="{{ cart.currency.iso_code }}"
+    data-intro="{{ section.settings.intro_enabled }}"
+    data-reward="{{ section.settings.reward_amount }}"
+    data-code="{{ section.settings.reward_code | strip | escape }}"
   >
     <div class="bm-dock" data-bm-dock>
       <span class="bm-tip" data-bm-tip hidden>{{ section.settings.tip | escape }}</span>
@@ -249,6 +261,10 @@
             <button type="button" class="bm-round bm-round--nope" data-bm-nope aria-label="Not for me">
               {%- render 'gicon', name: 'close', size: 30 -%}
             </button>
+            <button type="button" class="bm-round bm-round--super" data-bm-super aria-label="Super Like">
+              {%- render 'gicon', name: 'star-fill', size: 26 -%}
+              <span class="bm-round__badge" data-bm-super-badge aria-hidden="true"></span>
+            </button>
             <button type="button" class="bm-round bm-round--like oce-disk" data-bm-like aria-label="Love it">
               {%- render 'gicon', name: 'favorite-fill', size: 30 -%}
             </button>
@@ -262,6 +278,16 @@
             <span>It’s a match</span>
           </p>
           <div class="bm-result__body">
+            <div class="bm-superwin" data-bm-superwin hidden>
+              <span class="bm-superwin__star" aria-hidden="true">{%- render 'gicon', name: 'star-fill', size: 18 -%}</span>
+              <img class="bm-superwin__img" data-bm-superwin-img alt="" width="96" height="64">
+              <span class="bm-superwin__text">
+                <span class="bm-superwin__kicker">Your Super Like</span>
+                <span class="bm-superwin__name" data-bm-superwin-name></span>
+                <span class="bm-superwin__deal" data-bm-superwin-deal></span>
+              </span>
+              <a class="bm-superwin__claim" data-bm-superwin-claim href="#">Claim</a>
+            </div>
             <a class="bm-result__card" data-bm-match-link href="#">
               <span class="bm-result__media"><img data-bm-match-img alt="" width="640" height="640"></span>
               <span class="bm-result__info">
@@ -282,6 +308,72 @@
             <button type="button" class="bm-secondary" data-bm-again>Keep swiping</button>
             <a class="bm-primary" data-bm-match-cta href="#">View this boot</a>
           </div>
+        </div>
+      </div>
+    </dialog>
+
+    {%- comment -%} The welcome (first visit) and the Super Like offer {%- endcomment -%}
+    <dialog class="bm-intro" data-bm-intro aria-labelledby="bm-intro-title-{{ section.id }}">
+      <div class="bm-intro__scrim" data-bm-intro-scrim></div>
+      <div class="bm-intro__stage">
+        <button type="button" class="bm-intro__x" data-bm-intro-close aria-label="Close">
+          {%- render 'gicon', name: 'close', size: 22 -%}
+        </button>
+        <div class="bm-intro__flame" data-bm-intro-flame>
+          <span class="bm-intro__glow" aria-hidden="true"></span>
+          <span class="bm-intro__embers" aria-hidden="true">
+            {%- for i in (1..8) -%}<i style="--i: {{ i }};"></i>{%- endfor -%}
+          </span>
+          <span class="bm-mark bm-intro__mark" style="--bm-fill: url({{ 'boot-match-fill.png' | asset_url }}); --bm-holo: url({{ 'oce-holo.webp' | asset_url }});" aria-hidden="true"><span class="bm-mark__foil"></span><img src="{{ 'boot-match-mark.png' | asset_url }}" alt="" width="197" height="240"></span>
+        </div>
+
+        <div class="bm-intro__step" data-bm-intro-step="hello">
+          <h2 class="bm-intro__title" id="bm-intro-title-{{ section.id }}">{{ bm_full_name | escape }}</h2>
+          <p class="bm-intro__text">Swipe through boots and find your perfect match.</p>
+          <div class="bm-intro__buttons">
+            <button type="button" class="bm-intro__primary" data-bm-intro-play>Play</button>
+            <button type="button" class="bm-intro__link" data-bm-intro-close>Not now</button>
+          </div>
+        </div>
+
+        <form class="bm-intro__step" data-bm-intro-step="offer" hidden novalidate>
+          <h2 class="bm-intro__title">
+            <span class="bm-intro__star" aria-hidden="true">{%- render 'gicon', name: 'star-fill', size: 26 -%}</span>
+            Get a Super Like
+          </h2>
+          <p class="bm-intro__text">
+            Leave your email or mobile number. Super Like one boot while you play and get
+            <strong data-bm-reward-text></strong> off it.
+          </p>
+          <label class="bm-intro__field">
+            <span class="visually-hidden">Email or mobile number</span>
+            <input
+              type="text"
+              name="contact"
+              inputmode="email"
+              autocomplete="email"
+              placeholder="Email or mobile number"
+              data-bm-intro-input
+              required
+            >
+          </label>
+          <p class="bm-intro__error" data-bm-intro-error aria-live="polite"></p>
+          <div class="bm-intro__buttons">
+            <button type="submit" class="bm-intro__primary" data-bm-intro-submit>Get my Super Like</button>
+            <button type="button" class="bm-intro__link" data-bm-intro-skip>Skip, just play</button>
+          </div>
+          <p class="bm-intro__small">
+            One Super Like per person, on football boots. By signing up you agree to hear from OCEBOOTS by
+            email or text. Unsubscribe any time.
+          </p>
+        </form>
+
+        <div class="bm-intro__step" data-bm-intro-step="done" hidden>
+          <h2 class="bm-intro__title">
+            <span class="bm-intro__star" aria-hidden="true">{%- render 'gicon', name: 'star-fill', size: 26 -%}</span>
+            Super Like unlocked
+          </h2>
+          <p class="bm-intro__text">Tap the star on the boot you love most.</p>
         </div>
       </div>
     </dialog>
@@ -1099,6 +1191,419 @@
     box-shadow: none;
   }
 
+  /* ---- Super Like ---- */
+  .bm-round--super {
+    position: relative;
+    width: 52px;
+    height: 52px;
+    color: #3897f0;
+  }
+
+  .bm-round--super[data-state='locked'] {
+    color: rgb(18 18 18 / 0.35);
+  }
+
+  .bm-round__badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    display: grid;
+    place-items: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: #3897f0;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    box-shadow: 0 0 0 2px #ffffff;
+  }
+
+  .bm-round__badge:empty {
+    display: none;
+  }
+
+  .bm-round--super[data-state='locked'] .bm-round__badge {
+    background: #121212;
+  }
+
+  .bm-stamp--super {
+    left: 50%;
+    top: auto;
+    bottom: 38%;
+    color: #3897f0;
+    transform: translateX(-50%) rotate(-4deg);
+    white-space: nowrap;
+  }
+
+  .bm-superwin {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding: 10px 10px 10px 12px;
+    border-radius: 16px;
+    background: #eef6ff;
+    box-shadow: inset 0 0 0 1.5px #3897f0;
+  }
+
+  .bm-superwin[hidden] {
+    display: none;
+  }
+
+  .bm-superwin__star {
+    flex: none;
+    color: #3897f0;
+  }
+
+  .bm-superwin__img {
+    flex: none;
+    width: 56px;
+    height: 38px;
+    object-fit: contain;
+  }
+
+  .bm-superwin__text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .bm-superwin__kicker {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #3897f0;
+  }
+
+  .bm-superwin__name {
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 800;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .bm-superwin__deal {
+    font-size: 12px;
+    color: rgb(18 18 18 / 0.7);
+  }
+
+  .bm-superwin__claim {
+    flex: none;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: #3897f0;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  /* ---- The welcome: the page darkens and blurs, the flame pops up and flickers ---- */
+  .bm-intro {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: hidden;
+    color: #ffffff;
+    font-family: var(--font-body--family);
+  }
+
+  .bm-intro::backdrop {
+    background: transparent;
+  }
+
+  .bm-intro__scrim {
+    position: absolute;
+    inset: 0;
+    background: rgb(6 6 6 / 0.7);
+    will-change: opacity;
+  }
+
+  .bm-intro.is-settled .bm-intro__scrim {
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    transition: -webkit-backdrop-filter 0.5s linear, backdrop-filter 0.5s linear;
+  }
+
+  .bm-intro__stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    width: min(420px, 100%);
+    height: 100%;
+    margin: 0 auto;
+    padding: calc(24px + env(safe-area-inset-top, 0px)) 24px calc(24px + env(safe-area-inset-bottom, 0px));
+    text-align: center;
+  }
+
+  .bm-intro__x {
+    position: absolute;
+    top: calc(14px + env(safe-area-inset-top, 0px));
+    right: 14px;
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.12);
+    color: #ffffff;
+    cursor: pointer;
+  }
+
+  .bm-intro__flame {
+    position: relative;
+    width: 128px;
+  }
+
+  .bm-intro__mark {
+    width: 100%;
+    filter: drop-shadow(0 6px 24px rgb(255 120 40 / 0.45));
+  }
+
+  /* The lines go white on the dark */
+  .bm-intro__mark img {
+    filter: invert(1);
+  }
+
+  /* Alive: a flicker from the base, the foil drifting faster, a warm glow breathing behind */
+  .bm-intro__flame.is-alive .bm-intro__mark {
+    transform-origin: 50% 100%;
+    animation: bm-flicker 1.7s ease-in-out infinite;
+  }
+
+  .bm-intro__flame.is-alive .bm-mark__foil {
+    animation-duration: 5s;
+  }
+
+  .bm-intro__glow {
+    position: absolute;
+    left: 50%;
+    bottom: 4%;
+    width: 170%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgb(255 140 40 / 0.45), rgb(255 80 40 / 0.12) 45%, rgb(255 80 40 / 0) 70%);
+    transform: translateX(-50%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .bm-intro__flame.is-alive .bm-intro__glow {
+    animation: bm-glow 1.9s ease-in-out infinite alternate;
+  }
+
+  .bm-intro__embers i {
+    position: absolute;
+    left: calc(18% + var(--i) * 8%);
+    bottom: 30%;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #ffc531;
+    box-shadow: 0 0 6px #ff6a00;
+    opacity: 0;
+  }
+
+  .bm-intro__flame.is-alive .bm-intro__embers i {
+    animation: bm-ember 2.4s ease-out infinite;
+    animation-delay: calc(var(--i) * 0.31s);
+  }
+
+  @keyframes bm-flicker {
+    0%,
+    100% {
+      transform: scale(1, 1) skewX(0deg);
+    }
+    18% {
+      transform: scale(0.97, 1.05) skewX(-2.5deg);
+    }
+    37% {
+      transform: scale(1.02, 0.98) skewX(1.5deg);
+    }
+    58% {
+      transform: scale(0.98, 1.04) skewX(2deg);
+    }
+    79% {
+      transform: scale(1.01, 0.99) skewX(-1deg);
+    }
+  }
+
+  @keyframes bm-glow {
+    from {
+      opacity: 0.55;
+      transform: translateX(-50%) scale(0.92);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) scale(1.06);
+    }
+  }
+
+  @keyframes bm-ember {
+    0% {
+      opacity: 0;
+      transform: translate(0, 0) scale(1);
+    }
+    15% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translate(calc((var(--i) - 4.5) * 6px), -150px) scale(0.4);
+    }
+  }
+
+  .bm-intro__step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .bm-intro__step[hidden] {
+    display: none;
+  }
+
+  .bm-intro__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-size: clamp(30px, 9vw, 40px);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+
+  .bm-intro__star {
+    color: #3897f0;
+    display: inline-grid;
+  }
+
+  .bm-intro__text {
+    max-width: 30ch;
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.4;
+    color: rgb(255 255 255 / 0.85);
+  }
+
+  .bm-intro__buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    margin-top: 6px;
+  }
+
+  .bm-intro__primary {
+    width: 100%;
+    max-width: 320px;
+    min-height: 54px;
+    border: 0;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #121212;
+    font: inherit;
+    font-size: 17px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .bm-intro__primary:disabled {
+    opacity: 0.6;
+  }
+
+  .bm-intro__link {
+    min-height: 44px;
+    padding: 0 12px;
+    border: 0;
+    background: none;
+    color: rgb(255 255 255 / 0.75);
+    font: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  .bm-intro__field {
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .bm .bm-intro__field input {
+    width: 100%;
+    min-height: 54px;
+    padding: 0 20px;
+    border: 0;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.14);
+    box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / 0.35);
+    color: #ffffff;
+    font: inherit;
+    font-size: 17px;
+    text-align: center;
+    outline: none;
+  }
+
+  .bm .bm-intro__field input::placeholder {
+    color: rgb(255 255 255 / 0.6);
+  }
+
+  .bm .bm-intro__field input:focus {
+    box-shadow: inset 0 0 0 2px #ffffff;
+  }
+
+  .bm-intro__error {
+    min-height: 1em;
+    margin: -4px 0 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffb4a8;
+  }
+
+  .bm-intro__small {
+    max-width: 34ch;
+    margin: 4px 0 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: rgb(255 255 255 / 0.55);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bm-intro__flame.is-alive .bm-intro__mark,
+    .bm-intro__flame.is-alive .bm-intro__glow,
+    .bm-intro__flame.is-alive .bm-intro__embers i {
+      animation: none;
+    }
+
+    .bm-intro__glow {
+      opacity: 0.8;
+    }
+  }
+
   /* ---- 4. The deck ---- */
   .bm-status {
     min-height: 18px;
@@ -1515,7 +2020,7 @@
 {% endstylesheet %}
 
 <script type="module">
-  import { animate, spring } from 'motion';
+  import { animate, spring, stagger } from 'motion';
 
   const root = document.querySelector('[data-bm]');
   if (root && !root.dataset.ready) {
@@ -1541,7 +2046,6 @@
     const LIKES_TO_MATCH = Math.max(2, Number(root.dataset.likesToMatch) || 4);
     const MAX_SWIPES = 16;
     const CURRENCY = root.dataset.currency || '';
-    const MONEY_FORMAT = root.dataset.moneyFormat || '${amount}';
 
     const store = {
       get(key) {
@@ -1560,18 +2064,69 @@
       },
     };
 
-    /* Money in the shop's own format (as the product cards), in the shopper's currency */
+    /* Money in the shopper's currency, with its own symbol ($, £, €...) */
     function money(units, decimals) {
-      const fixed = decimals ? Number(units).toFixed(2) : String(Math.round(units));
-      const [whole, cents] = fixed.split('.');
-      const group = (separator) => whole.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
-      return MONEY_FORMAT.replace(/\{\{\s*(\w+)\s*\}\}/, (all, kind) => {
-        if (kind === 'amount_no_decimals') return group(',');
-        if (kind === 'amount_with_comma_separator') return group('.') + (cents ? ',' + cents : '');
-        if (kind === 'amount_no_decimals_with_comma_separator') return group('.');
-        if (kind === 'amount_with_apostrophe_separator') return group("'") + (cents ? '.' + cents : '');
-        return group(',') + (cents ? '.' + cents : '');
-      });
+      try {
+        return new Intl.NumberFormat(undefined, {
+          style: 'currency',
+          currency: CURRENCY || 'NZD',
+          currencyDisplay: 'narrowSymbol',
+          minimumFractionDigits: decimals ? 2 : 0,
+          maximumFractionDigits: decimals ? 2 : 0,
+        }).format(units);
+      } catch (e) {
+        return '$' + (decimals ? Number(units).toFixed(2) : Math.round(units));
+      }
+    }
+
+    /* The Super Like reward in the shopper's currency: exact in NZD; elsewhere the NZD amount at
+       today's rate, rounded to a tidy figure (5s, or the like for big currencies) */
+    const REWARD = Number(root.dataset.reward) || 25;
+    const CODE = root.dataset.code || '';
+
+    function rewardText() {
+      const currency = CURRENCY || 'NZD';
+      if (currency === 'NZD') return money(REWARD) + ' NZD';
+      const rate = Number(window.Shopify && window.Shopify.currency && window.Shopify.currency.rate) || 1;
+      const local = REWARD * rate;
+      const step = local < 20 ? 1 : local < 200 ? 5 : 5 * Math.pow(10, Math.floor(Math.log10(local)) - 1);
+      const tidy = Math.max(step, Math.round(local / step) * step);
+      return 'about ' + money(tidy) + ' ' + currency;
+    }
+
+    /* The Super Like: locked until they leave an email or number, then one to use */
+    const SUPER_KEY = 'oce-bm-super';
+    function superState() {
+      try {
+        return JSON.parse(store.get(SUPER_KEY) || '{}');
+      } catch (e) {
+        return {};
+      }
+    }
+    function setSuper(state) {
+      store.set(SUPER_KEY, JSON.stringify(state));
+      paintSuper();
+    }
+    function paintSuper() {
+      const state = superState();
+      const button = $('[data-bm-super]');
+      const badge = $('[data-bm-super-badge]');
+      if (state.status === 'ready') {
+        button.dataset.state = 'ready';
+        button.disabled = false;
+        badge.textContent = '1';
+        button.setAttribute('aria-label', 'Super Like this boot: ' + rewardText() + ' off');
+      } else if (state.status === 'used') {
+        button.dataset.state = 'used';
+        button.disabled = true;
+        badge.textContent = '';
+        button.setAttribute('aria-label', 'Super Like used');
+      } else {
+        button.dataset.state = 'locked';
+        button.disabled = false;
+        badge.textContent = '+';
+        button.setAttribute('aria-label', 'Unlock a Super Like');
+      }
     }
 
     /* ---------- The launcher: pops in once the page has settled ---------- */
@@ -2263,8 +2818,10 @@
       like.setAttribute('aria-hidden', 'true');
       const nope = el('span', 'bm-stamp bm-stamp--nope', 'PASS');
       nope.setAttribute('aria-hidden', 'true');
+      const superStamp = el('span', 'bm-stamp bm-stamp--super', 'SUPER LIKE');
+      superStamp.setAttribute('aria-hidden', 'true');
 
-      card.append(media, info, like, nope);
+      card.append(media, info, like, nope, superStamp);
       card._boot = boot;
       return card;
     }
@@ -2330,12 +2887,16 @@
     /* ---------- Swiping ---------- */
     let flying = null;
 
-    function decide(card, liking) {
+    function decide(card, liking, isSuper) {
       const boot = card._boot;
       seen.add(boot.handle);
       swipes += 1;
-      history.push({ boot: boot, liked: liking });
-      if (liking) {
+      history.push({ boot: boot, liked: liking, super: Boolean(isSuper) });
+      if (isSuper) {
+        liked.push(boot);
+        learn(boot, 2);
+        setSuper({ status: 'used', handle: boot.handle, title: boot.title, url: boot.url, image: boot.image });
+      } else if (liking) {
         liked.push(boot);
         learn(boot, 1);
       } else {
@@ -2426,6 +2987,42 @@
       layout(true);
     }
 
+    function superLike() {
+      if (asking()) return;
+      const state = superState();
+      if (state.status === 'used') return;
+      if (state.status !== 'ready') {
+        offer(true);
+        return;
+      }
+      if (flying) flying.complete();
+      const card = cards()[0];
+      if (!card || !card._boot) return;
+      card.classList.add('is-leaving');
+      card.classList.remove('is-top');
+      decide(card, true, true);
+      card.querySelector('.bm-stamp--super').style.opacity = '1';
+      status.textContent = 'Super Like! ' + rewardText() + ' off this boot, on your match screen';
+      const done = () => {
+        card.remove();
+        flying = null;
+        afterDecision();
+      };
+      if (reduced()) {
+        done();
+        return;
+      }
+      flying = animate(
+        card,
+        { transform: ['none', 'translateY(-14px) scale(1.04)', 'translateY(-130%) scale(0.9)'] },
+        { duration: 0.6, ease: [0.4, 0, 0.6, 1], times: [0, 0.3, 1] }
+      );
+      flying.finished.then(done);
+      layout(true);
+    }
+
+    $('[data-bm-super]').addEventListener('click', superLike);
+
     function choose(liking) {
       if (asking()) return;
       if (flying) flying.complete();
@@ -2442,6 +3039,10 @@
       if (!step) return;
       seen.delete(step.boot.handle);
       swipes = Math.max(0, swipes - 1);
+      if (step.super) {
+        setSuper({ status: 'ready' });
+        learn(step.boot, -1);
+      }
       if (step.liked) {
         liked = liked.filter((boot) => boot.handle !== step.boot.handle);
         learn(step.boot, -1);
@@ -2634,6 +3235,17 @@
       thumbs($('[data-bm-likes]'), liked);
       $('[data-bm-likes-wrap]').hidden = liked.length === 0;
       showInCard(match, false);
+      const won = superState();
+      const win = $('[data-bm-superwin]');
+      win.hidden = !(won.status === 'used' && won.url && CODE);
+      if (!win.hidden) {
+        $('[data-bm-superwin-img]').src = won.image || '';
+        $('[data-bm-superwin-name]').textContent = won.title || '';
+        $('[data-bm-superwin-deal]').textContent = rewardText() + ' off with code ' + CODE;
+        const claim = $('[data-bm-superwin-claim]');
+        claim.textContent = 'Claim';
+        claim.href = '/discount/' + encodeURIComponent(CODE) + '?redirect=' + encodeURIComponent(won.url);
+      }
       const save = $('[data-bm-save]');
       save.textContent = 'Save all to wishlist';
       save.onclick = null;
@@ -2763,6 +3375,154 @@
     }
 
     launch.addEventListener('click', open);
+
+    /* ---------- The welcome, and the Super Like offer ---------- */
+    const intro = $('[data-bm-intro]');
+    const introScrim = $('[data-bm-intro-scrim]');
+    const flame = $('[data-bm-intro-flame]');
+    const introInput = $('[data-bm-intro-input]');
+    const introError = $('[data-bm-intro-error]');
+    let thenPlay = false;
+
+    function introStep(name) {
+      $$('[data-bm-intro-step]').forEach((step) => {
+        step.hidden = step.dataset.bmIntroStep !== name;
+      });
+      const step = $('[data-bm-intro-step="' + name + '"]');
+      if (!reduced()) {
+        animate(step.children, { opacity: [0, 1], transform: ['translateY(14px)', 'none'] }, { duration: 0.55, ease: EASE, delay: stagger(0.07) });
+      }
+      $('[data-bm-reward-text]').textContent = rewardText();
+    }
+
+    function showIntro(step, fromGame) {
+      if (intro.open) return;
+      thenPlay = !fromGame;
+      hideTip();
+      introStep(step);
+      introError.textContent = '';
+      intro.classList.remove('is-settled');
+      flame.classList.remove('is-alive');
+      intro.showModal();
+      lockPage(true);
+      if (reduced()) {
+        intro.classList.add('is-settled');
+        flame.classList.add('is-alive');
+        return;
+      }
+      introScrim.style.opacity = '0';
+      flame.style.opacity = '0';
+      requestAnimationFrame(() => {
+        // The page darkens, then blurs; the flame pops up and comes alive
+        animate(introScrim, { opacity: [0, 1] }, { duration: fromGame ? 0.3 : 0.6, ease: 'linear' }).finished.then(() => {
+          introScrim.style.opacity = '';
+          intro.classList.add('is-settled');
+        });
+        animate(
+          flame,
+          { opacity: [0, 1], transform: ['translateY(40px) scale(0.2) rotate(-12deg)', 'none'] },
+          { type: spring, visualDuration: 0.6, bounce: 0.45, delay: fromGame ? 0.05 : 0.35 }
+        ).finished.then(() => {
+          flame.style.opacity = '';
+          flame.classList.add('is-alive');
+        });
+      });
+    }
+
+    function hideIntro() {
+      if (!intro.open) return Promise.resolve();
+      store.set('oce-bm-intro', '1');
+      const finish = () => {
+        intro.close();
+        if (!dlg.open) lockPage(false);
+        flame.classList.remove('is-alive');
+      };
+      if (reduced()) {
+        finish();
+        return Promise.resolve();
+      }
+      intro.classList.remove('is-settled');
+      return animate(intro, { opacity: [1, 0] }, { duration: 0.25 }).finished.then(() => {
+        intro.getAnimations().forEach((animation) => animation.cancel());
+        finish();
+      });
+    }
+
+    // From the game's star: the offer over the game
+    function offer() {
+      showIntro(superState().status === 'ready' ? 'done' : 'offer', true);
+    }
+
+    function play() {
+      hideIntro().then(() => {
+        if (!dlg.open) open();
+      });
+    }
+
+    $$('[data-bm-intro-close]').forEach((button) => button.addEventListener('click', () => hideIntro()));
+    intro.addEventListener('cancel', (event) => {
+      event.preventDefault();
+      hideIntro();
+    });
+    $('[data-bm-intro-play]').addEventListener('click', () => {
+      if (superState().status) play();
+      else introStep('offer');
+    });
+    $('[data-bm-intro-skip]').addEventListener('click', () => (thenPlay ? play() : hideIntro()));
+
+    // Email: joins the store's customers (marketing consent, tagged); mobile: sent to the store
+    async function signUp(value) {
+      const isEmail = value.includes('@');
+      const form = new FormData();
+      form.append('utf8', '✓');
+      if (isEmail) {
+        form.append('form_type', 'customer');
+        form.append('contact[email]', value);
+        form.append('contact[tags]', 'boot-match,super-like,newsletter');
+      } else {
+        form.append('form_type', 'contact');
+        form.append('contact[name]', 'Boot Match Super Like');
+        form.append('contact[phone]', value);
+        form.append('contact[body]', 'Boot Match Super Like sign-up by mobile: ' + value + '. Happy to hear from OCEBOOTS by text.');
+      }
+      try {
+        const response = await fetch('/contact', { method: 'POST', body: form, credentials: 'same-origin' });
+        return response.ok && !/challenge/.test(response.url);
+      } catch (e) {
+        return false;
+      }
+    }
+
+    $('[data-bm-intro-step="offer"]').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const value = introInput.value.trim();
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
+      const isPhone = /^\+?[\d\s().-]{8,}$/.test(value) && value.replace(/\D/g, '').length >= 8;
+      if (!isEmail && !isPhone) {
+        introError.textContent = 'Enter an email address or a mobile number.';
+        introInput.focus();
+        return;
+      }
+      introError.textContent = '';
+      const submit = $('[data-bm-intro-submit]');
+      submit.disabled = true;
+      submit.textContent = 'One moment…';
+      await signUp(value);
+      setSuper({ status: 'ready' });
+      submit.disabled = false;
+      submit.textContent = 'Get my Super Like';
+      introStep('done');
+      setTimeout(() => (thenPlay ? play() : hideIntro()), 1400);
+    });
+
+    paintSuper();
+
+    // First visit (or ?bm-intro): the welcome as the page comes in
+    const forced = /[?&]bm-intro\b/.test(window.location.search);
+    if (forced || (root.dataset.intro === 'true' && !store.get('oce-bm-intro'))) {
+      store.set('oce-bm-tip', '1');
+      requestAnimationFrame(() => showIntro('hello', false));
+    }
     $$('[data-bm-close]').forEach((button) => button.addEventListener('click', close));
     dlg.addEventListener('cancel', (event) => {
       event.preventDefault();
@@ -2805,6 +3565,30 @@
       "id": "tip",
       "label": "First-visit hint beside the button",
       "default": "Find your boot match"
+    },
+    {
+      "type": "header",
+      "content": "Welcome and Super Like"
+    },
+    {
+      "type": "checkbox",
+      "id": "intro_enabled",
+      "label": "Welcome on first visit",
+      "info": "The page darkens, the flame pops up, and it offers the game and the Super Like. Once per shopper. Preview it any time by adding ?bm-intro to the address.",
+      "default": true
+    },
+    {
+      "type": "number",
+      "id": "reward_amount",
+      "label": "Super Like reward (NZD)",
+      "info": "Shown in NZD in New Zealand; elsewhere converted and rounded to a tidy figure. Must match the discount code's amount.",
+      "default": 25
+    },
+    {
+      "type": "text",
+      "id": "reward_code",
+      "label": "Super Like discount code",
+      "default": "SUPERLIKE25"
     },
     {
       "type": "range",
