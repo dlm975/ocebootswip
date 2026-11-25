@@ -488,10 +488,14 @@
     flex: 1;
     margin: 0;
     font-family: var(--font-heading--family);
-    font-size: 22px;
+    font-size: clamp(18px, 5.4vw, 22px);
     font-weight: 800;
     letter-spacing: -0.02em;
     line-height: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 
   .bm-icon-btn {
@@ -672,14 +676,25 @@
   }
 
   .bm .bm-sizepick__panel {
+    display: flex;
+    flex-direction: column;
     flex: 1;
     min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
   }
 
+  /* The sizes fill the space: rows stretch to the window's height (and scroll when there are more
+     than fit), numbers a size up from the menu's */
   .bm .bm-sizepick .size-drill__sizes {
+    flex: 1;
+    grid-auto-rows: minmax(46px, 1fr);
+    align-content: stretch;
     padding-block: 14px 6px;
+  }
+
+  .bm .bm-sizepick .size-drill__value {
+    font-size: 1.8rem;
   }
 
   .bm .bm-sizepick .size-drill__size {
@@ -714,15 +729,22 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* The chart grows to fill the space, the slider under it */
   .bm-price {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
     padding: 0 4px;
   }
 
   .bm-hist {
     display: flex;
+    flex: 1;
     align-items: flex-end;
     gap: 2px;
-    height: 72px;
+    min-height: 90px;
+    max-height: 320px;
   }
 
   .bm-hist__bar {
@@ -818,22 +840,30 @@
     outline-offset: 2px;
   }
 
-  /* Ground: three pictures with bold names */
+  /* Ground: three full-width picture bands filling the height, the names on the pictures */
   .bm-grounds {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    flex: 1;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: repeat(3, minmax(84px, 1fr));
     gap: 10px;
   }
 
   .bm-ground {
+    position: relative;
+    isolation: isolate;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    justify-content: flex-end;
     gap: 2px;
-    padding: 0;
+    padding: 14px 16px;
+    overflow: hidden;
     border: 0;
+    border-radius: 18px;
     background: none;
-    color: #121212;
+    color: #ffffff;
     font: inherit;
     text-align: left;
     cursor: pointer;
@@ -841,14 +871,13 @@
   }
 
   .bm-ground__media {
-    position: relative;
+    position: absolute;
+    inset: 0;
+    z-index: -1;
     display: block;
-    width: 100%;
-    aspect-ratio: 1;
-    margin-bottom: 8px;
+    border-radius: 18px;
     overflow: hidden;
-    border-radius: 16px;
-    box-shadow: 0 0 0 0 #121212;
+    box-shadow: inset 0 0 0 0 #121212;
     transition: box-shadow 0.18s;
   }
 
@@ -859,21 +888,29 @@
     object-fit: cover;
   }
 
-  .bm-ground[aria-pressed='true'] .bm-ground__media {
+  /* A shade at the bottom so the white names read on the grass */
+  .bm-ground__media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgb(0 0 0 / 0.55), rgb(0 0 0 / 0) 65%);
+  }
+
+  .bm-ground[aria-pressed='true'] {
     box-shadow: 0 0 0 3px #121212;
   }
 
   .bm-ground__name {
-    font-size: 18px;
+    font-size: 26px;
     font-weight: 800;
-    line-height: 1.1;
+    line-height: 1.05;
     letter-spacing: -0.02em;
   }
 
   .bm-ground__code {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
-    color: rgb(18 18 18 / 0.5);
+    color: rgb(255 255 255 / 0.85);
   }
 
   .bm-ground__tick,
@@ -889,8 +926,9 @@
 
   .bm-ground__tick {
     position: absolute;
-    top: 8px;
-    right: 8px;
+    top: 12px;
+    right: 12px;
+    z-index: 1;
     background: rgb(255 255 255 / 0.85);
   }
 
