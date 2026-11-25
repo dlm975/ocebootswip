@@ -55,7 +55,13 @@
         aria-label="{{ bm_full_name | escape }}: find your perfect boot"
       >
         <span class="bm-launch__coin oce-disk" aria-hidden="true"></span>
-        {%- render 'boot-match-logo', id: 'bm-flame-launch', class: 'bm-launch__logo' -%}
+        <img
+          class="bm-launch__logo"
+          src="{{ 'boot-match-mark.png' | asset_url }}"
+          alt=""
+          width="197"
+          height="240"
+        >
       </button>
     </div>
 
@@ -313,10 +319,12 @@
     border-radius: 50%;
   }
 
+  /* The mark on the foil disk (assets/boot-match-mark.png, black lines on clear) */
   .bm-launch__logo {
     position: relative;
-    width: 27px;
-    height: 40px;
+    display: block;
+    width: 29px;
+    height: auto;
   }
 
   @media (hover: hover) {
