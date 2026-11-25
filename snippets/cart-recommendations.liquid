@@ -117,23 +117,23 @@
     <div
       class="cart-recs"
       style="
-        --cr-bg: {{ settings.cart_recs_background | default: '#f5f5f5' }};
-        --cr-fg: {{ settings.cart_recs_text_color | default: '#111111' }};
+        --cr-bg: {{ settings.cart_recs_background | default: '#F1F5F9' }};
+        --cr-fg: {{ settings.cart_recs_text_color | default: '#121212' }};
         --cr-radius: {{ settings.cart_recs_radius | default: 16 }}px;
-        --cr-btn-bg: {{ settings.cart_recs_button_background | default: '#111111' }};
+        --cr-btn-bg: {{ settings.cart_recs_button_background | default: '#121212' }};
         --cr-btn-fg: {{ settings.cart_recs_button_text | default: '#ffffff' }};
         --cr-card-bg: {{ settings.cart_recs_card_background | default: '#ffffff' }};
-        --cr-card-border: {{ settings.cart_recs_card_border | default: '#e6e6e6' }};
+        --cr-card-border: {{ settings.cart_recs_card_border | default: '#64748B40' }};
       "
     >
       <div class="cart-recs__head">
         <span class="cart-recs__heading">{{ heading }}</span>
         <div class="cart-recs__nav">
           <button type="button" class="cart-recs__arrow" data-cart-recs-prev aria-label="Previous">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+            {%- render 'gicon', name: 'chevron_left', size: 13 -%}
           </button>
           <button type="button" class="cart-recs__arrow" data-cart-recs-next aria-label="Next">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+            {%- render 'gicon', name: 'chevron_right', size: 13 -%}
           </button>
         </div>
       </div>
@@ -154,8 +154,8 @@
     max-width: 100%;
     min-width: 0;
     box-sizing: border-box;
-    background: var(--cr-bg, #f5f5f5);
-    color: var(--cr-fg, #111);
+    background: var(--cr-bg, #F1F5F9);
+    color: var(--cr-fg, #121212);
     border-radius: var(--cr-radius, 16px);
     padding: 12px;
     margin-block-end: 12px;
@@ -172,7 +172,7 @@
 
   .cart-recs__heading {
     font-size: 0.78rem;
-    font-weight: 700;
+    font-weight: 600;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -295,7 +295,7 @@
   }
 
   .cart-recs__now {
-    font-weight: 700;
+    font-weight: 600;
   }
 
   .cart-recs__add {
@@ -307,10 +307,10 @@
     padding: 8px 14px;
     border: none;
     border-radius: var(--brand-radius-md);
-    background: var(--cr-btn-bg, #111);
+    background: var(--cr-btn-bg, #121212);
     color: var(--cr-btn-fg, #fff);
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: 600;
     white-space: nowrap;
     text-decoration: none;
     cursor: pointer;

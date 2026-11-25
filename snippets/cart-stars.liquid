@@ -15,8 +15,8 @@
   endif
 
   assign stars_text = settings.cart_stars_text | default: '1000+ HAPPY CUSTOMERS'
-  assign star_color = settings.cart_stars_color | default: '#14b554'
-  assign star_text_color = settings.cart_stars_text_color | default: '#15803d'
+  assign star_color = settings.cart_stars_color | default: '#25D366'
+  assign star_text_color = settings.cart_stars_text_color | default: '#121212'
   assign star_size = settings.cart_stars_size | default: 15
 -%}
 
@@ -29,13 +29,7 @@
       --cs-size: {{ star_size }}px;
     "
   >
-    <span class="cart-stars__row" aria-hidden="true">
-      {%- for i in (1..5) -%}
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-        </svg>
-      {%- endfor -%}
-    </span>
+    <span class="cart-stars__row oce-stars" aria-hidden="true"></span>
     <span class="cart-stars__text">{{ stars_text }}</span>
   </div>
 {%- endif -%}
@@ -55,23 +49,17 @@
     margin-block-end: 4px;
   }
 
+  /* Stars in WhatsApp green (Theme settings: Cart) */
   .cart-stars__row {
-    display: inline-flex;
-    gap: 2px;
-    color: var(--cs-color, #14b554);
-  }
-
-  .cart-stars__row svg {
-    width: var(--cs-size, 15px);
-    height: var(--cs-size, 15px);
-    display: block;
+    --oce-star: var(--cs-size, 15px);
+    --oce-star-color: var(--cs-color, #25d366);
   }
 
   .cart-stars__text {
-    color: var(--cs-fg, #15803d);
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
+    color: var(--cs-fg, #121212);
+    font-size: 0.75rem;
+    font-weight: 750;
+    letter-spacing: 0.01em;
     line-height: 1.2;
   }
 {% endstylesheet %}

@@ -27,6 +27,12 @@
   # The Size filter is a US / UK / EU switch with one button per size, in the filter drawer and in the
   # desktop dropdown alike (facet-size-chips in assets/facets.js). The checkboxes below stay in the form,
   # hidden, as its inputs.
+  # Surface (FG, SG, AG, HG) shows each value as a round photo of the ground with its full name
+  assign is_surface = false
+  if filter.param_name contains 'surface'
+    assign is_surface = true
+  endif
+
   assign is_size_chips = false
   if is_swatch == false and is_image == false
     assign filter_label_downcase = filter.label | downcase
@@ -42,10 +48,14 @@
     data-disable-animation-on-desktop="true"
     data-close-with-escape="true"
   {% endif %}
-  open-by-default-on-mobile
-  {% if filter_style == 'vertical' %}
-    open
-    open-by-default-on-desktop
+  {% if in_drawer %}
+    data-drawer-focus
+  {% else %}
+    open-by-default-on-mobile
+    {% if filter_style == 'vertical' %}
+      open
+      open-by-default-on-desktop
+    {% endif %}
   {% endif %}
   data-filter-param-name="{{ filter.param_name | escape | replace: '.', '-' }}"
 >
@@ -94,7 +104,21 @@
             >
               {%- liquid
                 if active_value_count == 1
-                  echo filter.active_values[0].label
+                  assign status_label = filter.active_values[0].label
+                  if is_surface
+                    assign status_code = filter.active_values[0].value | downcase | strip
+                    case status_code
+                      when 'fg'
+                        assign status_label = 'Firm-Ground'
+                      when 'sg'
+                        assign status_label = 'Soft-Ground'
+                      when 'ag'
+                        assign status_label = 'Artificial-Grass'
+                      when 'hg'
+                        assign status_label = 'Hard-Ground'
+                    endcase
+                  endif
+                  echo status_label
                 elsif active_value_count > 1
                   echo active_value_count
                 endif
@@ -103,8 +127,13 @@
           </facet-status-component>
         {% endif %}
         <span class="svg-wrapper icon-caret icon-animated">
-          {{- 'icon-caret.svg' | inline_asset_content -}}
+          {{- 'icon-dropdown.svg' | inline_asset_content -}}
         </span>
+        {%- if in_drawer -%}
+          <span class="svg-wrapper facets__drill-close" aria-hidden="true">
+            {{- 'icon-close.svg' | inline_asset_content -}}
+          </span>
+        {%- endif -%}
       </div>
     </summary>
     <floating-panel-component
@@ -157,7 +186,7 @@
             endif
           endfor
 
-          if filter.type == 'boolean'
+          if filter.type == 'boolean' or is_surface
             assign should_use_pills = false
           endif
         %}
@@ -229,7 +258,7 @@
           %}
           <ul
             id="filters-list-{{ sectionId }}-{{ filter.param_name | escape | replace: '.', '-' }}"
-            class="facets__inputs-list{% if should_use_pills %} facets__inputs-list--grid{% endif %} list-unstyled{% if is_swatch %} facets__inputs-list--swatches{% if show_swatch_label %} facets__inputs-list--swatches-grid{% endif %}{% endif %}{% if is_image %} facets__inputs-list--images{% endif %}"
+            class="facets__inputs-list{% if should_use_pills %} facets__inputs-list--grid{% endif %} list-unstyled{% if is_swatch %} facets__inputs-list--swatches{% if show_swatch_label %} facets__inputs-list--swatches-grid{% endif %}{% endif %}{% if is_image %} facets__inputs-list--images{% endif %}{% if is_surface %} facets__inputs-list--surface{% endif %}"
             {% if is_swatch %}
               style="--swatch-columns: {{ swatch_columns }};"
             {% endif %}
@@ -365,6 +394,60 @@
                       </label>
                     </label>
                   </fieldset>
+                {% elsif is_surface %}
+                  {%- liquid
+                    assign surface_code = value.value | downcase | strip
+                    case surface_code
+                      when 'fg'
+                        assign surface_name = 'Firm-Ground'
+                      when 'sg'
+                        assign surface_name = 'Soft-Ground'
+                      when 'ag'
+                        assign surface_name = 'Artificial-Grass'
+                      when 'hg'
+                        assign surface_name = 'Hard-Ground'
+                      else
+                        assign surface_name = value.label
+                    endcase
+                    assign surface_image = 'surface-' | append: surface_code | append: '.webp'
+                  -%}
+                  <div
+                    class="checkbox surface-option"
+                    on:pointerenter="/prefetchPage"
+                    on:pointerleave="/cancelPrefetchPage"
+                  >
+                    <input
+                      type="checkbox"
+                      name="{{ value.param_name }}"
+                      value="{{ value.value }}"
+                      id="{{ input_id }}"
+                      class="checkbox__input"
+                      data-label="{{ surface_name }}"
+                      {% if value.active %}
+                        checked
+                      {% endif %}
+                      {% if is_disabled %}
+                        disabled
+                      {% endif %}
+                      ref="facetInputs[]"
+                    >
+                    <label
+                      class="surface-option__label"
+                      for="{{ input_id }}"
+                    >
+                      {%- if surface_name != value.label -%}
+                        <img
+                          class="surface-option__swatch"
+                          src="{{ surface_image | asset_url }}"
+                          alt=""
+                          width="40"
+                          height="40"
+                          loading="lazy"
+                        >
+                      {%- endif -%}
+                      <span class="surface-option__name">{{ surface_name }}</span>
+                    </label>
+                  </div>
                 {% else %}
                   {% if should_use_pills %}
                     <div
@@ -411,6 +494,8 @@
                     </div>
                   {% else %}
                     {% liquid
+                      # The brand written as a name: Adidas, not adidas
+                      assign value_label = value.label | replace: 'adidas', 'Adidas'
                       # Hidden inputs behind the size buttons never take focus when the drawer opens
                       assign checkbox_autofocus = autofocus
                       if is_size_chips
@@ -420,7 +505,7 @@
                     {% render 'checkbox',
                       name: value.param_name,
                       value: value.value,
-                      label: value.label,
+                      label: value_label,
                       checked: value.active,
                       id: input_id,
                       disabled: is_disabled,
@@ -478,6 +563,89 @@
 </accordion-custom>
 
 {% stylesheet %}
+  /* Surface: a round photo of the ground beside its full name; ringed when chosen */
+  .facets__inputs .facets__inputs-list.facets__inputs-list--surface {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    grid-template-columns: none;
+  }
+
+  .facets__inputs-list--surface > .facets__inputs-list-item {
+    width: auto;
+    min-width: 0;
+  }
+
+  .surface-option {
+    display: block;
+  }
+
+  .surface-option__name {
+    white-space: nowrap;
+  }
+
+  .surface-option .checkbox__input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+  }
+
+  .surface-option__label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-block: 5px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .surface-option__swatch {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 0 0 1px rgb(18 18 18 / 0.08);
+    transition: box-shadow 0.2s ease, transform 0.3s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  .surface-option__name {
+    font-weight: 450;
+    transition: font-weight 0.15s ease;
+  }
+
+  .surface-option .checkbox__input:checked + .surface-option__label .surface-option__swatch {
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #121212;
+  }
+
+  .surface-option .checkbox__input:checked + .surface-option__label .surface-option__name {
+    font-weight: 650;
+  }
+
+  .surface-option .checkbox__input:focus-visible + .surface-option__label .surface-option__swatch {
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #121212;
+  }
+
+  .surface-option .checkbox__input:disabled + .surface-option__label {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  @media (hover: hover) {
+    .surface-option__label:hover .surface-option__swatch {
+      transform: scale(1.06);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .surface-option__swatch {
+      transition: none;
+    }
+  }
+
   /* Size filter (drawer and desktop dropdown): US / UK / EU switch + one button per size */
   .size-facet {
     --size-facet-toggle-on: var(--brand-green);

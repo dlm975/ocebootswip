@@ -1,11 +1,64 @@
+{%- doc -%}
+  Breadcrumbs above the product photos: the boot's brand and its generation, each linking to its
+  collection, e.g. "Nike › Mercurial Vapor 17". The brand is the first word of the title (listings
+  use the shop as vendor); the generation is the boot's gen: tag. A boot with neither links to all
+  football boots. Matches the BreadcrumbList structured data (snippets/seo-product.liquid).
+{%- enddoc -%}
+
+{%- liquid
+  assign crumb_brand = ''
+  assign crumb_brand_collection = nil
+  assign crumb_first = product.title | split: ' ' | first | downcase
+  case crumb_first
+    when 'nike'
+      assign crumb_brand = 'Nike'
+      assign crumb_brand_collection = collections['nike']
+    when 'adidas'
+      assign crumb_brand = 'Adidas'
+      assign crumb_brand_collection = collections['adidas']
+    when 'puma'
+      assign crumb_brand = 'Puma'
+      assign crumb_brand_collection = collections['puma-1']
+    when 'mizuno'
+      assign crumb_brand = 'Mizuno'
+      assign crumb_brand_collection = collections['mizuno']
+  endcase
+
+  assign crumb_gen = nil
+  for tag in product.tags
+    if tag contains 'gen:'
+      assign crumb_gen_handle = tag | remove_first: 'gen:' | strip
+      assign crumb_gen = collections[crumb_gen_handle]
+      break
+    endif
+  endfor
+  assign crumb_gen_label = ''
+  if crumb_gen != blank
+    assign crumb_prefix = crumb_brand | append: ' '
+    assign crumb_gen_label = crumb_gen.title | replace: 'adidas', 'Adidas' | remove_first: crumb_prefix
+  endif
+-%}
+
 <nav class="breadcrumb" aria-label="Breadcrumb">
   <ol class="breadcrumb__list">
-    <li class="breadcrumb__item">
-      <a href="{{ routes.root_url }}" class="breadcrumb__link">Home</a>
-    </li>
-    <li class="breadcrumb__item breadcrumb__item--current" aria-current="page">
-      <a href="/collections/all-football-boots" class="breadcrumb__link">All Football Boots</a>
-    </li>
+    {%- if crumb_brand_collection != blank -%}
+      <li class="breadcrumb__item">
+        <a href="{{ crumb_brand_collection.url }}" class="breadcrumb__link">{{ crumb_brand }}</a>
+      </li>
+      {%- if crumb_gen_label != blank -%}
+        <li class="breadcrumb__item">
+          <a href="{{ crumb_gen.url }}" class="breadcrumb__link">{{ crumb_gen_label | escape }}</a>
+        </li>
+      {%- endif -%}
+    {%- elsif crumb_gen_label != blank -%}
+      <li class="breadcrumb__item">
+        <a href="{{ crumb_gen.url }}" class="breadcrumb__link">{{ crumb_gen.title | escape }}</a>
+      </li>
+    {%- else -%}
+      <li class="breadcrumb__item">
+        <a href="/collections/all-football-boots" class="breadcrumb__link">All Football Boots</a>
+      </li>
+    {%- endif -%}
   </ol>
 </nav>
 
@@ -17,41 +70,48 @@
     padding-inline: var(--padding-2xl, 32px);
   }
 
+  /* Phones: in line with the text under the photos */
+  @media screen and (max-width: 749px) {
+    .breadcrumb {
+      padding-inline: 16px;
+    }
+  }
+
   .breadcrumb__list {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 5px;
     list-style: none;
     margin: 0;
     padding: 0;
-    font-size: 0.76rem;
-    color: rgba(var(--color-foreground-rgb), 0.45);
+    font-family: var(--font-body--family);
+    font-size: 12px;
+    line-height: 1.3;
+    letter-spacing: 0.01em;
+    color: rgb(var(--color-foreground-rgb) / 0.6);
   }
 
   .breadcrumb__item {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 5px;
   }
 
   .breadcrumb__item:not(:last-child)::after {
-    content: '/';
-    opacity: 0.4;
+    content: '›';
   }
 
   .breadcrumb__link {
     color: inherit;
     text-decoration: none;
-    transition: color 0.15s;
   }
 
-  .breadcrumb__link:hover {
-    color: rgb(var(--color-foreground-rgb));
-  }
-
-  .breadcrumb__item--current .breadcrumb__link {
-    color: rgba(var(--color-foreground-rgb), 0.65);
-    font-weight: 500;
+  @media (hover: hover) {
+    .breadcrumb__link:hover {
+      color: rgb(var(--color-foreground-rgb) / 0.9);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
   }
 </style>

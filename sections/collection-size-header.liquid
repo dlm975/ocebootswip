@@ -27,6 +27,13 @@
   endfor
 
   assign heading = section.settings.heading | default: collection.title
+  # A sale collection's heading is written as the menu's "Sale": bold red
+  assign heading_lower = heading | downcase
+  assign handle_lower = collection.handle | downcase
+  assign is_sale = false
+  if heading_lower contains 'sale' or handle_lower contains 'sale' or handle_lower contains 'outlet' or handle_lower contains 'black-friday'
+    assign is_sale = true
+  endif
 -%}
 
 {% style %}
@@ -60,13 +67,13 @@
 
   #csh-{{ section.id }} .csh__heading {
     margin: 0;
-    font-family: {{ section.settings.heading_font.family }}, {{ section.settings.heading_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ section.settings.heading_font.family }}, {{ section.settings.heading_font.fallback_families }}{% endif %};
     font-weight: {{ section.settings.heading_font.weight }};
-    font-style: {{ section.settings.heading_font.style }};
+    font-style: {% if settings.brand_font %}normal{% else %}{{ section.settings.heading_font.style }}{% endif %};
     font-size: clamp(32px, 7vw, {{ section.settings.heading_size }}px);
     line-height: 0.95;
     letter-spacing: {{ section.settings.heading_letter_spacing | divided_by: 100.0 }}em;
-    {% if section.settings.uppercase %}text-transform: uppercase;{% endif %}
+    {% if section.settings.uppercase %}text-transform: none;{% endif %}
     color: var(--csh-text);
     overflow-wrap: anywhere;
     /* Trim the font's empty space above the capitals so the heading sits tight under the header */
@@ -107,9 +114,9 @@
 
   #csh-{{ section.id }} .csh__label {
     font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-transform: none;
   }
 
   /* US / UK / EU toggle switch */
@@ -136,8 +143,8 @@
     padding: 8px 14px;
     text-align: center;
     font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
+    font-weight: 600;
+    letter-spacing: 0.01em;
     border-radius: 999px;
     cursor: pointer;
     color: var(--csh-toggle-text);
@@ -235,7 +242,7 @@
     border: 0;
     padding: 0;
     font: inherit;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--csh-text);
     text-decoration: underline;
     text-underline-offset: 3px;
@@ -279,14 +286,103 @@
       border-radius: {{ section.settings.chip_radius | times: 0.8 | round }}px;
     }
   }
+  /* ---- The site's style (as the collection filters and the menus) ---- */
+
+  /* A sale heading: bold red, as "Sale" in the menu (lowercase, a capital first letter) */
+  #csh-{{ section.id }}.csh-section .csh__heading--sale {
+    color: #e8323c;
+    font-family: var(--font-oce, 'Inter', system-ui, sans-serif);
+    font-weight: 850;
+    font-variation-settings: 'opsz' 32;
+    letter-spacing: -0.04em;
+    text-transform: lowercase;
+  }
+
+  #csh-{{ section.id }}.csh-section .csh__heading--sale::first-letter {
+    text-transform: uppercase;
+  }
+
+  /* US / UK / EU as big bold words, the chosen one dark and the others faded (no switch) */
+  #csh-{{ section.id }}.csh-section .csh__toggle {
+    display: flex;
+    gap: 18px;
+    width: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  #csh-{{ section.id }}.csh-section .csh__thumb {
+    display: none;
+  }
+
+  #csh-{{ section.id }}.csh-section .csh__toggle label {
+    min-width: 0;
+    height: auto;
+    padding: 0;
+    background: none;
+    color: #121212;
+    font-family: var(--font-oce, 'Inter', system-ui, sans-serif);
+    font-size: 2.25rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    opacity: 0.22;
+    transition: opacity 0.2s ease;
+  }
+
+  #csh-{{ section.id }}.csh-section .csh__toggle input:checked + label {
+    background: none;
+    color: #121212;
+    opacity: 1;
+  }
+
+  #csh-{{ section.id }}.csh-section .csh__label {
+    color: rgb(18 18 18 / 0.55);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  /* The sizes: bold numbers, no boxes; a chosen size a dark pill */
+  #csh-{{ section.id }}.csh-section .csh__chip {
+    height: 40px;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    box-shadow: none;
+    color: #121212;
+    font-family: var(--font-oce, 'Inter', system-ui, sans-serif);
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (hover: hover) {
+    #csh-{{ section.id }}.csh-section .csh__chip:hover:not(:disabled, [aria-pressed='true']) {
+      background: #f1f1f1;
+    }
+  }
+
+  #csh-{{ section.id }}.csh-section .csh__chip[aria-pressed='true'] {
+    background: #121212;
+    color: #ffffff;
+  }
+
+  #csh-{{ section.id }}.csh-section .csh__chip:disabled {
+    opacity: 0.25;
+  }
 {% endstyle %}
 
 <div id="csh-{{ section.id }}" class="csh-section">
   <div class="csh">
     {% if section.settings.heading_tag == 'h1' %}
-      <h1 class="csh__heading">{{ heading }}</h1>
+      <h1 class="csh__heading{% if is_sale %} csh__heading--sale{% endif %}">{{ heading }}</h1>
+      {%- render 'size-heading' -%}
     {% else %}
-      <h2 class="csh__heading">{{ heading }}</h2>
+      <h2 class="csh__heading{% if is_sale %} csh__heading--sale{% endif %}">{{ heading }}</h2>
+      {%- render 'size-heading' -%}
     {% endif %}
 
     {% if section.settings.show_description and collection.description != blank %}
@@ -449,8 +545,10 @@
       groups() {
         const map = new Map();
         for (const v of this.values) {
-          const size = parse(v.value)[this.sys];
+          let size = parse(v.value)[this.sys];
           if (!size) continue;
+          // A third (EU 41 1/3) is the same boot size as the nearest whole one (EU 41): one chip
+          if (/ [12]\/3$/.test(size)) size = String(Math.round(toNumber(size)));
           if (!map.has(size)) map.set(size, { size, values: [], count: 0 });
           const g = map.get(size);
           g.values.push(v.value);
@@ -647,7 +745,7 @@
       "type": "color",
       "id": "toggle_on_color",
       "label": "Toggle selected",
-      "default": "#14b554"
+      "default": "#25D366"
     },
     {
       "type": "color",
@@ -659,7 +757,7 @@
       "type": "color",
       "id": "toggle_track_color",
       "label": "Toggle background",
-      "default": "#E9E9EB"
+      "default": "#64748B40"
     },
     {
       "type": "color",
@@ -691,13 +789,13 @@
       "type": "color",
       "id": "text_color",
       "label": "Text",
-      "default": "#000000"
+      "default": "#121212"
     },
     {
       "type": "color",
       "id": "accent_color",
       "label": "Selected size / toggle",
-      "default": "#000000"
+      "default": "#121212"
     },
     {
       "type": "color",

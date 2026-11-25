@@ -1,0 +1,240 @@
+{%- comment -%}
+  Popular categories: a small label over a stack of big category names in the site's heading
+  style, each a link, sized so the whole list fits in one screen's height. Pointing at one
+  (desktop) steps the others back and slides a round iridescent arrow in beside it. Phones: big
+  tappable names. Simple state changes, so CSS transitions (house timing).
+{%- endcomment -%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<div
+  class="section section--page-width color-{{ section.settings.color_scheme }} popcat spacing-style"
+  style="{% render 'spacing-style', settings: section.settings %}"
+>
+  {%- if section.settings.heading != blank -%}
+    <h2 class="popcat__label">{{ section.settings.heading | escape }}</h2>
+  {%- endif -%}
+
+  <ul
+    class="popcat__list"
+    role="list"
+    style="--popcat-count: {{ section.blocks.size | at_least: 1 }};"
+  >
+    {%- for block in section.blocks -%}
+      {%- if block.settings.title != blank -%}
+        <li {{ block.shopify_attributes }}>
+          <a
+            class="popcat__link"
+            href="{{ block.settings.link | default: '#' }}"
+          >
+            <span class="popcat__name">{{ block.settings.title | escape }}</span>
+            <span
+              class="popcat__arrow"
+              aria-hidden="true"
+            >
+              {%- render 'gicon', name: 'arrow_forward', size: 26 -%}
+            </span>
+          </a>
+        </li>
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+</div>
+
+{% stylesheet %}
+  .popcat__label {
+    margin: 0 0 clamp(14px, 2.5vw, 28px);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: rgb(var(--color-foreground-rgb) / 0.55);
+  }
+
+  .popcat__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .popcat__link {
+    display: inline-flex;
+    align-items: center;
+    gap: clamp(12px, 2vw, 28px);
+    padding-block: 0.06em;
+    color: var(--color-foreground);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* The site's heading style, as big as the screen allows: never wider than the page allows,
+     and the whole list (label and spacing included) within one screen's height */
+  .popcat__name {
+    font-size: min(
+      clamp(2.25rem, 9vw, 7rem),
+      calc((100vh - 190px) / (var(--popcat-count) * 1.14))
+    );
+    font-size: min(
+      clamp(2.25rem, 9vw, 7rem),
+      calc((100svh - 190px) / (var(--popcat-count) * 1.14))
+    );
+    font-weight: 750;
+    font-variation-settings: 'opsz' 32;
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+    color: currentColor;
+    transition: opacity 0.3s ease;
+  }
+
+  /* The round arrow: metallic iridescent (assets/base.css), waiting off to the side */
+  .popcat__arrow {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: clamp(40px, 0.62em, 72px);
+    height: clamp(40px, 0.62em, 72px);
+    font-size: min(clamp(2.25rem, 9vw, 7rem), calc((100svh - 190px) / (var(--popcat-count) * 1.14)));
+    border-radius: 50%;
+    opacity: 0;
+    transform: translateX(-14px) scale(0.85);
+    transition:
+      opacity 0.25s ease,
+      transform 0.55s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  /* Its holographic finish lives in assets/base.css, shared with the buy buttons. Here the glint
+     doesn't loop: it sweeps across once, just after the arrow slides in on hover. */
+  .popcat .popcat__link .popcat__arrow::after {
+    animation: none;
+  }
+
+  @media (hover: hover) {
+    .popcat .popcat__link:hover .popcat__arrow::after {
+      animation: popcat-glint 0.8s cubic-bezier(0.45, 0, 0.25, 1) 0.35s 1 both;
+    }
+  }
+
+  @keyframes popcat-glint {
+    from {
+      transform: translateX(-110%);
+    }
+    to {
+      transform: translateX(110%);
+    }
+  }
+
+  .popcat__arrow svg {
+    position: relative;
+    width: 55%;
+    height: 55%;
+  }
+
+
+
+  /* Pointed at: the others step back, the arrow slides in */
+  @media (hover: hover) {
+    .popcat__list:has(.popcat__link:hover) .popcat__link:not(:hover) .popcat__name {
+      opacity: 0.18;
+    }
+
+    .popcat__link:hover .popcat__arrow,
+    .popcat__link:focus-visible .popcat__arrow {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+  }
+
+  .popcat__link:active .popcat__name {
+    opacity: 0.6;
+  }
+
+  .popcat__link:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 6px;
+    border-radius: 6px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .popcat__arrow {
+      display: none;
+    }
+
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .popcat__name,
+    .popcat__arrow {
+      transition: none;
+      animation: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Popular categories",
+  "tag": "section",
+  "class": "section-popular-categories",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Label",
+      "default": "Popular categories"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Name",
+          "default": "Football boots"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Popular categories",
+      "blocks": [{ "type": "category" }, { "type": "category" }, { "type": "category" }]
+    }
+  ]
+}
+{% endschema %}

@@ -12,7 +12,7 @@
     "size_header": {
       "type": "collection-size-header",
       "settings": {
-        "heading": "BLACK FRIDAY SALE",
+        "heading": "Black Friday sale",
         "heading_font": "oswald_n7",
         "heading_size": 136,
         "heading_size_mobile": 64,
@@ -26,15 +26,15 @@
         "default_system": "us",
         "chip_radius": 10,
         "background_color": "#ffffff",
-        "text_color": "#000000",
-        "accent_color": "#000000",
+        "text_color": "#121212",
+        "accent_color": "#121212",
         "accent_text_color": "#ffffff",
         "padding_top": 20,
         "padding_bottom": 12,
-        "toggle_on_color": "#14b554",
+        "toggle_on_color": "#25D366",
         "toggle_on_text_color": "#FFFFFF",
-        "toggle_track_color": "#E9E9EB",
-        "toggle_text_color": "#8E8E93"
+        "toggle_track_color": "#64748B40",
+        "toggle_text_color": "#64748B"
       }
     },
     "main": {
@@ -51,7 +51,7 @@
             "show_swatch_label": false,
             "show_filter_label": false,
             "enable_sorting": true,
-            "enable_grid_density": true,
+            "enable_grid_density": false,
             "inherit_color_scheme": true,
             "color_scheme": "",
             "padding-block-start": 0,
@@ -111,7 +111,7 @@
                 "wrap": "balance",
                 "color": "var(--color-foreground)",
                 "background": false,
-                "background_color": "#00000026",
+                "background_color": "#12121226",
                 "corner_radius": 0,
                 "padding-block-start": 4,
                 "padding-block-end": 0,
@@ -165,10 +165,19 @@
         "padding-block-end": 32,
         "desktop_columns": 4
       }
+    },
+    "collection_seo": {
+      "type": "collection-seo",
+      "settings": {
+        "color_scheme": "scheme-1",
+        "padding-block-start": 24,
+        "padding-block-end": 40
+      }
     }
   },
   "order": [
     "size_header",
-    "main"
+    "main",
+    "collection_seo"
   ]
 }

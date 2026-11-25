@@ -1,0 +1,295 @@
+{%- comment -%}
+  The mini product page the wishlist's Buy buttons open (sections/wishlist.liquid), fetched from the
+  product's own URL with section_id=wishlist-quickview: every photo, the title, price, condition and
+  sizes, to pick a size and add it to the cart without leaving the wishlist.
+  Its styles and script live in sections/wishlist.liquid. Not for adding to pages: it has no presets.
+
+  Sizes are stored like "US 10.5 - UK 9.5 - EU 44.5"; each is shown in the shopper's size system
+  (the one the collection pages remember), with the other two underneath once chosen.
+{%- endcomment -%}
+
+{%- liquid
+  assign size_option = product.options_by_name['Size']
+  assign condition_option = product.options_by_name['Condition']
+  assign size_index = 0
+  assign condition_index = 0
+  for option in product.options_with_values
+    assign name = option.name | downcase
+    if name == 'size'
+      assign size_index = forloop.index
+    elsif name contains 'condition'
+      assign condition_index = forloop.index
+    endif
+  endfor
+  assign size_at = size_index | minus: 1
+  assign condition_at = condition_index | minus: 1
+  assign one_condition = true
+  if condition_option and condition_option.values.size > 1
+    assign one_condition = false
+  endif
+  assign available_count = product.variants | where: 'available' | size
+  assign preselect = nil
+  if available_count == 1
+    assign preselect = product.variants | where: 'available' | first
+  endif
+  assign shown_variant = preselect | default: product.selected_or_first_available_variant
+  assign images = product.media | where: 'media_type', 'image'
+  if images.size == 0
+    assign images = product.media
+  endif
+-%}
+
+{%- if product -%}
+  <div
+    class="wlq__product"
+    data-wlq-product
+    data-product-id="{{ product.id }}"
+    data-handle="{{ product.handle }}"
+  >
+    <div class="wlq__gallery">
+      <div
+        class="wlq__track"
+        data-wlq-track
+        tabindex="0"
+        aria-label="Photos"
+      >
+        {%- for media in images -%}
+          <figure class="wlq__slide" data-wlq-slide>
+            {{
+              media.preview_image
+              | image_url: width: 1200
+              | image_tag:
+                widths: '400, 600, 800, 1000, 1200',
+                sizes: '(min-width: 990px) 520px, 100vw',
+                loading: 'eager',
+                class: 'wlq__image',
+                alt: media.alt | default: product.title
+            }}
+          </figure>
+        {%- endfor -%}
+      </div>
+      {%- if images.size > 1 -%}
+        <span class="wlq__counter" data-wlq-counter>1 / {{ images.size }}</span>
+        <div
+          class="wlq__thumbs"
+          role="list"
+        >
+          {%- for media in images -%}
+            <button
+              type="button"
+              class="wlq__thumb{% if forloop.first %} is-active{% endif %}"
+              data-wlq-thumb="{{ forloop.index0 }}"
+              aria-label="Photo {{ forloop.index }} of {{ images.size }}"
+              role="listitem"
+            >
+              {{
+                media.preview_image
+                | image_url: width: 160
+                | image_tag: widths: '100, 160', sizes: '64px', loading: 'eager', class: 'wlq__thumb-image', alt: ''
+              }}
+            </button>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+    <div class="wlq__info">
+      <h2
+        class="wlq__title"
+        id="wlq-title"
+      >
+        {{ product.title | escape }}
+      </h2>
+
+      <div class="wlq__price">
+        <span
+          class="wlq__amount"
+          data-wlq-price
+        >
+          {{- shown_variant.price | money_with_currency -}}
+        </span>
+        {%- if shown_variant.compare_at_price > shown_variant.price -%}
+          <s
+            class="wlq__was"
+            data-wlq-was
+          >
+            {%- render 'was-price', cents: shown_variant.compare_at_price, with_currency: settings.currency_code_enabled_product_cards -%}
+          </s>
+        {%- else -%}
+          <s
+            class="wlq__was"
+            data-wlq-was
+            hidden
+          ></s>
+        {%- endif -%}
+      </div>
+
+      {%- if condition_option -%}
+        <p class="wlq__condition">
+          <span class="wlq__label">Condition</span>
+          <span
+            class="wlq__condition-value"
+            data-wlq-condition
+          >
+            {%- if one_condition -%}
+              {{ condition_option.values.first | escape }}
+            {%- elsif preselect -%}
+              {{ preselect.options[condition_at] | escape }}
+            {%- else -%}
+              Choose a size
+            {%- endif -%}
+          </span>
+        </p>
+      {%- endif -%}
+
+      {%- if size_option -%}
+        <div class="wlq__sizes-head">
+          <span class="wlq__label">Size</span>
+          <div
+            class="wlq__systems"
+            role="group"
+            aria-label="Size system"
+          >
+            <button
+              type="button"
+              data-wlq-sys="us"
+            >
+              US
+            </button>
+            <button
+              type="button"
+              data-wlq-sys="uk"
+            >
+              UK
+            </button>
+            <button
+              type="button"
+              data-wlq-sys="eu"
+            >
+              EU
+            </button>
+          </div>
+        </div>
+      {%- endif -%}
+
+      <div
+        class="wlq__sizes"
+        role="radiogroup"
+        aria-label="Size"
+      >
+        {%- for variant in product.variants -%}
+          {%- liquid
+            if size_index > 0
+              assign size_value = variant.options[size_at]
+            else
+              assign size_value = variant.title
+            endif
+            assign variant_condition = ''
+            if condition_index > 0
+              assign variant_condition = variant.options[condition_at]
+            endif
+            assign parts = size_value | split: ' - '
+          -%}
+          <button
+            type="button"
+            class="wlq__size{% if preselect.id == variant.id %} is-selected{% endif %}"
+            role="radio"
+            aria-checked="{% if preselect.id == variant.id %}true{% else %}false{% endif %}"
+            data-wlq-variant="{{ variant.id }}"
+            data-price="{{ variant.price | money_with_currency | escape }}"
+            {% if variant.compare_at_price > variant.price %}
+              data-was="{% render 'was-price', cents: variant.compare_at_price, with_currency: settings.currency_code_enabled_product_cards %}"
+            {% endif %}
+            data-condition="{{ variant_condition | escape }}"
+            data-full="{{ size_value | escape }}"
+            {% unless variant.available %}
+              disabled
+            {% endunless %}
+          >
+            {%- if parts.size == 3 -%}
+              {%- for part in parts -%}
+                {%- assign sys = part | split: ' ' | first | downcase -%}
+                <span
+                  class="wlq__size-label"
+                  data-sys="{{ sys }}"
+                >
+                  {{- part | escape -}}
+                </span>
+              {%- endfor -%}
+            {%- else -%}
+              <span class="wlq__size-label wlq__size-label--plain">{{ size_value | escape }}</span>
+            {%- endif -%}
+            {%- unless one_condition -%}
+              <span class="wlq__size-note">{{ variant_condition | escape }}</span>
+            {%- endunless -%}
+            {%- unless variant.available -%}
+              <span class="wlq__size-note">Sold</span>
+            {%- endunless -%}
+          </button>
+        {%- endfor -%}
+      </div>
+      <p
+        class="wlq__size-full"
+        data-wlq-full
+      >
+        {%- if preselect -%}
+          {%- if size_index > 0 -%}
+            {{ preselect.options[size_at] | escape }}
+          {%- else -%}
+            {{ preselect.title | escape }}
+          {%- endif -%}
+        {%- endif -%}
+      </p>
+
+      <button
+        type="button"
+        class="wlq__add"
+        data-wlq-add
+        {% unless preselect %}
+          disabled
+        {% endunless %}
+      >
+        <span data-wlq-add-text>
+          {%- if available_count == 0 -%}
+            Sold out
+          {%- elsif preselect -%}
+            Checkout now
+          {%- else -%}
+            Choose a size
+          {%- endif -%}
+        </span>
+      </button>
+      <p
+        class="wlq__error"
+        data-wlq-error
+        role="alert"
+        hidden
+      ></p>
+
+      {%- if product.description != blank -%}
+        <details class="wlq__details">
+          <summary>
+            <span>Details</span>
+            {%- render 'gicon', name: 'keyboard_arrow_down', class: 'wlq__details-icon', size: 22 -%}
+          </summary>
+          <div class="wlq__description rte">{{ product.description }}</div>
+        </details>
+      {%- endif -%}
+
+      <a
+        class="wlq__more"
+        href="{{ product.url }}"
+      >
+        View product page
+        {%- render 'gicon', name: 'arrow_forward', size: 18 -%}
+      </a>
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Wishlist quick view",
+  "settings": []
+}
+{% endschema %}

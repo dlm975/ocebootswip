@@ -137,6 +137,11 @@
   endcapture
   assign sizes = sizes | strip
 -%}
+<script
+  src="{{ 'pdp-pinch-zoom.js' | asset_url }}"
+  type="module"
+  defer
+></script>
 {%- if has_image_drop -%}
   <script
     src="{{ 'drag-zoom-wrapper.js' | asset_url }}"
@@ -579,11 +584,17 @@
       overflow: hidden;
       transform: scale(var(--drag-zoom-scale, 1))
         translate(var(--drag-zoom-translate-x, 0), var(--drag-zoom-translate-y, 0));
+      /* Pinching and dragging glide a touch behind the fingers, smoothing out jitter */
+      transition: transform 0.16s cubic-bezier(0.25, 0.8, 0.35, 1);
+
+      @media (prefers-reduced-motion: reduce) {
+        transition: none;
+      }
     }
 
-    /* Double-tap zoom eases in and out; pinching and dragging track the fingers directly */
+    /* Double-tap zoom eases in and out more slowly */
     .product-media__drag-zoom-wrapper[data-animating] .product-media__image {
-      transition: transform 0.25s ease-out;
+      transition: transform 0.45s cubic-bezier(0.3, 0.7, 0.3, 1);
 
       @media (prefers-reduced-motion: reduce) {
         transition: none;

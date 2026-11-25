@@ -16,7 +16,7 @@
       font-size: {{ section.settings.text_size }}px;
       {% endif %}
       {% if section.settings.override_fonts %}
-      font-family: {{ section.settings.text_font.family }}, {{ section.settings.text_font.fallback_families }};
+      font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ section.settings.text_font.family }}, {{ section.settings.text_font.fallback_families }}{% endif %};
       font-weight: {{ section.settings.text_font.weight }};
       {% endif %}
       {% if section.settings.text_line_height != 'inherit' %}line-height: {{ section.settings.text_line_height }};{% endif %}
@@ -40,7 +40,7 @@
     font-size: {{ section.settings.text_size }}px;
     {% endif %}
     {% if section.settings.override_fonts %}
-    font-family: {{ section.settings.text_font.family }}, {{ section.settings.text_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ section.settings.text_font.family }}, {{ section.settings.text_font.fallback_families }}{% endif %};
     font-weight: {{ section.settings.text_font.weight }};
     {% endif %}
     {% if section.settings.text_line_height != 'inherit' %}line-height: {{ section.settings.text_line_height }};{% endif %}
@@ -82,7 +82,7 @@
       font-size: {{ section.settings.headline_size }}px;
       {% endif %}
       {% if section.settings.override_fonts %}
-      font-family: {{ section.settings.headline_font.family }}, {{ section.settings.headline_font.fallback_families }};
+      font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ section.settings.headline_font.family }}, {{ section.settings.headline_font.fallback_families }}{% endif %};
       font-weight: {{ section.settings.headline_font.weight }};
       {% endif %}
       {% if section.settings.headline_line_height != 'inherit' %}line-height: {{ section.settings.headline_line_height }};{% endif %}
@@ -572,7 +572,7 @@
     {
         "type": "color",
         "id": "text_color",
-        "default": "#111",
+        "default": "#121212",
         "label": "Text Color",
         "visible_if": "{{ section.settings.override_text_colors == true }}"
     },
@@ -713,7 +713,7 @@
     {
         "type": "color",
         "id": "container_border_color",
-        "default": "#888",
+        "default": "#64748B",
         "label": "Border Color on Container"
     }
 ,
@@ -725,7 +725,7 @@
     {
       "type": "color_background",
       "id": "cover_background",
-      "default": "linear-gradient(164deg, #111 0%, #555 100%)",
+      "default": "linear-gradient(164deg, #121212 0%, #64748B 100%)",
       "label": "Cover Background"
     },
     {
@@ -788,7 +788,7 @@
     {
       "type": "color_background",
       "id": "button_background_color",
-      "default": "linear-gradient(164deg, #111 0%, #333 100%)",
+      "default": "linear-gradient(164deg, #121212 0%, #1F2937 100%)",
       "label": "Primary Button Background Color"
     },
     {
@@ -834,7 +834,7 @@
     {
       "type": "color",
       "id": "button_border_color",
-      "default": "#111",
+      "default": "#121212",
       "label": "Border Color"
     },
     {

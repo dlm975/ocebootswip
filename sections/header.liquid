@@ -74,8 +74,13 @@
       assign order = 'logo,search,menu,localization,mobile_search,actions'
     endif
   endif
+  # Desktop search: an inline underlined field (predictive search) or the original icon button
+  assign desktop_search_style = search_style
+  if search_style != 'none' and section.settings.search_style_desktop == 'field'
+    assign desktop_search_style = 'bar'
+  endif
   capture search
-    render 'search', style: search_style, class: search_class
+    render 'search', style: desktop_search_style, class: search_class
   endcapture
 
   # Skip mobile search under specific conditions:
@@ -156,17 +161,15 @@
   endif
 %}
 
-<script type="application/ld+json">
-  {
-    "@context": "http://schema.org",
-    "@type": "Organization",
-    "name": {{ shop.name | json }},
-    {% if settings.logo %}
-      "logo": {{ settings.logo | image_url: width: 500 | prepend: "https:" | json }},
-    {% endif %}
-    "url": {{ request.origin | append: page.url | json }}
-  }
-</script>
+{%- comment -%} The business's structured data is in snippets/seo-site (every page) {%- endcomment -%}
+
+{%- if section.settings.invert_logo -%}
+  {% style %}
+    #header-component .header-logo__image-container--original .header-logo__image {
+      filter: invert(1);
+    }
+  {% endstyle %}
+{%- endif -%}
 
 <header-component
   id="header-component"
@@ -567,23 +570,6 @@
     }
   }
 
-  /* Floating pill header */
-  .header-section {
-    padding: 10px 16px;
-    background: transparent;
-  }
-
-  .header__row--top {
-    border-radius: 20px;
-    box-shadow: 0 4px 20px rgb(0 0 0 / 0.1);
-  }
-
-  /* Keep box-shadow on sticky state */
-  .header-section:has(> #header-component[sticky='always']) .header__row--top,
-  .header-section:has(> #header-component[sticky='scroll-up'][data-sticky-state='active']) .header__row--top {
-    box-shadow: 0 4px 24px rgb(0 0 0 / 0.14);
-  }
-
   /* When the header is transparent, add a margin to a potential header-section below it */
   .header-section:has(.header[transparent]) + .shopify-section {
     margin-top: var(--header-height);
@@ -610,6 +596,415 @@
     }
   }
 
+  /* ---------------------------------------------------------------
+   * Header layout
+   *   1024px and wider: two rows. Logo | search field | account, bag
+   *                     on top; category navigation underneath.
+   *   Below 1024px:     one row. Logo | search, account, bag, menu.
+   * Flat, full width, no pill. Icons and text use the scheme's
+   * heading colour so they read as solid black on white.
+   * --------------------------------------------------------------- */
+  .header {
+    --header-gutter: clamp(12px, 4.1vw, 32px);
+    --header-action: 44px;
+    --header-icon: 24px;
+  }
+
+  .header-section {
+    padding: 0;
+  }
+
+  .header__row {
+    --color-foreground: var(--color-foreground-heading);
+    --color-foreground-rgb: var(--color-foreground-heading-rgb);
+
+    color: var(--color-foreground);
+  }
+
+  #header-component .header__row--top {
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  /* A soft shadow under the whole header bar, so it lifts off the page as it rides along (no hard
+     line along its edge) */
+  #header-component {
+    box-shadow: 0 8px 20px -12px rgb(18 18 18 / 0.28);
+    transition: box-shadow 0.2s ease;
+  }
+
+  /* The menu open: it hangs straight off the bar as one piece, so no shadow between them */
+  #header-component:has(.menu-drawer-container[open]),
+  #header-component:has(.menu-drawer-container[open]) .header__row--top {
+    box-shadow: none !important;
+  }
+
+  /* Collection pages: the lower row is see-through (the dock and the currency tab hang from the
+     bar), so the shadow sits under the top bar instead; the dock pieces, drawn above it, cover it
+     where they join */
+  #header-component:has(.header-menu--dock) .header__row--top {
+    box-shadow: 0 8px 20px -12px rgb(18 18 18 / 0.28);
+  }
+
+  /* Gutters are set here, not by the page-width grid, so both rows share one left edge */
+  #header-component .header__row .header__columns {
+    padding-inline: var(--header-gutter);
+  }
+
+  #header-component .header-logo {
+    justify-content: flex-start;
+    margin-inline: 0;
+    min-width: 0;
+  }
+
+  /* ---- Actions: one size for every icon -------------------------- */
+  #header-component :is(.header-actions__action, .account-button, .header__icon--summary) {
+    width: var(--header-action);
+    height: var(--header-action);
+    padding: 0;
+    color: var(--color-foreground);
+  }
+
+  #header-component .header-actions__action .svg-wrapper,
+  #header-component .account-button__icon {
+    width: var(--header-icon);
+    height: var(--header-icon);
+  }
+
+  #header-component :is(.header-actions__action, .account-button__icon) svg {
+    width: var(--header-icon);
+    height: var(--header-icon);
+  }
+
+  /* The menu glyph is drawn on a 14px grid; this size matches the optical weight of the 20px-grid icons */
+  #header-component .header__icon--summary .header-drawer-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  #header-component :is(.header-actions__action, .account-button, .header__icon--summary):focus-visible,
+  #header-component .account-popover__summary:focus-visible .account-button {
+    outline: 2px solid var(--color-foreground);
+    outline-offset: -4px;
+    border-radius: 50%;
+  }
+
+  #header-component .account-popover__summary:focus-visible {
+    outline: 0;
+  }
+
+  /* ---- Bag: centred in its 44px target like the account and menu icons ---- */
+  #header-component .header-actions__cart-icon {
+    --cart-bubble-size: 16px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--header-action);
+  }
+
+  #header-component .header-actions__cart-icon .svg-wrapper {
+    display: flex;
+  }
+
+  /* The bag and account icons are filled glyphs that fill more of their box than the outline
+     search and menu icons; 22px matches their weight */
+  #header-component .header-actions__cart-icon .svg-wrapper,
+  #header-component .header-actions__cart-icon svg,
+  #header-component .account-button__icon,
+  #header-component .account-button__icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  #header-component .header-actions__cart-icon .svg-wrapper,
+  #header-component .header-actions__cart-icon--has-cart svg {
+    mask: none;
+  }
+
+  #header-component .header-actions__cart-icon .cart-bubble {
+    /* cart-icon is 44px tall with the 22px bag centred; the bag's lower-left corner is at about
+       (4px, 31px), so the badge's centre sits on it */
+    top: auto;
+    right: auto;
+    bottom: 5px;
+    left: -5px;
+    width: var(--cart-bubble-size);
+    height: var(--cart-bubble-size);
+    animation: none;
+  }
+
+  #header-component .header-actions__cart-icon .cart-bubble__background {
+    background-color: var(--color-foreground);
+    box-shadow: 0 0 0 2px var(--color-background);
+  }
+
+  #header-component .header-actions__cart-icon .cart-bubble__background::after {
+    content: none;
+  }
+
+  #header-component .header-actions__cart-icon .cart-bubble__text {
+    color: var(--color-background);
+    font-size: 10px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---- Below 1024px: one row ------------------------------------- */
+  @media screen and (max-width: 1023px) {
+    #header-component .header__row--top .header__column {
+      display: contents;
+    }
+
+    #header-component .header__row--top .header__columns {
+      --header-template-columns: minmax(0, 1fr) repeat(3, auto);
+
+      grid-template-areas: 'logo search actions menu';
+      grid-template-columns: var(--header-template-columns);
+      column-gap: 0;
+      align-items: center;
+      min-height: 60px;
+      padding-block: 0;
+
+      /* The touch targets are wider than their icons: pull the row in so the menu icon's
+         right edge, not its touch target, lines up with the gutter. */
+      padding-inline-end: max(0px, calc(var(--header-gutter) - (var(--header-action) - var(--header-icon)) / 2));
+    }
+
+    #header-component .header__row--top .header-logo {
+      grid-area: logo;
+      justify-self: start;
+    }
+
+    /* Keep the logo's own aspect ratio; shrink it a little on very narrow phones */
+    #header-component .header__row--top .header-logo__image {
+      height: min(var(--header-logo-image-height-mobile), 14.5vw);
+      width: auto;
+      max-width: 100%;
+    }
+
+    #header-component .header__row--top .search-action {
+      grid-area: search;
+      margin-inline: 0;
+    }
+
+    #header-component .header__row--top header-actions {
+      grid-area: actions;
+      justify-self: auto;
+      margin-inline: 0;
+    }
+
+    #header-component .header__row--top .header__drawer {
+      grid-area: menu;
+      min-height: 0;
+    }
+
+    /* Desktop-only parts. The theme's utility classes switch at 750px; the header switches at 1024px. */
+    #header-component :is(.header__row--bottom, header-menu, .account-popover, .dropdown-localization) {
+      display: none !important; /* stylelint-disable-line declaration-no-important */
+    }
+  }
+
+  @media screen and (min-width: 750px) and (max-width: 1023px) {
+    #header-component :is(.header__drawer, .search-action:not(.header-search)).desktop\:hidden {
+      display: flex !important; /* stylelint-disable-line declaration-no-important */
+    }
+
+    #header-component .account-drawer {
+      display: block;
+    }
+  }
+
+  @media screen and (max-width: 359px) {
+    .header {
+      --header-action: 40px;
+      --header-icon: 22px;
+    }
+  }
+
+  /* ---- 1024px and wider: two rows -------------------------------- */
+  @media screen and (min-width: 1024px) {
+    #header-component .header__row--top .header__columns {
+      --header-template-columns: auto minmax(0, 1fr) auto;
+
+      grid-template-areas: 'left center right';
+      grid-template-columns: var(--header-template-columns);
+      column-gap: clamp(32px, 4vw, 72px);
+      align-items: center;
+      min-height: 88px;
+      padding-block: 0;
+      padding-inline-end: calc(var(--header-gutter) - (var(--header-action) - var(--header-icon)) / 2);
+    }
+
+    #header-component .header__row--top .header__column--left {
+      gap: 0;
+    }
+
+    #header-component .header__row--top .header__column--center {
+      justify-content: center;
+    }
+
+    #header-component .header__row--top .header__column--right {
+      gap: 0;
+    }
+
+    #header-component .header-search {
+      max-width: 960px;
+      margin-inline: 0;
+    }
+
+    #header-component .header__row--top header-actions {
+      margin-inline-start: 0;
+      gap: 4px;
+    }
+
+    /* Row 2: categories, left edge on the logo's left edge */
+    #header-component .header__row--bottom .header__columns {
+      --header-template-columns: minmax(0, 1fr) auto;
+
+      grid-template-areas: 'left right';
+      grid-template-columns: var(--header-template-columns);
+      align-items: center;
+      min-height: 48px;
+      padding-block: 0 4px;
+    }
+
+    #header-component .header__row--bottom .menu-list {
+      --menu-horizontal-gap: 32px;
+    }
+
+    #header-component .header__row--bottom .menu-list__link {
+      min-height: 44px;
+      font-size: 0.9375rem;
+      letter-spacing: 0;
+    }
+
+    /* Solid black labels; the hovered, open or current category gets an underline instead of the others dimming */
+    #header-component .header__row--bottom .menu-list .menu-list__link {
+      color: var(--color-foreground);
+    }
+
+    #header-component .header__row--bottom .menu-list__link .menu-list__link-title {
+      text-decoration: underline 1.5px transparent;
+      text-underline-offset: 6px;
+      transition: text-decoration-color var(--animation-speed) var(--animation-easing);
+    }
+
+    #header-component .header__row--bottom .menu-list__list-item:is(:hover, :focus-within) .menu-list__link-title,
+    #header-component .header__row--bottom .menu-list__link[aria-expanded='true'] .menu-list__link-title,
+    #header-component .header__row--bottom .menu-list__link--active .menu-list__link-title {
+      text-decoration-color: currentColor;
+    }
+
+    #header-component .header__row--bottom .menu-list__link:focus-visible {
+      outline: 2px solid var(--color-foreground);
+      outline-offset: 2px;
+    }
+
+    /* Dropdown panels: white, full width, content starting under the hovered category */
+    #header-component .menu-list__submenu-inner {
+      padding-inline: 0;
+      --submenu-padding-block-start: 28px;
+      --submenu-padding-block-end: 36px;
+    }
+
+    #header-component .menu-list__submenu .mega-menu {
+      display: block;
+      width: 100%;
+      padding-inline: calc(var(--header-gutter) + var(--submenu-offset, 0px)) var(--header-gutter);
+    }
+
+    #header-component .menu-list__submenu .mega-menu > * {
+      padding-inline: 0;
+    }
+
+    #header-component .menu-list__submenu .mega-menu__grid {
+      display: block;
+    }
+
+    #header-component .menu-list__submenu .mega-menu__list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px 56px;
+    }
+
+    #header-component .menu-list__submenu .mega-menu__column {
+      min-width: 140px;
+    }
+
+    /* A long flat list (e.g. sizes) flows into columns instead of one tall stack */
+    #header-component .menu-list__submenu .mega-menu__column:not(:has(.mega-menu__link--parent)):has(> div:nth-child(9)) {
+      column-count: 3;
+      column-gap: 48px;
+    }
+
+    #header-component .menu-list__submenu .mega-menu__column > div {
+      break-inside: avoid;
+    }
+
+    #header-component .menu-list__submenu .mega-menu__link {
+      padding-block: 6px;
+      font-size: 0.9375rem;
+      color: rgb(var(--color-foreground-rgb) / 0.75);
+    }
+
+    #header-component .menu-list__submenu .mega-menu__link:is(:hover, :focus-visible) {
+      color: var(--color-foreground);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    /* Brand drill-down (three-level links): same left edge as the other dropdowns, under its category */
+    #header-component .menu-list__submenu .brand-drill--desktop,
+    #header-component .menu-list__submenu .size-drill--desktop {
+      padding-inline: calc(var(--header-gutter) + var(--submenu-offset, 0px)) var(--header-gutter);
+    }
+
+    #header-component .menu-list__submenu .mega-menu__link--parent {
+      margin-block-end: 4px;
+      font-weight: 600;
+      color: var(--color-foreground);
+    }
+  }
+
+  /* Desktop: the header bar's bottom corners are rounded. While a dropdown is open the bar's
+     corners square off so the bar and the dropdown read as one panel, and the dropdown carries
+     the rounding (blocks/_header-menu). */
+  @media screen and (min-width: 1024px) {
+    #header-component {
+      --header-radius: 20px;
+    }
+
+    #header-component .header__row--bottom,
+    #header-component .header__row--top:not(:has(~ .header__row--bottom)) {
+      border-end-start-radius: var(--header-radius);
+      border-end-end-radius: var(--header-radius);
+      transition: border-radius var(--submenu-animation-speed, 0.2s) var(--ease-out-cubic, ease);
+    }
+
+    /* The bar sits over what follows it, so its rounded corners show that colour (the promo bar
+       tucks up under it by the corner radius) instead of white page behind white bar */
+    :where(.header-section) {
+      position: relative;
+      z-index: var(--layer-sticky, 10);
+    }
+
+    .header-section + .shopify-section:has(> .announcement-bar--promo) {
+      margin-block-start: -20px;
+      padding-block-start: 20px;
+    }
+
+    #header-component .header__row:has(
+        .menu-list__link[aria-haspopup][aria-expanded='true'],
+        .menu-list__submenu:hover
+      ) {
+      border-end-start-radius: 0;
+      border-end-end-radius: 0;
+      /* Square off at once as the dropdown appears (it opens at full size), so its top edge never
+         shows past rounded corners; rounding back after it closes still eases */
+      transition: none;
+    }
+  }
 {% endstylesheet %}
 
 {% schema %}
@@ -702,12 +1097,34 @@
     },
     {
       "type": "select",
+      "id": "search_style_desktop",
+      "label": "Desktop search",
+      "info": "Below 1024px the search icon is always used.",
+      "options": [
+        {
+          "value": "field",
+          "label": "Search field"
+        },
+        {
+          "value": "icon",
+          "label": "Icon"
+        }
+      ],
+      "default": "field",
+      "visible_if": "{{ section.settings.show_search }}"
+    },
+    {
+      "type": "select",
       "id": "search_position",
       "label": "t:settings.search_position",
       "options": [
         {
           "value": "left",
           "label": "t:options.left"
+        },
+        {
+          "value": "center",
+          "label": "t:options.center"
         },
         {
           "value": "right",
@@ -947,6 +1364,13 @@
       "id": "color_scheme_top",
       "label": "t:settings.default",
       "default": "primary"
+    },
+    {
+      "type": "checkbox",
+      "id": "invert_logo",
+      "label": "Invert logo colours",
+      "info": "For a light-on-dark logo file shown on a light header. The file itself is unchanged.",
+      "default": false
     },
     {
       "type": "color_scheme",

@@ -16,12 +16,28 @@
 
   assign keyword = block.settings.match_keyword | strip | downcase
   assign title_lower = p.title | downcase
+  assign brand_lower = p.metafields.custom.brand.value | downcase
 
+  # Boots only (they have a Size option): no add-ons on the studs or socks themselves
+  assign is_boot = false
+  for option_name in p.options
+    assign option_lower = option_name | downcase
+    if option_lower == 'size'
+      assign is_boot = true
+    endif
+  endfor
+
+  # The brand's own list (adidas studs on adidas boots) by the boot's brand, or its title
   assign picks = block.settings.products
   assign matched = false
-  if keyword != blank and title_lower contains keyword
-    assign matched = true
-    assign picks = block.settings.products_alt
+  if keyword != blank
+    if title_lower contains keyword or brand_lower == keyword
+      assign matched = true
+      assign picks = block.settings.products_alt
+    endif
+  endif
+  if is_boot == false and request.design_mode == false
+    assign picks = nil
   endif
 
   assign limit = block.settings.max_items | default: 2
@@ -92,7 +108,7 @@
         <a class="pa__media" href="{{ item.url }}" tabindex="-1" aria-hidden="true">
           {%- if item.featured_image -%}
             <img
-              src="{{ item.featured_image | image_url: width: 160 }}"
+              src="{{ item.featured_image | image_url: width: 320 }}"
               alt=""
               width="60"
               height="60"
@@ -156,9 +172,72 @@
     "
     {{ block.shopify_attributes }}
   >
-    <span class="pa__heading">{{ heading }}</span>
+    <span class="pa__heading">
+      <span>{{ heading }}</span>
+      {%- comment -%} An iridescent plus, raised like the size keys {%- endcomment -%}
+      <svg class="pa__plus" viewBox="0 0 34 34" aria-hidden="true" focusable="false">
+        <defs>
+          <linearGradient id="pa-irid-{{ block.id }}" x1="3" y1="3" x2="31" y2="31" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#ff9fd6"/>
+            <stop offset="0.28" stop-color="#c7a8ff"/>
+            <stop offset="0.52" stop-color="#8fd0ff"/>
+            <stop offset="0.76" stop-color="#8ef2d4"/>
+            <stop offset="1" stop-color="#fff0a0"/>
+          </linearGradient>
+          <linearGradient id="pa-gloss-{{ block.id }}" x1="0" y1="4" x2="0" y2="20" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#ffffff" stop-opacity="0.9"/>
+            <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        {%- comment -%} Each layer drawn twice: a black stroke, then the fill over its inner half, so only the outer edge shows {%- endcomment -%}
+        <g transform="translate(-1.5 2.5)" fill="none" stroke="#121212" stroke-width="3.2">
+          <rect x="13" y="4" width="8" height="26" rx="3"/>
+          <rect x="4" y="13" width="26" height="8" rx="3"/>
+        </g>
+        <g class="pa__plus-side" transform="translate(-1.5 2.5)" fill="#a9a3cf">
+          <rect x="13" y="4" width="8" height="26" rx="3"/>
+          <rect x="4" y="13" width="26" height="8" rx="3"/>
+        </g>
+        <g fill="none" stroke="#121212" stroke-width="3.2">
+          <rect x="13" y="4" width="8" height="26" rx="3"/>
+          <rect x="4" y="13" width="26" height="8" rx="3"/>
+        </g>
+        <g fill="url(#pa-irid-{{ block.id }})">
+          <rect x="13" y="4" width="8" height="26" rx="3"/>
+          <rect x="4" y="13" width="26" height="8" rx="3"/>
+        </g>
+        <g fill="url(#pa-gloss-{{ block.id }})">
+          <rect x="14" y="5" width="6" height="11" rx="2.5"/>
+          <rect x="5" y="14" width="24" height="3.5" rx="1.75"/>
+        </g>
+      </svg>
+    </span>
     <div class="pa__list">{{ cards }}</div>
   </div>
+
+  {%- comment -%}
+    After this boot is added to the cart (the main button or the floating bar), these add-ons are
+    offered once more in a popup before the cart opens.
+  {%- endcomment -%}
+  <dialog class="pa-pop" data-pa-pop data-product-id="{{ p.id }}" aria-labelledby="pa-pop-title-{{ block.id }}">
+    <div class="pa-pop__scrim" data-pa-pop-close></div>
+    <div class="pa-pop__card" data-pa-pop-card>
+      <p class="pa-pop__done">
+        {%- render 'gicon', name: 'check', class: 'pa-pop__tick', size: 16 -%}
+        <span>In your cart</span>
+      </p>
+      <h2 class="pa-pop__title" id="pa-pop-title-{{ block.id }}">Add these also?</h2>
+      <div class="pa__list pa-pop__list">{{ cards }}</div>
+      <div class="pa-pop__actions">
+        <button type="button" class="pa-pop__go" data-pa-pop-close>
+          <span>Continue</span>
+          <span class="pa-pop__go-disk oce-disk" aria-hidden="true">
+            {%- render 'gicon', name: 'arrow_forward', size: 14 -%}
+          </span>
+        </button>
+      </div>
+    </div>
+  </dialog>
 {%- elsif request.design_mode -%}
   {%- comment -%}
     Editor only. With nothing chosen this renders nothing at all on the
@@ -180,26 +259,220 @@
 {%- endif -%}
 
 <style>
+  /* The site's newer look: no grey panel; a bold heading over raised off-white cards (like the size
+     keys), each with the holographic + Add key */
   .pa {
     display: block;
     width: 100%;
     box-sizing: border-box;
-    background: var(--pa-bg, #f5f5f5);
-    color: var(--pa-fg, #111);
-    border-radius: var(--pa-radius, 16px);
-    padding: 7px;
+    background: none;
+    color: var(--pa-fg, #121212);
+    padding: 0;
     font-family: var(--font-body--family);
     font-style: var(--font-body--style);
   }
 
+  /* "Add-ons:" in big bold type */
   .pa__heading {
-    display: block;
-    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
     font-family: var(--font-heading--family);
     font-style: var(--font-heading--style);
-    font-size: 0.7rem;
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.035em;
+  }
+
+  .pa__plus {
+    flex: none;
+    width: 0.95em;
+    height: 0.95em;
+    overflow: visible;
+    filter: drop-shadow(-1px 3px 4px rgb(90 80 160 / 0.28));
+    transition: filter 0.6s ease;
+  }
+
+  @media (hover: hover) {
+    .pa:hover .pa__plus {
+      filter: drop-shadow(-1px 3px 4px rgb(90 80 160 / 0.28)) hue-rotate(60deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pa__plus {
+      transition: none;
+    }
+  }
+
+  /* ---- The popup after adding the boot to the cart ---- */
+  .pa-pop {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 16px;
+    border: 0;
+    background: transparent;
+    overflow: hidden;
+  }
+
+  .pa-pop[open] {
+    display: grid;
+    place-items: center;
+  }
+
+  .pa-pop::backdrop {
+    background: transparent;
+  }
+
+  .pa-pop__scrim {
+    position: absolute;
+    inset: 0;
+    background: rgb(255 255 255 / 0.6);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+
+  .pa-pop__card {
+    position: relative;
+    width: min(440px, 100%);
+    padding: 20px 18px 16px;
+    border-radius: 24px;
+    background: #ffffff;
+    color: #121212;
+    box-shadow: 0 0 0 1px rgb(18 18 18 / 0.06), 0 24px 60px rgb(18 18 18 / 0.22);
+  }
+
+  .pa-pop__done {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 6px;
+    color: rgb(18 18 18 / 0.6);
+    font-size: 0.8125rem;
+    font-weight: 650;
+  }
+
+  .pa-pop__tick {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    padding: 2px;
+    border-radius: 50%;
+    background: #25d366;
+    color: #ffffff;
+  }
+
+  .pa-pop__title {
+    margin: 0 0 14px;
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+  }
+
+  .pa-pop__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+
+  /* Continue: small bold text and a small holographic disk with an arrow */
+  .pa-pop__go {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0 6px 6px;
+    border: 0;
+    background: none;
+    color: #121212;
+    font: inherit;
+    font-size: 0.9375rem;
+    font-weight: 750;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .pa-pop__go-disk {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    transition: transform 0.25s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  .pa-pop__go-disk svg {
+    position: relative;
+    width: 14px;
+    height: 14px;
+  }
+
+  @media (hover: hover) {
+    .pa-pop__go:hover .pa-pop__go-disk {
+      transform: translateX(3px);
+    }
+  }
+
+  .pa-pop__go:active .pa-pop__go-disk {
+    transform: scale(0.92);
+  }
+
+  /* The popup is as tall as what is in it; the add-ons inside are big, one per row */
+  .pa-pop__card {
+    display: flex;
+    flex-direction: column;
+    width: min(420px, 100%);
+    max-height: calc(100svh - 32px);
+    padding: 20px 18px 14px;
+    box-sizing: border-box;
+  }
+
+  .pa-pop .pa-pop__list {
+    grid-template-columns: 1fr;
+    align-content: center;
+    gap: 10px;
+  }
+
+  .pa-pop__list .pa__card {
+    gap: 10px 14px;
+    padding: 12px;
+    border-radius: 18px;
+  }
+
+  .pa-pop__list .pa__media {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+  }
+
+  .pa-pop__list .pa__title {
+    font-size: 1.0625rem;
     font-weight: 700;
-    letter-spacing: 0.01em;
+    letter-spacing: -0.01em;
+  }
+
+  .pa-pop__list .pa__add {
+    min-height: 42px;
+    padding: 0 14px;
+    font-size: 0.9375rem;
+  }
+
+  /* An add-on added from the popup: its button shows it */
+  .pa__add.is-added {
+    pointer-events: none;
+    opacity: 0.55;
   }
 
   /* Side by side rather than the cart's side-scroller: the details column
@@ -208,7 +481,8 @@
   .pa__list {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 6px;
+    gap: 10px;
+    padding-inline-start: 2px;
   }
 
   /* Thumbnail and title on the top row, the button spanning underneath
@@ -223,22 +497,28 @@
       'media info'
       'action action';
     align-items: center;
-    gap: 4px 7px;
-    padding: 5px;
-    border-radius: calc(var(--pa-radius, 16px) - 6px);
-    background: var(--pa-card-bg, #fff);
-    border: 1px solid var(--pa-card-border, #e6e6e6);
+    gap: 6px 8px;
+    margin-block-end: 3px;
+    padding: 8px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #ffffff 0%, #f7f7f5 100%);
+    border: 1px solid #d4d4d8;
+    box-shadow:
+      inset 0 1px 0 #ffffff,
+      -2px 3px 0 #d4d4d8,
+      -2px 4px 8px rgb(18 18 18 / 0.06);
     box-sizing: border-box;
     min-width: 0;
   }
 
   .pa__media {
     grid-area: media;
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
     overflow: hidden;
-    background: rgb(0 0 0 / 4%);
+    background: #ffffff;
+    box-shadow: 0 0 0 1px rgb(18 18 18 / 0.06);
     display: block;
   }
 
@@ -301,7 +581,7 @@
 
   .pa__now {
     flex: 0 0 auto;
-    font-weight: 700;
+    font-weight: 600;
   }
 
   /* Set explicitly rather than left to inherit: buttons do not take
@@ -322,10 +602,10 @@
     padding: 0 7px;
     border: none;
     border-radius: var(--brand-radius-md);
-    background: var(--pa-btn-bg, #111);
+    background: var(--pa-btn-bg, #121212);
     color: var(--pa-btn-fg, #fff);
     font-size: 0.66rem;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1;
     text-decoration: none;
     white-space: nowrap;
@@ -404,8 +684,18 @@
             })
           );
 
-          /* Show the shopper it landed. The drawer is the theme's own
-             component, so only ask if it is actually there and openable. */
+          /* In the popup: the button shows it landed, then the popup closes and the cart opens
+             (closePop), so closing the cart goes back to the product page, not the popup.
+             Elsewhere: show the shopper it landed in the drawer (the theme's own component, so
+             only ask if it is actually there and openable). */
+          var inPop = btn.closest('[data-pa-pop]');
+          if (inPop) {
+            btn.classList.add('is-added');
+            var label = btn.querySelector('.pa__add-label');
+            if (label) label.textContent = '\u2713 Added';
+            setTimeout(function () { closePop(inPop); }, reduced() ? 0 : 450);
+            return;
+          }
           var drawer = document.querySelector('cart-drawer-component');
           if (drawer && typeof drawer.open === 'function') drawer.open();
 
@@ -416,6 +706,75 @@
           btn.removeAttribute('disabled');
         });
     });
+
+    /* ---- The popup: offered once a boot from this page lands in the cart ----
+       Listening before the cart drawer does (capture), so the drawer waits behind the popup and
+       opens as it closes. Once per page. */
+    var offered = false;
+    var restoreAutoOpen = false;
+    var reduced = function () { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; };
+    var EASE = 'cubic-bezier(0.3, 0.7, 0.3, 1)';
+
+    document.addEventListener('cart:update', function (event) {
+      var data = event.detail && event.detail.data;
+      if (offered || !data || data.source !== 'product-form-component' || data.didError) return;
+      var pop = document.querySelector('[data-pa-pop]');
+      if (!pop || String(data.productId) !== pop.dataset.productId) return;
+      if (!pop.querySelector('[data-pa-add], .pa__add')) return;
+      offered = true;
+      var drawer = document.querySelector('cart-drawer-component');
+      if (drawer && drawer.hasAttribute('auto-open')) {
+        drawer.removeAttribute('auto-open');
+        restoreAutoOpen = true;
+      }
+      pop.showModal();
+      if (!reduced()) {
+        var card = pop.querySelector('[data-pa-pop-card]');
+        var scrim = pop.querySelector('.pa-pop__scrim');
+        scrim.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, easing: 'linear' });
+        card.animate(
+          [{ opacity: 0, transform: 'translateY(16px) scale(0.96)' }, { opacity: 1, transform: 'none' }],
+          { duration: 550, easing: EASE }
+        );
+      }
+    }, true);
+
+    function closePop(pop) {
+      if (!pop.open || pop.dataset.closing) return;
+      pop.dataset.closing = '1';
+      var finish = function () {
+        pop.close();
+        delete pop.dataset.closing;
+        var drawer = document.querySelector('cart-drawer-component');
+        if (drawer) {
+          if (restoreAutoOpen) drawer.setAttribute('auto-open', '');
+          restoreAutoOpen = false;
+          if (typeof drawer.open === 'function') drawer.open();
+        }
+      };
+      if (reduced()) return finish();
+      var card = pop.querySelector('[data-pa-pop-card]');
+      var scrim = pop.querySelector('.pa-pop__scrim');
+      scrim.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, easing: 'linear', fill: 'forwards' });
+      card.animate(
+        [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(8px) scale(0.98)' }],
+        { duration: 200, easing: 'cubic-bezier(0.4, 0, 1, 1)', fill: 'forwards' }
+      ).finished.then(function () {
+        finish();
+        pop.getAnimations({ subtree: true }).forEach(function (a) { a.cancel(); });
+      });
+    }
+
+    document.addEventListener('click', function (event) {
+      var closer = event.target.closest('[data-pa-pop-close]');
+      if (closer) closePop(closer.closest('[data-pa-pop]'));
+    });
+    document.addEventListener('cancel', function (event) {
+      if (event.target.matches && event.target.matches('[data-pa-pop]')) {
+        event.preventDefault();
+        closePop(event.target);
+      }
+    }, true);
   })();
 </script>
 
@@ -432,7 +791,7 @@
       "type": "text",
       "id": "heading",
       "label": "Heading",
-      "default": "Add to your order"
+      "default": "Add-ons:"
     },
     {
       "type": "range",
@@ -509,13 +868,13 @@
       "type": "color",
       "id": "background",
       "label": "Background",
-      "default": "#f5f5f5"
+      "default": "#F1F5F9"
     },
     {
       "type": "color",
       "id": "text_color",
       "label": "Text",
-      "default": "#111111"
+      "default": "#121212"
     },
     {
       "type": "color",
@@ -527,13 +886,13 @@
       "type": "color",
       "id": "card_border",
       "label": "Card border",
-      "default": "#e6e6e6"
+      "default": "#64748B40"
     },
     {
       "type": "color",
       "id": "button_background",
       "label": "Button background",
-      "default": "#111111"
+      "default": "#121212"
     },
     {
       "type": "color",

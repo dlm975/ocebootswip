@@ -47,9 +47,9 @@
     assign pct = 50
   endif
 
-  assign track = settings.cart_ship_track | default: '#e6e6e6'
-  assign fill = settings.cart_ship_fill | default: '#14b554'
-  assign fg = settings.cart_ship_text_color | default: '#15803d'
+  assign track = settings.cart_ship_track | default: '#64748B40'
+  assign fill = settings.cart_ship_fill | default: '#25D366'
+  assign fg = settings.cart_ship_text_color | default: '#121212'
   assign pending_fill = settings.cart_ship_pending_fill | default: '#d1a300'
   assign pending_fg = settings.cart_ship_pending_text_color | default: '#8a6d00'
 
@@ -79,14 +79,12 @@
     "
   >
     <p class="cart-ship__text" role="status">
+      {{ message }}
       {%- if qualified -%}
         <span class="cart-ship__tick" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="13" height="13">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
+          {%- render 'gicon', name: 'check', size: 13 -%}
         </span>
       {%- endif -%}
-      {{ message }}
     </p>
 
     {%- comment -%}
@@ -102,11 +100,13 @@
         aria-valuenow="{{ pct }}"
         aria-label="{{ message | strip_html | escape }}"
       >
-        <span class="cart-ship__fill"></span>
+        <span class="cart-ship__fill oce-foil-fill"></span>
       </div>
 
       <span class="cart-ship__check{% if pct >= 50 %} cart-ship__check--hit{% endif %}" aria-hidden="true"></span>
-      <span class="cart-ship__plane" aria-hidden="true">&#9992;&#65039;</span>
+      <span class="cart-ship__plane oce-disk" aria-hidden="true">
+        {%- render 'gicon', name: 'local_shipping', size: 14 -%}
+      </span>
     </div>
   </div>
 {%- endif -%}
@@ -120,42 +120,68 @@
   }
 
   .cart-ship__text {
-    margin: 0 0 6px;
+    margin: 0 0 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 5px;
     text-align: center;
-    color: var(--cs-fg, #15803d);
-    font-size: var(--cs-size, var(--cart-font-size--sm, 0.8rem));
-    font-weight: 600;
+    color: var(--cs-fg, #121212);
+    font-size: var(--cs-size, var(--cart-font-size--sm, 0.8125rem));
+    font-weight: 750;
     line-height: 1.3;
   }
 
+  /* Unlocked: the message much bigger, ending in a raised green disk with a white tick */
+  .cart-ship--done .cart-ship__text {
+    gap: 0.35em;
+    font-size: 1.375rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
   .cart-ship__tick {
-    display: inline-flex;
+    display: inline-grid;
     flex-shrink: 0;
+    place-items: center;
+    width: 1.15em;
+    height: 1.15em;
+    border-radius: 50%;
+    color: #ffffff;
+    /* A domed coin: lit from the top left, a darker rim, and its edge showing below */
+    background:
+      radial-gradient(circle at 34% 28%, rgb(255 255 255 / 0.55) 0%, rgb(255 255 255 / 0) 42%),
+      radial-gradient(circle at 50% 50%, #2fe076 0%, #25d366 55%, #15a24c 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.6),
+      inset 0 -1.5px 0 rgb(0 0 0 / 0.16),
+      -1px 2px 0 #0e8a3e,
+      -2px 5px 10px rgb(21 130 64 / 0.35);
   }
 
   /* Sized in em so the tick grows with the message rather than staying
      at the 13px in its markup. */
   .cart-ship__tick svg {
-    width: 1em;
-    height: 1em;
+    width: 0.72em;
+    height: 0.72em;
+    filter: drop-shadow(0 1px 0 rgb(0 0 0 / 0.15));
   }
 
   /* Padded so the plane and the checkpoint, which both stand proud of the
      track, are not clipped by the card above or the list below. */
   .cart-ship__rail {
     position: relative;
-    padding-block: 9px;
+    margin-inline: 12px;
+    padding-block: 13px;
   }
 
   .cart-ship__track {
     position: relative;
-    height: 6px;
+    height: 8px;
     border-radius: 999px;
-    background: var(--cs-track, #e6e6e6);
+    background: rgb(18 18 18 / 0.08);
+    box-shadow: inset 0 1px 2px rgb(18 18 18 / 0.08);
     overflow: hidden;
   }
 
@@ -169,27 +195,34 @@
     height: 9px;
     margin: -4.5px 0 0 -4.5px;
     border-radius: 50%;
-    background: var(--cs-track, #e6e6e6);
-    box-shadow: 0 0 0 2px rgb(255 255 255 / 85%);
+    background: #d4d4d8;
+    box-shadow: 0 0 0 2px rgb(255 255 255 / 0.9);
     transition: background-color 0.3s ease;
   }
 
   .cart-ship__check--hit {
-    background: var(--cs-fill, #14b554);
+    background: #8f84dc;
   }
 
-  /* Rides the head of the fill, at the glyph's own angle. */
+  /* A holographic disk with the truck rides the head of the fill */
   .cart-ship__plane {
     position: absolute;
-    left: var(--cs-pct, 0%);
+    left: clamp(13px, var(--cs-pct, 0%), calc(100% - 13px));
     top: 50%;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
     transform: translate(-50%, -50%);
-    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
-    font-size: 15px;
-    line-height: 1;
-    filter: drop-shadow(0 1px 2px rgb(0 0 0 / 25%));
-    transition: left 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+    transition: left 0.55s cubic-bezier(0.3, 0.7, 0.3, 1);
     pointer-events: none;
+  }
+
+  .cart-ship__plane svg {
+    position: relative;
+    width: 15px;
+    height: 15px;
   }
 
   /* Animated rather than snapped, so adding a qualifying item visibly
@@ -200,8 +233,7 @@
     height: 100%;
     width: var(--cs-pct, 0%);
     border-radius: inherit;
-    background: var(--cs-fill, #14b554);
-    transition: width 0.45s cubic-bezier(0.32, 0.72, 0, 1), background-color 0.3s ease;
+    transition: width 0.55s cubic-bezier(0.3, 0.7, 0.3, 1);
   }
 
   @media (prefers-reduced-motion: reduce) {

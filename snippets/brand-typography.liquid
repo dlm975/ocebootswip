@@ -1,0 +1,227 @@
+{%- doc -%}
+  OCEBOOTS brand typography: Inter display, upright and mixed case (Option A).
+
+  Inter is loaded from Google Fonts as a variable font with the optical-size axis (opsz 14-32),
+  which Shopify's built-in Inter doesn't have. Rendered in <head> after theme-styles-variables and
+  color-schemes, so the :root variables below replace the ones Horizon builds from
+  Theme settings > Typography; every preset (h1-h6, paragraph, buttons, menus) reads them.
+
+  Weights are a touch under the original Option A spec (800 -> 750, 600 -> 560, 500 -> 480).
+
+  Roles:
+    Hero / page headings  750, opsz 32, -0.04em, line-height 0.95
+    Product title (PDP)   750, opsz 32, -0.03em, line-height 1.02, 27px
+    Prices                400, tabular figures, -0.01em (PDP 22px); compare-at muted, struck
+    Size buttons          480
+    Buttons, add to cart  560
+    Collection card titles 700, 13px; card prices 12px
+    Body                  400, 15px, line-height 1.55
+
+  Everything is upright and mixed case. The BFSALE "% OFF" badge keeps its Oswald styling.
+  Turned off with Theme settings > Typography > "Use Inter display brand font".
+{%- enddoc -%}
+
+{%- if settings.brand_font -%}
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap"
+  >
+
+  {% style %}
+    :root {
+      --font-oce: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+      /* Horizon's four type families */
+      --font-body--family: var(--font-oce);
+      --font-body--style: normal;
+      --font-body--weight: 400;
+      --font-subheading--family: var(--font-oce);
+      --font-subheading--style: normal;
+      --font-subheading--weight: 400;
+      --font-heading--family: var(--font-oce);
+      --font-heading--style: normal;
+      --font-heading--weight: 700;
+      --font-accent--family: var(--font-oce);
+      --font-accent--style: normal;
+      --font-accent--weight: 480;
+
+      /* Body: 15px, 1.55 */
+      --font-paragraph--family: var(--font-oce);
+      --font-paragraph--style: normal;
+      --font-paragraph--weight: 400;
+      --font-paragraph--size: 0.9375rem;
+      --font-paragraph--line-height: 1.55;
+      --font-paragraph--case: none;
+
+      /* Headings: upright, mixed case; h1 is the hero / page heading */
+      --font-h1--family: var(--font-oce);
+      --font-h1--style: normal;
+      --font-h1--weight: 750;
+      --font-h1--line-height: 0.95;
+      --font-h1--letter-spacing: -0.04em;
+      --font-h1--case: none;
+      --font-h2--family: var(--font-oce);
+      --font-h2--style: normal;
+      --font-h2--weight: 700;
+      --font-h2--letter-spacing: -0.02em;
+      --font-h2--case: none;
+      --font-h3--family: var(--font-oce);
+      --font-h3--style: normal;
+      --font-h3--weight: 700;
+      --font-h3--letter-spacing: -0.02em;
+      --font-h3--case: none;
+      --font-h4--family: var(--font-oce);
+      --font-h4--style: normal;
+      --font-h4--weight: 650;
+      --font-h4--letter-spacing: -0.01em;
+      --font-h4--case: none;
+      --font-h5--family: var(--font-oce);
+      --font-h5--style: normal;
+      --font-h5--weight: 650;
+      --font-h5--letter-spacing: -0.01em;
+      --font-h5--case: none;
+      --font-h6--family: var(--font-oce);
+      --font-h6--style: normal;
+      --font-h6--weight: 560;
+      --font-h6--letter-spacing: 0;
+      --font-h6--case: none;
+
+      /* Buttons */
+      --button-font-family-primary: var(--font-oce);
+      --button-font-family-secondary: var(--font-oce);
+      --button-font-weight-primary: 560;
+      --button-font-weight-secondary: 560;
+      --button-text-case-primary: none;
+      --button-text-case-secondary: none;
+
+      /* No slanted fake italics where the old Inter Italic is still asked for */
+      font-synthesis: none;
+    }
+
+    body {
+      font-family: var(--font-oce);
+      font-optical-sizing: auto;
+    }
+
+    /* Upright, mixed case, one family everywhere. Custom sections pick their own fonts (Oswald,
+       Inter Italic) and caps in the editor, so this overrides them; the BFSALE badge is left alone. */
+    body *:not(.bfsale-badge:not(.sale-badge)) {
+      font-family: var(--font-oce) !important; /* stylelint-disable-line declaration-no-important */
+      font-style: normal !important; /* stylelint-disable-line declaration-no-important */
+      text-transform: none !important; /* stylelint-disable-line declaration-no-important */
+    }
+
+    /* ---- Hero / page headings: 750, opsz 32 ---- */
+    :root:root :is(h1, .h1.h1, .text-block.h1 > *, .bfrh__heading) {
+      font-weight: 750;
+      font-variation-settings: 'opsz' 32;
+      letter-spacing: -0.04em;
+      line-height: 0.95;
+    }
+
+    :root:root .bfrh__offer {
+      font-weight: 600;
+      font-variation-settings: 'opsz' 32;
+      letter-spacing: -0.02em;
+    }
+
+    /* ---- Product title on the product page: 750, opsz 32, 27px ---- */
+    :root:root:root :is(.product-information, .product-details, .view-product-title) h1,
+    :root:root:root .ps__title {
+      font-weight: 750;
+      font-variation-settings: 'opsz' 32;
+      letter-spacing: -0.03em;
+      line-height: 1.02;
+    }
+
+    :root:root:root :is(.product-information, .product-details, .view-product-title) h1 {
+      font-size: 27px;
+    }
+
+    /* ---- Prices: never bold, tabular figures ---- */
+    :root :is(
+        .price,
+        .compare-at-price,
+        .unit-price,
+        .bfsale-price,
+        .bfsale-rrp__amount,
+        .pa__now,
+        .cart-items__price,
+        .cart__total-value,
+        .announcement-bar__countdown
+      ) {
+      font-weight: 400 !important; /* stylelint-disable-line declaration-no-important */
+      letter-spacing: -0.01em;
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: 'tnum' 1;
+    }
+
+    /* Sale price in the foreground colour; "was" price muted and struck; "Now" label muted */
+    :root :is(.bfsale-price.price, .price) {
+      color: var(--color-foreground-heading, #121212);
+    }
+
+    /* "Was" price muted; the struck line is the theme's own (a diagonal on sale prices) */
+    :root :is(.bfsale-rrp__amount, .compare-at-price) {
+      color: rgb(var(--color-foreground-rgb) / 0.5);
+    }
+
+    :root .bfsale-price:not(.price) {
+      color: rgb(var(--color-foreground-rgb) / 0.6);
+      font-size: 0.85em;
+    }
+
+    /* Card prices: 12px, a step under the bold name. The "was" price is rounded to whole units
+       (snippets/was-price.liquid); <price-fit> still shrinks a sale line that doesn't fit its card. */
+    :root:root product-card [ref='priceContainer'],
+    :root:root product-card [ref='priceContainer'] :is(.price, .compare-at-price, .card-sale-price, .card-sale-price__label) {
+      font-size: 12px;
+    }
+
+    /* Product page price: 22px */
+    :root:root :is(.product-information, .product-details) :is(.price, .bfsale-price.price) {
+      font-size: 22px;
+    }
+
+    /* ---- Size buttons and variant pickers: 480 ---- */
+    :root :is(
+        .ps__size-btn,
+        .ps__soleplate-btn__label,
+        .sbz-size-btn,
+        .sbz-sys,
+        .pill-option__value,
+        .psb__pill-label,
+        .variant-option__button-label
+      ) {
+      font-weight: 480;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0;
+    }
+
+    /* ---- Buttons and add to cart: 560 ---- */
+    :root :is(
+        .button,
+        .button-secondary,
+        button.shopify-payment-button__button--unbranded,
+        .add-to-cart-text__content,
+        .bfrh__button,
+        .ps__buy-label,
+        .cc-card__cta,
+        .igw-follow-btn,
+        .sbz-shop-btn,
+        .pa__add-label
+      ) {
+      font-weight: 560;
+      letter-spacing: 0;
+    }
+
+    /* ---- Collection, search and homepage product cards: 13px, bold ---- */
+    :root:root .product-card [class*='product_title'],
+    :root:root .product-card [class*='product_title'] > * {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+    }
+  {% endstyle %}
+{%- endif -%}

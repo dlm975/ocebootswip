@@ -123,10 +123,6 @@
 </div>
 
 <div class="cart__ctas">
-  {% comment %}
-    The wrapper exists purely to give the wick a positioned box matching
-    the button exactly, so the fuse can trace its perimeter.
-  {% endcomment %}
   <div class="cart__checkout-wick">
     <button
       type="submit"
@@ -156,7 +152,6 @@
       {%- endif -%}
     </button>
 
-    {% render 'cart-wick' %}
   </div>
 
   {% if additional_checkout_buttons and settings.show_accelerated_checkout_buttons %}

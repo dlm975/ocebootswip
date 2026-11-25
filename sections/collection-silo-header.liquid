@@ -1,0 +1,279 @@
+{%- comment -%}
+  Silo (and brand) collection header: the collection's title in big bold type, then its generations
+  to jump to, in a row that scrolls sideways. The generations are read from the boots in this
+  collection: each boot's "gen:<handle>" tag names its generation's collection, so the list keeps
+  itself up to date as boots are added. Newest generation first (by its number where it has one).
+{%- endcomment -%}
+
+{%- liquid
+  assign c = collection
+  assign keys = ''
+  assign size_prefix = c.handle | slice: 0, 3
+  assign is_size = false
+  if size_prefix == 'us-' or size_prefix == 'uk-' or size_prefix == 'eu-'
+    assign is_size = true
+  endif
+  for tag in c.all_tags
+    if is_size
+      break
+    endif
+    if tag contains 'gen:'
+      assign gen_handle = tag | remove_first: 'gen:' | strip
+      assign gen = collections[gen_handle]
+      if gen != blank and gen.handle != c.handle and gen.products_count > 0
+        assign last_part = gen_handle | split: '-' | last
+        assign number = last_part | times: 1
+        assign number_text = number | append: ''
+        if number_text != last_part
+          assign number = 0
+        endif
+        assign key = number | prepend: '0000' | slice: -4, 4 | append: '|' | append: gen_handle
+        assign keys = keys | append: key | append: ','
+      endif
+    endif
+  endfor
+  assign keys = keys | split: ',' | uniq | sort | reverse
+  assign limit = section.settings.limit
+-%}
+
+{%- comment -%} A player's collection has its photo banner instead (snippets/is-player-collection) {%- endcomment -%}
+{%- capture is_player -%}{%- render 'is-player-collection', collection: c -%}{%- endcapture -%}
+{%- if is_player != 'true' -%}
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<div
+  class="section section--page-width color-{{ section.settings.color_scheme }} cslh spacing-style"
+  style="{% render 'spacing-style', settings: section.settings %}"
+>
+  {%- liquid
+    assign title_lower = c.title | downcase
+    assign handle_lower = c.handle | downcase
+    assign is_sale = false
+    if title_lower contains 'sale' or handle_lower contains 'sale' or handle_lower contains 'outlet'
+      assign is_sale = true
+    endif
+  -%}
+  <h1 class="cslh__title{% if is_sale %} cslh__title--sale{% endif %}">{{ c.title | replace: 'adidas', 'Adidas' | escape }}</h1>
+  {%- render 'size-heading' -%}{%- comment -%} heading shows just the clicked size {%- endcomment -%}
+
+  {%- if keys.size > 0 and section.settings.show_generations -%}
+    <nav class="cslh__gens" aria-label="Generations">
+      <ul class="cslh__track" role="list">
+        {%- for key in keys limit: limit -%}
+          {%- liquid
+            assign gen_handle = key | split: '|' | last
+            assign gen = collections[gen_handle]
+            assign label = gen.title | remove_first: 'Nike ' | remove_first: 'Adidas ' | remove_first: 'adidas ' | remove_first: 'Puma ' | remove_first: 'Mizuno '
+          -%}
+          <li>
+            <a class="cslh__gen" href="{{ gen.url }}">
+              <span class="cslh__pic">
+                {%- if gen.featured_image -%}
+                  {{ gen.featured_image | image_url: width: 160 | image_tag: widths: '80, 160', sizes: '52px', loading: 'lazy', class: 'cslh__image', alt: '' }}
+                {%- endif -%}
+              </span>
+              <span class="cslh__name">{{ label | escape }}</span>
+              <span class="cslh__count">{{ gen.products_count }}</span>
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </nav>
+  {%- endif -%}
+</div>
+
+{%- endif -%}
+
+{% stylesheet %}
+  .cslh__title {
+    margin: 0;
+    font-size: clamp(2.5rem, 11vw, 5rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    font-variation-settings: 'opsz' 32;
+    text-wrap: balance;
+  }
+
+  /* A sale collection: bold red, as "Sale" in the menu */
+  .cslh__title--sale {
+    color: #e8323c;
+    font-weight: 850;
+    text-transform: lowercase;
+  }
+
+  .cslh__title--sale::first-letter {
+    text-transform: uppercase;
+  }
+
+  /* The generations: a row of raised pills that scrolls sideways, edge to edge on phones */
+  .cslh__gens {
+    margin-top: 16px;
+  }
+
+  .cslh__track {
+    display: flex;
+    gap: 10px;
+    margin: 0 calc(-1 * var(--page-margin, 16px));
+    padding: 4px var(--page-margin, 16px) 10px;
+    list-style: none;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--page-margin, 16px);
+    scrollbar-width: none;
+  }
+
+  .cslh__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cslh__track > li {
+    flex: none;
+    scroll-snap-align: start;
+  }
+
+  .cslh__gen {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 64px;
+    padding: 6px 16px 6px 6px;
+    border: 1px solid #d4d4d8;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #ffffff 0%, #f7f7f5 100%);
+    box-shadow:
+      inset 0 1px 0 #ffffff,
+      -2px 3px 0 #d4d4d8,
+      -2px 4px 8px rgb(18 18 18 / 0.06);
+    color: #121212;
+    text-decoration: none;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.2s cubic-bezier(0.3, 0.7, 0.3, 1), box-shadow 0.2s ease;
+  }
+
+  .cslh__gen:active {
+    transform: translate(-1px, 2px);
+    box-shadow: inset 0 1px 0 #ffffff, -1px 1px 0 #d4d4d8;
+  }
+
+  .cslh__pic {
+    flex: none;
+    width: 52px;
+    height: 52px;
+    overflow: hidden;
+    border-radius: 11px;
+    background: #f1f1f1;
+  }
+
+  .cslh__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .cslh__name {
+    font-size: 1rem;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+  }
+
+  .cslh__count {
+    align-self: flex-start;
+    margin-top: 12px;
+    margin-left: -6px;
+    color: rgb(18 18 18 / 0.5);
+    font-size: 0.625rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (hover: hover) {
+    .cslh__gen:hover .cslh__name {
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 4px;
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .cslh__gens {
+      margin-top: 20px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cslh__gen {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Silo collection header",
+  "tag": "section",
+  "class": "section-collection-silo-header",
+  "enabled_on": {
+    "templates": ["collection"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "The collection's title, then its generations: read from the boots in it (their gen: tags), newest first."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_generations",
+      "label": "Show generations",
+      "info": "Off where the Shop by silo dropdowns follow this header.",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "limit",
+      "label": "Generations to show",
+      "min": 4,
+      "max": 40,
+      "step": 1,
+      "default": 24
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 4
+    }
+  ],
+  "presets": [
+    {
+      "name": "Silo collection header"
+    }
+  ]
+}
+{% endschema %}

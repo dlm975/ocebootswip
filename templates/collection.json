@@ -1,1 +1,614 @@
-{"sections":{"section":{"type":"section","blocks":{"text_tqQTNE":{"type":"text","name":"Collection title","settings":{"text":"<p>{{ closest.collection.title }}</p>","width":"fit-content","max_width":"normal","alignment":"left","type_preset":"h2","font":"var(--font-primary--family)","font_size":"","line_height":"normal","letter_spacing":"normal","case":"none","wrap":"pretty","color":"","background":false,"background_color":"#00000026","corner_radius":0,"padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0},"blocks":{}},"text_twGGkJ":{"type":"text","name":"t:names.text","settings":{"text":"{{ closest.collection.description }}","width":"fit-content","max_width":"normal","alignment":"left","type_preset":"rte","font":"var(--font-primary--family)","font_size":"","line_height":"normal","letter_spacing":"normal","case":"none","wrap":"pretty","color":"","background":false,"background_color":"#00000026","corner_radius":0,"padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0},"blocks":{}}},"block_order":["text_tqQTNE","text_twGGkJ"],"disabled":true,"name":"Heading","settings":{"content_direction":"column","vertical_on_mobile":true,"horizontal_alignment":"flex-start","vertical_alignment":"center","align_baseline":false,"horizontal_alignment_flex_direction_column":"flex-start","vertical_alignment_flex_direction_column":"center","gap":12,"section_width":"page-width","section_height":"","section_height_custom":50,"color_scheme":"scheme-1","background_media":"none","video_position":"cover","background_image_position":"cover","border":"none","border_width":1,"border_opacity":100,"border_radius":0,"toggle_overlay":false,"overlay_color":"#00000026","overlay_style":"solid","gradient_direction":"to top","padding-block-start":48,"padding-block-end":48}},"main":{"type":"main-collection","blocks":{"filters":{"type":"filters","static":true,"settings":{"enable_filtering":true,"filter_style":"horizontal","filter_width":"centered","text_label_case":"default","show_swatch_label":false,"show_filter_label":false,"enable_sorting":true,"enable_grid_density":true,"inherit_color_scheme":true,"color_scheme":"","padding-block-start":8,"padding-block-end":8,"padding-inline-start":0,"padding-inline-end":0,"facets_margin_bottom":8,"facets_margin_right":20},"blocks":{}},"product-card":{"type":"_product-card","static":true,"settings":{"product_card_gap":4,"inherit_color_scheme":true,"color_scheme":"","border":"none","border_width":1,"border_opacity":100,"border_radius":0,"padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0},"blocks":{"card-gallery":{"type":"_product-card-gallery","settings":{"image_ratio":"adapt","border":"none","border_width":1,"border_opacity":100,"border_radius":0,"padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0},"blocks":{}},"product_title_4nY4eT":{"type":"product-title","name":"t:names.product_title","settings":{"width":"fit-content","max_width":"normal","alignment":"left","type_preset":"custom","font":"var(--font-heading--family)","font_size":"0.875rem","line_height":"tight","letter_spacing":"tight","case":"none","wrap":"balance","color":"var(--color-foreground)","background":false,"background_color":"#00000026","corner_radius":0,"padding-block-start":4,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0},"blocks":{}},"price_EzJzMm":{"type":"price","settings":{"show_sale_price_first":true,"show_installments":false,"show_tax_info":false,"type_preset":"custom","width":"fit-content","alignment":"left","font":"var(--font-subheading--family)","font_size":"0.75rem","line_height":"normal","letter_spacing":"loose","case":"none","color":"var(--color-foreground)","padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0},"blocks":{}}},"block_order":["card-gallery","product_title_4nY4eT","price_EzJzMm"]}},"settings":{"layout_type":"grid","product_card_size":"small","mobile_product_card_size":"small","product_grid_width":"centered","full_width_on_mobile":true,"columns_gap_horizontal":24,"columns_gap_vertical":24,"padding-inline-start":0,"padding-inline-end":0,"color_scheme":"scheme-1","padding-block-start":0,"padding-block-end":32}}},"order":["section","main"]}
+/*
+ * ------------------------------------------------------------ 
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "section": {
+      "type": "section",
+      "blocks": {
+        "text_tqQTNE": {
+          "type": "text",
+          "name": "Collection title",
+          "settings": {
+            "text": "<p>{{ closest.collection.title }}</p>",
+            "width": "fit-content",
+            "max_width": "normal",
+            "alignment": "left",
+            "type_preset": "h2",
+            "font": "var(--font-primary--family)",
+            "font_size": "",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "",
+            "background": false,
+            "background_color": "#12121226",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "text_twGGkJ": {
+          "type": "text",
+          "name": "t:names.text",
+          "settings": {
+            "text": "{{ closest.collection.description }}",
+            "width": "fit-content",
+            "max_width": "normal",
+            "alignment": "left",
+            "type_preset": "rte",
+            "font": "var(--font-primary--family)",
+            "font_size": "",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "",
+            "background": false,
+            "background_color": "#12121226",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "text_tqQTNE",
+        "text_twGGkJ"
+      ],
+      "disabled": true,
+      "name": "Heading",
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "flex-start",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "flex-start",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 12,
+        "section_width": "page-width",
+        "section_height": "",
+        "section_height_custom": 50,
+        "color_scheme": "scheme-1",
+        "background_media": "none",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_radius": 0,
+        "toggle_overlay": false,
+        "overlay_color": "#12121226",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "padding-block-start": 48,
+        "padding-block-end": 48
+      }
+    },
+    "main": {
+      "type": "main-collection",
+      "blocks": {
+        "filters": {
+          "type": "filters",
+          "static": true,
+          "settings": {
+            "enable_filtering": true,
+            "filter_style": "horizontal",
+            "filter_width": "centered",
+            "text_label_case": "default",
+            "show_swatch_label": false,
+            "show_filter_label": false,
+            "enable_sorting": true,
+            "enable_grid_density": false,
+            "inherit_color_scheme": true,
+            "color_scheme": "",
+            "padding-block-start": 8,
+            "padding-block-end": 8,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0,
+            "facets_margin_bottom": 8,
+            "facets_margin_right": 20
+          },
+          "blocks": {}
+        },
+        "product-card": {
+          "type": "_product-card",
+          "static": true,
+          "settings": {
+            "product_card_gap": 4,
+            "inherit_color_scheme": true,
+            "color_scheme": "",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {
+            "card-gallery": {
+              "type": "_product-card-gallery",
+              "settings": {
+                "image_ratio": "adapt",
+                "border": "none",
+                "border_width": 1,
+                "border_opacity": 100,
+                "border_radius": 0,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            },
+            "product_title_4nY4eT": {
+              "type": "product-title",
+              "name": "t:names.product_title",
+              "settings": {
+                "width": "fit-content",
+                "max_width": "normal",
+                "alignment": "left",
+                "type_preset": "custom",
+                "font": "var(--font-heading--family)",
+                "font_size": "0.875rem",
+                "line_height": "tight",
+                "letter_spacing": "tight",
+                "case": "none",
+                "wrap": "balance",
+                "color": "var(--color-foreground)",
+                "background": false,
+                "background_color": "#12121226",
+                "corner_radius": 0,
+                "padding-block-start": 4,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            },
+            "price_EzJzMm": {
+              "type": "price",
+              "settings": {
+                "show_sale_price_first": true,
+                "show_installments": false,
+                "show_tax_info": false,
+                "type_preset": "custom",
+                "width": "fit-content",
+                "alignment": "left",
+                "font": "var(--font-subheading--family)",
+                "font_size": "0.75rem",
+                "line_height": "normal",
+                "letter_spacing": "loose",
+                "case": "none",
+                "color": "var(--color-foreground)",
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": [
+            "card-gallery",
+            "product_title_4nY4eT",
+            "price_EzJzMm"
+          ]
+        }
+      },
+      "settings": {
+        "layout_type": "grid",
+        "product_card_size": "small",
+        "mobile_product_card_size": "small",
+        "product_grid_width": "centered",
+        "full_width_on_mobile": true,
+        "columns_gap_horizontal": 24,
+        "columns_gap_vertical": 24,
+        "padding-inline-start": 0,
+        "padding-inline-end": 0,
+        "color_scheme": "scheme-1",
+        "padding-block-start": 0,
+        "padding-block-end": 32
+      }
+    },
+    "silo_header": {
+      "type": "collection-silo-header",
+      "settings": {
+        "limit": 24,
+        "color_scheme": "scheme-1",
+        "padding-block-start": 16,
+        "padding-block-end": 4,
+        "show_generations": false
+      }
+    },
+    "silo_nav": {
+      "type": "shop-by-silo",
+      "blocks": {
+        "brand_nike": {
+          "type": "brand",
+          "settings": {
+            "title": "Nike",
+            "collection": "nike"
+          }
+        },
+        "silo_01": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike Mercurial",
+            "image": "shopify://shop_images/silo-nike-mercurial.jpg",
+            "collection": "nike-mercurial",
+            "generations": [
+              "nike-mercurial-vapor-17",
+              "nike-mercurial-vapor-16",
+              "nike-mercurial-vapor-15",
+              "nike-mercurial-vapor-14",
+              "nike-mercurial-vapor-13",
+              "nike-mercurial-vapor-12",
+              "nike-mercurial-vapor-11",
+              "nike-mercurial-vapor-10",
+              "nike-mercurial-vapor-9",
+              "nike-mercurial-vapor-8",
+              "nike-mercurial-vapor-7",
+              "nike-mercurial-vapor-5",
+              "nike-mercurial-vapor-3",
+              "nike-mercurial-vapor-1",
+              "nike-mercurial-superfly-11",
+              "nike-mercurial-superfly-10",
+              "nike-mercurial-superfly-9",
+              "nike-mercurial-superfly-8",
+              "nike-mercurial-superfly-7",
+              "nike-mercurial-superfly-6",
+              "nike-mercurial-superfly-5",
+              "nike-mercurial-superfly-4",
+              "nike-mercurial-superfly-3"
+            ],
+            "aliases": [
+              "superfly-copy",
+              "mercurial",
+              "vapor-14-elite"
+            ]
+          }
+        },
+        "silo_02": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike Phantom",
+            "image": "shopify://shop_images/silo-nike-phantom.jpg",
+            "collection": "phantom-1",
+            "generations": [
+              "nike-phantom-6",
+              "nike-phantom-gx-2",
+              "nike-phantom-gx",
+              "nike-phantom-luna",
+              "nike-phantom-gt-2",
+              "nike-phantom-gt",
+              "nike-phantom-vision-2",
+              "nike-phantom-vision",
+              "nike-phantom-venom"
+            ],
+            "aliases": [
+              "phantom"
+            ]
+          }
+        },
+        "silo_03": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike Tiempo",
+            "image": "shopify://shop_images/silo-nike-tiempo.jpg",
+            "collection": "tiempo-1",
+            "generations": [
+              "nike-tiempo-maestro",
+              "nike-tiempo-legend-10",
+              "nike-tiempo-legend-9",
+              "nike-tiempo-legend-8",
+              "nike-tiempo-legend-7",
+              "nike-tiempo-legend-6",
+              "nike-tiempo-legend-5",
+              "nike-tiempo-legend-4",
+              "nike-tiempo-legend-3"
+            ],
+            "aliases": [
+              "tiempo"
+            ]
+          }
+        },
+        "silo_07": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike Hypervenom",
+            "image": "shopify://shop_images/silo-nike-hypervenom.jpg",
+            "collection": "hypervenom-1",
+            "generations": [
+              "nike-hypervenom-phantom-3",
+              "nike-hypervenom-phantom-2",
+              "nike-hypervenom-phantom-1"
+            ],
+            "aliases": [
+              "hypervenom"
+            ]
+          }
+        },
+        "silo_08": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike Magista",
+            "image": "shopify://shop_images/silo-nike-magista.jpg",
+            "collection": "magista-1",
+            "generations": [
+              "nike-magista-obra-2",
+              "nike-magista-obra-1",
+              "nike-magista-opus-2",
+              "nike-magista-opus-1"
+            ],
+            "aliases": [
+              "magista"
+            ]
+          }
+        },
+        "silo_11": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike CTR360",
+            "image": "shopify://shop_images/silo-nike-ctr360.jpg",
+            "collection": "ctr360-1",
+            "generations": [
+              "nike-ctr360-maestri-3",
+              "nike-ctr360-maestri-2",
+              "nike-ctr360-maestri-1"
+            ],
+            "aliases": [
+              "ctr360"
+            ]
+          }
+        },
+        "silo_12": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike Total 90",
+            "image": "shopify://shop_images/silo-nike-total-90.jpg",
+            "collection": "total-91",
+            "generations": [
+              "nike-total-90-laser-4",
+              "nike-total-90-laser-3"
+            ],
+            "aliases": [
+              "total-90"
+            ]
+          }
+        },
+        "brand_adidas": {
+          "type": "brand",
+          "settings": {
+            "title": "Adidas",
+            "collection": "adidas"
+          }
+        },
+        "silo_04": {
+          "type": "silo",
+          "settings": {
+            "title": "Adidas Predator",
+            "image": "shopify://shop_images/silo-adidas-predator.jpg",
+            "collection": "predator-1",
+            "generations": [
+              "adidas-predator-ft",
+              "adidas-predator-accuracy",
+              "adidas-predator-instinct",
+              "adidas-predator-lz"
+            ],
+            "aliases": [
+              "predator"
+            ]
+          }
+        },
+        "silo_05": {
+          "type": "silo",
+          "settings": {
+            "title": "Adidas X",
+            "image": "shopify://shop_images/silo-adidas-x.jpg",
+            "collection": "x",
+            "generations": [
+              "adidas-x-crazyfast",
+              "adidas-x-speedportal",
+              "adidas-x-speedflow",
+              "adidas-x-ghosted",
+              "adidas-x-19",
+              "adidas-x-18",
+              "adidas-x-17",
+              "adidas-x-16",
+              "adidas-x-15"
+            ],
+            "aliases": [
+              "adidas-x",
+              "crazyfast"
+            ]
+          }
+        },
+        "silo_06": {
+          "type": "silo",
+          "settings": {
+            "title": "Adidas F50",
+            "image": "shopify://shop_images/silo-adidas-f50.jpg",
+            "collection": "f50",
+            "generations": [
+              "adidas-f50-hyperfast",
+              "adidas-f50-elite",
+              "adidas-f50-adizero",
+              "adidas-f50-itunit"
+            ],
+            "aliases": [
+              "adidas-f50"
+            ]
+          }
+        },
+        "silo_09": {
+          "type": "silo",
+          "settings": {
+            "title": "Adidas Copa",
+            "image": "shopify://shop_images/silo-adidas-copa.jpg",
+            "collection": "copa",
+            "generations": [
+              "adidas-copa-pure",
+              "adidas-copa-sense",
+              "adidas-copa-20",
+              "adidas-copa-19"
+            ]
+          }
+        },
+        "silo_10": {
+          "type": "silo",
+          "settings": {
+            "title": "Adidas Nemeziz",
+            "image": "shopify://shop_images/silo-adidas-nemeziz.jpg",
+            "collection": "nemeziz",
+            "generations": [
+              "adidas-nemeziz-19",
+              "adidas-nemeziz-18",
+              "adidas-nemeziz-17"
+            ]
+          }
+        },
+        "silo_16": {
+          "type": "silo",
+          "settings": {
+            "title": "Adidas 11Pro",
+            "image": "shopify://shop_images/silo-adidas-11pro.jpg",
+            "collection": "11pro",
+            "generations": [
+              "adidas-11pro-elite",
+              "adidas-11pro",
+              "adidas-adipure-11pro"
+            ]
+          }
+        },
+        "silo_13": {
+          "type": "silo",
+          "settings": {
+            "title": "Adidas Ace",
+            "image": "shopify://shop_images/silo-adidas-ace.jpg",
+            "collection": "",
+            "generations": [
+              "adidas-ace-17",
+              "adidas-ace-16",
+              "adidas-ace-15"
+            ]
+          }
+        },
+        "brand_puma": {
+          "type": "brand",
+          "settings": {
+            "title": "Puma",
+            "collection": "puma-1",
+            "aliases": [
+              "puma"
+            ]
+          }
+        },
+        "silo_14": {
+          "type": "silo",
+          "settings": {
+            "title": "Puma Future",
+            "image": "shopify://shop_images/silo-puma-future.jpg",
+            "collection": "puma-future",
+            "generations": []
+          }
+        },
+        "silo_17": {
+          "type": "silo",
+          "settings": {
+            "title": "Puma Ultra",
+            "image": "shopify://shop_images/silo-puma-ultra.jpg",
+            "collection": "puma-ultra",
+            "generations": []
+          }
+        },
+        "silo_18": {
+          "type": "silo",
+          "settings": {
+            "title": "Puma evoPOWER",
+            "image": "shopify://shop_images/silo-puma-evopower.jpg",
+            "collection": "puma-evopower",
+            "generations": []
+          }
+        },
+        "brand_mizuno": {
+          "type": "brand",
+          "settings": {
+            "title": "Mizuno",
+            "collection": "mizuno"
+          }
+        },
+        "silo_15": {
+          "type": "silo",
+          "settings": {
+            "title": "Mizuno Morelia",
+            "image": "shopify://shop_images/silo-mizuno-morelia.jpg",
+            "collection": "mizuno-morelia",
+            "generations": []
+          }
+        }
+      },
+      "block_order": [
+        "brand_nike",
+        "silo_01",
+        "silo_02",
+        "silo_03",
+        "silo_07",
+        "silo_08",
+        "silo_11",
+        "silo_12",
+        "brand_adidas",
+        "silo_04",
+        "silo_05",
+        "silo_06",
+        "silo_09",
+        "silo_10",
+        "silo_16",
+        "silo_13",
+        "brand_puma",
+        "silo_14",
+        "silo_17",
+        "silo_18",
+        "brand_mizuno",
+        "silo_15"
+      ],
+      "settings": {
+        "heading": "",
+        "color_scheme": "scheme-1",
+        "padding-block-start": 8,
+        "padding-block-end": 8
+      }
+    },
+    "collection_seo": {
+      "type": "collection-seo",
+      "settings": {
+        "color_scheme": "scheme-1",
+        "padding-block-start": 24,
+        "padding-block-end": 40
+      }
+    }
+  },
+  "order": [
+    "section",
+    "silo_header",
+    "silo_nav",
+    "main",
+    "collection_seo"
+  ]
+}

@@ -103,10 +103,15 @@
           aria-haspopup="listbox"
           aria-expanded="false"
         >
-          <span class="psb__pill-label" data-psb-label>{{ size_label }}</span>
-          <svg class="psb__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="13" height="13" aria-hidden="true">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
+          {%- liquid
+            assign label_parts = size_label | split: ' - '
+            assign label_rest = label_parts | slice: 1, 4 | join: ' · '
+          -%}
+          <span class="psb__pill-label" data-psb-label>
+            <span class="psb__pill-main">{{ label_parts | first }}</span>
+            {%- if label_rest != blank -%}<span class="psb__pill-sub">{{ label_rest }}</span>{%- endif -%}
+          </span>
+          {%- render 'gicon', name: 'keyboard_arrow_down', class: 'psb__chev', size: 13 -%}
         </button>
       {%- elsif show_size -%}
         {%- comment -%}
@@ -114,7 +119,14 @@
           chevron and nothing to open.
         {%- endcomment -%}
         <span class="psb__pill psb__pill--static">
-          <span class="psb__pill-label" data-psb-label>{{ size_label }}</span>
+          {%- liquid
+            assign label_parts = size_label | split: ' - '
+            assign label_rest = label_parts | slice: 1, 4 | join: ' · '
+          -%}
+          <span class="psb__pill-label" data-psb-label>
+            <span class="psb__pill-main">{{ label_parts | first }}</span>
+            {%- if label_rest != blank -%}<span class="psb__pill-sub">{{ label_rest }}</span>{%- endif -%}
+          </span>
         </span>
       {%- endif -%}
 
@@ -156,9 +168,7 @@
         <div class="psb__sheet-head">
           <span>{{ section.settings.sheet_heading | default: 'Select size' }}</span>
           <button type="button" class="psb__sheet-close" data-psb-close aria-label="Close">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="16" height="16" aria-hidden="true">
-              <line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/>
-            </svg>
+            {%- render 'gicon', name: 'close', size: 16 -%}
           </button>
         </div>
 
@@ -186,14 +196,15 @@
               aria-selected="{% if v.id == current.id %}true{% else %}false{% endif %}"
               {% unless v.available %}disabled aria-disabled="true"{% endunless %}
             >
-              <span class="psb__opt-label">{{ v_label }}</span>
-              <span class="psb__opt-meta">
-                {%- if v.available -%}
-                  {{ v.price | money_with_currency }}
-                {%- else -%}
-                  {{ 'products.product.sold_out' | t | default: 'Sold out' }}
-                {%- endif -%}
-              </span>
+              {%- liquid
+                assign v_parts = v_label | split: ' - '
+                assign v_main = v_parts | first
+                assign v_rest = v_parts | slice: 1, 4 | join: ' · '
+              -%}
+              <span class="psb__opt-label">{{ v_main }}</span>
+              {%- if v_rest != blank -%}
+                <span class="psb__opt-meta">{{ v_rest }}</span>
+              {%- endif -%}
             </button>
           {%- endfor -%}
         </div>
@@ -204,10 +215,14 @@
 
 {% stylesheet %}
   /* ── Floating buy bar ──
-     Mobile: pinned full-width to the bottom edge.
-     Desktop: a card floating in the bottom-right corner. */
+     The site's newer look: a glassy bar floating clear of the screen edges (phones) or in the
+     bottom-right corner (desktop); the size as a raised off-white key; the holographic add to cart
+     (assets/base.css); and a sheet of raised size keys, the chosen one pressed in. */
   .psb {
-    --psb-ease: cubic-bezier(0.32, 0.72, 0, 1);
+    --psb-ease: cubic-bezier(0.3, 0.7, 0.3, 1);
+    --psb-key-face: linear-gradient(180deg, #ffffff 0%, #f7f7f5 100%);
+    --psb-key-raised: inset 0 1px 0 #ffffff, -2px 3px 0 #d4d4d8, -2px 4px 8px rgb(18 18 18 / 0.06);
+    --psb-key-pressed: inset -1px 2px 3px rgb(18 18 18 / 0.08), -0.5px 1px 0 #d4d4d8;
 
     position: fixed;
     z-index: 40;
@@ -215,18 +230,26 @@
     pointer-events: none;
   }
 
+  /* Glass: the page shows through, blurred, with a light rim */
   .psb__bar {
     pointer-events: auto;
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
-    background: rgba(255, 255, 255, 0.86);
+    margin: 0 10px calc(16px + max(env(safe-area-inset-bottom, 0px), 14px));
+    padding: 8px 8px 8px 8px;
+    border-radius: 22px;
+    background: rgb(255 255 255 / 0.62);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     backdrop-filter: blur(20px) saturate(180%);
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: 0 -8px 24px -12px rgba(0, 0, 0, 0.18);
-    transition: transform 0.38s var(--psb-ease), opacity 0.26s var(--psb-ease);
+    box-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 0.7),
+      inset 0 1px 0 rgb(255 255 255 / 0.9),
+      0 0 0 1px rgb(18 18 18 / 0.06),
+      0 12px 32px rgb(18 18 18 / 0.16);
+    transition:
+      transform 0.55s var(--psb-ease),
+      opacity 0.25s ease;
   }
 
   /* Held out of the way until the in-page add-to-cart button scrolls off */
@@ -238,79 +261,101 @@
 
   .psb__thumb {
     flex: 0 0 auto;
-    width: 40px;
-    height: 40px;
-    border-radius: var(--brand-radius-sm);
-    object-fit: contain;
-    background: rgba(0, 0, 0, 0.04);
     display: block;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    object-fit: contain;
+    background: #ffffff;
+    box-shadow: 0 0 0 1px rgb(18 18 18 / 0.06);
   }
 
-  /* ── Size pill ── */
-  /* Sized to its text so the whole size reads out. Shrink is left on as a
-     last resort only — the label still truncates rather than shoving the
-     add-to-cart button off the bar on a very narrow screen. */
+  /* ── Size: a raised off-white key ── */
+  /* Sized to its text so the whole size reads out; it shrinks (and the label truncates) only as a
+     last resort, rather than pushing the add to cart off a very narrow bar. */
   .psb__pill {
     flex: 0 1 auto;
     min-width: 0;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    height: 38px;
-    padding: 0 12px;
-    border: 1.5px solid rgba(0, 0, 0, 0.16);
-    border-radius: 999px;
-    background: #fff;
-    color: #111;
-    font-size: 0.74rem;
-    font-weight: 600;
+    gap: 6px;
+    height: 44px;
+    margin-block-end: 3px;
+    padding: 0 12px 0 14px;
+    border: 1px solid #d4d4d8;
+    border-radius: 12px;
+    background: var(--psb-key-face);
+    box-shadow: var(--psb-key-raised);
+    color: #121212;
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 700;
     line-height: 1;
-    cursor: pointer;
     white-space: nowrap;
+    cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: transform 0.2s var(--psb-ease), border-color 0.2s var(--psb-ease);
+    transition:
+      transform 0.2s var(--psb-ease),
+      box-shadow 0.2s var(--psb-ease),
+      border-color 0.2s ease;
   }
 
-  .psb__pill:active {
-    transform: scale(0.96);
+  .psb__pill:active,
+  .psb__pill[aria-expanded='true'] {
+    transform: translate(-1.5px, 2px);
+    box-shadow: var(--psb-key-pressed);
   }
 
-  /* Same shape, but nothing to press. */
+  .psb__pill[aria-expanded='true'] {
+    border-color: #121212;
+  }
+
+  /* Same shape, but nothing to press */
   .psb__pill--static {
     cursor: default;
     pointer-events: none;
   }
 
-  .psb__pill--static:active {
-    transform: none;
-  }
-
-  .psb__pill[aria-expanded='true'] {
-    border-color: #111;
-  }
-
+  /* The full size on two lines: the US size in bold, UK · EU smaller beneath */
   .psb__pill-label {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+    gap: 2px;
+    line-height: 1;
+  }
+
+  .psb__pill-main {
+    font-size: 0.9375rem;
+    font-weight: 700;
+  }
+
+  .psb__pill-sub {
     overflow: hidden;
+    max-width: 100%;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: rgb(18 18 18 / 0.55);
     text-overflow: ellipsis;
   }
 
   .psb__chev {
     flex-shrink: 0;
-    transition: transform 0.24s var(--psb-ease);
+    color: rgb(18 18 18 / 0.6);
+    transition: transform 0.3s var(--psb-ease);
   }
 
   .psb__pill[aria-expanded='true'] .psb__chev {
     transform: rotate(180deg);
   }
 
-  /* ── Add to cart ──
-     Keeps its natural width and never shrinks; the auto margin absorbs
-     all the slack so it sits hard against the right edge while the size
-     pill keeps whatever width its text needs. */
+  /* ── Add to cart: the holographic key (assets/base.css) ──
+     Keeps its natural width and never shrinks; the auto margin sets it hard against the right. */
   .psb__form {
     flex: 0 0 auto;
-    margin-inline-start: auto;
     display: block;
+    margin-inline-start: auto;
   }
 
   .psb__form form {
@@ -319,26 +364,14 @@
   }
 
   .psb .psb__atc {
-    height: 38px;
-    min-height: 38px;
-    padding: 0 18px;
-    border-radius: var(--brand-radius-md);
-    background: var(--psb-accent, #111);
-    color: var(--psb-accent-text, #fff);
-    border: none;
-    font-size: 0.78rem;
+    height: 46px;
+    min-height: 46px;
+    margin-block-end: 2px;
+    padding: 0 20px;
+    border-radius: 14px;
+    font-size: 0.875rem;
     font-weight: 700;
     white-space: nowrap;
-    position: relative;
-    transition: transform 0.2s var(--psb-ease), opacity 0.2s var(--psb-ease);
-  }
-
-  .psb .psb__atc:active:not([disabled]) {
-    transform: scale(0.96);
-  }
-
-  .psb .psb__atc[disabled] {
-    opacity: 0.45;
   }
 
   /* The theme's cart icon inside the button is noise at this size */
@@ -354,12 +387,12 @@
   .psb__scrim {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.28);
+    background: rgb(0 0 0 / 0.28);
     opacity: 0;
     pointer-events: auto;
-    transition: opacity 0.3s var(--psb-ease);
-    /* iOS: block page scroll behind the sheet without locking the body,
-       which would break scrolling inside the sheet itself. */
+    transition: opacity 0.3s ease;
+    /* iOS: blocks page scroll behind the sheet without locking the body, which would stop the
+       sheet itself scrolling */
     touch-action: none;
   }
 
@@ -370,16 +403,15 @@
   .psb__sheet {
     pointer-events: auto;
     position: fixed;
-    inset: auto 0 0 0;
+    inset: auto 10px calc(16px + max(env(safe-area-inset-bottom, 0px), 14px));
     display: flex;
     flex-direction: column;
     max-height: min(70vh, 560px);
-    background: #fff;
-    border-radius: var(--brand-radius-lg) var(--brand-radius-lg) 0 0;
-    box-shadow: 0 -12px 40px -8px rgba(0, 0, 0, 0.28);
-    transform: translateY(100%);
-    transition: transform 0.38s var(--psb-ease);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    border-radius: 22px;
+    background: #ffffff;
+    box-shadow: 0 0 0 1px rgb(18 18 18 / 0.06), 0 24px 60px rgb(18 18 18 / 0.28);
+    transform: translateY(calc(100% + 24px));
+    transition: transform 0.55s var(--psb-ease);
   }
 
   .psb[data-open] .psb__sheet {
@@ -391,99 +423,118 @@
   }
 
   .psb__sheet-grip {
+    flex-shrink: 0;
     width: 38px;
     height: 4px;
-    border-radius: 999px;
-    background: rgba(0, 0, 0, 0.16);
     margin: 8px auto 2px;
-    flex-shrink: 0;
+    border-radius: 999px;
+    background: rgb(18 18 18 / 0.16);
   }
 
   .psb__sheet-head {
     display: flex;
+    flex-shrink: 0;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 18px 10px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #111;
-    flex-shrink: 0;
+    padding: 8px 16px 12px 18px;
+    color: #121212;
+    font-size: 1.0625rem;
+    font-weight: 750;
+    letter-spacing: -0.01em;
   }
 
   .psb__sheet-close {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    border: none;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border: 0;
     border-radius: 50%;
-    background: rgba(0, 0, 0, 0.06);
-    color: #111;
+    background: rgb(18 18 18 / 0.06);
+    color: #121212;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* min-height:0 lets this flex child actually scroll */
+  /* The sizes: raised off-white keys, three a row; min-height:0 lets the grid scroll */
   .psb__opts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px 8px;
+    min-height: 0;
+    padding: 2px 14px 18px 12px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    min-height: 0;
-    padding: 0 12px 14px;
     touch-action: pan-y;
   }
 
   .psb__opt {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    width: 100%;
-    padding: 13px 14px;
-    border: none;
-    border-radius: var(--brand-radius-md);
-    background: transparent;
-    color: #111;
-    font-size: 0.85rem;
-    text-align: left;
+    justify-content: center;
+    gap: 2px;
+    min-height: 54px;
+    padding: 6px;
+    border: 1px solid #d4d4d8;
+    border-radius: 12px;
+    background: var(--psb-key-face);
+    box-shadow: var(--psb-key-raised);
+    color: #121212;
+    font: inherit;
+    line-height: 1.15;
+    text-align: center;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: background-color 0.18s var(--psb-ease);
+    transition:
+      transform 0.2s var(--psb-ease),
+      box-shadow 0.2s var(--psb-ease),
+      border-color 0.2s ease;
   }
 
-  .psb__opt + .psb__opt {
-    box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.06);
+  @media (hover: hover) {
+    .psb__opt:hover:not([disabled], [aria-selected='true']) {
+      border-color: #b8b8bf;
+      transform: translate(0.5px, -1px);
+    }
   }
 
-  .psb__opt:active:not([disabled]) {
-    background: rgba(0, 0, 0, 0.05);
+  .psb__opt:active:not([disabled]),
+  .psb__opt[aria-selected='true'] {
+    transform: translate(-1.5px, 2px);
+    box-shadow: var(--psb-key-pressed);
   }
 
   .psb__opt[aria-selected='true'] {
-    background: rgba(0, 0, 0, 0.06);
-    font-weight: 700;
+    border: 1.5px solid #121212;
+    background: #f4f4f2;
   }
 
   .psb__opt[disabled] {
-    opacity: 0.38;
-    cursor: not-allowed;
+    opacity: 0.45;
+    background: #f7f7f5;
+    border-color: #e4e4e7;
+    box-shadow: none;
+    cursor: default;
     text-decoration: line-through;
   }
 
   .psb__opt-label {
-    font-weight: inherit;
+    font-size: 0.9375rem;
+    font-weight: 700;
   }
 
   .psb__opt-meta {
-    font-size: 0.74rem;
-    opacity: 0.6;
-    white-space: nowrap;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: rgb(18 18 18 / 0.55);
     font-variant-numeric: tabular-nums;
   }
 
-  /* Keep page content clear of the bar */
-  body:has(.psb) {
-    padding-bottom: 72px;
+  /* Keep page content clear of the bar. The room is inside the (dark) footer, so the page never
+     ends on a white strip */
+  body:has(.psb) footer.section-wrapper:last-of-type {
+    padding-bottom: calc(92px + max(env(safe-area-inset-bottom, 0px), 14px));
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -492,67 +543,62 @@
     .psb__scrim,
     .psb__chev,
     .psb__pill,
-    .psb .psb__atc {
+    .psb__opt {
       transition: none;
     }
   }
 
-  /* ── Desktop: floating card, bottom-right ── */
+  /* ── Desktop: the glass card in the bottom-right corner, the sheet growing up from it ── */
   @media screen and (min-width: 750px) {
     .psb {
       inset: auto 24px 24px auto;
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 10px;
+      gap: 12px;
     }
 
-    /* Hugs its contents rather than sitting at a fixed width, so the card
-       grows and shrinks with the selected size's text — "US 9" gets a
-       compact card, "US 12.5 - UK 11.5 - EU 47" gets a wide one. No floor:
-       the contents themselves are the minimum, so a short size leaves no
-       empty space. The max only stops a long one running off screen. */
+    /* Hugs its contents: a short size gets a compact card, a long one a wider card (up to a
+       limit so it never runs off screen) */
     .psb__bar {
       width: fit-content;
       max-width: min(560px, calc(100vw - 48px));
-      padding: 12px 14px;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      border-radius: var(--brand-radius-lg);
-      box-shadow: 0 20px 44px -16px rgba(0, 0, 0, 0.3), 0 2px 10px rgba(0, 0, 0, 0.08);
+      margin: 0;
+      padding: 10px;
     }
 
-    /* Anchor the sheet to the card instead of the screen edge */
+    /* The (clear) scrim stays beneath the sheet, so clicks on the sizes reach them and only clicks
+       elsewhere close it */
     .psb__scrim {
+      z-index: 0;
       background: transparent;
     }
 
-    /* Sits in flow above the card, so the stack grows upward off the
-       bottom-right corner instead of relying on offset arithmetic. */
     .psb__sheet {
       position: relative;
+      z-index: 2;
       inset: auto;
       order: -1;
       width: min(420px, calc(100vw - 48px));
       max-height: min(60vh, 460px);
-      border-radius: var(--brand-radius-lg);
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      transform: translateY(8px) scale(0.98);
       opacity: 0;
+      transform: translateY(8px) scale(0.98);
       transform-origin: bottom right;
-      transition: transform 0.28s var(--psb-ease), opacity 0.2s var(--psb-ease);
-      padding-bottom: 0;
+      transition:
+        transform 0.55s var(--psb-ease),
+        opacity 0.2s ease;
     }
 
     .psb[data-open] .psb__sheet {
-      transform: translateY(0) scale(1);
       opacity: 1;
+      transform: translateY(0) scale(1);
     }
 
     .psb__sheet-grip {
       display: none;
     }
 
-    body:has(.psb) {
+    body:has(.psb) footer.section-wrapper:last-of-type {
       padding-bottom: 0;
     }
   }
@@ -567,6 +613,21 @@
     var sheet = root.querySelector('[data-psb-sheet]');
     var scrim = root.querySelector('[data-psb-scrim]');
     var label = root.querySelector('[data-psb-label]');
+    // The full size on two lines: "US 10.5" in bold, "UK 9.5 · EU 44.5" beneath
+    function setLabel(el, text) {
+      var parts = String(text).split(' - ');
+      el.replaceChildren();
+      var main = document.createElement('span');
+      main.className = 'psb__pill-main';
+      main.textContent = parts[0];
+      el.append(main);
+      if (parts.length > 1) {
+        var sub = document.createElement('span');
+        sub.className = 'psb__pill-sub';
+        sub.textContent = parts.slice(1).join(' · ');
+        el.append(sub);
+      }
+    }
     var variantInput = root.querySelector('input[name="id"]');
     var atc = root.querySelector('.psb__atc');
     var opts = [].slice.call(root.querySelectorAll('[data-psb-opt]'));
@@ -582,10 +643,13 @@
       if (!mainBtn || !('IntersectionObserver' in window)) {
         root.removeAttribute('data-hidden');
       } else {
+        /* Only once the page is scrolled past the button (it is above the screen), not while it is
+           still further down, below the screen, waiting to be reached */
         new IntersectionObserver(function (entries) {
           entries.forEach(function (entry) {
-            if (entry.isIntersecting) root.setAttribute('data-hidden', '');
-            else root.removeAttribute('data-hidden');
+            var passed = !entry.isIntersecting && entry.boundingClientRect.bottom <= 0;
+            if (passed) root.removeAttribute('data-hidden');
+            else root.setAttribute('data-hidden', '');
           });
         }).observe(mainBtn);
       }
@@ -645,7 +709,7 @@
        on the page (or its option value has since changed). */
     function applyLocally(id, text) {
       if (variantInput) variantInput.value = id;
-      if (label && text) label.textContent = text;
+      if (label && text) setLabel(label, text);
 
       opts.forEach(function (o) {
         o.setAttribute('aria-selected', o.dataset.variantId === String(id) ? 'true' : 'false');
@@ -693,6 +757,23 @@
         syncMainPicker(text);
         close();
       });
+    });
+
+    /* ── Follow the page's size picker straight away ──
+       The size grid and dropdowns drive a hidden <select name="options[Size]">. Reading it
+       directly updates this bar the moment a size is tapped, without waiting for the variant
+       to load (and still updates it if that request is slow or fails). */
+    document.addEventListener('change', function (e) {
+      var select = e.target;
+      if (!(select instanceof HTMLSelectElement) || root.contains(select)) return;
+      var optionName = root.dataset.sizeOption;
+      if (!optionName || select.name !== 'options[' + optionName + ']') return;
+      var text = select.value;
+      var match = opts.filter(function (o) {
+        return o.dataset.label === text;
+      })[0];
+      if (match) applyLocally(match.dataset.variantId, text);
+      else if (label && text) setLabel(label, text);
     });
 
     /* ── Keep in step with the main picker ── */
@@ -759,7 +840,7 @@
       "type": "color",
       "id": "button_color",
       "label": "Button colour",
-      "default": "#14b554"
+      "default": "#25D366"
     },
     {
       "type": "color",

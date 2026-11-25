@@ -12,11 +12,36 @@
   type="module"
   fetchpriority="low"
 ></script>
+<script
+  src="{{ 'filter-drawer-focus.js' | asset_url }}"
+  defer
+></script>
 
 {%- liquid
   assign products_count = results_size
   assign sort_by = results.sort_by | default: results.default_sort_by
   assign filters = filters | default: results.filters
+
+  # OCEBOOTS: filters shown in this order, matched by their names in Search & Discovery; any other
+  # filter (e.g. Availability) is left out. If none of these names match, every filter shows.
+  # Price is left out: Shopify only filters by price in NZD, so it vanished for other currencies
+  assign filter_order = 'size,brand,condition,surface' | split: ','
+  assign ordered_filters = filters | where: 'param_name', '__none__'
+  for wanted in filter_order
+    for candidate in filters
+      assign candidate_label = candidate.label | downcase | strip
+      if candidate_label == wanted
+        assign match = filters | where: 'param_name', candidate.param_name
+        assign ordered_filters = ordered_filters | concat: match
+        break
+      endif
+    endfor
+  endfor
+  if ordered_filters.size > 0
+    assign filters = ordered_filters
+  else
+    assign filters = filters | where: 'type', 'list'
+  endif
   assign total_active_values = 0
 
   # Calculate facets margin style
@@ -296,7 +321,7 @@
         >
           {{- 'actions.sort' | t -}}
           <span class="svg-wrapper icon-caret">
-            {{- 'icon-caret.svg' | inline_asset_content -}}
+            {{- 'icon-sort-arrow.svg' | inline_asset_content -}}
           </span>
         </label>
         <select
@@ -351,7 +376,7 @@
 {% if block.settings.enable_filtering %}
   <dialog-component
     id="filters-drawer"
-    class="facets-block-wrapper facets-block-wrapper--vertical facets-block-wrapper--drawer color-{{ settings.drawer_color_scheme }}"
+    class="facets-block-wrapper facets-block-wrapper--vertical facets-block-wrapper--drawer color-scheme-1"
   >
     <dialog
       ref="dialog"
@@ -432,7 +457,7 @@
                         assign is_active = true
                       endif
 
-                      render 'price-filter', filter: filter, filter_style: 'vertical', should_render_clear: false, autofocus: should_autofocus
+                      render 'price-filter', filter: filter, filter_style: 'vertical', should_render_clear: false, autofocus: should_autofocus, in_drawer: true
                     -%}
                   {% else %}
                     {% liquid
@@ -472,6 +497,189 @@
 {% endif %}
 
 {% stylesheet %}
+  /* OCEBOOTS: on phones and tablets the filter drawer matches the menu drawer: a white panel
+     hanging straight off the bottom of the header (square top, rounded bottom corners, soft
+     shadow), dropping into place with the same 0.25s fade-down, the page below dimmed but the
+     header left clear, and ink text with the same size and weight as the menu's items. The
+     drawer uses the white colour scheme (scheme-1) rather than the dark drawer scheme. */
+  @media screen and (max-width: 1023px) {
+    .facets--drawer.dialog-drawer {
+      --color-primary-button-background: #121212;
+      --color-primary-button-text: #ffffff;
+      --color-primary-button-border: #121212;
+      --color-primary-button-hover-background: #333333;
+      --color-primary-button-hover-text: #ffffff;
+      --color-primary-button-hover-border: #333333;
+      --dialog-drawer-opening-animation: oce-drawer-slide-in;
+      --dialog-drawer-closing-animation: oce-drawer-slide-out;
+
+      position: fixed;
+      inset: var(--header-height, 60px) 0 auto 0;
+      width: 100%;
+      max-width: none;
+      /* Most of the screen below the header, leaving a sliver of page showing underneath */
+      height: calc(100dvh - var(--header-height, 60px) - 16px);
+      max-height: none;
+      margin: 0;
+      background-color: #ffffff;
+      color: #121212;
+      border: 0;
+      border-radius: 0 0 20px 20px;
+      box-shadow: 0 14px 36px rgb(0 0 0 / 0.13);
+      overflow: hidden;
+    }
+
+    /* Slides in from the right edge, settling softly; slides back out a little quicker */
+    .facets--drawer.dialog-drawer[open] {
+      animation-duration: 0.45s;
+      animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .facets--drawer.dialog-drawer.dialog-closing {
+      animation-duration: 0.3s;
+      animation-timing-function: cubic-bezier(0.4, 0, 1, 1);
+    }
+
+    /* Same dim as the menu drawer, over the page only: the header stays clear */
+    .facets--drawer.dialog-drawer::backdrop {
+      background: rgb(0 0 0 / 0.25);
+      backdrop-filter: none;
+      clip-path: inset(var(--header-height, 60px) 0 0 0);
+    }
+
+    /* The filters list scrolls between the fixed title and the results button */
+    .facets--drawer .facets__form-wrapper,
+    .facets--drawer .facets__form {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    .facets--drawer .facets__form > .facets__filters-wrapper {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .facets--drawer .facets__title-wrapper {
+      background: #ffffff;
+      box-shadow: none;
+    }
+
+    /* Filter names read like the menu drawer's items */
+    .facets--drawer .facets__summary .facets__label {
+      font-family: var(--menu-top-level-font-family);
+      font-size: var(--menu-top-level-font-size);
+      font-weight: 520;
+      line-height: var(--menu-top-level-font-line-height);
+      color: #121212;
+    }
+
+    .facets--drawer .facets__summary .icon-caret {
+      color: #121212;
+    }
+
+    .facets--drawer .facets-drawer__close {
+      color: rgb(0 0 0 / 0.45);
+    }
+  }
+
+  @keyframes oce-drawer-slide-in {
+    from {
+      transform: translateX(100%);
+    }
+
+    to {
+      transform: none;
+    }
+  }
+
+  @keyframes oce-drawer-slide-out {
+    from {
+      transform: none;
+    }
+
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .facets--drawer.dialog-drawer[open],
+    .facets--drawer.dialog-drawer.dialog-closing {
+      animation-duration: 0.01s;
+    }
+  }
+
+  /* OCEBOOTS: Sort and the filter names read exactly like the Filter button (same size, weight
+     and colour), on phones and desktop */
+  .facets-toggle__button,
+  .sort-select__label,
+  .facets__summary .facets__label {
+    font-size: 0.9375rem;
+    font-weight: 560;
+    color: var(--color-foreground);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .sort-select__label .icon-caret,
+  .sorting-filter .facets__summary .icon-caret {
+    color: currentColor;
+  }
+
+  /* OCEBOOTS: filters in the drawer work like the menu drawer's items (assets/filter-drawer-focus.js):
+     closed until tapped, one at a time, the others cleared away while one is open */
+  .facets__filters-wrapper:has(> accordion-custom[data-drawer-focus] > details[open])
+    > :not(:has(> details[open])) {
+    display: none;
+  }
+
+  /* The script animates the options in and out, so the theme's own height/opacity transition is off */
+  /* (the ::details-content half of this lives in assets/base.css: the stylesheet compiler drops it) */
+  accordion-custom[data-drawer-focus] > details > .details-content {
+    transition: none;
+  }
+
+  accordion-custom[data-drawer-focus] > details > summary {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .facets--drawer :is(label, button, a, summary) {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* An open filter's arrow becomes an X; tapping the row closes it */
+  .facets__drill-close {
+    display: none;
+    width: var(--icon-size-xs);
+    height: var(--icon-size-xs);
+    margin-inline-start: var(--margin-2xs);
+    color: var(--color-foreground);
+  }
+
+  .facets__drill-close svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  accordion-custom[data-drawer-focus] > details[open] > summary .facets__drill-close {
+    display: inline-flex;
+  }
+
+  accordion-custom[data-drawer-focus] > details[open] > summary .icon-caret {
+    display: none;
+  }
+
+  /* OCEBOOTS: the Filter icon sits as far in from the left edge as the Sort arrow does from the
+     right (both inset by the toolbar padding plus --gap-md) */
+  .facets-toggle .facets-toggle__wrapper {
+    margin-inline-start: calc(var(--gap-md) - 8px);
+  }
+
   .collection-wrapper {
     @media screen and (min-width: 750px) {
       --facets-vertical-col-width: 6;
@@ -759,6 +967,11 @@
 
   .facets__filters-wrapper .facets__summary:hover,
   .facets__filters-wrapper .facets__panel[open] .facets__summary {
+    opacity: 1;
+  }
+
+  /* In the drawer every filter name stays full ink: the hover dimming would stick after a tap */
+  .facets--drawer .facets__filters-wrapper .facets__summary {
     opacity: 1;
   }
 

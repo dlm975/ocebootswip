@@ -1,0 +1,1394 @@
+{%- comment -%}
+  The wishlist page (/collections/all?view=wishlist, templates/collection.wishlist.json).
+
+  Saved products live in this browser (assets/wishlist.js). Their cards are fetched from each
+  product's URL with section_id=wishlist-card, drawn in the saved order (newest first) behind
+  placeholders the same size, so nothing jumps as they arrive. Tapping a card's heart removes it:
+  it fades away and the cards after it glide into the gap.
+{%- endcomment -%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<div class="section section--page-width color-{{ section.settings.color_scheme }}">
+  <div
+    class="wl spacing-style"
+    style="{% render 'spacing-style', settings: section.settings %}"
+    data-wishlist-page
+    data-collection-url="{{ routes.all_products_collection_url }}"
+  >
+    <header class="wl__header">
+      <h1 class="wl__title">Wishlist</h1>
+      <p
+        class="wl__count"
+        data-wishlist-page-count
+      ></p>
+    </header>
+
+    <ul
+      class="wl-grid"
+      role="list"
+      data-wishlist-grid
+    ></ul>
+
+    <div
+      class="wl__empty"
+      data-wishlist-empty
+      hidden
+    >
+      <p class="wl__empty-text">Tap the heart on any boot to save it here.</p>
+      <a
+        class="wl__empty-link"
+        href="{{ routes.collections_url }}/all-football-boots"
+      >
+        Browse all football boots
+      </a>
+    </div>
+  </div>
+</div>
+
+{%- comment -%}
+  Mini product page for the See Details buttons: a window that zooms open in the middle of the screen.
+  Its content is sections/wishlist-quickview.liquid, fetched per product.
+{%- endcomment -%}
+<dialog
+  class="wlq"
+  data-wlq
+  aria-labelledby="wlq-title"
+>
+  <div
+    class="wlq__scrim"
+    data-wlq-scrim
+  ></div>
+  <div
+    class="wlq__sheet"
+    data-wlq-sheet
+  >
+    <span
+      class="wlq__grabber"
+      aria-hidden="true"
+    ></span>
+    <button
+      type="button"
+      class="wlq__close"
+      data-wlq-close
+      aria-label="Close"
+    >
+      {%- render 'gicon', name: 'close', size: 22 -%}
+    </button>
+    <div
+      class="wlq__body"
+      data-wlq-body
+    ></div>
+  </div>
+</dialog>
+
+<script type="module">
+  import { animate } from 'motion';
+  import { pinchZoom } from '{{ 'pdp-pinch-zoom.js' | asset_url }}';
+  import { CartAddEvent } from '@theme/events';
+
+  const dialog = document.querySelector('[data-wlq]');
+  const grid = document.querySelector('[data-wishlist-grid]');
+  if (dialog && grid) {
+    const sheet = dialog.querySelector('[data-wlq-sheet]');
+    const body = dialog.querySelector('[data-wlq-body]');
+    const scrim = dialog.querySelector('[data-wlq-scrim]');
+    const EASE = [0.3, 0.7, 0.3, 1];
+    const MOVE = 0.55;
+    const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const SYSTEMS = ['us', 'uk', 'eu'];
+    const SYSTEM_KEY = 'csh-size-system'; // shared with the collection pages' size switch
+    const cache = new Map();
+    let current = null;
+    let opener = null;
+    let closing = null;
+
+    const load = (handle) => {
+      if (!cache.has(handle)) {
+        cache.set(
+          handle,
+          fetch('/products/' + encodeURIComponent(handle) + '?section_id=wishlist-quickview')
+            .then((response) => (response.ok ? response.text() : ''))
+            .then((html) => new DOMParser().parseFromString(html, 'text/html').querySelector('[data-wlq-product]'))
+            .catch(() => null)
+        );
+      }
+      return cache.get(handle);
+    };
+
+    const skeleton = () => {
+      const el = document.createElement('div');
+      el.className = 'wlq__product wlq__product--ghost';
+      el.innerHTML =
+        '<div class="wlq__gallery"><div class="wlq__ghost wlq__ghost--image"></div></div>' +
+        '<div class="wlq__info"><div class="wlq__ghost wlq__ghost--line"></div><div class="wlq__ghost wlq__ghost--line wlq__ghost--short"></div><div class="wlq__ghost wlq__ghost--sizes"></div><div class="wlq__ghost wlq__ghost--button"></div></div>';
+      return el;
+    };
+
+    const savedSystem = () => {
+      try {
+        const saved = localStorage.getItem(SYSTEM_KEY);
+        if (SYSTEMS.includes(saved)) return saved;
+      } catch (e) {}
+      return 'us';
+    };
+
+    /** Wire up a freshly loaded product: photos, size system, sizes and the add button */
+    function setUp(root) {
+      // Photos: a swipeable track, with a counter and thumbnails that follow it
+      const track = root.querySelector('[data-wlq-track]');
+      // Pinch a photo to zoom in; it eases back to normal when let go
+      if (track) pinchZoom(track, { slide: '[data-wlq-slide]', target: (slide) => slide.querySelector('.wlq__image') });
+      const thumbs = [...root.querySelectorAll('[data-wlq-thumb]')];
+      const counter = root.querySelector('[data-wlq-counter]');
+      const total = root.querySelectorAll('[data-wlq-slide]').length;
+      let frame = 0;
+      track.addEventListener(
+        'scroll',
+        () => {
+          cancelAnimationFrame(frame);
+          frame = requestAnimationFrame(() => {
+            const index = Math.round(track.scrollLeft / track.clientWidth);
+            if (counter) counter.textContent = index + 1 + ' / ' + total;
+            thumbs.forEach((thumb, i) => thumb.classList.toggle('is-active', i === index));
+          });
+        },
+        { passive: true }
+      );
+      thumbs.forEach((thumb) =>
+        thumb.addEventListener('click', () => {
+          track.scrollTo({ left: Number(thumb.dataset.wlqThumb) * track.clientWidth, behavior: reduced() ? 'instant' : 'smooth' });
+        })
+      );
+
+      // Size system (US / UK / EU), remembered with the collection pages' switch
+      const setSystem = (sys, remember) => {
+        root.dataset.sys = sys;
+        root.querySelectorAll('[data-wlq-sys]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.wlqSys === sys)));
+        if (!remember) return;
+        try {
+          localStorage.setItem(SYSTEM_KEY, sys);
+        } catch (e) {}
+        document.dispatchEvent(new CustomEvent('size-system:change', { detail: sys }));
+      };
+      setSystem(savedSystem(), false);
+      root.querySelectorAll('[data-wlq-sys]').forEach((b) => b.addEventListener('click', () => setSystem(b.dataset.wlqSys, true)));
+
+      // Sizes
+      const add = root.querySelector('[data-wlq-add]');
+      const addText = root.querySelector('[data-wlq-add-text]');
+      const error = root.querySelector('[data-wlq-error]');
+      const price = root.querySelector('[data-wlq-price]');
+      const was = root.querySelector('[data-wlq-was]');
+      const condition = root.querySelector('[data-wlq-condition]');
+      const full = root.querySelector('[data-wlq-full]');
+      let selected = root.querySelector('.wlq__size.is-selected')?.dataset.wlqVariant || null;
+      root.querySelectorAll('[data-wlq-variant]').forEach((button) =>
+        button.addEventListener('click', () => {
+          root.querySelectorAll('[data-wlq-variant]').forEach((b) => {
+            const on = b === button;
+            b.classList.toggle('is-selected', on);
+            b.setAttribute('aria-checked', String(on));
+          });
+          selected = button.dataset.wlqVariant;
+          price.textContent = button.dataset.price;
+          was.textContent = button.dataset.was || '';
+          was.hidden = !button.dataset.was;
+          if (condition && button.dataset.condition) condition.textContent = button.dataset.condition;
+          full.textContent = button.dataset.full;
+          add.disabled = false;
+          addText.textContent = 'Checkout now';
+          error.hidden = true;
+        })
+      );
+
+      add.addEventListener('click', async () => {
+        if (!selected || add.disabled) return;
+        add.disabled = true;
+        addText.textContent = 'Going to checkout…';
+        error.hidden = true;
+        const sections = [...document.querySelectorAll('cart-items-component')]
+          .map((el) => el.dataset.sectionId)
+          .filter(Boolean);
+        try {
+          const response = await fetch((window.Theme?.routes?.cart_add_url || '/cart/add') + '.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({ id: Number(selected), quantity: 1, sections: sections.join(',') }),
+          });
+          const result = await response.json();
+          if (!response.ok || result.status) throw new Error(result.description || result.message || 'Couldn’t add it to your cart.');
+          addText.textContent = 'Going to checkout…';
+          // The theme's own event: the cart count, cart drawer and anything else listening update
+          dialog.dispatchEvent(
+            new CartAddEvent({}, String(selected), {
+              source: 'product-form-component',
+              itemCount: 1,
+              productId: root.dataset.productId,
+              sections: result.sections,
+            })
+          );
+          // Checkout now: straight on to checkout with it in the cart
+          window.location.assign(window.Theme?.routes?.checkout_url || '/checkout');
+        } catch (e) {
+          error.textContent = e.message;
+          error.hidden = false;
+          add.disabled = false;
+          addText.textContent = 'Checkout now';
+        }
+      });
+    }
+
+    async function open(handle, from) {
+      if (current === handle) return; // a second tap while it opens
+      if (closing) await closing;
+      current = handle;
+      opener = from;
+      // Wait briefly for the product (usually already fetched on hover or press), so the window
+      // opens at its full size with the sizes in place, rather than growing once they arrive.
+      const loading = load(handle);
+      const early = await Promise.race([loading, new Promise((resolve) => setTimeout(() => resolve(undefined), 600))]);
+      if (current !== handle) return;
+      const ready = early !== undefined;
+
+      if (ready && early) {
+        const fresh = early.cloneNode(true);
+        body.replaceChildren(fresh);
+        setUp(fresh);
+      } else if (ready) {
+        body.replaceChildren(failed(handle));
+      } else {
+        body.replaceChildren(skeleton());
+      }
+      dialog.showModal();
+      document.documentElement.classList.add('wlq-open');
+      if (!reduced()) {
+        animate(scrim, { opacity: [0, 1] }, { duration: 0.3, ease: 'linear' });
+        // Zooms open in the middle of the screen (phones and desktop)
+        animate(sheet, { opacity: [0, 1], transform: ['scale(0.86)', 'scale(1)'] }, { duration: MOVE, ease: EASE });
+      }
+      if (ready) return;
+
+      // Slow connection: the placeholder shows first, then the product takes its place
+      const product = await loading;
+      if (!dialog.open || current !== handle) return;
+      const startHeight = sheet.getBoundingClientRect().height;
+      if (!product) {
+        body.replaceChildren(failed(handle));
+        return;
+      }
+      const fresh = product.cloneNode(true);
+      body.replaceChildren(fresh);
+      setUp(fresh);
+      if (reduced()) return;
+      const endHeight = sheet.getBoundingClientRect().height;
+      if (Math.abs(endHeight - startHeight) > 1) {
+        sheet.style.overflow = 'hidden';
+        animate(sheet, { height: [startHeight + 'px', endHeight + 'px'] }, { duration: 0.45, ease: EASE }).then(() => {
+          sheet.style.removeProperty('height');
+          sheet.style.removeProperty('overflow');
+        });
+      }
+      animate(fresh, { opacity: [0, 1] }, { duration: 0.3, ease: 'linear' });
+    }
+
+    function failed(handle) {
+      const p = document.createElement('p');
+      p.className = 'wlq__failed';
+      p.innerHTML = 'Couldn’t load this boot. <a href="/products/' + encodeURIComponent(handle) + '">Open its page</a>';
+      return p;
+    }
+
+    function close() {
+      if (closing) return closing;
+      if (!dialog.open) return Promise.resolve();
+      current = null;
+      const finish = () => {
+        dialog.close();
+        document.documentElement.classList.remove('wlq-open');
+        [sheet, scrim].forEach((el) => {
+          el.getAnimations().forEach((a) => a.cancel());
+          el.style.removeProperty('opacity');
+          el.style.removeProperty('transform');
+          el.style.removeProperty('height');
+          el.style.removeProperty('overflow');
+        });
+        body.replaceChildren();
+        closing = null;
+        if (opener && document.contains(opener)) opener.focus({ preventScroll: true });
+      };
+      if (reduced()) {
+        finish();
+        return Promise.resolve();
+      }
+      const out = [0.4, 0, 1, 1];
+      const scrimOpacity = parseFloat(getComputedStyle(scrim).opacity);
+      const fades = [animate(scrim, { opacity: [scrimOpacity, 0] }, { duration: 0.24, ease: 'linear' })];
+      fades.push(animate(sheet, { opacity: [1, 0], transform: ['scale(1)', 'scale(0.92)'] }, { duration: 0.2, ease: out }));
+      closing = Promise.all(fades).then(finish, finish);
+      return closing;
+    }
+
+    grid.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-wlq-open]');
+      if (!button) return;
+      // The card's photo is a link to the product page: a plain tap opens the mini product page
+      // instead; a new-tab click (cmd/ctrl/shift, middle button) still opens the product page
+      if (button.tagName === 'A') {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+        event.preventDefault();
+      }
+      open(button.dataset.wlqOpen, button);
+    });
+    // Start fetching as soon as a Buy button is pointed at or pressed
+    const warm = (event) => {
+      const button = event.target.closest && event.target.closest('[data-wlq-open]');
+      if (button) load(button.dataset.wlqOpen);
+    };
+    grid.addEventListener('pointerover', warm, { passive: true });
+    grid.addEventListener('pointerdown', warm, { passive: true });
+    // Fetch each saved boot's details once the page is quiet, so See Details opens straight away
+    const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 400));
+    const prefetch = () =>
+      idle(() => grid.querySelectorAll('[data-wlq-open]').forEach((button) => load(button.dataset.wlqOpen)));
+    new MutationObserver(prefetch).observe(grid, { childList: true, subtree: true });
+    prefetch();
+
+    dialog.querySelector('[data-wlq-close]').addEventListener('click', () => close());
+    scrim.addEventListener('click', () => close());
+    dialog.addEventListener('cancel', (event) => {
+      event.preventDefault();
+      close();
+    });
+  }
+</script>
+
+<script>
+  (function () {
+    const page = document.querySelector('[data-wishlist-page]');
+    if (!page) return;
+    const grid = page.querySelector('[data-wishlist-grid]');
+    const empty = page.querySelector('[data-wishlist-empty]');
+    const countText = page.querySelector('[data-wishlist-page-count]');
+    const TIMING = { duration: 550, easing: 'cubic-bezier(0.3, 0.7, 0.3, 1)' };
+    const reducedMotion = function () {
+      return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    };
+    /** @type {Map<string, Promise<Element | null>>} */
+    const cache = new Map();
+
+    function whenReady(callback) {
+      if (window.OceWishlist) return callback();
+      window.addEventListener('DOMContentLoaded', callback, { once: true });
+    }
+
+    function fetchCard(handle) {
+      if (!cache.has(handle)) {
+        const url = '/products/' + encodeURIComponent(handle) + '?section_id=wishlist-card';
+        cache.set(
+          handle,
+          fetch(url)
+            .then(function (response) {
+              return response.ok ? response.text() : '';
+            })
+            .then(function (html) {
+              const doc = new DOMParser().parseFromString(html, 'text/html');
+              return doc.querySelector('[data-wishlist-item]');
+            })
+            .catch(function () {
+              return null;
+            })
+        );
+      }
+      return cache.get(handle);
+    }
+
+    function setCount(count) {
+      countText.textContent = count ? count + (count === 1 ? ' saved boot' : ' saved boots') : '';
+      empty.hidden = count > 0;
+    }
+
+    function placeholder(handle) {
+      const item = document.createElement('li');
+      item.className = 'wl-grid__item wl-grid__item--loading';
+      item.dataset.wishlistItem = handle;
+      item.innerHTML = '<span class="wl-card wl-card--ghost"><span class="wl-card__media"></span><span class="wl-ghost-line wl-ghost-line--short"></span></span>';
+      return item;
+    }
+
+    function render() {
+      const handles = window.OceWishlist ? window.OceWishlist.items() : [];
+      grid.replaceChildren.apply(grid, handles.map(placeholder));
+      setCount(handles.length);
+
+      handles.forEach(function (handle) {
+        fetchCard(handle).then(function (card) {
+          const slot = grid.querySelector('[data-wishlist-item="' + CSS.escape(handle) + '"].wl-grid__item--loading');
+          if (!slot) return;
+          if (!card) {
+            // No longer in the store: drop it quietly
+            slot.remove();
+            window.OceWishlist.set(handle, false);
+            return;
+          }
+          const fresh = card.cloneNode(true);
+          slot.replaceWith(fresh);
+          if (!reducedMotion()) {
+            fresh.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, easing: 'ease-out' });
+          }
+        });
+      });
+    }
+
+    /** Remove a card: it fades and shrinks a little, then the cards after it glide into the gap */
+    function removeCard(handle) {
+      const item = grid.querySelector('[data-wishlist-item="' + CSS.escape(handle) + '"]');
+      if (!item) return;
+      const after = function () {
+        const others = Array.from(grid.children).filter(function (el) {
+          return el !== item;
+        });
+        const before = new Map(
+          others.map(function (el) {
+            return [el, el.getBoundingClientRect()];
+          })
+        );
+        item.remove();
+        setCount(grid.children.length);
+        if (reducedMotion()) return;
+        others.forEach(function (el) {
+          const was = before.get(el);
+          const now = el.getBoundingClientRect();
+          const dx = was.left - now.left;
+          const dy = was.top - now.top;
+          if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+          el.animate([{ transform: 'translate(' + dx + 'px, ' + dy + 'px)' }, { transform: 'none' }], TIMING);
+        });
+      };
+      if (reducedMotion()) return after();
+      item.style.pointerEvents = 'none';
+      item
+        .animate(
+          [
+            { opacity: 1, transform: 'none' },
+            { opacity: 0, transform: 'scale(0.94)' },
+          ],
+          { duration: 220, easing: 'cubic-bezier(0.4, 0, 1, 1)', fill: 'forwards' }
+        )
+        .finished.then(after, after);
+    }
+
+    document.addEventListener('oce-wishlist:change', function (event) {
+      const detail = event.detail || {};
+      // Removed here: animate it out. Anything else (another tab): redraw.
+      if (detail.handle && detail.saved === false) removeCard(detail.handle);
+      else render();
+    });
+
+    whenReady(render);
+  })();
+</script>
+
+{% stylesheet %}
+  .wl__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 14px;
+    margin-block-end: 24px;
+  }
+
+  .wl__title {
+    margin: 0;
+    font-size: clamp(2.5rem, 8vw, 4.5rem);
+    font-weight: 750;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    font-variation-settings: 'opsz' 32;
+  }
+
+  .wl__count {
+    margin: 0;
+    font-size: 0.875rem;
+    color: rgb(var(--color-foreground-rgb) / 0.55);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wl-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media screen and (min-width: 750px) {
+    .wl-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .wl-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .wl-grid__item {
+    position: relative;
+  }
+
+  .wl-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 10px 10px 14px;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgb(18 18 18 / 0.06), 0 6px 20px rgb(18 18 18 / 0.05);
+    color: #121212;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: box-shadow 0.2s ease, transform 0.2s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  @media (hover: hover) {
+    a.wl-card:hover {
+      box-shadow: 0 1px 2px rgb(18 18 18 / 0.08), 0 10px 28px rgb(18 18 18 / 0.09);
+      transform: translateY(-2px);
+    }
+  }
+
+  .wl-card:focus-visible {
+    outline: 2px solid #121212;
+    outline-offset: 2px;
+  }
+
+  .wl-card__media {
+    position: relative;
+    display: block;
+    aspect-ratio: 1;
+    margin-block-end: 10px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #ffffff;
+  }
+
+  .wl-card__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .wl-card__sold {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #121212;
+    color: #ffffff;
+    font-size: 0.6875rem;
+    font-weight: 600;
+  }
+
+  .wl-card__title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 0.8125rem;
+    font-weight: 460;
+    line-height: 1.3;
+  }
+
+  .wl-card__price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 6px;
+    margin-block-start: auto;
+    padding-block-start: 6px;
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wl-card__amount {
+    white-space: nowrap;
+  }
+
+  .wl-card__from,
+  .wl-card__was {
+    color: rgb(18 18 18 / 0.45);
+    font-size: 0.75rem;
+  }
+
+  .wl-card__condition {
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgb(18 18 18 / 0.06);
+    color: rgb(18 18 18 / 0.7);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  @media screen and (max-width: 749px) {
+    .wl-card__condition {
+      display: none;
+    }
+  }
+
+  /* See Details: bold words and a holographic coin along the foot of the card (the card leaves
+     room for it); opens the mini product page */
+  .wl-card {
+    padding-block-end: 58px;
+  }
+
+  .wl-card__details {
+    position: absolute;
+    inset: auto 14px 14px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #121212;
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 750;
+    letter-spacing: -0.01em;
+    text-align: start;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .wl-card__details--sold {
+    min-height: 36px;
+    color: rgb(18 18 18 / 0.4);
+    cursor: default;
+  }
+
+  .wl-card__disk {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    transition: transform 0.25s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  .wl-card__disk svg {
+    position: relative;
+    width: 55%;
+    height: 55%;
+    transition: transform 0.25s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  @media (hover: hover) {
+    .wl-card__details:not(.wl-card__details--sold):hover .wl-card__disk {
+      transform: translateY(-1px);
+    }
+
+    .wl-card__details:not(.wl-card__details--sold):hover .wl-card__disk svg {
+      transform: translateX(2px);
+    }
+
+    .wl-card__details:not(.wl-card__details--sold):hover .wl-card__disk::after {
+      animation: wl-disk-glint 0.8s cubic-bezier(0.45, 0, 0.25, 1) 0.1s 1 both;
+    }
+  }
+
+  .wl-card__details:active .wl-card__disk {
+    transform: translateY(2px);
+  }
+
+  .wl-card__details:focus-visible {
+    outline: 2px solid #121212;
+    outline-offset: 4px;
+    border-radius: 999px;
+  }
+
+  @keyframes wl-disk-glint {
+    from {
+      transform: translateX(-110%);
+    }
+    to {
+      transform: translateX(110%);
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .wl-card__details {
+      font-size: 1.125rem;
+    }
+
+    .wl-card__disk {
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  /* ---- Mini product page (Buy) ---- */
+  .wlq {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: hidden;
+    color: #121212;
+  }
+
+  /* A window in the middle of the screen, on phones too */
+  .wlq[open] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .wlq__scrim {
+    position: absolute;
+    inset: 0;
+    background: rgb(0 0 0 / 0.45);
+  }
+
+  .wlq__sheet {
+    position: relative;
+    width: calc(100% - 24px);
+    max-height: calc(100vh - 48px);
+    max-height: calc(100dvh - 48px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 24px 80px rgb(0 0 0 / 0.3);
+    transform-origin: 50% 50%;
+  }
+
+  .wlq__grabber {
+    display: none !important;
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    z-index: 3;
+    width: 40px;
+    height: 4px;
+    margin-left: -20px;
+    border-radius: 2px;
+    background: rgb(18 18 18 / 0.2);
+  }
+
+  .wlq__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.92);
+    color: #121212;
+    box-shadow: 0 2px 10px rgb(0 0 0 / 0.12);
+    cursor: pointer;
+  }
+
+  .wlq__gallery {
+    position: relative;
+  }
+
+  .wlq__track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    background: #ffffff;
+  }
+
+  .wlq__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .wlq__slide {
+    flex: 0 0 100%;
+    aspect-ratio: 1;
+    margin: 0;
+    overflow: hidden;
+    scroll-snap-align: start;
+    /* Two fingers zoom the photo (pdp-pinch-zoom.js), not the page */
+    touch-action: pan-x pan-y;
+  }
+
+  .wlq__slide.is-pinching {
+    position: relative;
+    z-index: 1;
+  }
+
+  .wlq__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .wlq__counter {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgb(18 18 18 / 0.7);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wlq__thumbs {
+    display: flex;
+    gap: 6px;
+    padding: 8px 16px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .wlq__thumb {
+    flex: none;
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f4f4f4;
+    opacity: 0.55;
+    cursor: pointer;
+    box-shadow: inset 0 0 0 1px rgb(18 18 18 / 0.06);
+    transition: opacity 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .wlq__thumb.is-active {
+    opacity: 1;
+    box-shadow: inset 0 0 0 2px #121212;
+  }
+
+  .wlq__thumb-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+  }
+
+  .wlq__info {
+    display: flex;
+    flex-direction: column;
+    padding: 16px 16px 24px;
+  }
+
+  .wlq__title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 750;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .wlq__price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 8px;
+    margin-block-start: 6px;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wlq__was {
+    color: rgb(18 18 18 / 0.45);
+    font-size: 0.875rem;
+    font-weight: 400;
+  }
+
+  .wlq__label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgb(18 18 18 / 0.55);
+  }
+
+  .wlq__condition {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 14px 0 0;
+  }
+
+  .wlq__condition-value {
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgb(18 18 18 / 0.06);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .wlq__sizes-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-block-start: 18px;
+  }
+
+  .wlq__systems {
+    display: inline-flex;
+    padding: 3px;
+    border-radius: 999px;
+    background: rgb(18 18 18 / 0.06);
+  }
+
+  .wlq__systems button {
+    min-width: 42px;
+    height: 28px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: rgb(18 18 18 / 0.6);
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .wlq__systems button[aria-pressed='true'] {
+    background: #ffffff;
+    color: #121212;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+  }
+
+  .wlq__sizes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+    gap: 8px;
+    margin-block-start: 10px;
+  }
+
+  /* Sizes: rounded off-white keys with a grey outline, slightly raised on a grey edge; the chosen
+     one is pressed in, with a dark outline (the product page sizes match) */
+  .wlq__size {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 50px;
+    padding: 6px;
+    border: 1px solid #d4d4d8;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #f7f7f5 100%);
+    box-shadow:
+      inset 0 1px 0 #ffffff,
+      -2px 3px 0 #d4d4d8,
+      -2px 4px 8px rgb(18 18 18 / 0.06);
+    color: #121212;
+    font: inherit;
+    font-size: 0.9375rem;
+    font-weight: 650;
+    cursor: pointer;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s cubic-bezier(0.3, 0.7, 0.3, 1),
+      transform 0.2s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  @media (hover: hover) {
+    .wlq__size:hover:not(:disabled, .is-selected) {
+      border-color: #b8b8bf;
+      transform: translate(0.5px, -1px);
+      box-shadow:
+        inset 0 1px 0 #ffffff,
+        -2.5px 4px 0 #c9c9cf,
+        -2.5px 6px 12px rgb(18 18 18 / 0.08);
+    }
+  }
+
+  .wlq__size:active:not(:disabled),
+  .wlq__size.is-selected {
+    transform: translate(-1.5px, 2px);
+    box-shadow:
+      inset -1px 2px 3px rgb(18 18 18 / 0.08),
+      -0.5px 1px 0 #d4d4d8;
+  }
+
+  .wlq__size.is-selected {
+    border: 1.5px solid #121212;
+    background: #f4f4f2;
+    color: #121212;
+  }
+
+  .wlq__size:disabled {
+    opacity: 0.45;
+    background: #f7f7f5;
+    border-color: #e4e4e7;
+    box-shadow: none;
+    cursor: default;
+    text-decoration: line-through;
+  }
+
+  /* Each size shows in the chosen system */
+  .wlq__size-label[data-sys] {
+    display: none;
+  }
+
+  .wlq__product[data-sys='us'] .wlq__size-label[data-sys='us'],
+  .wlq__product[data-sys='uk'] .wlq__size-label[data-sys='uk'],
+  .wlq__product[data-sys='eu'] .wlq__size-label[data-sys='eu'] {
+    display: block;
+  }
+
+  .wlq__size-label--plain {
+    font-size: 0.8125rem;
+  }
+
+  .wlq__size-note {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    opacity: 0.7;
+  }
+
+  .wlq__size-full {
+    min-height: 1.2em;
+    margin: 8px 0 0;
+    font-size: 0.8125rem;
+    color: rgb(18 18 18 / 0.55);
+  }
+
+  .wlq__add {
+    height: 52px;
+    margin-block-start: 14px;
+    border: 0;
+    border-radius: 999px;
+    background: #121212;
+    color: #ffffff;
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 650;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .wlq__add:disabled {
+    background: rgb(18 18 18 / 0.1);
+    color: rgb(18 18 18 / 0.5);
+    cursor: default;
+  }
+
+  .wlq__error {
+    margin: 10px 0 0;
+    color: #c4232e;
+    font-size: 0.875rem;
+  }
+
+  .wlq__details {
+    margin-block-start: 18px;
+    border-block-start: 1px solid rgb(18 18 18 / 0.1);
+  }
+
+  .wlq__details summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-block: 14px;
+    font-weight: 650;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .wlq__details summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* The arrow turns over as Details opens */
+  .wlq__details-icon {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    color: rgb(18 18 18 / 0.6);
+    transition: transform 0.35s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  .wlq__details[open] .wlq__details-icon {
+    transform: rotate(180deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wlq__details-icon {
+      transition: none;
+    }
+  }
+
+  .wlq__description {
+    padding-block-end: 8px;
+    font-size: 0.875rem;
+    line-height: 1.55;
+  }
+
+  .wlq__more {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-block-start: 12px;
+    color: #121212;
+    font-weight: 650;
+    text-decoration: none;
+  }
+
+  .wlq__more:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .wlq__failed {
+    padding: 64px 24px;
+    text-align: center;
+  }
+
+  /* Placeholder while the product loads, about its size */
+  .wlq__ghost {
+    border-radius: 10px;
+    background: rgb(18 18 18 / 0.06);
+    animation: wl-ghost 1.2s ease-in-out infinite alternate;
+  }
+
+  .wlq__ghost--image {
+    aspect-ratio: 1;
+    border-radius: 0;
+  }
+
+  .wlq__ghost--line {
+    height: 22px;
+    margin-block-end: 10px;
+  }
+
+  .wlq__ghost--short {
+    width: 40%;
+  }
+
+  .wlq__ghost--sizes {
+    height: 108px;
+    margin-block: 18px 14px;
+  }
+
+  .wlq__ghost--button {
+    height: 52px;
+    border-radius: 999px;
+  }
+
+  /* Phones: the photo takes the height that's left, so everything down to the Checkout now button
+     fits in the window without scrolling (Details and the product page link sit below it) */
+  @media screen and (max-width: 749px) {
+    .wlq__slide,
+    .wlq__ghost--image {
+      aspect-ratio: auto;
+      height: clamp(150px, calc(100vh - 444px), 100vw);
+      height: clamp(150px, calc(100dvh - 444px), 100vw);
+    }
+  }
+
+  /* Short phones: no thumbnail strip (swipe the photo; the counter shows where you are) */
+  @media screen and (max-width: 749px) and (max-height: 700px) {
+    .wlq__thumbs {
+      display: none;
+    }
+
+    .wlq__slide,
+    .wlq__ghost--image {
+      height: clamp(150px, calc(100vh - 380px), 100vw);
+      height: clamp(150px, calc(100dvh - 380px), 100vw);
+    }
+  }
+
+  /* Desktop: a window, photos on the left and details on the right */
+  @media screen and (min-width: 750px) {
+    .wlq[open] {
+      align-items: center;
+    }
+
+    .wlq__sheet {
+      width: min(980px, calc(100vw - 48px));
+      max-height: min(760px, calc(100vh - 48px));
+      border-radius: 20px;
+      box-shadow: 0 24px 80px rgb(0 0 0 / 0.3);
+    }
+
+    .wlq__grabber {
+      display: none;
+    }
+
+    .wlq__product {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      align-items: start;
+    }
+
+    .wlq__gallery {
+      position: sticky;
+      top: 0;
+      padding: 16px 0 16px 16px;
+    }
+
+    .wlq__track {
+      border-radius: 14px;
+    }
+
+    .wlq__counter {
+      top: 28px;
+      left: 28px;
+    }
+
+    .wlq__thumbs {
+      flex-wrap: wrap;
+      padding: 10px 0 0;
+    }
+
+    .wlq__info {
+      padding: 28px 28px 28px 24px;
+    }
+
+    .wlq__title {
+      padding-inline-end: 44px;
+      font-size: 1.625rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wl-card__disk,
+    .wl-card__disk svg,
+    .wlq__thumb,
+    .wlq__size {
+      transition: none;
+    }
+
+    .wlq__ghost {
+      animation: none;
+    }
+  }
+
+  /* The heart sits in the image's top corner */
+  .wl-card__heart.wishlist-toggle--card {
+    inset: 18px 18px auto auto;
+  }
+
+  /* Placeholders while the cards load, the same size so nothing shifts */
+  .wl-card--ghost .wl-card__media,
+  .wl-ghost-line {
+    background: rgb(18 18 18 / 0.05);
+    animation: wl-ghost 1.2s ease-in-out infinite alternate;
+  }
+
+  .wl-ghost-line {
+    display: block;
+    height: 0.8125rem;
+    margin-block-start: 4px;
+    border-radius: 4px;
+  }
+
+  .wl-ghost-line--short {
+    width: 45%;
+    margin-block-start: 14px;
+  }
+
+  @keyframes wl-ghost {
+    to {
+      opacity: 0.45;
+    }
+  }
+
+  .wl__empty[hidden] {
+    display: none;
+  }
+
+  .wl__empty-text {
+    margin: 0 0 14px;
+    font-size: 1.125rem;
+  }
+
+  .wl__empty-link {
+    display: inline-flex;
+    align-items: center;
+    height: 48px;
+    padding-inline: 24px;
+    border-radius: 999px;
+    background: #121212;
+    color: #ffffff;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wl-card {
+      transition: none;
+    }
+
+    .wl-card--ghost .wl-card__media,
+    .wl-ghost-line {
+      animation: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Wishlist",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 48
+    }
+  ]
+}
+{% endschema %}

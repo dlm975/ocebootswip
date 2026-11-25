@@ -38,9 +38,9 @@
     background: none;
     border: none;
     color: {{ block.settings.text_color }};
-    font-family: {{ block.settings.main_button_font.family }}, {{ block.settings.main_button_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.main_button_font.family }}, {{ block.settings.main_button_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.main_button_font.weight }};
-    font-style: {{ block.settings.main_button_font.style }};
+    font-style: {% if settings.brand_font %}normal{% else %}{{ block.settings.main_button_font.style }}{% endif %};
     font-size: {{ block.settings.font_size }}px;
     cursor: pointer;
     padding: 8px 16px;
@@ -80,9 +80,9 @@
   .ai-sticky-nav-option-btn-{{ ai_gen_id }} {
     background: {{ block.settings.option_bg_color }};
     color: {{ block.settings.option_text_color }};
-    font-family: {{ block.settings.size_type_font.family }}, {{ block.settings.size_type_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.size_type_font.family }}, {{ block.settings.size_type_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.size_type_font.weight }};
-    font-style: {{ block.settings.size_type_font.style }};
+    font-style: {% if settings.brand_font %}normal{% else %}{{ block.settings.size_type_font.style }}{% endif %};
     border: 1px solid {{ block.settings.option_border_color }};
     border-radius: {{ block.settings.option_border_radius }}px;
     padding: 8px 20px;
@@ -130,9 +130,9 @@
 
   .ai-sticky-nav-sizes-title-{{ ai_gen_id }} {
     color: {{ block.settings.text_color }};
-    font-family: {{ block.settings.size_type_font.family }}, {{ block.settings.size_type_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.size_type_font.family }}, {{ block.settings.size_type_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.size_type_font.weight }};
-    font-style: {{ block.settings.size_type_font.style }};
+    font-style: {% if settings.brand_font %}normal{% else %}{{ block.settings.size_type_font.style }}{% endif %};
     font-size: {{ block.settings.font_size }}px;
     margin: 0;
   }
@@ -217,16 +217,7 @@
       >
         {{ block.settings.main_text }}
         <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
+          xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-344 240-584l43-43 197 197 197-197 43 43-240 240Z"/></svg>
       </button>
 
       <div class="ai-sticky-nav-options-{{ ai_gen_id }}">
@@ -260,17 +251,7 @@
         aria-label="Close size list"
       >
         <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
+          xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="m249-207-42-42 231-231-231-231 42-42 231 231 231-231 42 42-231 231 231 231-42 42-231-231-231 231Z"/></svg>
       </button>
     </div>
     <div class="ai-sticky-nav-size-list-{{ ai_gen_id }}"></div>
@@ -955,7 +936,7 @@
       "type": "color",
       "id": "text_color",
       "label": "Text",
-      "default": "#000000"
+      "default": "#121212"
     },
     {
       "type": "header",
@@ -991,7 +972,7 @@
       "type": "color",
       "id": "option_text_color",
       "label": "Text",
-      "default": "#000000"
+      "default": "#121212"
     },
     {
       "type": "color",
@@ -1009,7 +990,7 @@
       "type": "color",
       "id": "option_hover_text_color",
       "label": "Hover text",
-      "default": "#000000"
+      "default": "#121212"
     }
   ],
   "presets": [

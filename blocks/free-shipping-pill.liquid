@@ -50,17 +50,12 @@
 {%- if show and block.settings.text != blank -%}
   <span
     id="fsp-{{ block.id }}"
-    class="fsp{% if excluded %} fsp--excluded{% endif %}"
+    class="fsp oce-disk{% if excluded %} fsp--excluded{% endif %}"
     style="--fsp-bg: {{ block.settings.background }}; --fsp-fg: {{ block.settings.text_color }};"
     {{ block.shopify_attributes }}
   >
     {%- if block.settings.show_icon -%}
-      <svg class="fsp__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true">
-        <path d="M1 3h13v13H1z"/>
-        <path d="M14 8h4l3 3v5h-7z"/>
-        <circle cx="5.5" cy="18.5" r="2"/>
-        <circle cx="17.5" cy="18.5" r="2"/>
-      </svg>
+      {%- render 'gicon', name: 'local_shipping', class: 'fsp__icon', size: 16 -%}
     {%- endif -%}
     <span class="fsp__text">{{ block.settings.text }}</span>
     {%- if excluded -%}
@@ -76,21 +71,33 @@
     position: relative;
   }
 
+  /* The whole pill in the holographic foil (assets/base.css .oce-disk, the site's disks), with the
+     truck and bold dark text on it */
   .fsp {
     display: none;
     align-items: center;
-    gap: 5px;
-    padding: 6px 12px;
+    gap: 7px;
+    padding: 7px 14px 7px 11px;
     border-radius: 999px;
-    background: var(--fsp-bg, #e7f6ee);
-    color: var(--fsp-fg, #15803d);
-    font-size: 0.68rem;
-    font-weight: 700;
-    line-height: 1.25;
-    letter-spacing: 0.01em;
+    color: #121212;
+    font-size: 0.75rem;
+    font-weight: 750;
+    line-height: 1.2;
+    letter-spacing: -0.005em;
     white-space: nowrap;
     box-sizing: border-box;
-    box-shadow: 0 4px 14px -6px rgb(0 0 0 / 35%);
+  }
+
+  .fsp__icon {
+    position: relative;
+    flex: none;
+    width: 17px;
+    height: 17px;
+  }
+
+  .fsp__text,
+  .fsp__note {
+    position: relative;
   }
 
   .fsp--placed {
@@ -107,12 +114,8 @@
     .fsp--placed {
       top: 16px;
       right: 16px;
-      font-size: 0.72rem;
+      font-size: 0.8125rem;
     }
-  }
-
-  .fsp__icon {
-    flex-shrink: 0;
   }
 
   /* Only rendered in the theme editor, so a merchant can see the block is
@@ -128,7 +131,8 @@
 
 <script>
   (function () {
-    var pill = document.getElementById('fsp-{{ block.id }}');
+    var id = 'fsp-{{ block.id }}';
+    var pill = document.getElementById(id);
     if (!pill) return;
 
     function gallery() {
@@ -137,6 +141,13 @@
     }
 
     function place() {
+      /* A re-render (choosing another size) draws a fresh pill back in the details column and
+         redraws the gallery without the one moved there: keep the newest and move it again. */
+      var fresh = document.getElementById(id);
+      if (fresh && fresh !== pill) {
+        if (pill.isConnected) pill.remove();
+        pill = fresh;
+      }
       var g = gallery();
       if (g && pill.parentElement !== g) g.appendChild(pill);
       /* Revealed either way — without a gallery it still shows where the
@@ -151,6 +162,15 @@
     }
 
     window.addEventListener('load', place);
+
+    /* Put it back the moment the product area is redrawn. Mutation observers run before the
+       next paint, so the pill never disappears for a frame. */
+    var area = document.querySelector('.product-information') || document.body;
+    new MutationObserver(function () {
+      var g = gallery();
+      var fresh = document.getElementById(id);
+      if (!pill.isConnected || (g && pill.parentElement !== g) || (fresh && fresh !== pill)) place();
+    }).observe(area, { childList: true, subtree: true });
   })();
 </script>
 
@@ -200,13 +220,13 @@
       "type": "color",
       "id": "background",
       "label": "Background",
-      "default": "#e7f6ee"
+      "default": "#F1F5F9"
     },
     {
       "type": "color",
       "id": "text_color",
       "label": "Text colour",
-      "default": "#15803d"
+      "default": "#121212"
     }
   ],
   "presets": [

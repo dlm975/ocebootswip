@@ -46,6 +46,14 @@
     assign show_bfsale_rrp = true
   endif
 
+  # Product page, any reduced price: "was <price>" on a small line above the price, and a big red
+  # bold "% off" to their right (rounded as the cards' badge: to the nearest whole, then up to a 5)
+  assign is_pdp_sale = false
+  if is_main_product_price and show_compare_price
+    assign is_pdp_sale = true
+    assign pdp_off = selected_variant.compare_at_price | minus: selected_variant.price | times: 100.0 | divided_by: selected_variant.compare_at_price | round | divided_by: 5.0 | ceil | times: 5
+  endif
+
   if product_resource == blank and request.design_mode
     assign price = 1999
   endif
@@ -66,17 +74,44 @@
     assign price = price | money
     assign compare_at_price = compare_at_price | money
   endif
+
+  # Cards: the "was" price is rounded up to whole units with no decimals (snippets/was-price.liquid)
+  if is_main_product_price == false and show_compare_price and product_resource != blank
+    capture compare_at_price
+      render 'was-price', cents: selected_variant.compare_at_price, with_currency: settings.currency_code_enabled_product_cards
+    endcapture
+  endif
 -%}
 
 <div
   ref="priceContainer"
-  {% if is_bfsale_pdp %}
+  {% if is_pdp_sale %}
+    class="pdp-sale"
+  {% elsif is_bfsale_pdp %}
     class="bfsale-price-line bfsale-price-line--pdp"
   {% elsif is_bfsale or is_sale_card %}
     class="bfsale-price-line bfsale-price-line--card"
   {% endif %}
 >
-  {% if show_bfsale_rrp %}
+  {% if is_pdp_sale %}
+    <span role="group" class="pdp-sale__was">
+      <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
+      <span aria-hidden="true">was </span><span class="compare-at-price">{{- compare_at_price -}}</span>
+    </span>
+    <span role="group" class="pdp-sale__now">
+      <span class="visually-hidden">{{ 'content.price_sale' | t }}&nbsp;</span>
+      <span class="price">{{ price }}</span>
+    </span>
+    {%- if pdp_off > 0 -%}
+      <span class="pdp-sale__off">{{ pdp_off }}% off</span>
+    {%- endif -%}
+  {% elsif show_bfsale_rrp and is_bfsale_pdp == false %}
+    {%- comment -%} Cards: just "Sale:" and the new price (no compare-at); the red "% off" is on the image {%- endcomment -%}
+    <span role="group" class="card-sale-price">
+      <span class="card-sale-price__label">Sale:</span>
+      <span class="price">{{ price }}</span>
+    </span>
+  {% elsif show_bfsale_rrp %}
     {%- unless is_bfsale_pdp -%}<price-fit class="bfsale-fit">{%- endunless -%}
     <span role="group" class="bfsale-rrp">
       <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
@@ -89,7 +124,11 @@
     </span>
     {%- unless is_bfsale_pdp -%}</price-fit>{%- endunless -%}
     {% if is_bfsale_pdp %}
-      {%- render 'bfsale-badge', product: product_resource, inline: true -%}
+      {%- if settings.sale_badge_style == 'classic' -%}
+        {%- render 'bfsale-badge', product: product_resource, inline: true -%}
+      {%- else -%}
+        {%- render 'sale-badge', product: product_resource, inline: true -%}
+      {%- endif -%}
     {% endif %}
   {% else %}
   {% if show_sale_price_first == false and show_compare_price %}

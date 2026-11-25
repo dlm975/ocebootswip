@@ -1,0 +1,95 @@
+{%- comment -%}
+  Who the site is, for search engines, on every page: the business (Organization: name, logo, the
+  Instagram profile) and the website itself (WebSite), so Google shows the site's name as
+  "OCEBOOTS" in results.
+{%- endcomment -%}
+
+{%- liquid
+  assign origin = request.origin
+  assign site_name = 'OCEBOOTS'
+-%}
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "OnlineStore",
+    "@id": {{ origin | append: '/#organization' | json }},
+    "name": {{ site_name | json }},
+    "alternateName": {{ shop.name | json }},
+    "url": {{ origin | append: '/' | json }},
+    {%- if settings.logo -%}
+      "logo": {{ settings.logo | image_url: width: 600 | prepend: 'https:' | json }},
+    {%- endif -%}
+    {%- if shop.description != blank -%}
+      "description": {{ shop.description | strip | json }},
+    {%- endif -%}
+    {%- if shop.email != blank -%}
+      "email": {{ shop.email | json }},
+    {%- endif -%}
+    {%- if shop.address.city != blank -%}
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": {{ shop.address.city | json }},
+        {%- if shop.address.province != blank %}"addressRegion": {{ shop.address.province | json }},{% endif -%}
+        "addressCountry": {{ shop.address.country_code | default: 'NZ' | json }}
+      },
+    {%- endif -%}
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer support",
+      "email": {{ shop.email | default: 'oceboots@gmail.com' | json }},
+      "url": {{ origin | append: '/pages/contact' | json }}
+    },
+    "areaServed": "Worldwide",
+    "knowsAbout": ["Football boots", "Soccer cleats", "Nike Mercurial", "Nike Phantom", "Nike Tiempo", "adidas Predator", "adidas F50", "Pre-owned football boots", "Pro-issue football boots"],
+    "sameAs": ["https://www.instagram.com/oceboots/"]
+  }
+</script>
+{%- if request.page_type == 'page' and page.content contains '<h3' -%}
+  {%- comment -%}
+    A page written as questions and answers (each question an h3 ending in "?", its answer the text
+    up to the next heading) is marked up as an FAQ, so search engines and AI assistants can read the
+    questions and their answers directly.
+  {%- endcomment -%}
+  {%- liquid
+    assign qa_parts = page.content | split: '<h3'
+    assign qa_count = 0
+  -%}
+  {%- capture qa_items -%}
+    {%- for part in qa_parts offset: 1 -%}
+      {%- liquid
+        assign q_html = part | split: '</h3>' | first
+        assign q_text = q_html | prepend: '<h3' | strip_html | strip
+        assign a_html = part | split: '</h3>' | last | split: '<h2' | first | split: '<h3' | first
+        assign a_text = a_html | strip_html | strip_newlines | replace: '  ', ' ' | strip
+        assign q_last = q_text | slice: -1, 1
+      -%}
+      {%- if q_last == '?' and a_text != blank -%}
+        {%- if qa_count > 0 %},{% endif -%}
+        {%- assign qa_count = qa_count | plus: 1 -%}
+        { "@type": "Question", "name": {{ q_text | json }}, "acceptedAnswer": { "@type": "Answer", "text": {{ a_text | json }} } }
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endcapture -%}
+  {%- if qa_count > 0 -%}
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [{{ qa_items }}]
+      }
+    </script>
+  {%- endif -%}
+{%- endif -%}
+{%- if request.page_type == 'index' -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "@id": {{ origin | append: '/#website' | json }},
+      "name": {{ site_name | json }},
+      "alternateName": [{{ shop.name | json }}, "oceboots.com"],
+      "url": {{ origin | append: '/' | json }},
+      "publisher": { "@id": {{ origin | append: '/#organization' | json }} }
+    }
+  </script>
+{%- endif -%}

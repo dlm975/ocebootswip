@@ -1,0 +1,538 @@
+{%- comment -%}
+  Main image hero for the home page: a full-width photo under a dark overlay (so the white text
+  reads on any image), bold white heading, a line of text and buttons, and the bottom of the
+  hero fading into the next section's white.
+
+  Entrance (Motion, motion.dev): the photo settles from a slight zoom and the text rises in, one
+  piece after another. Skipped with reduced motion; if the script can't load, everything shows.
+{%- endcomment -%}
+
+{%- liquid
+  assign image = section.settings.image
+  assign image_mobile = section.settings.image_mobile | default: image
+  assign overlay = section.settings.overlay_opacity | divided_by: 100.0
+  assign fade = section.settings.fade_height
+  assign position = 'object-position: ' | append: image.presentation.focal_point
+  assign position_mobile = 'object-position: ' | append: image_mobile.presentation.focal_point
+-%}
+
+<div
+  class="ih ih--{{ section.settings.text_alignment }} ih--{{ section.settings.content_position }}"
+  id="ih-{{ section.id }}"
+  style="
+    --ih-height: {{ section.settings.height_desktop }}vh;
+    --ih-height-mobile: {{ section.settings.height_mobile }}svh;
+    --ih-overlay: {{ section.settings.overlay_color }};
+    --ih-overlay-opacity: {{ overlay }};
+    --ih-fade: {{ section.settings.fade_color }};
+    --ih-fade-height: {{ fade }}%;
+  "
+>
+  <script>
+    /* Hide the text until the entrance runs (only when it will run), before the hero paints */
+    (function (hero) {
+      if (!hero || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      hero.setAttribute('data-ih-intro', '');
+      setTimeout(function () {
+        hero.removeAttribute('data-ih-intro');
+      }, 2600);
+    })(document.currentScript && document.currentScript.parentElement);
+  </script>
+
+  <div class="ih__media">
+    {%- if image != blank -%}
+      {{
+        image
+        | image_url: width: 3000
+        | image_tag:
+          widths: '1100, 1500, 2000, 2600, 3000',
+          sizes: '100vw',
+          loading: 'eager',
+          fetchpriority: 'high',
+          class: 'ih__image ih__image--desktop',
+          style: position,
+          alt: image.alt
+      }}
+      {{
+        image_mobile
+        | image_url: width: 1500
+        | image_tag:
+          widths: '600, 800, 1100, 1500',
+          sizes: '100vw',
+          loading: 'eager',
+          fetchpriority: 'high',
+          class: 'ih__image ih__image--mobile',
+          style: position_mobile,
+          alt: image_mobile.alt
+      }}
+    {%- else -%}
+      {{ 'hero-apparel-1' | placeholder_svg_tag: 'ih__image ih__placeholder' }}
+    {%- endif -%}
+  </div>
+
+  {%- comment -%} Dark overlay for legible white text, then the fade into the page {%- endcomment -%}
+  <div class="ih__overlay" aria-hidden="true"></div>
+  <div class="ih__fade" aria-hidden="true"></div>
+
+  <div class="ih__content">
+    {%- if section.settings.eyebrow != blank -%}
+      <p class="ih__eyebrow" data-ih-piece>{{ section.settings.eyebrow | escape }}</p>
+    {%- endif -%}
+    {%- comment -%}
+      On the home page the page's main heading says what the site is (for search engines and screen
+      readers); the hero's own line ("Sale is LIVE!") is then a second-level heading that looks the same.
+    {%- endcomment -%}
+    {%- if template.name == 'index' and section.index == 1 -%}
+      <h1 class="visually-hidden">OCEBOOTS: football boots, new, pre-owned and rare</h1>
+    {%- endif -%}
+    {%- if section.settings.heading != blank -%}
+      {%- if template.name == 'index' -%}
+        <h2 class="ih__heading" data-ih-piece>{{ section.settings.heading | escape }}</h2>
+      {%- else -%}
+        <h1 class="ih__heading" data-ih-piece>{{ section.settings.heading | escape }}</h1>
+      {%- endif -%}
+    {%- endif -%}
+    {%- if section.settings.text != blank -%}
+      <p class="ih__text" data-ih-piece>{{ section.settings.text | escape }}</p>
+    {%- endif -%}
+    {%- if section.settings.button_label != blank or section.settings.button2_label != blank -%}
+      <div class="ih__actions" data-ih-piece>
+        {%- if section.settings.button_label != blank -%}
+          <a class="ih__button ih__button--primary" href="{{ section.settings.button_link | default: routes.all_products_collection_url }}">
+            {{- section.settings.button_label | escape -}}
+          </a>
+        {%- endif -%}
+        {%- if section.settings.button2_label != blank -%}
+          <a class="ih__button ih__button--secondary" href="{{ section.settings.button2_link | default: routes.all_products_collection_url }}">
+            {{- section.settings.button2_label | escape -}}
+          </a>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+<script type="module">
+  import { animate, stagger } from 'motion';
+
+  const hero = document.getElementById('ih-{{ section.id }}');
+  if (hero && hero.hasAttribute('data-ih-intro')) {
+    const ease = [0.3, 0.7, 0.3, 1];
+    const images = hero.querySelectorAll('.ih__image');
+    const pieces = hero.querySelectorAll('[data-ih-piece]');
+    // The photo settles from a slight zoom; the text rises in, one piece after another
+    animate(images, { transform: ['scale(1.06)', 'scale(1)'] }, { duration: 1.4, ease });
+    const intro = animate(
+      pieces,
+      { opacity: [0, 1], transform: ['translateY(28px)', 'translateY(0px)'] },
+      { duration: 0.7, ease, delay: stagger(0.09, { startDelay: 0.15 }) }
+    );
+    const done = () => hero.removeAttribute('data-ih-intro');
+    Promise.resolve(intro).then(done, done);
+  }
+</script>
+
+{% stylesheet %}
+  .ih {
+    --ih-gutter: 20px;
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    /* Fills the screen below the header, leaving only a sliver of the next section in view */
+    --ih-peek: 54px;
+    min-height: calc(100vh - var(--header-height, 64px) - var(--ih-peek));
+    min-height: round(down, calc(100svh - var(--header-height, 64px) - var(--ih-peek)), 1px);
+    overflow: hidden;
+    isolation: isolate;
+    color: #ffffff;
+  }
+
+  @media screen and (min-width: 750px) {
+    .ih {
+      --ih-gutter: 40px;
+
+      --ih-peek: 72px;
+      min-height: calc(100vh - var(--header-height, 120px) - var(--ih-peek));
+      min-height: round(down, calc(100vh - var(--header-height, 120px) - var(--ih-peek)), 1px);
+    }
+  }
+
+  .ih__media,
+  .ih__overlay,
+  .ih__fade {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  /* A dark backdrop while the photo loads, so the hero never shows as a flat grey block */
+  .ih__media {
+    z-index: -3;
+    background: #1b1b1f;
+  }
+
+  /* The photo and its wash stop 2px short of the hero's foot (the white fade covers that strip), so
+     no dark sliver can show as a line where the hero meets the section below, in any browser */
+  .ih__media,
+  .ih__overlay {
+    bottom: 2px;
+  }
+
+  /* The photo zooms in on load and is drawn as its own layer: clip it to its box (Safari otherwise
+     lets its edge paint past the fade, as a thin line where the hero meets the section below) */
+  .ih__media {
+    overflow: hidden;
+    clip-path: inset(0);
+  }
+
+  .ih__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform-origin: 50% 40%;
+  }
+
+  .ih__image--mobile {
+    display: none;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ih__image--desktop {
+      display: none;
+    }
+
+    .ih__image--mobile {
+      display: block;
+    }
+  }
+
+  /* An even wash over the whole photo, a little deeper behind the text */
+  .ih__overlay {
+    z-index: -2;
+    background:
+      radial-gradient(120% 80% at 50% 45%, rgb(0 0 0 / 0.18), transparent 70%),
+      var(--ih-overlay, #000000);
+    opacity: var(--ih-overlay-opacity, 0.45);
+  }
+
+  .ih--left .ih__overlay {
+    background:
+      linear-gradient(to right, rgb(0 0 0 / 0.28), transparent 70%),
+      var(--ih-overlay, #000000);
+  }
+
+  /* The bottom of the hero fades into the page below */
+  .ih__fade {
+    z-index: -1;
+    /* Its own layer too, so it always draws over the moving photo */
+    transform: translateZ(0);
+    bottom: -1px;
+    top: auto;
+    height: calc(var(--ih-fade-height, 32%) * 1.75);
+    /* Long and gradual: the white builds evenly up the photo, with soft ends; many stops so
+       there is no visible edge */
+    background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 0.0%, transparent) 0.0%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 1.1%, transparent) 8.3%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 5.0%, transparent) 16.7%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 11.8%, transparent) 25.0%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 21.2%, transparent) 33.3%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 32.5%, transparent) 41.7%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 45.1%, transparent) 50.0%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 58.1%, transparent) 58.3%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 70.8%, transparent) 66.7%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 82.3%, transparent) 75.0%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 91.5%, transparent) 83.3%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 97.7%, transparent) 91.7%,
+      color-mix(in srgb, var(--ih-fade, #ffffff) 100.0%, transparent) 100.0%
+    );
+  }
+
+  .ih__content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex: 1 1 auto;
+    justify-content: center;
+    width: 100%;
+    max-width: calc(var(--page-width, 1400px) + 2 * var(--ih-gutter));
+    margin-inline: auto;
+    padding-inline: var(--ih-gutter);
+    padding-block: 48px calc(var(--ih-fade-height, 32%) * 0.6 + 24px);
+  }
+
+  .ih--bottom .ih__content {
+    justify-content: flex-end;
+  }
+
+  .ih--center .ih__content {
+    align-items: center;
+    text-align: center;
+  }
+
+  .ih--left .ih__content {
+    align-items: flex-start;
+    text-align: start;
+  }
+
+  .ih__eyebrow {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    opacity: 0.92;
+  }
+
+  /* Bold, big and tight; shadowed lightly so it holds over bright patches */
+  /* (:root:root:root outranks the brand typography's h1 rule) */
+  :root:root:root .ih .ih__heading {
+    margin: 0;
+    max-width: 14ch;
+    color: #ffffff;
+    font-size: clamp(3rem, 13vw, 7rem);
+    font-weight: 850;
+    line-height: 0.9;
+    letter-spacing: -0.045em;
+    font-variation-settings: 'opsz' 32;
+    text-shadow: 0 2px 24px rgb(0 0 0 / 0.25);
+    text-wrap: balance;
+  }
+
+  .ih__text {
+    margin: 0;
+    max-width: 34ch;
+    font-size: clamp(1.0625rem, 2.6vw, 1.375rem);
+    font-weight: 600;
+    line-height: 1.3;
+    text-shadow: 0 1px 14px rgb(0 0 0 / 0.3);
+  }
+
+  .ih__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-block-start: 10px;
+  }
+
+  .ih--center .ih__actions {
+    justify-content: center;
+  }
+
+  .ih__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    padding-inline: 26px;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.2s cubic-bezier(0.3, 0.7, 0.3, 1), background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .ih__button:active {
+    transform: scale(0.97);
+  }
+
+  .ih__button--primary {
+    background: #ffffff;
+    color: #121212;
+  }
+
+  .ih__button--secondary {
+    background: rgb(255 255 255 / 0.14);
+    color: #ffffff;
+    box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / 0.85);
+    backdrop-filter: blur(6px);
+  }
+
+  @media (hover: hover) {
+    .ih__button--primary:hover {
+      background: #f1f1f1;
+    }
+
+    .ih__button--secondary:hover {
+      background: #ffffff;
+      color: #121212;
+    }
+  }
+
+  .ih__button:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 3px;
+  }
+
+  /* Before the entrance runs (Motion, in this section's script) */
+  .ih[data-ih-intro] [data-ih-piece] {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+
+  .ih[data-ih-intro] .ih__image {
+    transform: scale(1.06);
+  }
+
+  .ih__placeholder {
+    background: #1f2937;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Image hero",
+  "tag": "section",
+  "class": "section-image-hero",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Mobile image",
+      "info": "Optional. Uses the main image if empty."
+    },
+    {
+      "type": "range",
+      "id": "height_desktop",
+      "label": "Height on desktop",
+      "min": 50,
+      "max": 100,
+      "step": 2,
+      "unit": "vh",
+      "default": 88
+    },
+    {
+      "type": "range",
+      "id": "height_mobile",
+      "label": "Height on mobile",
+      "min": 50,
+      "max": 100,
+      "step": 2,
+      "unit": "%",
+      "default": 82
+    },
+    {
+      "type": "header",
+      "content": "Overlay"
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Overlay colour",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay strength",
+      "min": 0,
+      "max": 90,
+      "step": 5,
+      "unit": "%",
+      "default": 45
+    },
+    {
+      "type": "color",
+      "id": "fade_color",
+      "label": "Fade into colour",
+      "info": "The next section's background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "fade_height",
+      "label": "Fade height",
+      "min": 10,
+      "max": 60,
+      "step": 2,
+      "unit": "%",
+      "default": 32
+    },
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Small text above the heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Sale is live"
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Text",
+      "default": "Up to 90% off"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Centre" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "content_position",
+      "label": "Position",
+      "options": [
+        { "value": "middle", "label": "Middle" },
+        { "value": "bottom", "label": "Bottom" }
+      ],
+      "default": "middle"
+    },
+    {
+      "type": "header",
+      "content": "Buttons"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "text",
+      "id": "button2_label",
+      "label": "Second button",
+      "default": "All boots"
+    },
+    {
+      "type": "url",
+      "id": "button2_link",
+      "label": "Second button link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image hero"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,20 @@
+{%- doc -%}
+  A "was" (compare-at) price for product cards, rounded up to the whole unit with no decimals
+  ($459.90 → $460), so the struck price takes less room beside the sale price. Uses the shop's
+  own money formats, so the currency symbol, code and separators stay as everywhere else.
+
+  @param {number} cents - The compare-at price, in cents
+  @param {boolean} [with_currency] - Add the currency code, as money_with_currency does
+{%- enddoc -%}
+
+{%- liquid
+  assign whole = cents | plus: 99 | divided_by: 100 | times: 100
+  assign plain = whole | money
+  assign short = whole | money_without_trailing_zeros
+  if with_currency
+    assign full = whole | money_with_currency
+    echo full | replace: plain, short
+  else
+    echo short
+  endif
+-%}

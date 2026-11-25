@@ -80,9 +80,9 @@
 
   .btl-heading {
     font-size: {{ section.settings.heading_size }}px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0.01em;
     margin: 0;
     color: {{ section.settings.heading_color }};
   }
@@ -145,7 +145,7 @@
     transition: width 0.25s cubic-bezier(0.34, 1.2, 0.64, 1),
                 height 0.25s cubic-bezier(0.34, 1.2, 0.64, 1),
                 box-shadow 0.25s ease;
-    background: #e8e8e8;
+    background: #64748B40;
   }
 
   .btl-pin__img--empty {
@@ -164,12 +164,12 @@
   .btl-pin__btn {
     display: block;
     padding: 4px 10px;
-    background: #111;
+    background: #121212;
     color: #fff;
     font-size: 0.62rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-transform: none;
     text-decoration: none;
     border-radius: 999px;
     white-space: nowrap;
@@ -193,7 +193,7 @@
 
   .btl-grass {
     height: 14px;
-    background: linear-gradient(to bottom, #5ab82e 0%, #4aa020 60%, #3d8f18 100%);
+    background: linear-gradient(to bottom, #25D366 0%, #25D366 60%, #3d8f18 100%);
     position: relative;
   }
 
@@ -207,9 +207,9 @@
     height: 9px;
     background: repeating-linear-gradient(
       90deg,
-      #6dd63a 0px, #6dd63a 2px,
-      #5ab82e 2px, #5ab82e 4px,
-      #4aa020 4px, #4aa020 5px,
+      #25D366 0px, #25D366 2px,
+      #25D366 2px, #25D366 4px,
+      #25D366 4px, #25D366 5px,
       transparent 5px, transparent 8px
     );
   }
@@ -318,7 +318,7 @@
       "type": "color",
       "id": "heading_color",
       "label": "Heading color",
-      "default": "#111111"
+      "default": "#121212"
     },
     {
       "type": "color_scheme",

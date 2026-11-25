@@ -7,6 +7,7 @@
   @param {string} [text_fallback] - text to display if image is blank
   @param {boolean} [unset_image_tag] - if true, ignores the image focal point
   @param {string} [style] - additional styles
+  @param {string} [alt] - alt text (defaults to the image's own)
 
   @example
   {% render 'image', image: product.featured_image, height: 300, class: 'product-image' %}
@@ -26,7 +27,8 @@
     {% assign style_value = style_value | append: 'object-position: inherit;' %}
   {% endif %}
 
-  {{ image | image_url: height: image_height | image_tag: class: class, srcset: image_srcset, style: style_value }}
+  {%- assign image_alt = alt | default: image.alt -%}
+  {{ image | image_url: height: image_height | image_tag: class: class, srcset: image_srcset, style: style_value, alt: image_alt }}
 {% elsif text_fallback %}
   {{ text_fallback }}
 {% endif %}

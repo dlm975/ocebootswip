@@ -41,30 +41,21 @@
   <ul class="cart-assure__trust list-unstyled" role="list">
     {%- if trust_1 != blank -%}
       <li>
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12 2.5 4.5 5.8v5.4c0 4.6 3.2 8.9 7.5 10.3 4.3-1.4 7.5-5.7 7.5-10.3V5.8z"/>
-          <polyline points="8.8 11.9 11.2 14.3 15.4 10.1"/>
-        </svg>
+        <span class="cart-assure__disk oce-disk" aria-hidden="true">{%- render 'gicon', name: 'verified_user', size: 13 -%}</span>
         <span>{{ trust_1 }}</span>
       </li>
     {%- endif -%}
 
     {%- if trust_2 != blank -%}
       <li>
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M2.5 13.2 21 4.2l-5 16-4.6-5.2-1.6 4.4-1.6-4.9z"/>
-          <path d="M9.2 14.4 21 4.2"/>
-        </svg>
+        <span class="cart-assure__disk oce-disk" aria-hidden="true">{%- render 'gicon', name: 'local_shipping', size: 13 -%}</span>
         <span>{{ trust_2 }}</span>
       </li>
     {%- endif -%}
 
     {%- if trust_3 != blank -%}
       <li>
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect x="4.2" y="10.4" width="15.6" height="10.4" rx="2.2"/>
-          <path d="M8 10.4V7.6a4 4 0 0 1 8 0v2.8"/>
-        </svg>
+        <span class="cart-assure__disk oce-disk" aria-hidden="true">{%- render 'gicon', name: 'lock', size: 13 -%}</span>
         <span>{{ trust_3 }}</span>
       </li>
     {%- endif -%}
@@ -101,25 +92,39 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-wrap: wrap;
-    gap: 6px 14px;
+    flex-wrap: nowrap;
+    gap: 10px;
     width: 100%;
-    margin: 10px 0 0;
+    margin: 12px 0 0;
     padding: 0;
   }
 
+  /* The site's newer look: each line with a small holographic disk holding its Google icon, and
+     bold text */
   .cart-assure__trust li {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    font-size: 0.66rem;
-    font-weight: 600;
+    min-width: 0;
+    font-size: 0.625rem;
+    font-weight: 750;
+    letter-spacing: -0.005em;
     line-height: 1.2;
     white-space: nowrap;
   }
 
-  .cart-assure__trust svg {
-    flex-shrink: 0;
-    opacity: 0.75;
+  .cart-assure__disk {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+  }
+
+  .cart-assure__disk svg {
+    position: relative;
+    width: 12px;
+    height: 12px;
   }
 {% endstylesheet %}

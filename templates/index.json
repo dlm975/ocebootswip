@@ -9,6 +9,27 @@
  */
 {
   "sections": {
+    "image_hero_main": {
+      "type": "image-hero",
+      "settings": {
+        "image": "shopify://shop_images/IMG_7628.jpg",
+        "height_desktop": 88,
+        "height_mobile": 82,
+        "overlay_color": "#000000",
+        "overlay_opacity": 45,
+        "fade_color": "#ffffff",
+        "fade_height": 32,
+        "eyebrow": "",
+        "heading": "Sale is LIVE!",
+        "text": "Up to 90% off",
+        "text_alignment": "left",
+        "content_position": "middle",
+        "button_label": "Shop SALE",
+        "button_link": "shopify://collections/black-friday-2026",
+        "button2_label": "All boots",
+        "button2_link": "shopify://collections/all-football-boots"
+      }
+    },
     "bf_ripped_hero_section": {
       "type": "_blocks",
       "blocks": {
@@ -17,7 +38,7 @@
           "settings": {
             "hero_image": "shopify://shop_images/IMG_7628.jpg",
             "image_opacity": 100,
-            "overlay_color": "#000000",
+            "overlay_color": "#121212",
             "overlay_opacity": 20,
             "border_radius": 20,
             "desktop_width_percent": 100,
@@ -25,27 +46,27 @@
             "roughness": 90,
             "flap_count": 0,
             "seed": 43,
-            "hole_color": "#BA2FFF",
-            "hole_glow_color": "#B8B8B8",
+            "hole_color": "#3897f0",
+            "hole_glow_color": "#64748b",
             "animate": true,
-            "heading": "SALE IS LIVE",
+            "heading": "Sale is live",
             "heading_font": "oswald_n7",
             "heading_size_desktop": 95,
             "heading_size_mobile": 105,
             "text_color": "#ffffff",
-            "offer_text": "UP TO [x]% OFF",
+            "offer_text": "Up to [x]% off",
             "offer_percent": 90,
             "offer_font": "oswald_n7",
             "offer_size_desktop": 35,
             "offer_size_mobile": 50,
             "offer_color": "#ffffff",
-            "button_text": "SHOP NOW",
+            "button_text": "Shop now",
             "button_font": "oswald_n7",
             "button_link": "shopify://collections/black-friday-2026",
             "button_background": "#ffffff",
-            "button_text_color": "#000000",
-            "button_hover_background": "#e6e6e6",
-            "button_hover_text_color": "#000000",
+            "button_text_color": "#121212",
+            "button_hover_background": "#64748b40",
+            "button_hover_text_color": "#121212",
             "button_border_radius": 14
           },
           "blocks": {}
@@ -54,6 +75,7 @@
       "block_order": [
         "bf_ripped_hero_BF26"
       ],
+      "disabled": true,
       "settings": {
         "content_direction": "column",
         "vertical_on_mobile": true,
@@ -75,7 +97,7 @@
         "border_opacity": 100,
         "border_radius": 0,
         "toggle_overlay": false,
-        "overlay_color": "#00000026",
+        "overlay_color": "#12121226",
         "overlay_style": "solid",
         "gradient_direction": "to top",
         "padding-block-start": 0,
@@ -94,7 +116,7 @@
             "mobile_hero_height": 600,
             "border_radius": 20,
             "desktop_width_percent": 100,
-            "overlay_color": "#000000",
+            "overlay_color": "#121212",
             "overlay_opacity": 45,
             "content_position": "bottom-left",
             "heading": "All Football Boots",
@@ -107,10 +129,10 @@
             "button_text": "Shop Now",
             "button_link": "shopify://collections/all-football-boots",
             "button_font": "inter_i9",
-            "button_background": "#e6e6e6",
-            "button_text_color": "#000000",
-            "button_hover_background": "#f5f5f5",
-            "button_hover_text_color": "#333333",
+            "button_background": "#64748b40",
+            "button_text_color": "#121212",
+            "button_hover_background": "#f1f5f9",
+            "button_hover_text_color": "#1f2937",
             "button_font_size": 16,
             "button_border_radius": 14,
             "button_shadow_enabled": true,
@@ -147,72 +169,485 @@
         "border_opacity": 100,
         "border_radius": 0,
         "toggle_overlay": false,
-        "overlay_color": "#00000026",
+        "overlay_color": "#12121226",
         "overlay_style": "solid",
         "gradient_direction": "to top",
         "padding-block-start": 0,
         "padding-block-end": 0
       }
     },
-    "17706063529fca8395": {
-      "type": "_blocks",
+    "shop_by_silo_main": {
+      "type": "shop-by-silo",
       "blocks": {
-        "trusted_logos_001": {
-          "type": "trusted-logos-bar",
+        "brand_nike": {
+          "type": "brand",
           "settings": {
-            "heading_text": "AS WORN IN LEAGUES",
-            "label_size": 12,
-            "label_color": "#111111",
-            "header_gap": 6,
-            "section_background": "#ffffff",
-            "section_padding": 0,
-            "bar_background": "#f7f7f7",
-            "bar_border_color": "#e2e2e2",
-            "bar_padding": 14,
-            "logo_height": 32,
-            "logo_gap": 56,
-            "scroll_speed": 25,
-            "logo_opacity": 85,
-            "logo_filter": "none",
-            "logo_1": "shopify://shop_images/Bundesliga_logo__2017.svg",
-            "logo_2": "shopify://shop_images/Premier_League_Logo.svg",
-            "logo_3": "shopify://shop_images/Major_League_Soccer_logo.svg",
-            "logo_4": "shopify://shop_images/LaLiga_EA_Sports_2023_Vertical_Logo.svg",
-            "logo_5": "shopify://shop_images/Serie_A_ENILIVE_logo.svg",
-            "logo_6": "shopify://shop_images/Roshn_Saudi_League_Logo.svg"
-          },
-          "blocks": {}
+            "title": "Nike",
+            "collection": "nike",
+            "aliases": []
+          }
+        },
+        "silo_01": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike Mercurial",
+            "collection": "nike-mercurial",
+            "image": "shopify://shop_images/silo-nike-mercurial.jpg",
+            "generations": [
+              "nike-mercurial-vapor-17",
+              "nike-mercurial-vapor-16",
+              "nike-mercurial-vapor-15",
+              "nike-mercurial-vapor-14",
+              "nike-mercurial-vapor-13",
+              "nike-mercurial-vapor-12",
+              "nike-mercurial-vapor-11",
+              "nike-mercurial-vapor-10",
+              "nike-mercurial-vapor-9",
+              "nike-mercurial-vapor-8",
+              "nike-mercurial-vapor-7",
+              "nike-mercurial-vapor-5",
+              "nike-mercurial-vapor-3",
+              "nike-mercurial-vapor-1",
+              "nike-mercurial-superfly-11",
+              "nike-mercurial-superfly-10",
+              "nike-mercurial-superfly-9",
+              "nike-mercurial-superfly-8",
+              "nike-mercurial-superfly-7",
+              "nike-mercurial-superfly-6",
+              "nike-mercurial-superfly-5",
+              "nike-mercurial-superfly-4",
+              "nike-mercurial-superfly-3"
+            ],
+            "aliases": [
+              "superfly-copy",
+              "mercurial",
+              "vapor-14-elite"
+            ]
+          }
+        },
+        "silo_02": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike Phantom",
+            "collection": "phantom-1",
+            "image": "shopify://shop_images/silo-nike-phantom.jpg",
+            "generations": [
+              "nike-phantom-6",
+              "nike-phantom-gx-2",
+              "nike-phantom-gx",
+              "nike-phantom-luna",
+              "nike-phantom-gt-2",
+              "nike-phantom-gt",
+              "nike-phantom-vision-2",
+              "nike-phantom-vision",
+              "nike-phantom-venom"
+            ],
+            "aliases": [
+              "phantom"
+            ]
+          }
+        },
+        "silo_03": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike Tiempo",
+            "collection": "tiempo-1",
+            "image": "shopify://shop_images/silo-nike-tiempo.jpg",
+            "generations": [
+              "nike-tiempo-maestro",
+              "nike-tiempo-legend-10",
+              "nike-tiempo-legend-9",
+              "nike-tiempo-legend-8",
+              "nike-tiempo-legend-7",
+              "nike-tiempo-legend-6",
+              "nike-tiempo-legend-5",
+              "nike-tiempo-legend-4",
+              "nike-tiempo-legend-3"
+            ],
+            "aliases": [
+              "tiempo"
+            ]
+          }
+        },
+        "silo_07": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike Hypervenom",
+            "collection": "hypervenom-1",
+            "image": "shopify://shop_images/silo-nike-hypervenom.jpg",
+            "generations": [
+              "nike-hypervenom-phantom-3",
+              "nike-hypervenom-phantom-2",
+              "nike-hypervenom-phantom-1"
+            ],
+            "aliases": [
+              "hypervenom"
+            ]
+          }
+        },
+        "silo_08": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike Magista",
+            "collection": "magista-1",
+            "image": "shopify://shop_images/silo-nike-magista.jpg",
+            "generations": [
+              "nike-magista-obra-2",
+              "nike-magista-obra-1",
+              "nike-magista-opus-2",
+              "nike-magista-opus-1"
+            ],
+            "aliases": [
+              "magista"
+            ]
+          }
+        },
+        "silo_11": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike CTR360",
+            "collection": "ctr360-1",
+            "image": "shopify://shop_images/silo-nike-ctr360.jpg",
+            "generations": [
+              "nike-ctr360-maestri-3",
+              "nike-ctr360-maestri-2",
+              "nike-ctr360-maestri-1"
+            ],
+            "aliases": [
+              "ctr360"
+            ]
+          }
+        },
+        "silo_12": {
+          "type": "silo",
+          "settings": {
+            "title": "Nike Total 90",
+            "collection": "total-91",
+            "image": "shopify://shop_images/silo-nike-total-90.jpg",
+            "generations": [
+              "nike-total-90-laser-4",
+              "nike-total-90-laser-3"
+            ],
+            "aliases": [
+              "total-90"
+            ]
+          }
+        },
+        "brand_adidas": {
+          "type": "brand",
+          "settings": {
+            "title": "Adidas",
+            "collection": "adidas",
+            "aliases": []
+          }
+        },
+        "silo_04": {
+          "type": "silo",
+          "settings": {
+            "title": "Adidas Predator",
+            "collection": "predator-1",
+            "image": "shopify://shop_images/silo-adidas-predator.jpg",
+            "generations": [
+              "adidas-predator-ft",
+              "adidas-predator-accuracy",
+              "adidas-predator-instinct",
+              "adidas-predator-lz"
+            ],
+            "aliases": [
+              "predator"
+            ]
+          }
+        },
+        "silo_05": {
+          "type": "silo",
+          "settings": {
+            "title": "Adidas X",
+            "collection": "x",
+            "image": "shopify://shop_images/silo-adidas-x.jpg",
+            "generations": [
+              "adidas-x-crazyfast",
+              "adidas-x-speedportal",
+              "adidas-x-speedflow",
+              "adidas-x-ghosted",
+              "adidas-x-19",
+              "adidas-x-18",
+              "adidas-x-17",
+              "adidas-x-16",
+              "adidas-x-15"
+            ],
+            "aliases": [
+              "adidas-x",
+              "crazyfast"
+            ]
+          }
+        },
+        "silo_06": {
+          "type": "silo",
+          "settings": {
+            "title": "Adidas F50",
+            "collection": "f50",
+            "image": "shopify://shop_images/silo-adidas-f50.jpg",
+            "generations": [
+              "adidas-f50-hyperfast",
+              "adidas-f50-elite",
+              "adidas-f50-adizero",
+              "adidas-f50-itunit"
+            ],
+            "aliases": [
+              "adidas-f50"
+            ]
+          }
+        },
+        "silo_09": {
+          "type": "silo",
+          "settings": {
+            "title": "Adidas Copa",
+            "collection": "copa",
+            "image": "shopify://shop_images/silo-adidas-copa.jpg",
+            "generations": [
+              "adidas-copa-pure",
+              "adidas-copa-sense",
+              "adidas-copa-20",
+              "adidas-copa-19"
+            ],
+            "aliases": []
+          }
+        },
+        "silo_10": {
+          "type": "silo",
+          "settings": {
+            "title": "Adidas Nemeziz",
+            "collection": "nemeziz",
+            "image": "shopify://shop_images/silo-adidas-nemeziz.jpg",
+            "generations": [
+              "adidas-nemeziz-19",
+              "adidas-nemeziz-18",
+              "adidas-nemeziz-17"
+            ],
+            "aliases": []
+          }
+        },
+        "silo_16": {
+          "type": "silo",
+          "settings": {
+            "title": "Adidas 11Pro",
+            "collection": "11pro",
+            "image": "shopify://shop_images/silo-adidas-11pro.jpg",
+            "generations": [
+              "adidas-11pro-elite",
+              "adidas-11pro",
+              "adidas-adipure-11pro"
+            ],
+            "aliases": []
+          }
+        },
+        "silo_13": {
+          "type": "silo",
+          "settings": {
+            "title": "Adidas Ace",
+            "collection": "",
+            "image": "shopify://shop_images/silo-adidas-ace.jpg",
+            "generations": [
+              "adidas-ace-17",
+              "adidas-ace-16",
+              "adidas-ace-15"
+            ],
+            "aliases": []
+          }
+        },
+        "brand_puma": {
+          "type": "brand",
+          "settings": {
+            "title": "Puma",
+            "collection": "puma-1",
+            "aliases": [
+              "puma"
+            ]
+          }
+        },
+        "silo_14": {
+          "type": "silo",
+          "settings": {
+            "title": "Puma Future",
+            "collection": "puma-future",
+            "image": "shopify://shop_images/silo-puma-future.jpg",
+            "generations": [],
+            "aliases": []
+          }
+        },
+        "silo_17": {
+          "type": "silo",
+          "settings": {
+            "title": "Puma Ultra",
+            "collection": "puma-ultra",
+            "image": "shopify://shop_images/silo-puma-ultra.jpg",
+            "generations": [],
+            "aliases": []
+          }
+        },
+        "silo_18": {
+          "type": "silo",
+          "settings": {
+            "title": "Puma evoPOWER",
+            "collection": "puma-evopower",
+            "image": "shopify://shop_images/silo-puma-evopower.jpg",
+            "generations": [],
+            "aliases": []
+          }
+        },
+        "brand_mizuno": {
+          "type": "brand",
+          "settings": {
+            "title": "Mizuno",
+            "collection": "mizuno",
+            "aliases": []
+          }
+        },
+        "silo_15": {
+          "type": "silo",
+          "settings": {
+            "title": "Mizuno Morelia",
+            "collection": "mizuno-morelia",
+            "image": "shopify://shop_images/silo-mizuno-morelia.jpg",
+            "generations": [],
+            "aliases": []
+          }
         }
       },
       "block_order": [
-        "trusted_logos_001"
+        "brand_nike",
+        "silo_01",
+        "silo_02",
+        "silo_03",
+        "silo_07",
+        "silo_08",
+        "silo_11",
+        "silo_12",
+        "brand_adidas",
+        "silo_04",
+        "silo_05",
+        "silo_06",
+        "silo_09",
+        "silo_10",
+        "silo_16",
+        "silo_13",
+        "brand_puma",
+        "silo_14",
+        "silo_17",
+        "silo_18",
+        "brand_mizuno",
+        "silo_15"
       ],
       "settings": {
-        "content_direction": "column",
-        "vertical_on_mobile": true,
-        "horizontal_alignment": "flex-start",
-        "vertical_alignment": "center",
-        "align_baseline": false,
-        "horizontal_alignment_flex_direction_column": "center",
-        "vertical_alignment_flex_direction_column": "center",
-        "gap": 8,
-        "section_width": "full-width",
-        "section_height": "",
-        "section_height_custom": 50,
+        "heading": "",
         "color_scheme": "scheme-1",
-        "background_media": "none",
-        "video_position": "cover",
-        "background_image_position": "cover",
-        "border": "none",
-        "border_width": 1,
-        "border_opacity": 100,
-        "border_radius": 0,
-        "toggle_overlay": false,
-        "overlay_color": "#00000026",
-        "overlay_style": "solid",
-        "gradient_direction": "to top",
-        "padding-block-start": 0,
-        "padding-block-end": 0
+        "padding-block-start": 50,
+        "padding-block-end": 32
+      }
+    },
+    "instagram_feed_main": {
+      "type": "instagram-feed",
+      "settings": {
+        "heading": "What's new on",
+        "handle": "oceboots",
+        "follow_label": "Follow",
+        "message_label": "Message",
+        "limit": 12,
+        "color_scheme": "scheme-1",
+        "padding-block-start": 32,
+        "padding-block-end": 48
+      }
+    },
+    "worn_by_pros_main": {
+      "type": "worn-by-pros",
+      "blocks": {
+        "league_LB3MjY": {
+          "type": "league",
+          "settings": {
+            "logo": "shopify://shop_images/Ligue1_logo.png",
+            "name": "Ligue 1",
+            "player_1": "none",
+            "player_2": "none",
+            "player_3": "4"
+          }
+        },
+        "league_premier": {
+          "type": "league",
+          "settings": {
+            "logo": "shopify://shop_images/Premier_League_Logo.svg",
+            "name": "Premier League",
+            "player_1": "1",
+            "player_2": "none",
+            "player_3": "none"
+          }
+        },
+        "league_laliga": {
+          "type": "league",
+          "settings": {
+            "logo": "shopify://shop_images/LaLiga_EA_Sports_2023_Vertical_Logo.svg",
+            "name": "LaLiga",
+            "player_1": "7",
+            "player_2": "none",
+            "player_3": "none"
+          }
+        },
+        "league_bundesliga": {
+          "type": "league",
+          "settings": {
+            "logo": "shopify://shop_images/Bundesliga_logo__2017.svg",
+            "name": "Bundesliga",
+            "player_1": "2",
+            "player_2": "none",
+            "player_3": "none"
+          }
+        },
+        "league_seriea": {
+          "type": "league",
+          "settings": {
+            "logo": "shopify://shop_images/Serie_A_ENILIVE_logo.svg",
+            "name": "Serie A",
+            "player_1": "3",
+            "player_2": "none",
+            "player_3": "none"
+          }
+        },
+        "league_mls": {
+          "type": "league",
+          "settings": {
+            "logo": "shopify://shop_images/Major_League_Soccer_logo.svg",
+            "name": "MLS",
+            "player_1": "6",
+            "player_2": "none",
+            "player_3": "none"
+          }
+        },
+        "league_saudi": {
+          "type": "league",
+          "settings": {
+            "logo": "shopify://shop_images/Roshn_Saudi_League_Logo.svg",
+            "name": "Saudi Pro League",
+            "player_1": "8",
+            "player_2": "none",
+            "player_3": "none"
+          }
+        }
+      },
+      "block_order": [
+        "league_LB3MjY",
+        "league_premier",
+        "league_laliga",
+        "league_bundesliga",
+        "league_seriea",
+        "league_mls",
+        "league_saudi"
+      ],
+      "settings": {
+        "heading": "Who we've worked with",
+        "hint": "Tap a league to meet the players",
+        "attach_to_details": false,
+        "color_scheme": "scheme-1",
+        "padding-block-start": 24,
+        "padding-block-end": 24
       }
     },
     "collection_cutout_grid_gidTf3": {
@@ -381,6 +816,7 @@
         "cutout_hEdGq4",
         "cutout_Gbz8K7"
       ],
+      "disabled": true,
       "name": "Collection Cutout Grid",
       "settings": {
         "heading": "",
@@ -392,116 +828,85 @@
         "padding-block-end": 0
       }
     },
-    "pro_player_wall_hhtJ4x": {
-      "type": "pro-player-wall",
+    "player_reels_main": {
+      "type": "player-reels",
       "blocks": {
-        "player_mDfxBi": {
+        "player_neymar_jr": {
           "type": "player",
           "settings": {
-            "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_20_42_PM.png",
-            "name": "CAMERON ARCHER",
-            "club": "Southampton F.C.",
-            "club_badge": "shopify://shop_images/FC_Southampton.svg",
-            "flag": "shopify://shop_images/Flag_of_England.svg",
-            "boot_name": "F50 Adizero 2014",
-            "link": ""
+            "name": "Neymar Jr",
+            "collection": "neymar-jr",
+            "video": "shopify://files/videos/snaptik_7621299847882214676_v3_c8963c05-6867-4ada-b53c-02105f56b67b.mov",
+            "image": "shopify://shop_images/8939b6d73f7ce255d6eb69a866906861.jpg",
+            "button_label": "Shop collection"
           }
         },
-        "player_YGwxeH": {
+        "player_cr7": {
           "type": "player",
           "settings": {
-            "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_19_21_PM.png",
-            "name": "Bryan Lasme",
-            "club": "FC Schalke 04",
-            "club_badge": "shopify://shop_images/FC_Schalke_04_Logo.svg",
-            "flag": "shopify://shop_images/Flag_of_France_svg.webp",
-            "boot_name": "HYPERVENOM PHANTOM 3",
-            "link": ""
+            "name": "CR7",
+            "collection": "cr7",
+            "video": "shopify://files/videos/snaptik_7657857445410196757_v3_0e9f4b98-990a-4ac1-baa1-747aaab6a9c9.mov",
+            "image": "shopify://shop_images/SnapInsta.to_660307150_18721519762056421_301077248123342423_n.jpg",
+            "button_label": "Shop collection"
           }
         },
-        "player_Nr4hyn": {
+        "player_messi_1": {
           "type": "player",
           "settings": {
-            "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_15_51_PM.png",
-            "name": "NICHOLAS PIERINI",
-            "club": "US SASSUOLO",
-            "club_badge": "shopify://shop_images/US_Sassuolo_Calcio_logo.svg",
-            "flag": "shopify://shop_images/Flag_of_Italy.svg",
-            "boot_name": "MERCURIAL VAPOR 8 'CLASH'",
-            "link": ""
+            "name": "Messi",
+            "collection": "messi-1",
+            "video": "shopify://files/videos/snaptik_7441619545900485890_v3 2_68b11955-1015-4e46-9455-6285e231bc26.mov",
+            "image": "shopify://shop_images/adidas-messi-f50-triunfo-dorado-boots_6.jpg",
+            "button_label": "Shop collection"
           }
         },
-        "player_GFgXXb": {
+        "player_olise": {
           "type": "player",
           "settings": {
-            "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_24_21_PM.png",
-            "name": "LOIS OPENDA",
-            "club": "OLYMPIQUE LYONNAIS",
-            "club_badge": "shopify://shop_images/Olympique_Lyonnais_logo.svg",
-            "flag": "shopify://shop_images/Flag_of_Belgium.svg",
-            "boot_name": "PREDATOR LZ INSTINCT",
-            "link": ""
+            "name": "Olise",
+            "collection": "olise",
+            "video": "shopify://files/videos/snaptik_7675038953073904928_v3_09209dbf-3429-4ccd-9938-1bac3088e0d3.mov",
+            "image": "shopify://shop_images/SnapInsta.to_654969911_18568562623057038_5230344121947742236_n.jpg",
+            "button_label": "Shop collection"
           }
         },
-        "player_nfExFK": {
+        "player_pogba": {
           "type": "player",
           "settings": {
-            "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_30_25_PM.png",
-            "name": "GARANG KUOL",
-            "club": "SPARTA PRAGUE",
-            "club_badge": "shopify://shop_images/AC-Sparta-LOGO2021.svg",
-            "flag": "shopify://shop_images/Flag_of_Australia__converted.svg",
-            "boot_name": "PHANTOM GT SG-PRO",
-            "link": ""
-          }
-        },
-        "player_Mk4T4B": {
-          "type": "player",
-          "settings": {
-            "image": "shopify://shop_images/ChatGPT_Image_Sep_19_2026_03_37_36_PM.png",
-            "name": "CAMERON HARPER",
-            "club": "NEW YORK RED BULLS",
-            "club_badge": "shopify://shop_images/New_York_Red_Bulls_logo.svg",
-            "flag": "shopify://shop_images/Flag_of_the_United_States__DDD-F-416E_specifications.svg",
-            "boot_name": "MERCURIAL VAPOR 12",
-            "link": ""
+            "name": "Pogba",
+            "collection": "pogba",
+            "video": "shopify://files/videos/snaptik_7546869617134931223_v3_e3063a1a-4345-434d-af1f-283cd1515dab.mov",
+            "image": "shopify://shop_images/images_voltaxMediaLibrary_mmsport_90min_en_international_web_01k4ajkbnh9t405hewvm.webp",
+            "button_label": "Shop collection"
           }
         }
       },
       "block_order": [
-        "player_mDfxBi",
-        "player_YGwxeH",
-        "player_Nr4hyn",
-        "player_GFgXXb",
-        "player_nfExFK",
-        "player_Mk4T4B"
+        "player_neymar_jr",
+        "player_cr7",
+        "player_messi_1",
+        "player_olise",
+        "player_pogba"
       ],
-      "name": "Pro Player Wall",
       "settings": {
-        "roster_source": "shared",
-        "heading": "TRUSTED BY THE PRO'S",
-        "subheading": "",
-        "show_stars": true,
-        "star_color": "#14b554",
-        "star_size": 20,
-        "aspect_ratio": "4 / 5",
-        "cards_mobile": 3,
-        "cards_desktop": 6,
-        "gap_mobile": 8,
-        "gap_desktop": 12,
-        "corner_radius": 16,
-        "attach_to": "none",
-        "blur_strength": 16,
-        "tint_opacity": 30,
-        "cross_seconds": 30,
-        "pause_on_hover": true,
-        "padding-block-start": 40,
-        "padding-block-end": 40
+        "heading": "Player collections",
+        "color_scheme": "scheme-1",
+        "padding-block-start": 28,
+        "padding-block-end": 48
       }
     },
     "newly_listed_fc": {
       "type": "product-list",
       "blocks": {
+        "see-all-new": {
+          "type": "plist-link",
+          "settings": {
+            "label": "See all new boots",
+            "link": "shopify://collections/shop-new"
+          },
+          "blocks": {}
+        },
         "static-header": {
           "type": "_product-list-content",
           "name": "Header",
@@ -535,36 +940,7 @@
             "padding-inline-start": 0,
             "padding-inline-end": 0
           },
-          "blocks": {
-            "newly-listed-title": {
-              "type": "_product-list-text",
-              "settings": {
-                "text": "<h1><strong>Newly Listed</strong></h1>",
-                "width": "fit-content",
-                "max_width": "normal",
-                "alignment": "left",
-                "type_preset": "custom",
-                "font": "var(--font-heading--family)",
-                "font_size": "1.5rem",
-                "line_height": "tight",
-                "letter_spacing": "tight",
-                "case": "uppercase",
-                "wrap": "pretty",
-                "color": "var(--color-foreground)",
-                "background": false,
-                "background_color": "#00000026",
-                "corner_radius": 0,
-                "padding-block-start": 4,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            }
-          },
-          "block_order": [
-            "newly-listed-title"
-          ]
+          "blocks": {}
         },
         "static-product-card": {
           "type": "_product-card",
@@ -599,71 +975,26 @@
                 "padding-inline-end": 0
               },
               "blocks": {}
-            },
-            "product_title": {
-              "type": "product-title",
-              "name": "Title",
-              "settings": {
-                "width": "fit-content",
-                "max_width": "normal",
-                "alignment": "left",
-                "type_preset": "rte",
-                "font": "var(--font-body--family)",
-                "font_size": "1rem",
-                "line_height": "normal",
-                "letter_spacing": "normal",
-                "case": "none",
-                "wrap": "pretty",
-                "color": "var(--color-foreground)",
-                "background": false,
-                "background_color": "#00000026",
-                "corner_radius": 0,
-                "padding-block-start": 4,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            },
-            "price": {
-              "type": "price",
-              "name": "Price",
-              "settings": {
-                "show_sale_price_first": true,
-                "show_installments": false,
-                "show_tax_info": false,
-                "type_preset": "h6",
-                "width": "100%",
-                "alignment": "left",
-                "font": "var(--font-body--family)",
-                "font_size": "1rem",
-                "line_height": "normal",
-                "letter_spacing": "normal",
-                "case": "none",
-                "color": "var(--color-foreground)",
-                "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
             }
           },
           "block_order": [
-            "product-card-gallery",
-            "product_title",
-            "price"
+            "product-card-gallery"
           ]
         }
       },
+      "block_order": [
+        "see-all-new"
+      ],
       "settings": {
-        "collection": "all-football-boots",
+        "collection": "shop-new",
         "layout_type": "grid",
         "carousel_on_mobile": false,
         "max_products": 12,
         "mobile_max": 8,
+        "mobile_view_all_card": false,
+        "boxed": true,
         "columns": 6,
-        "mobile_columns": "3",
+        "mobile_columns": "4",
         "mobile_card_size": "60cqw",
         "columns_gap": 0,
         "rows_gap": 8,
@@ -673,323 +1004,93 @@
         "horizontal_alignment": "flex-start",
         "gap": 0,
         "color_scheme": "scheme-1",
-        "padding-block-start": 0,
-        "padding-block-end": 40
+        "padding-block-start": 8,
+        "padding-block-end": 48
       }
     },
-    "brand_tiles_main": {
-      "type": "brand-tiles",
+    "popular_categories_main": {
+      "type": "popular-categories",
+      "blocks": {
+        "cat_1": {
+          "type": "category",
+          "settings": {
+            "title": "Sale",
+            "link": "shopify://collections/black-friday-2026"
+          }
+        },
+        "cat_2": {
+          "type": "category",
+          "settings": {
+            "title": "Football boots",
+            "link": "shopify://collections/all-football-boots"
+          }
+        },
+        "cat_3": {
+          "type": "category",
+          "settings": {
+            "title": "Nike",
+            "link": "shopify://collections/nike"
+          }
+        },
+        "cat_4": {
+          "type": "category",
+          "settings": {
+            "title": "Adidas",
+            "link": "shopify://collections/adidas"
+          }
+        },
+        "cat_5": {
+          "type": "category",
+          "settings": {
+            "title": "Puma",
+            "link": "shopify://collections/puma-1"
+          }
+        },
+        "cat_6": {
+          "type": "category",
+          "settings": {
+            "title": "Accessories",
+            "link": "shopify://collections/accessories-services"
+          }
+        }
+      },
+      "block_order": [
+        "cat_1",
+        "cat_2",
+        "cat_3",
+        "cat_4",
+        "cat_5",
+        "cat_6"
+      ],
       "settings": {
-        "heading": "Shop by Brand",
-        "heading_size": 18,
-        "heading_weight": "700",
-        "heading_case": "uppercase",
-        "heading_color": "#111111",
+        "heading": "Popular categories",
         "color_scheme": "scheme-1",
-        "padding_top": 40,
-        "padding_bottom": 40,
-        "brand_image_1": "shopify://shop_images/unnamed.webp",
-        "brand_link_1": "shopify://collections/nike",
-        "brand_label_1": "",
-        "brand_image_2": "shopify://shop_images/adidaslogo.webp",
-        "brand_link_2": "shopify://collections/adidas",
-        "brand_label_2": "",
-        "brand_image_3": "shopify://shop_images/pumalogo.png",
-        "brand_link_3": "shopify://collections/puma",
-        "brand_label_3": "",
-        "brand_image_4": "shopify://shop_images/mizunologo.jpg",
-        "brand_link_4": "shopify://collections/mizuno",
-        "brand_label_4": "",
-        "brand_image_5": "shopify://shop_images/IMG_4534.jpg",
-        "brand_link_5": "shopify://collections/accessories-services",
-        "brand_label_5": "",
-        "brand_link_6": "",
-        "brand_label_6": "",
-        "brand_link_7": "",
-        "brand_label_7": "",
-        "brand_link_8": "",
-        "brand_label_8": "",
-        "brand_link_9": "",
-        "brand_label_9": "",
-        "brand_link_10": "",
-        "brand_label_10": ""
+        "padding-block-start": 48,
+        "padding-block-end": 56
       }
     },
-    "product_spotlight_HMicki": {
-      "type": "product-spotlight",
-      "blocks": {
-        "soleplate_RhGgpF": {
-          "type": "soleplate",
-          "settings": {
-            "name": "FG",
-            "image": "shopify://shop_images/close-up-golf-green-grass-37662976.webp"
-          }
-        },
-        "soleplate_KBn4jP": {
-          "type": "soleplate",
-          "settings": {
-            "name": "SG",
-            "image": "shopify://shop_images/close-up-view-muddy-terrain-young-green-grass-emerging-rippled-texture-wet-soil-contrasts-fresh-grass-overcast-378267444.webp"
-          }
-        },
-        "soleplate_CB6Ujp": {
-          "type": "soleplate",
-          "settings": {
-            "name": "AG",
-            "image": "shopify://shop_images/EPDM-Rubber-Granules-Crumb-Rubber-Infill-Material-for-Turf-Playground-Surfaces.jpg_300x300_ea1d0e4c-072c-4f5c-8a47-a74c9b1586a0.jpg"
-          }
-        },
-        "colourway_jnnzkR": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "FG",
-            "product": "nike-mercurial-vapor-16-elite-fg-blueprint-1",
-            "name": ""
-          }
-        },
-        "colourway_rtAgK9": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "FG",
-            "product": "nike-mercurial-vapor-16-elite-fg",
-            "name": ""
-          }
-        },
-        "colourway_ma4kxL": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "FG",
-            "product": "nike-mercurial-vapor-16-elite-fg-1",
-            "name": ""
-          }
-        },
-        "colourway_TQX7WK": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "FG",
-            "product": "nike-mercurial-vapor-16-elite-fg-3",
-            "name": ""
-          }
-        },
-        "colourway_CgF3jh": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "FG",
-            "product": "nike-mercurial-vapor-16-elite-fg-4",
-            "name": ""
-          }
-        },
-        "colourway_Lqx8kX": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "FG",
-            "product": "nike-mercurial-vapor-16-elite-fg-020326",
-            "name": ""
-          }
-        },
-        "colourway_XXY6zN": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "FG",
-            "product": "nike-mercurial-vapor-16-elite-fg-km",
-            "name": ""
-          }
-        },
-        "colourway_YGLtg9": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "FG",
-            "product": "nike-mercurial-vapor-16-elite-fg-lv8",
-            "name": ""
-          }
-        },
-        "colourway_mGiWkX": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "FG",
-            "product": "nike-mercurial-vapor-16-elite-fg-vini-fly-070925",
-            "name": ""
-          }
-        },
-        "colourway_4zcqeb": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "FG",
-            "product": "nike-mercurial-vapor-16-elite-fg-nike-by-you",
-            "name": ""
-          }
-        },
-        "colourway_Y8qAjT": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "FG",
-            "product": "nike-mercurial-vapor-16-elite-fg-olympics",
-            "name": ""
-          }
-        },
-        "colourway_UQFwg6": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "SG",
-            "product": "nike-mercurial-vapor-16-elite-sg-pro-pro-020326",
-            "name": ""
-          }
-        },
-        "colourway_PKUiXx": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "SG",
-            "product": "nike-mercurial-vapor-16-elite-sg-pro-oly-011125",
-            "name": ""
-          }
-        },
-        "colourway_WyFiJx": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "AG",
-            "product": "nike-mercurial-vapor-16-elite-ag",
-            "name": ""
-          }
-        },
-        "colourway_rz4q3N": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "AG",
-            "product": "nike-mercurial-vapor-16-elite-ag-nikeid-231125",
-            "name": ""
-          }
-        },
-        "colourway_z7BQgF": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "AG",
-            "product": "nike-mercurial-vapor-16-elite-fg-nike-by-you-1",
-            "name": ""
-          }
-        },
-        "colourway_iiiJwC": {
-          "type": "colourway",
-          "settings": {
-            "soleplate": "AG",
-            "product": "nike-mercurial-vapor-16-elite-ag-nike-by-you",
-            "name": ""
-          }
-        }
-      },
-      "block_order": [
-        "soleplate_RhGgpF",
-        "soleplate_KBn4jP",
-        "soleplate_CB6Ujp",
-        "colourway_jnnzkR",
-        "colourway_rtAgK9",
-        "colourway_ma4kxL",
-        "colourway_TQX7WK",
-        "colourway_CgF3jh",
-        "colourway_Lqx8kX",
-        "colourway_XXY6zN",
-        "colourway_YGLtg9",
-        "colourway_mGiWkX",
-        "colourway_4zcqeb",
-        "colourway_Y8qAjT",
-        "colourway_UQFwg6",
-        "colourway_PKUiXx",
-        "colourway_WyFiJx",
-        "colourway_rz4q3N",
-        "colourway_z7BQgF",
-        "colourway_iiiJwC"
-      ],
-      "name": "Product Spotlight",
+    "boot_match": {
+      "type": "boot-match",
       "settings": {
-        "title": "Nike Mercurial Vapor 16 Elite",
-        "subtitle": "",
-        "size_label": "Size",
-        "buy_label": "Add To Cart",
-        "bg_image_landscape": "shopify://shop_images/IMG_8004_c6f9b93e-3b43-465d-91bf-149470f3816a.jpg",
-        "bg_image_portrait": "shopify://shop_images/IMG_8004.jpg",
-        "padding-block-start": 60,
-        "padding-block-end": 60
-      }
-    },
-    "collection_carousel_xaqMa8": {
-      "type": "collection-carousel",
-      "blocks": {
-        "card_pDEAYF": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/8939b6d73f7ce255d6eb69a866906861.jpg",
-            "title": "Neymar Jr",
-            "subtitle": "",
-            "link": "shopify://collections/neymar-jr",
-            "cta_label": "Shop Now"
-          }
-        },
-        "card_8At9nm": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/SnapInsta.to_660307150_18721519762056421_301077248123342423_n.jpg",
-            "title": "CR7",
-            "subtitle": "",
-            "link": "shopify://collections/cr7",
-            "cta_label": "Shop Now"
-          }
-        },
-        "card_774Te6": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/adidas-messi-f50-triunfo-dorado-boots_6.jpg",
-            "title": "Messi",
-            "subtitle": "",
-            "link": "shopify://collections/messi-1",
-            "cta_label": "Shop Now"
-          }
-        },
-        "card_KPqQN6": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/SnapInsta.to_654969911_18568562623057038_5230344121947742236_n.jpg",
-            "title": "Olise",
-            "subtitle": "",
-            "link": "shopify://collections/olise",
-            "cta_label": "Shop Now"
-          }
-        },
-        "card_3HVjxU": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/images_voltaxMediaLibrary_mmsport_90min_en_international_web_01k4ajkbnh9t405hewvm.webp",
-            "title": "Pogba",
-            "subtitle": "",
-            "link": "shopify://collections/pogba",
-            "cta_label": "Shop Now"
-          }
-        }
-      },
-      "block_order": [
-        "card_pDEAYF",
-        "card_8At9nm",
-        "card_774Te6",
-        "card_KPqQN6",
-        "card_3HVjxU"
-      ],
-      "name": "Collection Carousel",
-      "settings": {
-        "heading": "Shop by Collection",
-        "subheading": "",
-        "card_aspect_ratio": "3/4",
-        "padding-block-start": 4,
-        "padding-block-end": 8
+        "enabled": true,
+        "collection": "all-football-boots",
+        "heading": "OCEBOOTS Tinder",
+        "tip": "Find your boot match",
+        "likes_to_match": 4
       }
     }
   },
   "order": [
+    "image_hero_main",
     "bf_ripped_hero_section",
     "1770583639efe53d54",
-    "17706063529fca8395",
+    "shop_by_silo_main",
+    "instagram_feed_main",
+    "worn_by_pros_main",
     "collection_cutout_grid_gidTf3",
-    "pro_player_wall_hhtJ4x",
+    "player_reels_main",
     "newly_listed_fc",
-    "brand_tiles_main",
-    "product_spotlight_HMicki",
-    "collection_carousel_xaqMa8"
+    "popular_categories_main",
+    "boot_match"
   ]
 }

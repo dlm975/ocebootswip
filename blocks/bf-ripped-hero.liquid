@@ -78,11 +78,11 @@
   .bfrh-{{ uid }} .bfrh__offer {
     margin: 0;
     color: {{ block.settings.offer_color }};
-    font-family: {{ block.settings.offer_font.family }}, {{ block.settings.offer_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.offer_font.family }}, {{ block.settings.offer_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.offer_font.weight }};
-    font-style: {{ block.settings.offer_font.style }};
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+    font-style: {% if settings.brand_font %}normal{% else %}{{ block.settings.offer_font.style }}{% endif %};
+    text-transform: none;
+    letter-spacing: 0.01em;
     line-height: 1;
     font-size: {{ block.settings.offer_size_desktop | divided_by: 10.0 }}cqw;
     text-shadow: 0 0.04em 0.18em rgb(0 0 0 / 0.6);
@@ -91,10 +91,10 @@
   .bfrh-{{ uid }} .bfrh__heading {
     margin: 0;
     color: {{ block.settings.text_color }};
-    font-family: {{ block.settings.heading_font.family }}, {{ block.settings.heading_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.heading_font.family }}, {{ block.settings.heading_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.heading_font.weight }};
-    font-style: {{ block.settings.heading_font.style }};
-    text-transform: uppercase;
+    font-style: {% if settings.brand_font %}normal{% else %}{{ block.settings.heading_font.style }}{% endif %};
+    text-transform: none;
     line-height: 0.95;
     letter-spacing: 0.02em;
     font-size: {{ block.settings.heading_size_desktop | divided_by: 10.0 }}cqw;
@@ -107,12 +107,12 @@
     padding: 0.9em 2.2em;
     background: {{ block.settings.button_background }};
     color: {{ block.settings.button_text_color }};
-    font-family: {{ block.settings.button_font.family }}, {{ block.settings.button_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.button_font.family }}, {{ block.settings.button_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.button_font.weight }};
-    font-style: {{ block.settings.button_font.style }};
+    font-style: {% if settings.brand_font %}normal{% else %}{{ block.settings.button_font.style }}{% endif %};
     font-size: clamp(14px, 1.45cqw, 22px);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    text-transform: none;
     text-decoration: none;
     border-radius: {{ block.settings.button_border_radius }}px;
     box-shadow: 0 4px 14px rgb(0 0 0 / 0.45);
@@ -467,12 +467,12 @@
         const shadow = el('filter', { id: id + 'sh', x: '-10%', y: '-10%', width: '120%', height: '120%' });
         shadow.append(el('feDropShadow', {
           dx: 0, dy: (unit * 0.012).toFixed(1), stdDeviation: (unit * 0.018).toFixed(1),
-          'flood-color': '#000', 'flood-opacity': 0.75,
+          'flood-color': '#121212', 'flood-opacity': 0.75,
         }));
         const flapShadow = el('filter', { id: id + 'fs', x: '-30%', y: '-30%', width: '160%', height: '160%' });
         flapShadow.append(el('feDropShadow', {
           dx: (unit * 0.004).toFixed(1), dy: (unit * 0.008).toFixed(1), stdDeviation: (unit * 0.009).toFixed(1),
-          'flood-color': '#000', 'flood-opacity': 0.45,
+          'flood-color': '#121212', 'flood-opacity': 0.45,
         }));
         // Fibrous look on the torn white rim.
         const rough = el('filter', { id: id + 'rf' });
@@ -493,7 +493,7 @@
           d: frame + pathOf(rimPts), 'fill-rule': 'evenodd', fill: '#f4f2ee', filter: `url(#${id}rf)`,
         }));
         const printed = el('g', { 'clip-path': `url(#${id}hc)` });
-        printed.append(el('rect', { width: W, height: H, fill: '#1a1a1a' }));
+        printed.append(el('rect', { width: W, height: H, fill: '#121212' }));
         if (img) {
           printed.append(el('image', {
             href: img, x: 0, y: 0, width: W, height: H,
@@ -501,10 +501,10 @@
           }));
         }
         const dim = parseFloat(this.dataset.dim || '0');
-        if (dim > 0) printed.append(el('rect', { width: W, height: H, fill: this.dataset.dimColor || '#000', opacity: dim }));
+        if (dim > 0) printed.append(el('rect', { width: W, height: H, fill: this.dataset.dimColor || '#121212', opacity: dim }));
         // Subtle darkening right at the torn edge where the paper lifts.
         printed.append(el('path', {
-          d: pathOf(holePts), fill: 'none', stroke: '#000', 'stroke-opacity': 0.35,
+          d: pathOf(holePts), fill: 'none', stroke: '#121212', 'stroke-opacity': 0.35,
           'stroke-width': (unit * 0.02).toFixed(1), 'stroke-linejoin': 'round',
           filter: `url(#${id}eb)`,
         }));
@@ -589,7 +589,7 @@
       "type": "color",
       "id": "overlay_color",
       "label": "Image overlay color",
-      "default": "#000000"
+      "default": "#121212"
     },
     {
       "type": "range",
@@ -692,7 +692,7 @@
       "type": "text",
       "id": "heading",
       "label": "Heading",
-      "default": "SALE IS LIVE"
+      "default": "Sale is live"
     },
     {
       "type": "font_picker",
@@ -735,7 +735,7 @@
       "id": "offer_text",
       "label": "Offer text",
       "info": "[x] is replaced with the percentage below. Leave empty to hide the line.",
-      "default": "UP TO [x]% OFF"
+      "default": "Up to [x]% off"
     },
     {
       "type": "range",
@@ -787,7 +787,7 @@
       "type": "text",
       "id": "button_text",
       "label": "Button text",
-      "default": "SHOP NOW"
+      "default": "Shop now"
     },
     {
       "type": "font_picker",
@@ -810,19 +810,19 @@
       "type": "color",
       "id": "button_text_color",
       "label": "Text color",
-      "default": "#000000"
+      "default": "#121212"
     },
     {
       "type": "color",
       "id": "button_hover_background",
       "label": "Hover background",
-      "default": "#e6e6e6"
+      "default": "#64748B40"
     },
     {
       "type": "color",
       "id": "button_hover_text_color",
       "label": "Hover text color",
-      "default": "#000000"
+      "default": "#121212"
     },
     {
       "type": "range",

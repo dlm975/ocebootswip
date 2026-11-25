@@ -79,9 +79,7 @@
             {%- if block.settings.urgency_text != blank -%}
               <div class="cart-urgency-inline" aria-live="polite">
                 <span class="cart-urgency-inline__icon" aria-hidden="true">
-                  <svg viewBox="0 0 10 16" fill="currentColor" width="11" height="11">
-                    <path d="M6 0L0 9h4.5L4 16l6-9H5.5z"/>
-                  </svg>
+                  {%- render 'gicon', name: 'bolt-fill', size: 11 -%}
                 </span>
                 <span>{{ block.settings.urgency_text }}</span>
               </div>
@@ -260,9 +258,9 @@
     gap: 7px;
     font-size: 0.78rem;
     font-weight: 500;
-    color: #744210;
-    background: #fffbeb;
-    border: 1px solid #f6e05e;
+    color: #121212;
+    background: #F1F5F9;
+    border: 1px solid #3897F0;
     border-radius: 6px;
     padding: 6px 12px;
     width: 100%;
@@ -270,7 +268,7 @@
   }
 
   .cart-urgency-inline__icon {
-    color: #c05621;
+    color: #121212;
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -422,6 +420,17 @@
   .pickup-location__close-button svg {
     width: var(--icon-size-xs);
     height: var(--icon-size-xs);
+  }
+
+  /* Product page (redesign): full-width 56px buttons with 2px corners */
+  .product-details .product-form-buttons .add-to-cart-button,
+  .product-details .product-form-buttons .shopify-payment-button__button {
+    min-height: 56px;
+    border-radius: 2px;
+  }
+
+  .product-details .product-form-buttons .add-to-cart-button {
+    font-size: 1rem;
   }
 {% endstylesheet %}
 

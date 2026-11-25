@@ -8,7 +8,7 @@
   {% liquid
     assign button_background_brightness = section.settings.color_scheme.settings.foreground | color_brightness
     if button_background_brightness < 105
-      assign strikethrough_color_mix = '#000'
+      assign strikethrough_color_mix = '#121212'
     else
       assign strikethrough_color_mix = '#fff'
     endif
@@ -30,7 +30,7 @@
     {% endif %}
   >
 
-    {%- if block.settings.variant_style == 'dropdowns' -%}
+    {%- if block.settings.variant_style == 'dropdowns' or block.settings.variant_style == 'size_grid' -%}
 
       {%- comment -%} ── PILL VARIANT PICKER ── {%- endcomment -%}
       <form class="variant-picker__form variant-picker__form--pills">
@@ -40,11 +40,99 @@
             {%- assign has_multiple = true -%}
           {%- endif -%}
 
+          {%- liquid
+            assign option_name_lower = product_option.name | downcase
+            assign is_size_grid = false
+            assign hide_option = false
+            # Only one size that can be bought: it starts chosen, as if the shopper had picked it
+            assign only_size = false
+            assign buyable = 0
+            for v in product_option.values
+              if v.available
+                assign buyable = buyable | plus: 1
+              endif
+            endfor
+            if buyable == 1
+              assign only_size = true
+            endif
+            if block.settings.variant_style == 'size_grid'
+              if option_name_lower contains 'size'
+                assign is_size_grid = true
+              elsif has_multiple == false
+                # Shown in the product meta line instead (e.g. condition)
+                assign hide_option = true
+              endif
+            endif
+          -%}
           <div
-            class="pill-option{% if has_multiple %} pill-option--interactive{% endif %}"
+            class="pill-option{% if has_multiple and is_size_grid == false %} pill-option--interactive{% endif %}{% if is_size_grid %} size-grid{% endif %}"
             data-option-name="{{ product_option.name | escape }}"
+            {% if is_size_grid %}data-product-id="{{ product_resource.id }}"{% if product_resource.selected_variant or only_size %} data-chosen{% endif %}{% endif %}
+            {% if hide_option %}hidden{% endif %}
           >
-            {%- if has_multiple -%}
+            {%- if is_size_grid -%}
+              {%- liquid
+                assign first_value = product_option.values.first | append: ''
+                assign size_label = product_option.name
+                if first_value contains 'US ' and first_value contains 'EU '
+                  assign size_label = size_label | append: ' (US · UK · EU)'
+                endif
+              -%}
+              <div class="size-grid__head">
+                <p class="size-grid__label" id="SizeGridLabel-{{ block.id }}-{{ product_option.position }}">{{ size_label | escape }}</p>
+                {%- comment -%} Rendered for the current variant; shown only once a size is chosen (.size-grid[data-chosen]) {%- endcomment -%}
+                {%- if block.settings.show_stock_urgency -%}
+                  {% render 'urgency-stock',
+                    variant: product_resource.selected_or_first_available_variant,
+                    threshold: block.settings.urgency_threshold,
+                    dot_color: block.settings.urgency_dot_color
+                  %}
+                {%- endif -%}
+              </div>
+              <div
+                class="size-grid__grid"
+                role="radiogroup"
+                aria-labelledby="SizeGridLabel-{{ block.id }}-{{ product_option.position }}"
+              >
+                {%- for product_option_value in product_option.values -%}
+                  {%- liquid
+                    assign value_text = product_option_value | append: ''
+                    assign value_parts = value_text | split: ' - '
+                    assign is_chosen = false
+                    if product_option_value.selected and product_resource.selected_variant
+                      assign is_chosen = true
+                    endif
+                    if only_size and product_option_value.available
+                      assign is_chosen = true
+                    endif
+                    # The current variant's size; it only looks selected once the shopper has chosen (data-chosen)
+                    assign is_current = product_option_value.selected
+                  -%}
+                  <button
+                    type="button"
+                    class="pill-option__item size-grid__item{% if is_current %} pill-option__item--selected{% endif %}{% if product_option_value.available == false %} pill-option__item--unavailable{% endif %}"
+                    role="radio"
+                    aria-checked="{{ is_chosen }}"
+                    {% if product_option_value.available == false %}
+                      disabled
+                      aria-label="{{ value_text | escape }}, {{ 'content.product_badge_sold_out' | t }}"
+                    {% endif %}
+                    data-value="{{ product_option_value | escape }}"
+                    data-option-value-id="{{ product_option_value.id }}"
+                    data-variant-id="{{ product_option_value.variant.id }}"
+                  >
+                    <span class="size-grid__main">{{ value_parts.first | escape }}</span>
+                    {%- if value_parts.size > 1 -%}
+                      <span class="size-grid__sub">
+                        {%- for part in value_parts offset: 1 -%}
+                          {{- part | escape -}}{%- unless forloop.last %} · {% endunless -%}
+                        {%- endfor -%}
+                      </span>
+                    {%- endif -%}
+                  </button>
+                {%- endfor -%}
+              </div>
+            {%- elsif has_multiple -%}
               <button
                 type="button"
                 class="pill-option__btn"
@@ -67,9 +155,7 @@
                 >
                   {{- 'content.product_badge_sold_out' | t -}}
                 </span>
-                <svg class="pill-option__chevron" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" width="10" height="6">
-                  <polyline points="1 1 5 5 9 1"/>
-                </svg>
+                {%- render 'gicon', name: 'keyboard_arrow_down', class: 'pill-option__chevron', size: 16 -%}
               </button>
               <div class="pill-option__dropdown" role="listbox" hidden>
                 {%- for product_option_value in product_option.values -%}
@@ -255,6 +341,145 @@
     padding-inline-start: max(4px, var(--padding-inline-start));
   }
 
+  /* ── Size grid (variant style "Size grid") ── */
+  .variant-picker__form--pills:has(.size-grid) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .size-grid {
+    width: 100%;
+  }
+
+  .size-grid__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 16px;
+    row-gap: 4px;
+    margin-block-end: 10px;
+  }
+
+  .size-grid__label {
+    margin: 0;
+    font-size: 14px;
+    color: var(--color-foreground-heading, #121212);
+  }
+
+  .size-grid__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+
+    @media screen and (max-width: 749px) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  /* Scoped under .size-grid so these win over the dropdown item rules (.pill-option__item ...) further down.
+     Matches the wishlist mini product page: rounded off-white keys with a grey outline, slightly
+     raised on a grey edge; the chosen size is pressed in with a dark outline. */
+  .size-grid .size-grid__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: 50px;
+    padding: 6px;
+    border: 1px solid #d4d4d8;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #f7f7f5 100%);
+    box-shadow:
+      inset 0 1px 0 #ffffff,
+      -2px 3px 0 #d4d4d8,
+      -2px 4px 8px rgb(18 18 18 / 0.06);
+    color: #121212;
+    font: inherit;
+    font-weight: 650;
+    line-height: 1.15;
+    text-align: center;
+    white-space: normal;
+    cursor: pointer;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s cubic-bezier(0.3, 0.7, 0.3, 1),
+      transform 0.2s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
+  .size-grid .size-grid__item:hover,
+  .size-grid .size-grid__item.pill-option__item--selected,
+  .size-grid .size-grid__item.pill-option__item--selected:hover {
+    background: linear-gradient(180deg, #ffffff 0%, #f7f7f5 100%);
+    color: #121212;
+  }
+
+  @media (hover: hover) {
+    .size-grid .size-grid__item:hover:not([disabled]) {
+      border-color: #b8b8bf;
+      transform: translate(0.5px, -1px);
+      box-shadow:
+        inset 0 1px 0 #ffffff,
+        -2.5px 4px 0 #c9c9cf,
+        -2.5px 6px 12px rgb(18 18 18 / 0.08);
+    }
+  }
+
+  .size-grid .size-grid__item:active:not([disabled]),
+  .size-grid[data-chosen] .size-grid__item.pill-option__item--selected,
+  .size-grid[data-chosen] .size-grid__item.pill-option__item--selected:hover {
+    transform: translate(-1.5px, 2px);
+    box-shadow:
+      inset -1px 2px 3px rgb(18 18 18 / 0.08),
+      -0.5px 1px 0 #d4d4d8;
+  }
+
+  .size-grid[data-chosen] .size-grid__item.pill-option__item--selected,
+  .size-grid[data-chosen] .size-grid__item.pill-option__item--selected:hover {
+    border: 1.5px solid #121212;
+    background: #f4f4f2;
+  }
+
+  .size-grid .size-grid__item:focus-visible {
+    outline: 2px solid #121212;
+    outline-offset: 3px;
+  }
+
+  .size-grid__main {
+    font-size: 0.9375rem;
+    font-weight: 650;
+  }
+
+  .size-grid__sub {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: rgb(18 18 18 / 0.55);
+  }
+
+  .size-grid .size-grid__item[disabled] {
+    cursor: default;
+    opacity: 0.45;
+    background: #f7f7f5;
+    border-color: #e4e4e7;
+    box-shadow: none;
+    text-decoration: line-through;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .size-grid .size-grid__item {
+      transition: none;
+    }
+  }
+
+  /* Low-stock message only once a size is chosen */
+  .size-grid:not([data-chosen]) .product-urgency-stock {
+    display: none;
+  }
+
+  .pill-option[hidden] {
+    display: none;
+  }
+
   /* ── Pill option container ── */
   .pill-option {
     position: relative;
@@ -266,7 +491,7 @@
     align-items: center;
     gap: 6px;
     padding: 8px 14px;
-    background: #111111;
+    background: #121212;
     color: #ffffff;
     border: none;
     border-radius: 999px;
@@ -284,14 +509,14 @@
   }
 
   .pill-option--interactive .pill-option__btn:hover {
-    background: #333333;
+    background: #1F2937;
   }
 
   .pill-option__btn--static {
     display: inline-flex;
     align-items: center;
     padding: 8px 14px;
-    background: #111111;
+    background: #121212;
     color: #ffffff;
     border-radius: 999px;
     font-size: 0.875rem;
@@ -318,7 +543,7 @@
     left: 0;
     z-index: 200;
     background: #ffffff;
-    border: 1px solid #e2e2e2;
+    border: 1px solid #64748B40;
     border-radius: var(--brand-radius-md);
     box-shadow: 0 8px 24px rgba(0,0,0,0.14);
     padding: 6px;
@@ -347,7 +572,7 @@
     border-radius: var(--brand-radius-sm);
     font-size: 0.875rem;
     font-weight: 500;
-    color: #111111;
+    color: #121212;
     cursor: pointer;
     white-space: nowrap;
     text-align: left;
@@ -355,17 +580,17 @@
   }
 
   .pill-option__item:hover {
-    background: #f5f5f5;
+    background: #F1F5F9;
   }
 
   .pill-option__item--selected {
-    background: #111111;
+    background: #121212;
     color: #ffffff;
     font-weight: 600;
   }
 
   .pill-option__item--selected:hover {
-    background: #333333;
+    background: #1F2937;
   }
 
   /* Sold-out sizes: the name is dimmed, the "Sold out" tag stays fully legible */
@@ -390,10 +615,10 @@
     background: var(--brand-red);
     color: #ffffff;
     font-size: 0.6875rem;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.3;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    text-transform: none;
     white-space: nowrap;
     vertical-align: middle;
   }
@@ -601,6 +826,38 @@
       initChooseLabels();
     }
 
+    /* ── Size grid: once a size is chosen, keep the grid in its "chosen" state (tile highlight,
+       low-stock message) when the picker is re-rendered after the variant fetch ── */
+    var chosenProducts = {};
+    function syncChosen() {
+      document.querySelectorAll('.size-grid').forEach(function (grid) {
+        var chosen = grid.hasAttribute('data-chosen') || chosenProducts[grid.dataset.productId];
+        if (chosen && !grid.hasAttribute('data-chosen')) grid.setAttribute('data-chosen', '');
+        if (grid.hasAttribute('data-chosen')) chosenProducts[grid.dataset.productId] = true;
+        grid.querySelectorAll('.size-grid__item').forEach(function (item) {
+          var checked = chosen && item.classList.contains('pill-option__item--selected') ? 'true' : 'false';
+          if (item.getAttribute('aria-checked') !== checked) item.setAttribute('aria-checked', checked);
+        });
+      });
+    }
+    // Only a re-rendered size grid (or a data-chosen change) sets off a pass, not every element the page adds
+    new MutationObserver(function (records) {
+      var hit = records.some(function (record) {
+        if (record.type === 'attributes') return true;
+        for (var i = 0; i < record.addedNodes.length; i++) {
+          var node = record.addedNodes[i];
+          if (node.nodeType === 1 && (node.matches('.size-grid, .size-grid__item') || node.querySelector('.size-grid'))) return true;
+        }
+        return false;
+      });
+      if (hit) syncChosen();
+    }).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-chosen'] });
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', syncChosen);
+    } else {
+      syncChosen();
+    }
+
     /* ── Event delegation — survives DOM morphing after variant fetch ── */
     document.addEventListener('click', function (e) {
 
@@ -622,6 +879,29 @@
           pillBtn.setAttribute('aria-expanded', 'true');
           dropdown.hidden = false;
         }
+        return;
+      }
+
+      /* Size grid: pick a size directly */
+      var gridItem = e.target.closest('.size-grid__item');
+      if (gridItem) {
+        if (gridItem.disabled) return;
+        var grid = gridItem.closest('.size-grid');
+        chosenProducts[grid.dataset.productId] = true;
+        grid.setAttribute('data-chosen', '');
+        var gridSelect = grid.querySelector('.pill-option__select');
+        var gridValue = gridItem.dataset.value;
+        Array.from(gridSelect.options).forEach(function (opt) {
+          var match = opt.value === gridValue;
+          opt.selected = match;
+          if (match) { opt.setAttribute('selected', 'selected'); } else { opt.removeAttribute('selected'); }
+        });
+        grid.querySelectorAll('.size-grid__item').forEach(function (item) {
+          var sel = item === gridItem;
+          item.classList.toggle('pill-option__item--selected', sel);
+          item.setAttribute('aria-checked', sel ? 'true' : 'false');
+        });
+        gridSelect.dispatchEvent(new Event('change', { bubbles: true }));
         return;
       }
 
@@ -676,6 +956,16 @@
           b.closest('.pill-option').querySelector('.pill-option__dropdown').hidden = true;
         });
       }
+    });
+
+    /* Size grid: arrow keys move between sizes, like a radio group */
+    document.addEventListener('keydown', function (e) {
+      var item = e.target.closest && e.target.closest('.size-grid__item');
+      if (!item || ['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp'].indexOf(e.key) === -1) return;
+      var items = Array.from(item.closest('.size-grid__grid').querySelectorAll('.size-grid__item:not([disabled])'));
+      var i = items.indexOf(item);
+      var next = items[(i + (e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length];
+      if (next) { e.preventDefault(); next.focus(); }
     });
 
     /* Escape key → close all */

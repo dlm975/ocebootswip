@@ -34,9 +34,52 @@
         {
           "value": "buttons",
           "label": "t:options.buttons"
+        },
+        {
+          "value": "size_grid",
+          "label": "Size grid"
         }
       ],
       "default": "buttons"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_stock_urgency",
+      "label": "Show low-stock message by the size label",
+      "info": "\"Only 1 left in stock!\" once a size is chosen and its stock is at or below the number below. Size grid only.",
+      "default": false,
+      "visible_if": "{{ block.settings.variant_style == 'size_grid' }}"
+    },
+    {
+      "type": "range",
+      "id": "urgency_threshold",
+      "label": "Show when stock is at or below",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "default": 5,
+      "visible_if": "{{ block.settings.variant_style == 'size_grid' and block.settings.show_stock_urgency }}"
+    },
+    {
+      "type": "select",
+      "id": "urgency_dot_color",
+      "label": "Dot colour",
+      "options": [
+        {
+          "value": "red",
+          "label": "Red"
+        },
+        {
+          "value": "orange",
+          "label": "Orange"
+        },
+        {
+          "value": "amber",
+          "label": "Amber"
+        }
+      ],
+      "default": "orange",
+      "visible_if": "{{ block.settings.variant_style == 'size_grid' and block.settings.show_stock_urgency }}"
     },
     {
       "type": "checkbox",

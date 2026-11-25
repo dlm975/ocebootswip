@@ -7,10 +7,17 @@ const DEFAULT_ZOOM = 1;
 // Double-tap toggles between fitted and this zoom level.
 const DOUBLE_TAP_ZOOM = 2.5;
 const DOUBLE_TAP_DELAY = 300;
+// Zoom builds more gently than the fingers spread (1 = exactly with them)
+const PINCH_SENSITIVITY = 0.8;
+// Moving the zoomed image: it travels this share of the finger's movement, for calmer control
+const PAN_SPEED = 0.75;
 // Movement under this many pixels still counts as a tap.
 const TAP_SLOP = 10;
 // A one-finger horizontal swipe this long, on an image that isn't zoomed in, moves to the next/previous image.
 const SWIPE_DISTANCE = 50;
+// Once zoomed, the image can be pulled this many pixels past its edges (so a boot's toe or heel at
+// the very edge can be seen whole), and no further: the same as pinching on the product page.
+const EDGE_MARGIN = 24;
 
 export class DragZoomWrapper extends HTMLElement {
   #controller = new AbortController();
@@ -169,7 +176,7 @@ export class DragZoomWrapper extends HTMLElement {
     const oldScale = this.#scale;
 
     // Calculate and apply new scale
-    const newScale = (currentDistance / this.#initialDistance) * this.#startScale;
+    const newScale = Math.pow(currentDistance / this.#initialDistance, PINCH_SENSITIVITY) * this.#startScale;
     this.#scale = clamp(newScale, MIN_ZOOM, MAX_ZOOM);
 
     // Adjust translation to keep the pinch midpoint stationary
@@ -194,8 +201,8 @@ export class DragZoomWrapper extends HTMLElement {
 
     // Two-finger movement: the image follows the fingers as they move together
     if (this.#lastMidpoint) {
-      this.#translate.x += (currentMidpoint.x - this.#lastMidpoint.x) / this.#scale;
-      this.#translate.y += (currentMidpoint.y - this.#lastMidpoint.y) / this.#scale;
+      this.#translate.x += ((currentMidpoint.x - this.#lastMidpoint.x) * PAN_SPEED) / this.#scale;
+      this.#translate.y += ((currentMidpoint.y - this.#lastMidpoint.y) * PAN_SPEED) / this.#scale;
     }
     this.#lastMidpoint = currentMidpoint;
 
@@ -218,8 +225,8 @@ export class DragZoomWrapper extends HTMLElement {
 
     // Calculate new translation
     this.#translate = {
-      x: this.#startTranslate.x + (point.x - this.#startPosition.x) / this.#scale,
-      y: this.#startTranslate.y + (point.y - this.#startPosition.y) / this.#scale,
+      x: this.#startTranslate.x + ((point.x - this.#startPosition.x) * PAN_SPEED) / this.#scale,
+      y: this.#startTranslate.y + ((point.y - this.#startPosition.y) * PAN_SPEED) / this.#scale,
     };
 
     this.#requestUpdateTransform();
@@ -318,7 +325,7 @@ export class DragZoomWrapper extends HTMLElement {
   #animate() {
     this.setAttribute('data-animating', '');
     clearTimeout(this.#animationTimer);
-    this.#animationTimer = setTimeout(() => this.removeAttribute('data-animating'), 300);
+    this.#animationTimer = setTimeout(() => this.removeAttribute("data-animating"), 480);
   }
 
   /** Back to the fitted, centred image */
@@ -352,25 +359,26 @@ export class DragZoomWrapper extends HTMLElement {
    * @returns {{ width: number, height: number } | null}
    */
   #getImageDimensions = () => {
-    const containerRect = this.getBoundingClientRect();
     if (!this.#image) return null;
     const { naturalWidth, naturalHeight } = this.#image;
-    const containerWidth = this.clientWidth;
-    const containerHeight = this.clientHeight;
+    // The photo is fitted (contain) inside its own box, which sits inside the screen with a margin
+    // all round: measure that box, not the whole screen, so panning reaches every edge exactly
+    const boxWidth = this.#image.clientWidth || this.clientWidth;
+    const boxHeight = this.#image.clientHeight || this.clientHeight;
 
-    if (!naturalWidth || !naturalHeight || !containerWidth || !containerHeight) return null;
+    if (!naturalWidth || !naturalHeight || !boxWidth || !boxHeight) return null;
 
-    const containerAspect = containerRect.width / containerRect.height;
+    const boxAspect = boxWidth / boxHeight;
     const naturalAspect = naturalWidth / naturalHeight;
 
     let imageWidth, imageHeight;
-    if (naturalAspect > containerAspect) {
-      // Image is wider than container (relative to height)
-      imageWidth = containerRect.width;
+    if (naturalAspect > boxAspect) {
+      // Wider than its box: fills the width
+      imageWidth = boxWidth;
       imageHeight = imageWidth / naturalAspect;
     } else {
-      // Image is taller than container (relative to width)
-      imageHeight = containerRect.height;
+      // Taller than its box: fills the height
+      imageHeight = boxHeight;
       imageWidth = imageHeight * naturalAspect;
     }
 
@@ -404,8 +412,10 @@ export class DragZoomWrapper extends HTMLElement {
     const excessWidth = Math.max(0, scaledWidth - containerWidth);
     const excessHeight = Math.max(0, scaledHeight - containerHeight);
 
-    const maxTranslateX = excessWidth / (2 * this.#scale);
-    const maxTranslateY = excessHeight / (2 * this.#scale);
+    // A little give past each edge once zoomed in, never more
+    const give = EDGE_MARGIN * clamp((this.#scale - minZoom) / 0.5, 0, 1);
+    const maxTranslateX = (excessWidth / 2 + (excessWidth > 0 ? give : 0)) / this.#scale;
+    const maxTranslateY = (excessHeight / 2 + (excessHeight > 0 ? give : 0)) / this.#scale;
 
     this.#translate.x = clamp(this.#translate.x, -maxTranslateX, maxTranslateX);
     this.#translate.y = clamp(this.#translate.y, -maxTranslateY, maxTranslateY);

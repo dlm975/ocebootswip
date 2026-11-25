@@ -1,0 +1,70 @@
+{%- comment -%}
+  One saved product's card on the wishlist page (sections/wishlist.liquid), fetched from the
+  product's own URL with section_id=wishlist-card so the price comes in the shopper's currency.
+  Not for adding to pages: it has no presets.
+  Just the photo. Tapping anywhere on the card (the photo or "See Details") opens the mini product
+  page; a sold-out boot's photo still leads to its product page.
+{%- endcomment -%}
+
+{%- liquid
+  assign image = product.featured_media.preview_image | default: product.featured_image
+  assign image_alt = image.alt | default: product.title | escape
+-%}
+
+{%- if product -%}
+  <li
+    class="wl-grid__item"
+    data-wishlist-item="{{ product.handle }}"
+  >
+    <a
+      class="wl-card"
+      href="{{ product.url }}"
+      {%- if product.available %}
+        data-wlq-open="{{ product.handle }}"
+        aria-haspopup="dialog"
+      {%- endif %}
+    >
+      <span class="wl-card__media">
+        {%- if image -%}
+          {{
+            image
+            | image_url: width: 700
+            | image_tag:
+              widths: '300, 400, 550, 700',
+              sizes: '(min-width: 990px) 25vw, (min-width: 750px) 33vw, 50vw',
+              class: 'wl-card__image',
+              alt: image_alt
+          }}
+        {%- endif -%}
+        {%- unless product.available -%}
+          <span class="wl-card__sold">Sold out</span>
+        {%- endunless -%}
+      </span>
+      <span class="visually-hidden">{{ product.title | escape }}</span>
+    </a>
+    {%- if product.available -%}
+      <button
+        type="button"
+        class="wl-card__details"
+        data-wlq-open="{{ product.handle }}"
+        aria-haspopup="dialog"
+        aria-label="See details: {{ product.title | escape }}"
+      >
+        <span class="wl-card__details-label">See Details</span>
+        <span class="wl-card__disk oce-disk" aria-hidden="true">
+          {%- render 'gicon', name: 'arrow_forward', size: 18 -%}
+        </span>
+      </button>
+    {%- else -%}
+      <span class="wl-card__details wl-card__details--sold">Sold out</span>
+    {%- endif -%}
+    {% render 'wishlist-button', product: product, class: 'wishlist-toggle--card wl-card__heart' %}
+  </li>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Wishlist card",
+  "settings": []
+}
+{% endschema %}

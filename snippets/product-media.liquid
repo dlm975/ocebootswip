@@ -11,6 +11,7 @@
   @param {object} [selected_product] - The currently selected product.
   @param {boolean} [first_3d_model] - Indicates if this is the first 3D model.
   @param {boolean} [is_main_product_media] - Indicates if this is the main product image.
+  @param {string} [alt_fallback] - Text for the image when the media has no alt text (the product's title).
 
   @example
   {% render 'product-media', media: media, preview_image_only: false, loading: 'lazy' %}
@@ -28,6 +29,8 @@
   {% liquid
     assign high_res_url = media.preview_image | image_url: width: 3840
     assign fetch_priority = 'auto'
+    # Photos with no alt text of their own are described by the product's title
+    assign media_alt = media.alt | default: alt_fallback | default: selected_product.title
     if is_main_product_media
       assign fetch_priority = 'high'
     endif
@@ -37,7 +40,7 @@
     | image_url: width: 2000
     | image_tag:
       widths: widths,
-      alt: media.alt,
+      alt: media_alt,
       sizes: sizes,
       loading: loading,
       class: 'product-media__image',
@@ -63,7 +66,7 @@
               | image_url: width: 2000
               | image_tag:
                 widths: widths,
-                alt: media.alt,
+                alt: media_alt,
                 sizes: sizes,
                 loading: loading,
                 class: 'deferred-media__poster-image'

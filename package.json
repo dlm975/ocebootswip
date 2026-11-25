@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "motion": "^14.14.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  },
+  "private": true,
+  "scripts": {
+    "build:motion": "esbuild scripts/motion-entry.js --bundle --format=esm --minify --target=es2020 --legal-comments=none --outfile=assets/motion.js"
+  }
+}

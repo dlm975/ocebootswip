@@ -1,0 +1,36 @@
+{%- doc -%}
+  Brands and their models from the Shop by Silo menu (the header menu's link whose children have
+  children), as JSON, so search suggestions can link to their collections
+  (assets/search-suggestions.js).
+
+  @param {string} id - The script element's id
+{%- enddoc -%}
+
+{%- liquid
+  assign silo_link = nil
+  for link in linklists['header-menu'].links
+    for child in link.links
+      if child.links != blank
+        assign silo_link = link
+        break
+      endif
+    endfor
+    if silo_link
+      break
+    endif
+  endfor
+-%}
+
+<script type="application/json" id="{{ id }}">
+  [
+    {%- if silo_link -%}
+      {%- for brand in silo_link.links -%}
+        {"name": {{ brand.title | downcase | json }}, "url": {{ brand.url | json }}, "models": {
+          {%- for model in brand.links -%}
+            {{ model.title | downcase | json }}: {{ model.url | json }}{% unless forloop.last %},{% endunless %}
+          {%- endfor -%}
+        }}{% unless forloop.last %},{% endunless %}
+      {%- endfor -%}
+    {%- endif -%}
+  ]
+</script>

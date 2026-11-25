@@ -5,18 +5,12 @@
 {%- if block.settings.show_stars or stars_text != blank -%}
   <span
     id="psr-{{ block.id }}"
-    class="psr"
+    class="psr{% if block.settings.placement == 'in_place' %} psr--in-place{% endif %}"
     style="--psr-color: {{ block.settings.star_color }}; --psr-fg: {{ block.settings.text_color }}; --psr-size: {{ block.settings.star_size }}px;"
     {{ block.shopify_attributes }}
   >
     {%- if block.settings.show_stars -%}
-      <span class="psr__stars" aria-hidden="true">
-        {%- for i in (1..5) -%}
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-          </svg>
-        {%- endfor -%}
-      </span>
+      <span class="psr__stars oce-stars" aria-hidden="true"></span>
     {%- endif -%}
 
     {%- if stars_text != blank -%}
@@ -45,24 +39,22 @@
     align-self: center;
   }
 
-  .psr__stars {
-    display: inline-flex;
-    gap: 1px;
-    color: var(--psr-color, #14b554);
-    flex-shrink: 0;
+  /* Left where the merchant placed it (Position: where it's placed), e.g. between title and price */
+  .psr--in-place.psr--placed {
+    align-self: flex-start;
   }
 
-  .psr__stars svg {
-    width: var(--psr-size, 13px);
-    height: var(--psr-size, 13px);
-    display: block;
+  /* Stars in WhatsApp green (the Star colour setting), bold text */
+  .psr__stars {
+    --oce-star: var(--psr-size, 13px);
+    --oce-star-color: var(--psr-color, #25d366);
   }
 
   .psr__text {
-    color: var(--psr-fg, #15803d);
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
+    color: var(--psr-fg, #121212);
+    font-size: 0.75rem;
+    font-weight: 750;
+    letter-spacing: -0.005em;
     line-height: 1.25;
   }
 
@@ -99,6 +91,10 @@
     }
 
     function place() {
+      if (el.classList.contains('psr--in-place')) {
+        el.classList.add('psr--placed');
+        return;
+      }
       var price = findPrice();
       if (price && el.parentElement !== price) price.appendChild(el);
       /* Revealed either way — if the price block isn't on the template it
@@ -127,6 +123,22 @@
       "content": "Five stars and a line of social proof, shown beside the product price. Add it anywhere in the product details column — it moves itself next to the price."
     },
     {
+      "type": "select",
+      "id": "placement",
+      "label": "Position",
+      "options": [
+        {
+          "value": "beside_price",
+          "label": "Beside the price"
+        },
+        {
+          "value": "in_place",
+          "label": "Where it's placed"
+        }
+      ],
+      "default": "beside_price"
+    },
+    {
       "type": "checkbox",
       "id": "show_stars",
       "label": "Show stars",
@@ -142,13 +154,13 @@
       "type": "color",
       "id": "star_color",
       "label": "Star colour",
-      "default": "#14b554"
+      "default": "#25D366"
     },
     {
       "type": "color",
       "id": "text_color",
       "label": "Text colour",
-      "default": "#15803d"
+      "default": "#121212"
     },
     {
       "type": "range",

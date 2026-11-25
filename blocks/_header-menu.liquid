@@ -254,6 +254,8 @@
     background-color: var(--color-background);
     box-shadow: var(--shadow-popover);
     clip-path: inset(0.5px 0 -100px 0); /* stylelint-disable-line */
+    border-end-start-radius: var(--header-radius, 20px);
+    border-end-end-radius: var(--header-radius, 20px);
     opacity: var(--submenu-opacity, 1);
     transition: height var(--submenu-animation-speed) var(--ease-out-cubic),
       opacity var(--animation-speed-slow) var(--ease-out-cubic) var(--animation-speed-fast);
@@ -290,7 +292,9 @@
     top: calc(100% - 1px + var(--border-bottom-width));
     z-index: var(--layer-header-menu);
     padding-inline: var(--padding-inline);
-    clip-path: rect(0 100% var(--submenu-height) 0); /* stylelint-disable-line */
+    clip-path: rect(0 100% var(--submenu-height) 0 round 0 0 var(--header-radius, 20px) var(--header-radius, 20px)); /* stylelint-disable-line */
+    border-end-start-radius: var(--header-radius, 20px);
+    border-end-end-radius: var(--header-radius, 20px);
     transition: clip-path var(--submenu-animation-speed) var(--ease-out-cubic);
   }
 

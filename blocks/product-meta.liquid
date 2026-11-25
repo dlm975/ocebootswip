@@ -1,0 +1,170 @@
+{%- doc -%}
+  Product meta line above the product title: brand · soleplate · condition, e.g. "Nike · FG · New"
+  (on the product's own page just "FG · New": the brand and generation are the breadcrumbs).
+
+  - Brand: the first word of the title when it is a known boot brand (listings use the shop as vendor),
+    otherwise the vendor unless it is the shop itself.
+  - Soleplate: the first soleplate code in the title (FG, SG-Pro, AG, HG/AG ...).
+  - Condition: the selected variant's value for the option named "Condition".
+  Parts that can't be found are left out.
+{%- enddoc -%}
+
+{%- liquid
+  assign meta_product = closest.product
+  if meta_product == blank
+    assign meta_product = product
+  endif
+
+  assign brands = 'nike,adidas,puma,mizuno,new balance,umbro,diadora,lotto,asics,under armour,joma,kelme,umbro,hummel,kappa,skechers,lotto'
+  assign brand_list = brands | split: ','
+  assign title_words = meta_product.title | split: ' '
+  assign first_word = title_words.first | downcase
+  assign two_words = title_words[0] | append: ' ' | append: title_words[1] | downcase
+
+  assign meta_brand = ''
+  if brand_list contains two_words
+    assign meta_brand = title_words[0] | append: ' ' | append: title_words[1]
+  elsif brand_list contains first_word
+    assign meta_brand = title_words.first
+  elsif meta_product.vendor != blank and meta_product.vendor != shop.name
+    assign meta_brand = meta_product.vendor
+  endif
+  if meta_brand == 'adidas' or meta_brand == 'ADIDAS'
+    assign meta_brand = 'Adidas'
+  endif
+
+  assign soleplates = 'SG-PRO,SG-AC,SG,FG/AG,FG,AG,HG/AG,HG,MG,TF,IC,AG-PRO,FG-AG'
+  assign sole_list = soleplates | split: ','
+  assign meta_sole = ''
+  for word in title_words
+    assign w = word | remove: '(' | remove: ')' | remove: ',' | upcase
+    if sole_list contains w
+      assign meta_sole = word | remove: '(' | remove: ')' | remove: ','
+      break
+    endif
+  endfor
+
+  assign meta_condition = ''
+  assign meta_variant = meta_product.selected_or_first_available_variant
+  for option in meta_product.options_with_values
+    assign option_name = option.name | downcase
+    if option_name contains 'condition'
+      assign meta_condition = option.selected_value
+    endif
+  endfor
+
+  # The brand and the boot's generation link to their collections ("Nike › Mercurial Vapor 17"),
+  # so shoppers and search engines can step up from a boot to everything like it
+  assign brand_key = meta_brand | downcase
+  case brand_key
+    when 'nike'
+      assign meta_brand_collection = collections['nike']
+    when 'adidas'
+      assign meta_brand_collection = collections['adidas']
+    when 'puma'
+      assign meta_brand_collection = collections['puma-1']
+    when 'mizuno'
+      assign meta_brand_collection = collections['mizuno']
+    else
+      assign meta_brand_collection = nil
+  endcase
+  assign meta_gen = nil
+  for tag in meta_product.tags
+    if tag contains 'gen:'
+      assign meta_gen_handle = tag | remove_first: 'gen:' | strip
+      assign meta_gen = collections[meta_gen_handle]
+      break
+    endif
+  endfor
+  assign meta_gen_label = ''
+  if meta_gen != blank
+    assign brand_prefix = meta_brand | append: ' '
+    assign meta_gen_label = meta_gen.title | replace: 'adidas', 'Adidas' | remove_first: brand_prefix
+  endif
+
+  # On the boot's own page the brand and generation are the breadcrumbs above the photos
+  # (snippets/breadcrumbs.liquid), so this line keeps to soleplate · condition there
+  if template.name == 'product' and meta_product.id == product.id
+    assign meta_brand = ''
+  endif
+
+  assign meta_text = ''
+  for part in (1..3)
+    case part
+      when 1
+        assign value = meta_brand
+      when 2
+        assign value = meta_sole
+      else
+        assign value = meta_condition
+    endcase
+    if value != blank
+      if meta_text != blank
+        assign meta_text = meta_text | append: ' · '
+      endif
+      assign meta_text = meta_text | append: value
+    endif
+  endfor
+-%}
+
+{%- if meta_text != blank -%}
+  <p
+    class="product-meta"
+    {{ block.shopify_attributes }}
+  >
+    {%- if meta_brand != blank -%}
+      {%- if meta_brand_collection != blank -%}
+        <a class="product-meta__link" href="{{ meta_brand_collection.url }}">{{ meta_brand | escape }}</a>
+      {%- else -%}
+        {{ meta_brand | escape }}
+      {%- endif -%}
+      {%- if meta_gen_label != blank %} <span aria-hidden="true">›</span> <a class="product-meta__link" href="{{ meta_gen.url }}">{{ meta_gen_label | escape }}</a>{% endif -%}
+      {%- if meta_sole != blank or meta_condition != blank %} · {% endif -%}
+    {%- endif -%}
+    {%- if meta_sole != blank -%}{{ meta_sole | escape }}{%- if meta_condition != blank %} · {% endif -%}{%- endif -%}
+    {%- if meta_condition != blank -%}{{ meta_condition | escape }}{%- endif -%}
+  </p>
+{%- endif -%}
+
+{% stylesheet %}
+  .product-meta {
+    margin: 0;
+    font-family: var(--font-body--family);
+    font-size: 12px;
+    line-height: 1.3;
+    font-weight: 400;
+    color: rgb(var(--color-foreground-rgb) / 0.6);
+    letter-spacing: 0.01em;
+  }
+
+  .product-meta__link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  @media (hover: hover) {
+    .product-meta__link:hover {
+      color: rgb(var(--color-foreground-rgb) / 0.9);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Product meta line",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Shows brand · soleplate · condition, read from the product title and the selected variant."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product meta line"
+    }
+  ]
+}
+{% endschema %}

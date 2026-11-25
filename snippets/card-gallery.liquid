@@ -37,7 +37,9 @@
 {% liquid
   assign product = closest.product
 
-  assign lazy_image_sizes = 'auto, ' | append: image_sizes
+  # No "auto": the sizes worked out above are already right, and "auto" loads Shopify's sizing
+  # script, which measures every photo of every card's gallery as the page loads (slow on phones)
+  assign lazy_image_sizes = image_sizes
 
   assign image_ratio_setting = block.settings.image_ratio
   assign temp_ratio = 1
@@ -156,7 +158,7 @@
 
         {% assign attributes = '' %}
         {% capture slideshow_children %}
-          {%- render 'product-media', media: media, sizes: sizes, loading: loading, preview_image_only: true -%}
+          {%- render 'product-media', media: media, sizes: sizes, loading: loading, preview_image_only: true, alt_fallback: product.title -%}
         {% endcapture %}
         {% capture class %}
           product-media-container media-fit product-media-container--{{ media.media_type }}{% if constrain_to_viewport %} constrain-height{% endif %}

@@ -22,8 +22,33 @@
   endif
 %}
 
+{%- liquid
+  # Collection pages (not the wishlist): on desktop the menu becomes a small dock of icons
+  assign dock = false
+  if template.name == 'collection' and template.suffix != 'wishlist'
+    assign dock = true
+  endif
+-%}
+
 {% capture children %}
   {% for link in block.settings.menu.links %}
+    {%- liquid
+      assign title_key = link.title | downcase | strip
+      case title_key
+        when 'all football boots', 'all boots', 'shop all'
+          assign dock_icon = 'storefront'
+        when 'shop by silo'
+          assign dock_icon = 'widgets'
+        when 'shop by size'
+          assign dock_icon = 'straighten'
+        when 'accessories'
+          assign dock_icon = 'more'
+        when 'sale'
+          assign dock_icon = 'percent_discount'
+        else
+          assign dock_icon = ''
+      endcase
+    -%}
     <li
       role="presentation"
       class="menu-list__list-item"
@@ -34,7 +59,7 @@
     >
       <a
         href="{{ link.url }}"
-        class="menu-list__link{% if link.active %} menu-list__link--active{% endif %}"
+        class="menu-list__link{% if link.active %} menu-list__link--active{% endif %}{% if dock_icon != '' %} menu-list__link--icon{% endif %}"
         {%- if link.links != blank -%}
           aria-controls="submenu-{{ forloop.index }}"
           aria-haspopup="true"
@@ -42,7 +67,10 @@
         {%- endif -%}
         ref="menuitem"
       >
-        <span class="menu-list__link-title">{{- link.title -}}</span>
+        {%- if dock_icon != '' -%}
+          {%- render 'gicon', name: dock_icon, class: 'menu-list__icon', size: 22 -%}
+        {%- endif -%}
+        <span class="menu-list__link-title{% if title_key == 'sale' %} menu-item--sale{% endif %}">{{- link.title | replace: 'adidas', 'Adidas' -}}</span>
       </a>
       {%- if link.links != blank -%}
         <div class="menu-list__submenu{{ color_scheme_classes }}" ref="submenu[]">
@@ -52,18 +80,54 @@
             style="{% render 'submenu-font-styles', settings: block.settings %}"
           >
             {% assign list_id = 'MegaMenuList-' | append: forloop.index %}
-            {% render 'mega-menu',
-              parent_link: link,
-              id: list_id,
-              menu_content_type: menu_content_type,
-              content_aspect_ratio: ratio,
-              image_border_radius: image_border_radius
-            %}
+            {%- liquid
+              # Three-level links (e.g. Shop by Silo > brand > model) use the brand drill-down list
+              assign has_grandchildren = false
+              for childlink in link.links
+                if childlink.links != blank
+                  assign has_grandchildren = true
+                  break
+                endif
+              endfor
+              # Size links ("US 8 - UK 7 - EU 41") use the size drill-down
+              assign is_size_menu = false
+              assign first_size_title = link.links.first.title | upcase
+              if first_size_title contains 'US ' and first_size_title contains ' - UK ' and first_size_title contains ' - EU '
+                assign is_size_menu = true
+              endif
+            -%}
+            {% if has_grandchildren %}
+              {% render 'brand-drill-menu', parent_link: link, variant: 'desktop', id: list_id %}
+            {% elsif is_size_menu %}
+              {% render 'size-drill-menu', parent_link: link, variant: 'desktop', id: list_id %}
+            {% else %}
+              {% render 'mega-menu',
+                parent_link: link,
+                id: list_id,
+                menu_content_type: menu_content_type,
+                content_aspect_ratio: ratio,
+                image_border_radius: image_border_radius
+              %}
+            {% endif %}
           </div>
         </div>
       {%- endif -%}
     </li>
   {% endfor %}
+  {%- comment -%} The Boot Match game: opens it on the home page (or goes there and opens it) {%- endcomment -%}
+  <li
+    role="presentation"
+    class="menu-list__list-item"
+    on:focus="/activate"
+    on:blur="/deactivate"
+    on:pointerenter="/activate"
+    on:pointerleave="/deactivate"
+  >
+    <a href="{{ routes.root_url }}?bm-open" class="menu-list__link menu-list__link--icon menu-list__link--bm" data-bm-menu ref="menuitem">
+      {%- render 'boot-match-menu-mark', class: 'menu-list__icon menu-list__bm-mark' -%}
+      <span class="menu-list__link-title menu-item--bm">OCEBOOTS Tinder</span>
+    </a>
+  </li>
   <li
     class="menu-list__list-item"
     role="presentation"
@@ -79,7 +143,7 @@
   </li>
 {% endcapture %}
 
-<nav header-menu>
+<nav header-menu{% if dock %} class="header-menu--dock" data-dock{% endif %}>
   <div
     class="menu-list"
     style="{% render 'menu-font-styles', settings: block.settings %}"
@@ -88,3 +152,398 @@
     {% render 'overflow-list', class: class, ref: 'overflowMenu', children: children, minimum-items: 2 %}
   </div>
 </nav>
+
+{%- if dock -%}
+  <script type="module">
+    /*
+      The dock's pills open on purposeful pointing, not plain :hover. Opening one slides the others
+      along, which can bring an icon under a pointer that hasn't moved; that mustn't open it. So:
+      - an item opens as soon as the pointer actually moves onto it;
+      - just after a switch, the pointer must travel a little before another item can take over;
+      - leaving the dock closes the open pill after a short pause (slipping off and back keeps it).
+    */
+    const dock = document.querySelector('nav[data-dock]');
+    if (dock) {
+      const isItem = (li) => li && li.querySelector(':scope > .menu-list__link--icon');
+      let current = null;
+      let openTimer = 0;
+      let leaveTimer = 0;
+      let lastSwitch = { x: 0, y: 0, t: 0 };
+
+      // The theme opens dropdowns on plain pointerenter/leave, which also fire when an icon slides
+      // under a still pointer. In the dock those are held back; the dock decides, and tells it.
+      const headerMenu = dock.closest('header-menu');
+      let driving = false;
+      const tellMenu = (type, li) => {
+        if (!headerMenu || !li) return;
+        driving = true;
+        if (type === 'open') headerMenu.activate?.({ target: li });
+        else headerMenu.deactivate?.({ target: li });
+        driving = false;
+      };
+      // (listening on the window, which comes before the document where the theme listens;
+      // events from content moving under the pointer may not say 'mouse': hold back all but touch/pen)
+      ['pointerenter', 'pointerleave'].forEach((type) =>
+        window.addEventListener(
+          type,
+          (event) => {
+            if (driving || event.pointerType === 'touch' || event.pointerType === 'pen') return;
+            const target = event.target;
+            if (target instanceof Element && target.matches('.menu-list__list-item') && dock.contains(target)) {
+              event.stopImmediatePropagation();
+            }
+          },
+          true
+        )
+      );
+
+      const setOpen = (li, point) => {
+        if (li === current) return;
+        const previous = current;
+        previous?.classList.remove('is-dock-open');
+        current = li;
+        li?.classList.add('is-dock-open');
+        if (li) tellMenu('open', li);
+        else tellMenu('close', previous);
+        if (point) lastSwitch = { x: point.x, y: point.y, t: performance.now() };
+      };
+
+      dock.addEventListener('pointermove', (event) => {
+        if (event.pointerType !== 'mouse') return;
+        clearTimeout(leaveTimer);
+        const li = event.target.closest('.menu-list__list-item');
+        if (!isItem(li)) {
+          // Empty space in the row (it runs the full width): as good as leaving the dock
+          clearTimeout(openTimer);
+          leaveTimer = setTimeout(() => setOpen(null), 200);
+          return;
+        }
+        if (li === current) {
+          clearTimeout(openTimer);
+          return;
+        }
+        // Settling after a switch: only a real move hands over to another item
+        const settling = performance.now() - lastSwitch.t < 450;
+        if (settling && Math.hypot(event.clientX - lastSwitch.x, event.clientY - lastSwitch.y) < 16) return;
+        clearTimeout(openTimer);
+        setOpen(li, { x: event.clientX, y: event.clientY });
+      });
+
+      // The big shape's edges: the dock's left edge and the currency tab's right edge
+      const row = dock.closest('.header__row');
+      const measure = () => {
+        const first = dock.querySelector('.menu-list__list-item');
+        const currency = row?.querySelector('.header__column--right');
+        if (!row || !first) return;
+        const flare = parseFloat(getComputedStyle(dock).getPropertyValue('--dock-flare')) || 0;
+        const rowBox = row.getBoundingClientRect();
+        row.style.setProperty('--dock-left', Math.round(first.getBoundingClientRect().left - rowBox.left + flare) + 'px');
+        const items = dock.querySelectorAll('.menu-list__list-item:not([slot="more"])');
+        const last = items[items.length - 1];
+        if (last) {
+          const lastBox = last.getBoundingClientRect();
+          row.style.setProperty('--dock-width', Math.round(lastBox.right - flare - first.getBoundingClientRect().left - flare) + 'px');
+          row.style.setProperty('--dock-height', Math.round(lastBox.bottom - rowBox.top) + 'px');
+        }
+        if (currency) row.style.setProperty('--dock-right', Math.round(rowBox.right - currency.getBoundingClientRect().right) + 'px');
+      };
+      measure();
+      window.addEventListener('resize', measure, { passive: true });
+      // The pills widen the dock as they open: keep the shadow under it, measured once a frame
+      let measuring = 0;
+      const resized = new ResizeObserver(() => {
+        if (measuring) return;
+        measuring = requestAnimationFrame(() => {
+          measuring = 0;
+          measure();
+        });
+      });
+      dock.querySelectorAll('.menu-list__list-item').forEach((li) => resized.observe(li));
+
+      // The tray behind the dock row grows down to hold an open dropdown: follow the theme's height
+      if (headerMenu && row) {
+        const follow = () => row.style.setProperty('--dock-tray', headerMenu.style.getPropertyValue('--submenu-height') || '0px');
+        new MutationObserver(follow).observe(headerMenu, { attributes: true, attributeFilter: ['style'] });
+        follow();
+      }
+
+      dock.addEventListener('pointerleave', (event) => {
+        if (event.pointerType !== 'mouse') return;
+        clearTimeout(openTimer);
+        clearTimeout(leaveTimer);
+        leaveTimer = setTimeout(() => setOpen(null), 200);
+      });
+    }
+  </script>
+{%- endif -%}
+
+{% stylesheet %}
+  /* Icons only show in the collection-page dock (desktop) */
+  .menu-list__icon {
+    display: none;
+  }
+
+  /* Boot Match: the iridescent logo shows beside the name in the full menu too (not only the dock) */
+  .menu-list__link--bm {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .menu-list__link--bm .menu-list__bm-mark {
+    display: inline-block;
+    width: 15px;
+  }
+
+  /*
+    Collection pages, desktop: the menu becomes a small island of icons, top left. Hovering (or
+    focusing) an icon opens it into a pill with its name; the menus still open as usual.
+  */
+  @media screen and (min-width: 990px) {
+    /* The island is drawn on the items themselves (the list keeps its full width, which the
+       overflow menu measures): a grey pill behind the icons, rounded at the two ends */
+    .header-menu--dock .overflow-menu::part(list) {
+      gap: 0;
+    }
+
+    /*
+      The dock is part of the top bar: one white piece hanging from it, rounded below, with reverse
+      curves where it meets the bar (like the corners of a phone's notch). The shape is painted as
+      backgrounds on the end items, so it needs no extra elements:
+      --dock-flare: the reverse curve's radius; --dock-round: the rounded bottom corners.
+    */
+    .header-menu--dock {
+      --dock-flare: 14px;
+      --dock-round: 22px;
+    }
+
+    .header-menu--dock .menu-list__list-item:not([slot='more']) {
+      padding: 2px 1px 6px;
+      background: #ffffff;
+    }
+
+    .header-menu--dock .menu-list__list-item:not([slot='more']):first-child {
+      padding-inline-start: calc(6px + var(--dock-flare));
+      background:
+        radial-gradient(circle at 0 100%, #fff0 calc(var(--dock-flare) - 0.5px), #fff var(--dock-flare)) 0 0 / var(--dock-flare) var(--dock-flare) no-repeat,
+        radial-gradient(circle at 100% 0, #fff calc(var(--dock-round) - 0.5px), #fff0 var(--dock-round)) var(--dock-flare) 100% / var(--dock-round) var(--dock-round) no-repeat,
+        linear-gradient(#fff, #fff) var(--dock-flare) 0 / calc(100% - var(--dock-flare)) calc(100% - var(--dock-round)) no-repeat,
+        linear-gradient(#fff, #fff) calc(var(--dock-flare) + var(--dock-round)) 100% / calc(100% - var(--dock-flare) - var(--dock-round)) var(--dock-round) no-repeat;
+    }
+
+    .header-menu--dock .menu-list__list-item:not([slot='more']):nth-last-child(2) {
+      padding-inline-end: calc(6px + var(--dock-flare));
+      background:
+        radial-gradient(circle at 100% 100%, #fff0 calc(var(--dock-flare) - 0.5px), #fff var(--dock-flare)) 100% 0 / var(--dock-flare) var(--dock-flare) no-repeat,
+        radial-gradient(circle at 0 0, #fff calc(var(--dock-round) - 0.5px), #fff0 var(--dock-round)) calc(100% - var(--dock-flare)) 100% / var(--dock-round) var(--dock-round) no-repeat,
+        linear-gradient(#fff, #fff) 0 0 / calc(100% - var(--dock-flare)) calc(100% - var(--dock-round)) no-repeat,
+        linear-gradient(#fff, #fff) 0 100% / calc(100% - var(--dock-flare) - var(--dock-round)) var(--dock-round) no-repeat;
+    }
+
+    /* The dock starts where the menu did: pull it left by the reverse curve */
+    .header-menu--dock .overflow-menu::part(list) {
+      margin-inline-start: calc(-1 * var(--dock-flare));
+    }
+
+    /* The rest of the menu row is see-through: only the dock (and the currency tab) show */
+    #header-component:has(.header-menu--dock),
+    #header-component .header__row--bottom:has(.header-menu--dock),
+    #header-component .header__row--bottom:has(.header-menu--dock) .header__columns {
+      background: transparent !important;
+      box-shadow: none !important;
+      border-block-end: 0 !important;
+    }
+
+    /* A soft shadow under the dock only (its edges measured by the script, following the pills
+       as they open), rounded like it */
+    #header-component .header__row--bottom:has(.header-menu--dock)::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: var(--dock-left, 0px);
+      width: var(--dock-width, 0px);
+      height: var(--dock-height, 0px);
+      z-index: 0;
+      border-radius: 0 0 22px 22px;
+      box-shadow: 0 14px 18px -12px rgb(18 18 18 / 0.22);
+      pointer-events: none;
+    }
+
+    #header-component .header__row--bottom:has(.header-menu--dock) .header__columns {
+      position: relative;
+      z-index: 1;
+      align-items: start;
+    }
+
+    /*
+      A menu open from the dock: the row fills in between the dock and the currency tab, and the
+      dropdown below spans the same width, so the top bar, the dock, the currency tab and the
+      dropdown read as one big white shape. Its edges (--dock-left / --dock-right) are the dock's
+      left edge and the currency tab's right edge, measured by the script.
+    */
+    /*
+      One white tray behind the dock row and any dropdown: the row's height plus the open dropdown's
+      (--dock-tray, following the theme's --submenu-height), rounded below at all times. Moving to
+      an item without a dropdown, the tray pulls up into itself, its rounded corners riding up.
+    */
+    #header-component .header__row--bottom:has(.header-menu--dock)::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: var(--dock-left, 32px);
+      right: var(--dock-right, 32px);
+      height: calc(100% + var(--dock-tray, 0px));
+      z-index: 0;
+      border-radius: 0 0 22px 22px;
+      background: #ffffff;
+      box-shadow: 0 22px 34px -22px rgb(0 0 0 / 0.18);
+      opacity: 0;
+      pointer-events: none;
+      transition:
+        height 0.4s cubic-bezier(0.33, 1, 0.68, 1),
+        opacity 0.2s ease;
+    }
+
+    /* The dropdowns ride on the tray: their own backdrop and panel colour step aside, and they
+       open at the tray's pace */
+    header-menu:has(.header-menu--dock) {
+      --submenu-animation-speed: 400ms !important;
+    }
+
+    .header-menu--dock .overflow-menu::after {
+      display: none;
+    }
+
+    #header-component .header__row--bottom:has(.header-menu--dock) .menu-list__submenu {
+      background-color: transparent !important;
+      box-shadow: none !important;
+    }
+
+    /* Any item pointed at extends the dock to the currency tab; an item without a dropdown gives
+       it rounded corners of its own, one with a dropdown runs it square into the dropdown */
+    #header-component .header__row--bottom:has(.header-menu--dock .is-dock-open)::before,
+    #header-component .header__row--bottom:has(.header-menu--dock .menu-list__link[aria-expanded='true'])::before {
+      opacity: 1;
+    }
+
+
+    #header-component .header__row--bottom:has(.header-menu--dock) .menu-list__submenu,
+    .header-menu--dock .overflow-menu::after {
+      left: var(--dock-left, 32px) !important;
+      right: var(--dock-right, 32px) !important;
+      width: auto !important;
+    }
+
+    #header-component .header__row--bottom:has(.header-menu--dock) .header__column--left {
+      align-self: start;
+    }
+
+    /* The currency switch: a small tab of its own on the right, the same shape */
+    #header-component .header__row--bottom:has(.header-menu--dock) .header__column--right {
+      position: relative;
+      align-self: start;
+      height: 50px;
+      padding: 0 16px;
+      border-radius: 0 0 18px 18px;
+      background: #ffffff;
+      /* The same soft shadow under the currency tab */
+      box-shadow: 0 14px 18px -12px rgb(18 18 18 / 0.22);
+    }
+
+    #header-component .header__row--bottom:has(.header-menu--dock) .header__column--right::before,
+    #header-component .header__row--bottom:has(.header-menu--dock) .header__column--right::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 14px;
+      height: 14px;
+      pointer-events: none;
+    }
+
+    #header-component .header__row--bottom:has(.header-menu--dock) .header__column--right::before {
+      right: 100%;
+      background: radial-gradient(circle at 0 100%, #fff0 13.5px, #fff 14px);
+    }
+
+    #header-component .header__row--bottom:has(.header-menu--dock) .header__column--right::after {
+      left: 100%;
+      background: radial-gradient(circle at 100% 100%, #fff0 13.5px, #fff 14px);
+    }
+
+    /* Each item is an icon that opens into a pill on hover: the name unrolls beside it (the
+       second grid column eases from 0 to its width) and the other icons slide along */
+    .header-menu--dock .menu-list__link--icon {
+      position: relative;
+      display: grid;
+      grid-template-columns: 22px 0fr;
+      column-gap: 0;
+      align-items: center;
+      height: 42px;
+      min-height: 42px;
+      padding: 0 10px;
+      border-radius: 999px;
+      color: #121212;
+      /* Closing: the pill tightens slowly, so hovering a shorter item doesn't snap the dock along */
+      transition:
+        grid-template-columns 0.8s cubic-bezier(0.3, 0.7, 0.3, 1),
+        column-gap 0.8s cubic-bezier(0.3, 0.7, 0.3, 1),
+        padding 0.8s cubic-bezier(0.3, 0.7, 0.3, 1),
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    /* A forgiving hover area: reaches past the pill above and below */
+    .header-menu--dock .menu-list__link--icon::after {
+      content: '';
+      position: absolute;
+      inset: -10px -1px;
+    }
+
+    .header-menu--dock .menu-list__link--icon .menu-list__icon {
+      display: block;
+    }
+
+    /* Sale's icon in the sale red */
+    .header-menu--dock .menu-list__link--icon:has(.menu-item--sale) .menu-list__icon {
+      color: #e8323c;
+    }
+
+    .header-menu--dock .menu-list__link--icon .menu-list__link-title {
+      min-width: 0;
+      overflow: hidden;
+      font-size: 0.875rem;
+      font-weight: 600;
+      line-height: 1.2;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.18s ease;
+    }
+
+    .header-menu--dock .menu-list__list-item:where(.is-dock-open, :focus-within) .menu-list__link--icon {
+      /* Opening: house timing */
+      transition:
+        grid-template-columns 0.45s cubic-bezier(0.3, 0.7, 0.3, 1),
+        column-gap 0.45s cubic-bezier(0.3, 0.7, 0.3, 1),
+        padding 0.45s cubic-bezier(0.3, 0.7, 0.3, 1),
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
+      grid-template-columns: 22px 1fr;
+      column-gap: 8px;
+      padding-inline-end: 16px;
+      background: rgb(18 18 18 / 0.06);
+    }
+
+    .header-menu--dock .menu-list__list-item:where(.is-dock-open, :focus-within) .menu-list__link-title {
+      opacity: 1;
+      transition: opacity 0.3s ease 0.08s;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .header-menu--dock .menu-list__link--icon,
+    .header-menu--dock .menu-list__link--icon .menu-list__link-title,
+    .header-menu--dock .menu-list__list-item:where(.is-dock-open, :focus-within) .menu-list__link-title {
+      transition: none;
+    }
+  }
+{% endstylesheet %}

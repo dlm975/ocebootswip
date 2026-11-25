@@ -19,9 +19,7 @@
 >
   <summary class="pdp-accordion__summary">
     <span>{{ block.settings.heading }}</span>
-    <svg class="pdp-accordion__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="16" height="16">
-      <polyline points="6 9 12 15 18 9"/>
-    </svg>
+    {%- render 'gicon', name: 'keyboard_arrow_down', class: 'pdp-accordion__chevron', size: 16 -%}
   </summary>
   <div class="pdp-accordion__body pdp-faq__body">
     {% for i in (1..8) %}
@@ -59,7 +57,7 @@
 
   .pdp-faq__item {
     padding-left: 12px;
-    border-left: 3px solid var(--color-foreground, #111);
+    border-left: 3px solid var(--color-foreground, #121212);
   }
 
   .pdp-faq__question {

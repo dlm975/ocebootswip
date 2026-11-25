@@ -1,0 +1,12 @@
+{%- doc -%}
+  The Boot Match logo with its iridescent fill, for the menu item.
+
+  @param {string} [class] - Extra classes
+{%- enddoc -%}
+<span
+  class="menu-bm-mark {{ class }}"
+  style="--bm-fill: url({{ 'boot-match-fill.png' | asset_url }}); --bm-holo: url({{ 'oce-holo.webp' | asset_url }});"
+  aria-hidden="true"
+  ><span class="menu-bm-mark__foil"></span
+  ><img src="{{ 'boot-match-mark.png' | asset_url }}" alt="" width="197" height="240" loading="lazy"
+></span>

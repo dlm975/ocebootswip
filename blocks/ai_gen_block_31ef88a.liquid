@@ -29,14 +29,14 @@
   }
 
   .ai-variant-picker__option-name-{{ ai_gen_id }} {
-    font-family: {{ block.settings.title_font.family }}, {{ block.settings.title_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.title_font.family }}, {{ block.settings.title_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.title_font.weight }};
-    font-style: {{ block.settings.title_font.style }};
+    font-style: {% if settings.brand_font %}normal{% else %}{{ block.settings.title_font.style }}{% endif %};
     font-size: {{ block.settings.title_font_size }}px;
     color: {{ block.settings.title_color }};
     text-align: center;
     {% if block.settings.title_text_transform == 'uppercase' %}
-      text-transform: uppercase;
+      text-transform: none;
     {% endif %}
   }
 
@@ -81,16 +81,16 @@
   }
 
   .ai-variant-picker__value-{{ ai_gen_id }} {
-    font-family: {{ block.settings.label_font.family }}, {{ block.settings.label_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.label_font.family }}, {{ block.settings.label_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.label_font.weight }};
-    font-style: {{ block.settings.label_font.style }};
+    font-style: {% if settings.brand_font %}normal{% else %}{{ block.settings.label_font.style }}{% endif %};
     font-size: {{ block.settings.label_font_size }}px;
     flex: 1;
     text-align: center;
     overflow: hidden;
     text-overflow: ellipsis;
     {% if block.settings.label_text_transform == 'uppercase' %}
-      text-transform: uppercase;
+      text-transform: none;
     {% endif %}
   }
 
@@ -138,9 +138,9 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-family: {{ block.settings.label_font.family }}, {{ block.settings.label_font.fallback_families }};
+    font-family: {% if settings.brand_font %}var(--font-oce){% else %}{{ block.settings.label_font.family }}, {{ block.settings.label_font.fallback_families }}{% endif %};
     font-weight: {{ block.settings.label_font.weight }};
-    font-style: {{ block.settings.label_font.style }};
+    font-style: {% if settings.brand_font %}normal{% else %}{{ block.settings.label_font.style }}{% endif %};
   }
 
   .ai-variant-picker__dropdown-item-{{ ai_gen_id }}:hover {
@@ -215,16 +215,7 @@
             {% if has_multiple_values %}
               <svg
                 class="ai-variant-picker__chevron-{{ ai_gen_id }}"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-344 240-584l43-43 197 197 197-197 43 43-240 240Z"/></svg>
             {% endif %}
           </button>
 
@@ -252,16 +243,7 @@
           <span class="ai-variant-picker__value-{{ ai_gen_id }}">M</span>
           <svg
             class="ai-variant-picker__chevron-{{ ai_gen_id }}"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
+            xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-344 240-584l43-43 197 197 197-197 43 43-240 240Z"/></svg>
         </button>
       </div>
       <div class="ai-variant-picker__option-{{ ai_gen_id }}">
@@ -470,7 +452,7 @@
       "type": "color",
       "id": "title_color",
       "label": "Color",
-      "default": "#666666"
+      "default": "#64748B"
     },
     {
       "type": "header",
@@ -566,31 +548,31 @@
       "type": "color",
       "id": "pill_text_color",
       "label": "Text",
-      "default": "#000000"
+      "default": "#121212"
     },
     {
       "type": "color",
       "id": "pill_border_color",
       "label": "Border",
-      "default": "#e6e6e6"
+      "default": "#64748B40"
     },
     {
       "type": "color",
       "id": "pill_hover_background",
       "label": "Hover background",
-      "default": "#f5f5f5"
+      "default": "#F1F5F9"
     },
     {
       "type": "color",
       "id": "pill_hover_text_color",
       "label": "Hover text",
-      "default": "#000000"
+      "default": "#121212"
     },
     {
       "type": "color",
       "id": "pill_hover_border_color",
       "label": "Hover border",
-      "default": "#e6e6e6"
+      "default": "#64748B40"
     },
     {
       "type": "header",
@@ -600,7 +582,7 @@
       "type": "color",
       "id": "pill_selected_background",
       "label": "Background",
-      "default": "#000000"
+      "default": "#121212"
     },
     {
       "type": "color",
@@ -612,13 +594,13 @@
       "type": "color",
       "id": "pill_selected_border_color",
       "label": "Border",
-      "default": "#000000"
+      "default": "#121212"
     },
     {
       "type": "color",
       "id": "pill_selected_hover_background",
       "label": "Hover background",
-      "default": "#1a1a1a"
+      "default": "#121212"
     },
     {
       "type": "color",
@@ -630,7 +612,7 @@
       "type": "color",
       "id": "pill_selected_hover_border_color",
       "label": "Hover border",
-      "default": "#1a1a1a"
+      "default": "#121212"
     },
     {
       "type": "header",
@@ -656,25 +638,25 @@
       "type": "color",
       "id": "dropdown_border_color",
       "label": "Border",
-      "default": "#e6e6e6"
+      "default": "#64748B40"
     },
     {
       "type": "color",
       "id": "dropdown_text_color",
       "label": "Text",
-      "default": "#000000"
+      "default": "#121212"
     },
     {
       "type": "color",
       "id": "dropdown_hover_background",
       "label": "Hover background",
-      "default": "#f5f5f5"
+      "default": "#F1F5F9"
     },
     {
       "type": "color",
       "id": "dropdown_selected_background",
       "label": "Selected background",
-      "default": "#000000"
+      "default": "#121212"
     },
     {
       "type": "color",
