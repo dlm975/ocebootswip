@@ -285,8 +285,15 @@
         {%- comment -%} 5. The match {%- endcomment -%}
         <div class="bm-screen bm-result" data-bm-screen="match" hidden>
           <p class="bm-result__kicker">
-            <span class="bm-mark bm-result__logo" style="--bm-fill: url({{ 'boot-match-fill.png' | asset_url }}); --bm-holo: url({{ 'oce-holo.webp' | asset_url }});" aria-hidden="true"><span class="bm-mark__foil"></span><img src="{{ 'boot-match-mark.png' | asset_url }}" alt="" width="197" height="240"></span>
+            <span class="bm-hearts" aria-hidden="true">
+              <span class="bm-heart bm-heart--a">{%- render 'gicon', name: 'favorite-fill', size: 14 -%}</span>
+              <span class="bm-heart bm-heart--b">{%- render 'gicon', name: 'favorite-fill', size: 20 -%}</span>
+            </span>
             <span>It’s a match</span>
+            <span class="bm-hearts" aria-hidden="true">
+              <span class="bm-heart bm-heart--b">{%- render 'gicon', name: 'favorite-fill', size: 20 -%}</span>
+              <span class="bm-heart bm-heart--a">{%- render 'gicon', name: 'favorite-fill', size: 14 -%}</span>
+            </span>
           </p>
           <div class="bm-result__body">
             <p class="bm-superwin" data-bm-superwin role="status" hidden>
@@ -316,6 +323,7 @@
           <div class="bm-result__buttons">
             <button type="button" class="bm-secondary" data-bm-again>Keep swiping</button>
             <a class="bm-primary" data-bm-match-cta href="#">View this boot</a>
+            <button type="button" class="bm-checkout" data-bm-checkout>{{ bm_gold }}<span>Checkout</span></button>
           </div>
         </div>
       </div>
@@ -2160,9 +2168,22 @@
     letter-spacing: -0.02em;
   }
 
-  .bm-result__logo {
-    width: 28px;
-    height: auto;
+  /* Floating hearts either side of "It's a match" (Motion floats them; see floatHearts) */
+  .bm-hearts {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #e0201b;
+  }
+
+  .bm-heart {
+    display: inline-grid;
+    will-change: transform;
+  }
+
+  .bm-heart--a {
+    opacity: 0.7;
+    transform: translateY(-6px);
   }
 
   .bm-result__card {
@@ -2316,8 +2337,31 @@
   .bm-result__buttons > * {
     flex: 1 1 0;
     min-width: 0;
-    padding: 0 12px;
+    padding: 0 8px;
+    font-size: 14px;
     white-space: nowrap;
+  }
+
+  /* Checkout: gold, with the gold flame */
+  .bm-checkout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 50px;
+    border: 0;
+    border-radius: 999px;
+    background: linear-gradient(115deg, #d79c0e, #ffe07a 45%, #e0a514);
+    color: #3a2600;
+    font-family: var(--font-body--family);
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .bm-checkout .bm-goldmark {
+    flex: none;
+    width: 17px;
+    filter: drop-shadow(0 0 2px rgb(255 255 255 / 0.85));
   }
 
   .bm-likes {
@@ -3692,14 +3736,14 @@
       return ids[index >= 0 ? index : 0] || ids[0];
     }
 
-    async function claimCheckout() {
+    async function claimCheckout(label) {
       const boot = shownBoot;
-      const claim = $('[data-bm-match-claim]');
-      const label = claim.lastElementChild;
+      label = label || $('[data-bm-match-claim]').lastElementChild;
       const id = boot && variantFor(boot);
-      const checkout = '/checkout?discount=' + encodeURIComponent(CODE);
+      const discounted = CODE && superState().status === 'used';
+      const checkout = discounted ? '/checkout?discount=' + encodeURIComponent(CODE) : '/checkout';
       if (!id) {
-        window.location.href = '/discount/' + encodeURIComponent(CODE) + '?redirect=' + encodeURIComponent(boot ? boot.url : '/');
+        window.location.href = checkout;
         return;
       }
       label.textContent = 'To checkout…';
@@ -3728,6 +3772,26 @@
         swapSuper();
       }
     });
+
+    // Checkout (bottom row): the boot on show into the cart, then checkout (with the code once earned)
+    $('[data-bm-checkout]').addEventListener('click', (event) => {
+      claimCheckout(event.currentTarget.lastElementChild);
+    });
+
+    // The hearts beside "It's a match" bob gently, out of step (still when motion is reduced)
+    let heartsFloating = false;
+    function floatHearts() {
+      if (heartsFloating || reduced()) return;
+      heartsFloating = true;
+      $$('.bm-heart').forEach((heart, index) => {
+        const lift = heart.classList.contains('bm-heart--a') ? -6 : 0;
+        animate(
+          heart,
+          { transform: ['translateY(' + lift + 'px) scale(1)', 'translateY(' + (lift - 5) + 'px) scale(1.12)', 'translateY(' + lift + 'px) scale(1)'] },
+          { duration: 1.8 + (index % 2) * 0.5, delay: index * 0.25, repeat: Infinity, ease: 'easeInOut' }
+        );
+      });
+    }
 
     // Move the Super Like to the boot on show: it glows, gets Claim, and its thumbnail the gold ring
     function swapSuper() {
@@ -3827,6 +3891,7 @@
       save.onclick = null;
 
       go('match');
+      floatHearts();
       if (!reduced()) {
         animate($('[data-bm-match-link]'), { transform: ['scale(0.85)', 'none'], opacity: [0, 1] }, { type: spring, visualDuration: 0.45, bounce: 0.35 });
       }
