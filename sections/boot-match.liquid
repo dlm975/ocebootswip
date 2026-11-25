@@ -368,6 +368,25 @@
           </p>
         </form>
 
+        {%- comment -%}
+          The sign-up goes through Shopify's own forms (an email joins the customers with marketing
+          consent, tagged; a mobile number comes to the store by the contact form), submitted into a
+          hidden frame so the shopper stays in the game
+        {%- endcomment -%}
+        <div class="bm-intro__forms" hidden>
+          {%- form 'customer', id: 'bm-signup-email' -%}
+            <input type="hidden" name="contact[tags]" value="boot-match,super-like,newsletter">
+            <input type="email" name="contact[email]" tabindex="-1" autocomplete="off">
+          {%- endform -%}
+          {%- form 'contact', id: 'bm-signup-phone' -%}
+            <input type="hidden" name="contact[name]" value="Boot Match Super Like">
+            <input type="hidden" name="contact[email]" value="{{ shop.email | escape }}">
+            <input type="tel" name="contact[phone]" tabindex="-1" autocomplete="off">
+            <textarea name="contact[body]" tabindex="-1"></textarea>
+          {%- endform -%}
+          <iframe name="bm-signup-sink" title="Sign-up" tabindex="-1"></iframe>
+        </div>
+
         <div class="bm-intro__step" data-bm-intro-step="done" hidden>
           <h2 class="bm-intro__title">
             <span class="bm-intro__star" aria-hidden="true">{%- render 'gicon', name: 'star-fill', size: 26 -%}</span>
@@ -3470,27 +3489,40 @@
     });
     $('[data-bm-intro-skip]').addEventListener('click', () => (thenPlay ? play() : hideIntro()));
 
-    // Email: joins the store's customers (marketing consent, tagged); mobile: sent to the store
-    async function signUp(value) {
+    // Email: joins the store's customers (marketing consent, tagged); mobile: sent to the store.
+    // Through Shopify's own forms, so its spam protection runs, into a hidden frame.
+    function signUp(value) {
       const isEmail = value.includes('@');
-      const form = new FormData();
-      form.append('utf8', '✓');
+      const form = document.getElementById(isEmail ? 'bm-signup-email' : 'bm-signup-phone');
+      if (!form) return Promise.resolve(false);
       if (isEmail) {
-        form.append('form_type', 'customer');
-        form.append('contact[email]', value);
-        form.append('contact[tags]', 'boot-match,super-like,newsletter');
+        form.querySelector('[name="contact[email]"]').value = value;
       } else {
-        form.append('form_type', 'contact');
-        form.append('contact[name]', 'Boot Match Super Like');
-        form.append('contact[phone]', value);
-        form.append('contact[body]', 'Boot Match Super Like sign-up by mobile: ' + value + '. Happy to hear from OCEBOOTS by text.');
+        form.querySelector('[name="contact[phone]"]').value = value;
+        form.querySelector('[name="contact[body]"]').value =
+          'Boot Match Super Like sign-up by mobile: ' + value + '. Happy to hear from OCEBOOTS by text.';
       }
-      try {
-        const response = await fetch('/contact', { method: 'POST', body: form, credentials: 'same-origin' });
-        return response.ok && !/challenge/.test(response.url);
-      } catch (e) {
-        return false;
-      }
+      form.target = 'bm-signup-sink';
+      const sink = root.querySelector('iframe[name="bm-signup-sink"]');
+      return new Promise((resolve) => {
+        const timer = setTimeout(() => resolve(false), 5000);
+        sink.addEventListener(
+          'load',
+          () => {
+            clearTimeout(timer);
+            let ok = true;
+            try {
+              ok = !/challenge/.test(sink.contentWindow.location.href);
+            } catch (e) {
+              /* another origin: assume it went through */
+            }
+            resolve(ok);
+          },
+          { once: true }
+        );
+        if (form.requestSubmit) form.requestSubmit();
+        else form.submit();
+      });
     }
 
     $('[data-bm-intro-step="offer"]').addEventListener('submit', async (event) => {
