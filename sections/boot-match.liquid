@@ -74,7 +74,8 @@
 
         {%- comment -%} 1. Size, in the Shop by Size menu's style {%- endcomment -%}
         <div class="bm-screen bm-step" data-bm-screen="size">
-          <p class="bm-step__q">What size are you? <span class="bm-step__hint">Pick one or more</span></p>
+          <p class="bm-step__q">What size are you?</p>
+          <div class="bm-step__sub"><span class="bm-step__hint">Pick one or more</span><button type="button" class="bm-clear" data-bm-clear="size" hidden>Clear all</button></div>
           <div class="size-drill size-drill--drawer bm-sizepick" data-active>
             <ul class="size-drill__systems list-unstyled" role="list">
               {%- for system in (1..3) -%}
@@ -112,7 +113,8 @@
 
         {%- comment -%} 2. Ground: the collection filter's surface pictures {%- endcomment -%}
         <div class="bm-screen bm-step" data-bm-screen="ground" hidden>
-          <p class="bm-step__q">What do you play on? <span class="bm-step__hint">Pick one or more</span></p>
+          <p class="bm-step__q">What do you play on?</p>
+          <div class="bm-step__sub"><span class="bm-step__hint">Pick one or more</span><button type="button" class="bm-clear" data-bm-clear="ground" hidden>Clear all</button></div>
           <div class="bm-grounds" data-bm-grounds role="group" aria-label="Ground">
             {%- for ground in (1..3) -%}
               {%- liquid
@@ -151,6 +153,7 @@
         {%- comment -%} 3. Price {%- endcomment -%}
         <div class="bm-screen bm-step" data-bm-screen="price" hidden>
           <p class="bm-step__q">What do you want to spend?</p>
+          <div class="bm-step__sub"><span class="bm-step__hint">Drag either end</span><button type="button" class="bm-clear" data-bm-clear="price" hidden>Clear all</button></div>
           <p class="bm-price__value" data-bm-price-label aria-live="polite"></p>
           <div class="bm-price">
             <div class="bm-hist" data-bm-hist aria-hidden="true"></div>
@@ -169,7 +172,8 @@
 
         {%- comment -%} 4. Favourite silos: brands in big type (as US / UK / EU), each with its silos to tick {%- endcomment -%}
         <div class="bm-screen bm-step" data-bm-screen="silos" hidden>
-          <p class="bm-step__q">Favourite silos? <span class="bm-step__hint">Tick as many as you like</span></p>
+          <p class="bm-step__q">Favourite silos?</p>
+          <div class="bm-step__sub"><span class="bm-step__hint">Tick as many as you like</span><button type="button" class="bm-clear" data-bm-clear="silos" hidden>Clear all</button></div>
           <div class="size-drill size-drill--drawer bm-brandpick" data-active>
             <ul class="size-drill__systems list-unstyled bm-brandpick__brands" role="list">
               {%- assign bm_brands = 'Nike,Adidas,Puma,Mizuno' | split: ',' -%}
@@ -209,6 +213,7 @@
               </button>
             {%- endfor -%}
           </div>
+          <div class="bm-picked" data-bm-picked aria-label="Silos ticked" hidden></div>
           <div class="bm-step__foot">
             <button type="button" class="bm-link" data-bm-anysilo>Any silo</button>
             <button type="button" class="bm-primary" data-bm-start>Start swiping</button>
@@ -238,24 +243,26 @@
             {%- render 'boot-match-logo', id: 'bm-flame-match', class: 'bm-result__logo' -%}
             <span>It’s a match</span>
           </p>
-          <a class="bm-result__card" data-bm-match-link href="#">
-            <span class="bm-result__media"><img data-bm-match-img alt="" width="640" height="640"></span>
-            <span class="bm-result__info">
-              <span class="bm-result__name" data-bm-match-title></span>
-              <span class="bm-result__meta" data-bm-match-meta></span>
-              <span class="bm-result__price" data-bm-match-price></span>
-            </span>
-          </a>
-          <div class="bm-result__buttons">
-            <a class="bm-primary" data-bm-match-cta href="#">View this boot</a>
-            <button type="button" class="bm-secondary" data-bm-again>Keep swiping</button>
-          </div>
-          <div class="bm-likes" data-bm-likes-wrap hidden>
-            <div class="bm-likes__head">
-              <p class="bm-label">Boots you liked</p>
-              <button type="button" class="bm-link" data-bm-save>Save all to wishlist</button>
+          <div class="bm-result__body">
+            <a class="bm-result__card" data-bm-match-link href="#">
+              <span class="bm-result__media"><img data-bm-match-img alt="" width="640" height="640"></span>
+              <span class="bm-result__info">
+                <span class="bm-result__name" data-bm-match-title></span>
+                <span class="bm-result__meta" data-bm-match-meta></span>
+                <span class="bm-result__price" data-bm-match-price></span>
+              </span>
+            </a>
+            <div class="bm-likes" data-bm-likes-wrap hidden>
+              <div class="bm-likes__head">
+                <p class="bm-label">Boots you liked</p>
+                <button type="button" class="bm-link" data-bm-save>Save all to wishlist</button>
+              </div>
+              <div class="bm-likes__row" data-bm-likes></div>
             </div>
-            <div class="bm-likes__row" data-bm-likes></div>
+          </div>
+          <div class="bm-result__buttons">
+            <button type="button" class="bm-secondary" data-bm-again>Keep swiping</button>
+            <a class="bm-primary" data-bm-match-cta href="#">View this boot</a>
           </div>
         </div>
       </div>
@@ -530,9 +537,36 @@
     letter-spacing: -0.02em;
   }
 
+  /* Under the question: the hint, and "Clear all" once something is chosen */
+  .bm-step__sub {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 22px;
+    margin: -10px 0 16px;
+  }
+
+  .bm-clear {
+    flex: none;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #121212;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+  }
+
+  .bm-clear[hidden] {
+    display: none;
+  }
+
   .bm-step__hint {
     display: block;
-    margin-top: 6px;
     font-family: var(--font-body--family);
     font-size: 16px;
     font-weight: 600;
@@ -907,6 +941,59 @@
     color: rgb(18 18 18 / 0.5);
   }
 
+  /* What's ticked, under the list: small tiles, tap one to untick it */
+  .bm-picked {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 12px 2px 2px;
+    margin-top: 4px;
+    border-top: 1px solid rgb(18 18 18 / 0.08);
+    scrollbar-width: none;
+  }
+
+  .bm-picked::-webkit-scrollbar {
+    display: none;
+  }
+
+  .bm-picked[hidden] {
+    display: none;
+  }
+
+  .bm-picked__tile {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 10px 0 4px;
+    border: 0;
+    border-radius: 999px;
+    background: #121212;
+    color: #ffffff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .bm-picked__tile img {
+    display: block;
+    width: 44px;
+    height: 28px;
+    padding: 2px 4px;
+    border-radius: 999px;
+    background: #ffffff;
+    object-fit: contain;
+  }
+
+  .bm-picked__tile svg {
+    width: 14px;
+    height: 14px;
+    opacity: 0.7;
+  }
+
   .bm-silo__tick {
     flex: none;
     box-shadow: inset 0 0 0 2px rgb(18 18 18 / 0.2);
@@ -1107,13 +1194,18 @@
   }
 
   /* ---- 5. The match ---- */
-  .bm-result {
-    overflow-y: auto;
-  }
-
-  /* The match screen scrolls instead of squeezing the card */
+  /* The match: the card and the liked boots scroll between the heading and the buttons */
   .bm-result > * {
     flex: none;
+  }
+
+  .bm-result > .bm-result__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    margin: 0 -4px;
+    padding: 2px 4px 8px;
   }
 
   .bm-result__kicker {
@@ -1182,13 +1274,20 @@
   }
 
   .bm-result__buttons {
-    display: grid;
+    display: flex;
     gap: 8px;
-    margin: 14px 0 6px;
+    padding-top: 12px;
+  }
+
+  .bm-result__buttons > * {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 12px;
+    white-space: nowrap;
   }
 
   .bm-likes {
-    margin-top: 12px;
+    margin-top: 16px;
   }
 
   .bm-likes[hidden] {
@@ -1204,9 +1303,13 @@
 
   .bm-likes__row {
     display: flex;
+    align-items: flex-start;
     gap: 8px;
+    height: 72px;
     overflow-x: auto;
-    padding: 2px 2px 6px;
+    overflow-y: hidden;
+    padding: 4px 4px 0;
+    margin: 0 -4px;
     scrollbar-width: none;
   }
 
@@ -1216,15 +1319,16 @@
 
   .bm-like-thumb {
     flex: none;
+    display: block;
     border: 0;
     cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
     -webkit-tap-highlight-color: transparent;
     transition: box-shadow 0.18s;
-    display: grid;
-    place-items: center;
-    width: 76px;
-    height: 60px;
-    padding: 4px;
+    width: 80px;
+    height: 62px;
+    padding: 5px;
     border-radius: 12px;
     background: #ffffff;
     box-shadow: 0 0 0 1px rgb(18 18 18 / 0.08);
@@ -1244,6 +1348,7 @@
   }
 
   .bm-like-thumb img {
+    display: block;
     width: 100%;
     height: 100%;
     object-fit: contain;
@@ -1487,6 +1592,7 @@
       });
       sizePick.toggleAttribute('data-picked', sizeValues.length > 0);
       $('[data-bm-anysize]').setAttribute('aria-pressed', String(!sizeValues.length));
+      updateClear();
     }
 
     function renderSizes(animated) {
@@ -1579,6 +1685,43 @@
       go('price');
     });
 
+    /* Clear all, on each step */
+    function updateClear() {
+      const has = {
+        size: sizeValues.length > 0,
+        ground: grounds.length > 0,
+        price: priceLo !== null || priceHi !== null,
+        silos: picked.length > 0,
+      };
+      $$('[data-bm-clear]').forEach((button) => {
+        button.hidden = !has[button.dataset.bmClear];
+      });
+    }
+
+    $$('[data-bm-clear]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const step = button.dataset.bmClear;
+        if (step === 'size') {
+          sizeValues = [];
+          saveSizes();
+          renderSizes(false);
+        } else if (step === 'ground') {
+          grounds = [];
+          store.set('oce-bm-grounds', '');
+          renderGrounds();
+        } else if (step === 'price') {
+          priceLo = null;
+          priceHi = null;
+          renderPrice();
+        } else if (step === 'silos') {
+          picked = [];
+          store.set('oce-bm-silos', '');
+          renderSilos();
+        }
+        updateClear();
+      });
+    });
+
     /* 2. Ground */
     function renderGrounds() {
       $$('.bm-ground').forEach((tile) => {
@@ -1589,6 +1732,7 @@
         tile.querySelector('[data-bm-ground-count]').textContent = boots.length ? n + (n === 1 ? ' boot' : ' boots') : '…';
       });
       $('[data-bm-anyground]').setAttribute('aria-pressed', String(!grounds.length));
+      updateClear();
     }
 
     $('[data-bm-grounds]').addEventListener('click', (event) => {
@@ -1685,6 +1829,7 @@
       $('[data-bm-price-count]').textContent =
         count + (count === 1 ? ' boot' : ' boots') + (sizeValues.length ? ' in ' + sizeText() : '') + ' at this price';
       $('[data-bm-next="silos"]').disabled = count === 0;
+      updateClear();
     }
 
     minInput.addEventListener('input', updatePrice);
@@ -1745,7 +1890,42 @@
       const start = $('[data-bm-start]');
       start.textContent = picked.length ? 'Start swiping' : 'Tick a silo';
       start.disabled = !picked.length;
+      renderPicked();
+      updateClear();
     }
+
+    function renderPicked() {
+      const strip = $('[data-bm-picked]');
+      strip.replaceChildren();
+      picked.forEach((silo) => {
+        const row = $('.bm-silo[data-silo="' + silo + '"]');
+        if (!row) return;
+        const tile = el('button', 'bm-picked__tile');
+        tile.type = 'button';
+        tile.dataset.silo = silo;
+        const name = row.querySelector('.bm-silo__name').textContent;
+        tile.setAttribute('aria-label', 'Untick ' + name);
+        const img = row.querySelector('img').cloneNode();
+        img.removeAttribute('loading');
+        img.alt = '';
+        tile.append(img, el('span', '', name), closeIcon.cloneNode(true));
+        strip.appendChild(tile);
+      });
+      strip.hidden = picked.length === 0;
+      // The newest tile in view
+      strip.scrollLeft = strip.scrollWidth;
+    }
+
+    // The close icon from the window's own close button
+    const closeIcon = $('.bm-head__close svg').cloneNode(true);
+
+    $('[data-bm-picked]').addEventListener('click', (event) => {
+      const tile = event.target.closest('.bm-picked__tile');
+      if (!tile) return;
+      picked = picked.filter((silo) => silo !== tile.dataset.silo);
+      store.set('oce-bm-silos', picked.join(','));
+      renderSilos();
+    });
 
     $$('[data-bm-brand]').forEach((button) => {
       button.addEventListener('click', () => {
