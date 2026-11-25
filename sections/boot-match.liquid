@@ -3031,15 +3031,8 @@
       });
       undoBtn.disabled = history.length === 0;
       const top = cards()[0];
-      const onSale = Boolean(top && top._boot && top._boot.off > 0);
-      $('[data-bm-super]').toggleAttribute('data-sale', onSale);
-      if (onSale && superState().status === 'ready') {
-        status.textContent = 'Sale boot: Super Likes are for full-price boots';
-        status.dataset.sale = '1';
-      } else if (status.dataset.sale) {
-        delete status.dataset.sale;
-        updateStatus();
-      }
+      $('[data-bm-super]').toggleAttribute('data-sale', Boolean(top && top._boot && top._boot.off > 0));
+      updateStatus();
     }
 
     function fill() {
@@ -3069,6 +3062,12 @@
 
     function updateStatus() {
       const left = Math.max(0, target - liked.length);
+      // A sale boot on top with a Super Like to spend: say why the gold logo has faded
+      const top = cards()[0];
+      if (top && top._boot && top._boot.off > 0 && superState().status === 'ready') {
+        status.textContent = 'Sale boot: Super Likes are for full-price boots';
+        return;
+      }
       status.textContent =
         liked.length === 0
           ? 'Swipe right on boots you love'
