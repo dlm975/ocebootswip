@@ -1062,7 +1062,7 @@
       "settings": {
         "enabled": true,
         "collection": "all-football-boots",
-        "heading": "Boot Match",
+        "heading": "Match",
         "tip": "Find your boot match",
         "likes_to_match": 4
       }

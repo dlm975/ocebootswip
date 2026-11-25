@@ -28,6 +28,9 @@
     assign bm_collection = collections.all
   endif
   assign bm_feed = bm_collection.url | append: '?view=bootmatch'
+  # Its name: "OCEBOOTS" plus the word set in the theme editor (e.g. "Match")
+  assign bm_name = section.settings.heading | strip
+  assign bm_full_name = 'OCEBOOTS ' | append: bm_name | strip
 
   # The silos to choose from: key (as the boots' gen: tags start), name, picture in Files
   assign bm_silos = 'nike-mercurial|Mercurial|Nike|silo-nike-mercurial.jpg,nike-phantom|Phantom|Nike|silo-nike-phantom.jpg,nike-tiempo|Tiempo|Nike|silo-nike-tiempo.jpg,nike-hypervenom|Hypervenom|Nike|silo-nike-hypervenom.jpg,nike-magista|Magista|Nike|silo-nike-magista.jpg,nike-ctr360|CTR360|Nike|silo-nike-ctr360.jpg,nike-total-90|Total 90|Nike|silo-nike-total-90.jpg,adidas-predator|Predator|Adidas|silo-adidas-predator.jpg,adidas-x|X|Adidas|silo-adidas-x.jpg,adidas-f50|F50|Adidas|silo-adidas-f50.jpg,adidas-copa|Copa|Adidas|silo-adidas-copa.jpg,adidas-nemeziz|Nemeziz|Adidas|silo-adidas-nemeziz.jpg,adidas-11pro|11Pro|Adidas|silo-adidas-11pro.jpg,adidas-ace|Ace|Adidas|silo-adidas-ace.jpg,puma-future|Future|Puma|silo-puma-future.jpg,puma-ultra|Ultra|Puma|silo-puma-ultra.jpg,puma-evopower|evoPOWER|Puma|silo-puma-evopower.jpg,mizuno-morelia|Morelia|Mizuno|silo-mizuno-morelia.jpg' | split: ','
@@ -50,7 +53,7 @@
         class="bm-launch"
         data-bm-open
         aria-haspopup="dialog"
-        aria-label="{{ section.settings.heading | escape }}: find your perfect boot"
+        aria-label="{{ bm_full_name | escape }}: find your perfect boot"
       >
         <span class="bm-launch__coin oce-disk" aria-hidden="true"></span>
         {%- render 'boot-match-logo', id: 'bm-flame-launch', class: 'bm-launch__logo' -%}
@@ -65,7 +68,20 @@
             {%- render 'gicon', name: 'chevron_left', size: 24 -%}
           </button>
           {%- render 'boot-match-logo', id: 'bm-flame-head', class: 'bm-head__logo' -%}
-          <h2 class="bm-head__title" id="bm-title-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+          <h2 class="bm-head__title" id="bm-title-{{ section.id }}">
+            {%- if settings.logo -%}
+              <img
+                class="bm-head__wordmark"
+                src="{{ settings.logo | image_url: height: 64 }}"
+                alt="OCEBOOTS"
+                width="{{ settings.logo.width | times: 64 | divided_by: settings.logo.height }}"
+                height="64"
+              >
+            {%- else -%}
+              <span class="bm-head__wordmark-text">OCEBOOTS</span>
+            {%- endif -%}
+            {%- if bm_name != blank %} <span class="bm-head__name">{{ bm_name | escape }}</span>{% endif -%}
+          </h2>
           <span class="bm-head__step" data-bm-step></span>
           <button type="button" class="bm-icon-btn bm-head__close" data-bm-close aria-label="Close">
             {%- render 'gicon', name: 'close', size: 22 -%}
@@ -313,8 +329,8 @@
 
   .bm-launch__logo {
     position: relative;
-    width: 34px;
-    height: 38px;
+    width: 27px;
+    height: 40px;
   }
 
   @media (hover: hover) {
@@ -422,9 +438,26 @@
   }
 
   .bm-head__logo {
-    width: 26px;
-    height: 29px;
+    width: 20px;
+    height: 30px;
     flex: none;
+  }
+
+  .bm-head__wordmark {
+    display: inline-block;
+    width: auto;
+    height: 19px;
+    vertical-align: -1px;
+  }
+
+  .bm-head__wordmark-text {
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: -0.03em;
+  }
+
+  .bm-head__name {
+    margin-inline-start: 3px;
   }
 
   .bm-head__title {
@@ -1222,7 +1255,7 @@
   }
 
   .bm-result__logo {
-    width: 30px;
+    width: 23px;
     height: 34px;
   }
 
@@ -2600,8 +2633,9 @@
     {
       "type": "text",
       "id": "heading",
-      "label": "Name",
-      "default": "Boot Match"
+      "label": "Name after the OCEBOOTS logo",
+      "info": "Shown beside the OCEBOOTS logo at the top of the window, e.g. \"Match\". Avoid other companies' brand names.",
+      "default": "Match"
     },
     {
       "type": "text",

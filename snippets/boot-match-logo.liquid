@@ -1,14 +1,14 @@
 {%- doc -%}
-  The Boot Match mark: a flame with a football in front of it, made from two Google Material
-  Symbols (local_fire_department, filled, and sports_soccer). The flame is drawn in fire colours;
-  the ball is white with dark panels.
+  The Boot Match mark: one flame (a small tongue each side of a tall one) whose round body is a
+  football, its panels cut out so whatever is behind shows through. Drawn in fire colours, from
+  deep red at the base to gold at the tip.
 
-  @param {string} id - A unique id for the flame's gradient (more than one mark can be on a page)
+  @param {string} id - A unique id for the gradient and mask (more than one mark can be on a page)
   @param {string} [class] - Classes for the svg
 {%- enddoc -%}
 <svg
   xmlns="http://www.w3.org/2000/svg"
-  viewBox="120 -880 720 800"
+  viewBox="16 0 68 100"
   aria-hidden="true"
   focusable="false"
   {%- if class %}
@@ -16,15 +16,16 @@
   {%- endif %}
 >
   <defs>
-    <linearGradient id="{{ id }}" x1="0" y1="1" x2="0" y2="0">
+    <linearGradient id="{{ id }}-fire" x1="0" y1="1" x2="0" y2="0">
       <stop offset="0" stop-color="#e0201b"/>
       <stop offset="0.55" stop-color="#ff6a00"/>
       <stop offset="1" stop-color="#ffc531"/>
     </linearGradient>
+    <mask id="{{ id }}-ball" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+      {%- comment -%} The flame, white; the ball's panels, black (cut out) {%- endcomment -%}
+      <path fill="#fff" d="M50 96 A30 30 0 0 1 20 66 C20 51 22 40 27 30 C30 38 33 42 37 44 C37 28 44 14 52 3 C58 15 66 26 64 40 C68 36 72 31 76 25 C80 36 80 50 80 66 A30 30 0 0 1 50 96 Z"/>
+      <path fill="#000" d="M50.00 57.40 L58.18 63.34 L55.05 72.96 L44.95 72.96 L41.82 63.34 Z M69.22 39.55 L72.20 48.71 L64.40 54.38 L56.60 48.71 L59.58 39.55 Z M81.10 76.10 L73.30 81.77 L65.50 76.10 L68.48 66.94 L78.12 66.94 Z M50.00 98.70 L42.20 93.03 L45.18 83.87 L54.82 83.87 L57.80 93.03 Z M18.90 76.10 L21.88 66.94 L31.52 66.94 L34.50 76.10 L26.70 81.77 Z M30.78 39.55 L40.42 39.55 L43.40 48.71 L35.60 54.38 L27.80 48.71 Z"/>
+    </mask>
   </defs>
-  <path fill="url(#{{ id }})" d="M160-400q0-105 50-187t110-138q60-56 110-85.5l50-29.5v132q0 37 25 58.5t56 21.5q17 0 32.5-7t28.5-23l18-22q72 42 116 116.5T800-400q0 88-43 160.5T644-125q17-24 26.5-52.5T680-238q0-40-15-75.5T622-377L480-516 339-377q-29 29-44 64t-15 75q0 32 9.5 60.5T316-125q-70-42-113-114.5T160-400Zm320-4 85 83q17 17 26 38t9 45q0 49-35 83.5T480-120q-50 0-85-34.5T360-238q0-23 9-44.5t26-38.5l85-83Z"/>
-  <g transform="translate(480 -282) scale(0.46) translate(-480 480)">
-    <circle cx="480" cy="-480" r="396" fill="#ffffff"/>
-    <path fill="#121212" d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm200-500 54-18 16-54q-32-48-77-82.5T574-786l-54 38v56l160 112Zm-400 0 160-112v-56l-54-38q-54 17-99 51.5T210-652l16 54 54 18Zm-42 308 46-4 30-54-58-174-56-20-40 30q0 65 18 118.5T238-272Zm293 108q25-4 49-12l28-60-26-44H378l-26 44 28 60q24 8 49 12t51 4q26 0 51-4ZM390-360h180l56-160-146-102-144 102 54 160Zm332 88q42-50 60-103.5T800-494l-40-28-56 18-58 174 30 54 46 4Z"/>
-  </g>
+  <rect x="0" y="0" width="100" height="100" fill="url(#{{ id }}-fire)" mask="url(#{{ id }}-ball)"/>
 </svg>
