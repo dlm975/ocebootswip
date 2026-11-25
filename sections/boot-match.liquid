@@ -358,14 +358,19 @@
     background: transparent;
   }
 
-  /* The page behind: darkened and blurred */
+  /* The page behind: darkened while the window slides in, then blurred once it has settled (a
+     blur redrawn on every frame of the slide is what made the opening stutter) */
   .bm-scrim {
     position: absolute;
     inset: 0;
     background: rgb(8 8 8 / 0.62);
+    will-change: opacity;
+  }
+
+  .bm-dlg.is-settled .bm-scrim {
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
-    will-change: opacity;
+    transition: -webkit-backdrop-filter 0.3s linear, backdrop-filter 0.3s linear;
   }
 
   .bm-panel {
@@ -2320,9 +2325,13 @@
         panel.style.transform = desktop() ? 'translateY(16px) scale(0.92)' : 'translateY(100%)';
         if (desktop()) panel.style.opacity = '0';
       }
+      dlg.classList.remove('is-settled');
       dlg.showModal();
       lockPage(true);
-      if (reduced()) return;
+      if (reduced()) {
+        dlg.classList.add('is-settled');
+        return;
+      }
       // Start on the next frame, once the window is laid out, so the first frame isn't skipped
       opening = new Promise((resolve) => {
         requestAnimationFrame(() => {
@@ -2338,6 +2347,7 @@
             scrim.style.opacity = '';
             panel.style.transform = '';
             panel.style.opacity = '';
+            dlg.classList.add('is-settled');
             opening = null;
             resolve();
           });
@@ -2361,6 +2371,7 @@
         finish();
         return;
       }
+      dlg.classList.remove('is-settled');
       animate(scrim, { opacity: 0 }, { duration: 0.22 });
       animate(panel, desktop() ? { opacity: 0, transform: 'translateY(10px) scale(0.96)' } : { transform: 'translateY(100%)' }, {
         duration: desktop() ? 0.2 : 0.28,
