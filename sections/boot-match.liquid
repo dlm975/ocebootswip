@@ -3934,12 +3934,27 @@
 
     // Show a step; its lines rise in one after another (after `wait` seconds), or start hidden
     // when `held` (the welcome brings them in itself, once the flame has had the stage)
+    // "SUPER LIKE = $12.69 AUD OFF" stays on one line: the type shrinks when a longer amount
+    // (another currency) wouldn't fit the screen
+    function fitDeal() {
+      const deal = $('.bm-intro__deal');
+      const line = deal && deal.lastElementChild;
+      if (!line) return;
+      deal.style.fontSize = '';
+      const room = deal.parentElement.clientWidth - 8;
+      const need = line.scrollWidth;
+      if (room > 0 && need > room) {
+        deal.style.fontSize = Math.floor(parseFloat(getComputedStyle(deal).fontSize) * (room / need)) + 'px';
+      }
+    }
+
     function introStep(name, held) {
       $$('[data-bm-intro-step]').forEach((step) => {
         step.hidden = step.dataset.bmIntroStep !== name;
       });
       const step = $('[data-bm-intro-step="' + name + '"]');
       $('[data-bm-reward-text]').textContent = rewardShort();
+      fitDeal();
       if (reduced()) return step;
       if (held) {
         Array.from(step.children).forEach((child) => {
