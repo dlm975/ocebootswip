@@ -329,22 +329,20 @@
 
         <div class="bm-intro__step" data-bm-intro-step="hello">
           <h2 class="bm-intro__title" id="bm-intro-title-{{ section.id }}">{{ bm_full_name | escape }}</h2>
-          <p class="bm-intro__text">Swipe through boots and find your perfect match.</p>
+          <p class="bm-intro__tagline">Find your perfect boot</p>
           <div class="bm-intro__buttons">
-            <button type="button" class="bm-intro__primary" data-bm-intro-play>Play</button>
+            <button type="button" class="bm-intro__primary" data-bm-intro-play>
+              Play and <span class="bm-gold">EARN</span>
+            </button>
             <button type="button" class="bm-intro__link" data-bm-intro-close>Not now</button>
           </div>
         </div>
 
         <form class="bm-intro__step" data-bm-intro-step="offer" hidden novalidate>
-          <h2 class="bm-intro__title">
-            <span class="bm-intro__star" aria-hidden="true">{%- render 'gicon', name: 'star-fill', size: 26 -%}</span>
-            Get a Super Like
+          <h2 class="bm-intro__title bm-intro__deal">
+            <span class="bm-intro__star" aria-hidden="true">{%- render 'gicon', name: 'star-fill', size: 30 -%}</span>
+            <span>Super Like = <span class="bm-gold" data-bm-reward-text></span> off</span>
           </h2>
-          <p class="bm-intro__text">
-            Leave your email or mobile number. Super Like one boot while you play and get
-            <strong data-bm-reward-text></strong> off it.
-          </p>
           <label class="bm-intro__field">
             <span class="visually-hidden">Email or mobile number</span>
             <input
@@ -362,10 +360,7 @@
             <button type="submit" class="bm-intro__primary" data-bm-intro-submit>Get my Super Like</button>
             <button type="button" class="bm-intro__link" data-bm-intro-skip>Skip, just play</button>
           </div>
-          <p class="bm-intro__small">
-            One Super Like per person, on football boots. By signing up you agree to hear from OCEBOOTS by
-            email or text. Unsubscribe any time.
-          </p>
+          <p class="bm-intro__small">By signing up you agree to hear from OCEBOOTS. Unsubscribe any time.</p>
         </form>
 
         {%- comment -%}
@@ -1515,6 +1510,56 @@
     letter-spacing: -0.03em;
   }
 
+  .bm-intro__tagline {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.85);
+  }
+
+  .bm-intro__deal {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-transform: uppercase;
+    font-size: clamp(30px, 9.5vw, 42px);
+  }
+
+  /* Gold foil type: a gold gradient with a light sweeping across it */
+  .bm-gold {
+    background: linear-gradient(
+        110deg,
+        #8a5a00 0%,
+        #c8920f 18%,
+        #f6d365 32%,
+        #fff6d5 40%,
+        #e2a92a 52%,
+        #b07a06 66%,
+        #f3cf63 82%,
+        #8a5a00 100%
+      )
+      0 0 / 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    font-weight: 900;
+    animation: bm-gold 3.2s linear infinite;
+  }
+
+  @keyframes bm-gold {
+    to {
+      background-position: -250% 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bm-gold {
+      animation: none;
+    }
+  }
+
   .bm-intro__star {
     color: #3897f0;
     display: inline-grid;
@@ -2113,6 +2158,13 @@
       const step = local < 20 ? 1 : local < 200 ? 5 : 5 * Math.pow(10, Math.floor(Math.log10(local)) - 1);
       const tidy = Math.max(step, Math.round(local / step) * step);
       return 'about ' + money(tidy) + ' ' + currency;
+    }
+
+    // For headlines: "$25" in NZ; elsewhere "≈£10"
+    function rewardShort() {
+      const currency = CURRENCY || 'NZD';
+      if (currency === 'NZD') return money(REWARD);
+      return '≈' + rewardText().replace(/^about /, '').replace(' ' + currency, '');
     }
 
     /* The Super Like: locked until they leave an email or number, then one to use */
@@ -3412,7 +3464,7 @@
         step.hidden = step.dataset.bmIntroStep !== name;
       });
       const step = $('[data-bm-intro-step="' + name + '"]');
-      $('[data-bm-reward-text]').textContent = rewardText();
+      $('[data-bm-reward-text]').textContent = rewardShort();
       if (reduced()) return step;
       if (held) {
         Array.from(step.children).forEach((child) => {
