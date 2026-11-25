@@ -291,7 +291,7 @@
           <div class="bm-result__body">
             <p class="bm-superwin" data-bm-superwin role="status" hidden>
               <span class="bm-superwin__icon">{%- render 'gicon', name: 'shopping_cart', size: 20 -%}</span>
-              <span class="bm-superwin__deal" data-bm-superwin-deal>Super Like discount auto-applied</span>
+              <span class="bm-superwin__deal" data-bm-superwin-deal>Discount auto-applied at checkout</span>
             </p>
             <a class="bm-result__card" data-bm-match-link href="#">
               <span class="bm-result__media"><img data-bm-match-img alt="" width="640" height="640"></span>
@@ -301,6 +301,7 @@
                 <span class="bm-result__price" data-bm-match-price></span>
                 <span class="bm-result__deal" data-bm-match-deal hidden></span>
                 <span class="bm-result__claim" data-bm-match-claim hidden>{{ bm_gold }}<span data-bm-match-claim-text>Claim</span></span>
+                <span class="bm-result__swap" data-bm-match-swap role="button" hidden>{{ bm_gold }}<span>Use Super Like here</span></span>
               </span>
               <span class="bm-result__name" data-bm-match-title></span>
             </a>
@@ -1429,7 +1430,30 @@
     filter: drop-shadow(0 0 2px rgb(255 255 255 / 0.8));
   }
 
-  :is(.bm-result__deal, .bm-result__claim)[hidden] {
+  /* On another full-price boot: move the Super Like here */
+  .bm-result__swap {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    align-self: flex-start;
+    margin-top: 2px;
+    padding: 5px 10px 5px 7px;
+    border-radius: 999px;
+    background: #fff8e3;
+    box-shadow: inset 0 0 0 1.5px #e0a514;
+    color: #5a3c00;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.15;
+    cursor: pointer;
+  }
+
+  .bm-result__swap .bm-goldmark {
+    flex: none;
+    width: 14px;
+  }
+
+  :is(.bm-result__deal, .bm-result__claim, .bm-result__swap)[hidden] {
     display: none;
   }
 
@@ -3696,10 +3720,26 @@
     }
 
     $('[data-bm-match-link]').addEventListener('click', (event) => {
-      if (!event.target.closest('[data-bm-match-claim]')) return;
-      event.preventDefault();
-      claimCheckout();
+      if (event.target.closest('[data-bm-match-claim]')) {
+        event.preventDefault();
+        claimCheckout();
+      } else if (event.target.closest('[data-bm-match-swap]')) {
+        event.preventDefault();
+        swapSuper();
+      }
     });
+
+    // Move the Super Like to the boot on show: it glows, gets Claim, and its thumbnail the gold ring
+    function swapSuper() {
+      const boot = shownBoot;
+      if (!boot) return;
+      setSuper({ status: 'used', handle: boot.handle, title: boot.title, url: boot.url, image: boot.image });
+      $$('[data-bm-likes] .bm-like-thumb').forEach((thumb) => thumb.classList.toggle('is-super', thumb.dataset.handle === boot.handle));
+      showInCard(boot, false);
+      if (!reduced()) {
+        animate($('[data-bm-match-link]'), { transform: ['scale(0.96)', 'none'] }, { type: spring, visualDuration: 0.4, bounce: 0.4 });
+      }
+    }
 
     function showInCard(boot, animated) {
       $('[data-bm-match-link]').href = boot.url;
@@ -3724,6 +3764,7 @@
       const discounted = Boolean(CODE) && superState().status === 'used' && !(boot.off > 0);
       deal.hidden = !discounted;
       claim.hidden = !(discounted && isSuper);
+      $('[data-bm-match-swap]').hidden = !(discounted && !isSuper);
       if (discounted) {
         const after = Math.max(0, boot.units - rewardAmount());
         deal.replaceChildren(document.createTextNode(withCode(money(after, true))), el('small', '', 'with Super Like'));
