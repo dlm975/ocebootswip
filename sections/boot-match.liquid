@@ -329,10 +329,10 @@
 
         <div class="bm-intro__step" data-bm-intro-step="hello">
           <h2 class="bm-intro__title" id="bm-intro-title-{{ section.id }}">{{ bm_full_name | escape }}</h2>
-          <p class="bm-intro__tagline">Find your perfect boot</p>
+          <p class="bm-intro__tagline">FIND YOUR PERFECT BOOT</p>
           <div class="bm-intro__buttons">
             <button type="button" class="bm-intro__primary" data-bm-intro-play>
-              Play and <span class="bm-gold">EARN</span>
+              Play and <span class="bm-gold bm-gold--on-light">EARN</span>
             </button>
             <button type="button" class="bm-intro__link" data-bm-intro-close>Not now</button>
           </div>
@@ -341,7 +341,7 @@
         <form class="bm-intro__step" data-bm-intro-step="offer" hidden novalidate>
           <h2 class="bm-intro__title bm-intro__deal">
             <span class="bm-intro__star" aria-hidden="true">{%- render 'gicon', name: 'star-fill', size: 30 -%}</span>
-            <span>Super Like = <span class="bm-gold" data-bm-reward-text></span> off</span>
+            <span>SUPER LIKE = <span class="bm-gold" data-bm-reward-text></span> OFF</span>
           </h2>
           <label class="bm-intro__field">
             <span class="visually-hidden">Email or mobile number</span>
@@ -1546,6 +1546,20 @@
     -webkit-text-fill-color: transparent;
     font-weight: 900;
     animation: bm-gold 3.2s linear infinite;
+  }
+
+  /* On the white button: deeper golds, so every letter reads on white */
+  .bm-gold--on-light {
+    background-image: linear-gradient(
+      110deg,
+      #7a4e00 0%,
+      #b07a06 20%,
+      #d9a21b 38%,
+      #8f5f00 52%,
+      #c48b0c 70%,
+      #e0aa2a 84%,
+      #7a4e00 100%
+    );
   }
 
   @keyframes bm-gold {
