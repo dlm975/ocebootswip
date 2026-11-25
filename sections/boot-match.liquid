@@ -254,6 +254,7 @@
         <div class="bm-screen bm-play" data-bm-screen="play" hidden>
           <p class="bm-status" data-bm-status aria-live="polite"></p>
           <div class="bm-deck" data-bm-deck></div>
+          <p class="bm-toast" data-bm-toast role="alert" hidden>{{ bm_gold }}<span>Super Like not available on sale items</span></p>
           <div class="bm-ask" data-bm-ask hidden>
             <div class="bm-ask__card" role="dialog" aria-modal="false" aria-labelledby="bm-ask-title-{{ section.id }}">
               <p class="bm-ask__title" id="bm-ask-title-{{ section.id }}" data-bm-ask-title></p>
@@ -1803,6 +1804,39 @@
     position: relative;
   }
 
+  /* A short pop-up over the deck (e.g. Super Like on a sale boot) */
+  .bm-toast {
+    position: absolute;
+    left: 50%;
+    top: 42%;
+    z-index: 25;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: max-content;
+    max-width: calc(100% - 24px);
+    margin: 0;
+    padding: 12px 18px 12px 14px;
+    border-radius: 999px;
+    background: #121212;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.25;
+    box-shadow: 0 0 0 1.5px #e0a514, 0 12px 32px rgb(0 0 0 / 0.3);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .bm-toast[hidden] {
+    display: none;
+  }
+
+  .bm-toast .bm-goldmark {
+    flex: none;
+    width: 22px;
+  }
+
   .bm-ask {
     position: absolute;
     inset: -4px;
@@ -3323,6 +3357,35 @@
       layout(true);
     }
 
+    // The pop-up over the deck: springs in, holds, fades out; a second tap restarts it
+    const toastEl = $('[data-bm-toast]');
+    let toastTimer = null;
+    let toastAnim = null;
+    function toast() {
+      clearTimeout(toastTimer);
+      if (toastAnim) toastAnim.cancel();
+      toastEl.hidden = false;
+      toastEl.style.opacity = '1';
+      if (!reduced()) {
+        toastAnim = animate(
+          toastEl,
+          { opacity: [0, 1], transform: ['translate(-50%, -50%) scale(0.85)', 'translate(-50%, -50%) scale(1)'] },
+          { type: spring, visualDuration: 0.35, bounce: 0.35 }
+        );
+      }
+      toastTimer = setTimeout(() => {
+        if (reduced()) {
+          toastEl.hidden = true;
+          return;
+        }
+        toastAnim = animate(toastEl, { opacity: [1, 0], transform: ['translate(-50%, -50%) scale(1)', 'translate(-50%, -50%) scale(0.96)'] }, { duration: 0.2 });
+        toastAnim.finished.then(() => {
+          toastEl.hidden = true;
+          toastAnim = null;
+        }).catch(() => {});
+      }, 1800);
+    }
+
     function superLike() {
       if (asking()) return;
       const state = superState();
@@ -3337,6 +3400,7 @@
       // The Super Like discount only covers full-price boots
       if (card._boot.off > 0) {
         status.textContent = 'Super Likes are for full-price boots. Save it for another one.';
+        toast();
         if (!reduced()) {
           animate($('[data-bm-super]'), { transform: ['translateX(0)', 'translateX(-5px)', 'translateX(5px)', 'translateX(-3px)', 'translateX(0)'] }, { duration: 0.35 });
         }
