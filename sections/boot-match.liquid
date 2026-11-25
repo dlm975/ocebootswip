@@ -543,7 +543,7 @@
       padding: 14px 18px 18px;
       border-radius: 24px;
       box-shadow: 0 0 0 1px rgb(18 18 18 / 0.06), 0 24px 60px rgb(18 18 18 / 0.24);
-      transform-origin: 100% 100%;
+      transform-origin: 50% 50%;
     }
 
   }
@@ -3468,8 +3468,9 @@
       warm();
       if (!reduced()) {
         scrim.style.opacity = '0';
-        panel.style.transform = desktop() ? 'translateY(16px) scale(0.92)' : 'translateY(calc(100% + 40px))';
-        if (desktop()) panel.style.opacity = '0';
+        // The window expands from its centre (no sliding: nothing measured, nothing to jump)
+        panel.style.transform = 'scale(0.86)';
+        panel.style.opacity = '0';
       }
       // From the welcome, the dark blurred background is already showing: the game's own takes over
       // at full strength in the same frame, and only the window slides in
@@ -3490,11 +3491,7 @@
         requestAnimationFrame(() => {
           const moves = [
             fromIntro ? null : animate(scrim, { opacity: [0, 1] }, { duration: 0.35, ease: 'linear' }),
-            animate(
-              panel,
-              desktop() ? { opacity: [0, 1], transform: ['translateY(16px) scale(0.92)', 'none'] } : { transform: ['translateY(calc(100% + 40px))', 'none'] },
-              { duration: 0.55, ease: EASE }
-            ),
+            animate(panel, { opacity: [0, 1], transform: ['scale(0.86)', 'none'] }, { duration: 0.45, ease: EASE }),
           ];
           Promise.all(moves.filter(Boolean).map((move) => move.finished)).then(() => {
             scrim.style.opacity = '';
@@ -3526,8 +3523,8 @@
       }
       dlg.classList.remove('is-settled');
       animate(scrim, { opacity: 0 }, { duration: 0.22 });
-      animate(panel, desktop() ? { opacity: 0, transform: 'translateY(10px) scale(0.96)' } : { transform: 'translateY(calc(100% + 40px))' }, {
-        duration: desktop() ? 0.2 : 0.28,
+      animate(panel, { opacity: 0, transform: 'scale(0.94)' }, {
+        duration: 0.2,
         ease: [0.4, 0, 1, 1],
       }).finished.then(() => {
         panel.getAnimations().forEach((animation) => animation.cancel());
