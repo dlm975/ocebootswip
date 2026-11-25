@@ -72,7 +72,7 @@
           <button type="button" class="bm-icon-btn bm-head__back" data-bm-back aria-label="Back" hidden>
             {%- render 'gicon', name: 'chevron_left', size: 24 -%}
           </button>
-          <img class="bm-head__logo" src="{{ 'boot-match-mark.png' | asset_url }}" alt="" width="197" height="240">
+          <span class="bm-mark bm-head__logo" style="--bm-fill: url({{ 'boot-match-fill.png' | asset_url }}); --bm-holo: url({{ 'oce-holo.webp' | asset_url }});" aria-hidden="true"><span class="bm-mark__foil"></span><img src="{{ 'boot-match-mark.png' | asset_url }}" alt="" width="197" height="240"></span>
           <h2 class="bm-head__title" id="bm-title-{{ section.id }}">{{ bm_full_name | escape }}</h2>
           <span class="bm-head__step" data-bm-step></span>
           <button type="button" class="bm-icon-btn bm-head__close" data-bm-close aria-label="Close">
@@ -248,7 +248,7 @@
         {%- comment -%} 5. The match {%- endcomment -%}
         <div class="bm-screen bm-result" data-bm-screen="match" hidden>
           <p class="bm-result__kicker">
-            <img class="bm-result__logo" src="{{ 'boot-match-mark.png' | asset_url }}" alt="" width="197" height="240">
+            <span class="bm-mark bm-result__logo" style="--bm-fill: url({{ 'boot-match-fill.png' | asset_url }}); --bm-holo: url({{ 'oce-holo.webp' | asset_url }});" aria-hidden="true"><span class="bm-mark__foil"></span><img src="{{ 'boot-match-mark.png' | asset_url }}" alt="" width="197" height="240"></span>
             <span>It’s a match</span>
           </p>
           <div class="bm-result__body">
@@ -429,6 +429,43 @@
     align-items: center;
     gap: 8px;
     margin-bottom: 10px;
+  }
+
+  /* In the game the mark is filled with the site's foil: the foil, cut to the inside of the
+     flame (assets/boot-match-fill.png), under the black lines (assets/boot-match-mark.png) */
+  .bm-mark {
+    position: relative;
+    display: inline-block;
+    flex: none;
+    aspect-ratio: 197 / 240;
+  }
+
+  .bm-mark__foil {
+    position: absolute;
+    inset: 0;
+    background: #c9c6f5 var(--bm-holo) 0 0 / 120px 60px repeat;
+    -webkit-mask: var(--bm-fill) center / 100% 100% no-repeat;
+    mask: var(--bm-fill) center / 100% 100% no-repeat;
+    animation: bm-foil 14s linear infinite;
+  }
+
+  .bm-mark img {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  @keyframes bm-foil {
+    to {
+      background-position: 120px 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bm-mark__foil {
+      animation: none;
+    }
   }
 
   .bm-head__logo {
