@@ -2468,28 +2468,23 @@
     }
 
     /* The Super Like reward in the shopper's market currency (the cart's currency, which follows
-       their market), always with its code: exact in NZD; elsewhere the NZD amount at Shopify's
-       rate, rounded to a clean figure: nearest 5 under 1,000 (5, 15, 25...), then two leading
-       digits in steps of 5 (1,050, 1,500, 10,000, 15,000...) */
+       their market), always with its code. Shopify converts the NZD discount at its own rate at
+       checkout, so the game shows exactly that (e.g. $12.69 AUD), never a rounded figure that
+       checkout wouldn't honour */
     const REWARD = Number(root.dataset.reward) || 15;
     const CODE = root.dataset.code || '';
-
-    function cleanAmount(value) {
-      if (value <= 0) return 0;
-      const step = Math.max(5, 5 * Math.pow(10, Math.floor(Math.log10(value)) - 2));
-      return Math.max(step, Math.round(value / step) * step);
-    }
 
     function rewardAmount() {
       const currency = CURRENCY || 'NZD';
       if (currency === 'NZD') return REWARD;
       const rate = Number(window.Shopify && window.Shopify.currency && window.Shopify.currency.rate) || 1;
-      return cleanAmount(REWARD * rate);
+      return Math.round(REWARD * rate * 100) / 100;
     }
 
     // "$25 NZD", "$15 USD", "£10 GBP", "¥2,000 JPY"
     function rewardText() {
-      return money(rewardAmount()) + ' ' + (CURRENCY || 'NZD');
+      const amount = rewardAmount();
+      return money(amount, amount % 1 !== 0) + ' ' + (CURRENCY || 'NZD');
     }
 
     // For headlines: the same
@@ -3716,7 +3711,7 @@
       if (discounted) {
         const after = Math.max(0, boot.units - rewardAmount());
         deal.replaceChildren(document.createTextNode(money(after, true) + ' ' + (CURRENCY || 'NZD')), el('small', '', 'with Super Like'));
-        claim.lastElementChild.textContent = 'Claim ' + money(rewardAmount());
+        claim.lastElementChild.textContent = 'Claim ' + money(rewardAmount(), rewardAmount() % 1 !== 0);
         const claimUrl = '/discount/' + encodeURIComponent(CODE) + '?redirect=' + encodeURIComponent(boot.url);
         $('[data-bm-match-link]').href = claimUrl;
         $('[data-bm-match-cta]').href = claimUrl;
@@ -4224,7 +4219,7 @@
       "type": "number",
       "id": "reward_amount",
       "label": "Super Like reward (NZD)",
-      "info": "Shown in NZD in New Zealand; elsewhere converted and rounded to a tidy figure. Must match the discount code's amount.",
+      "info": "Shown in NZD in New Zealand; elsewhere converted at Shopify's rate, exactly as checkout converts the discount. Must match the discount code's amount.",
       "default": 15
     },
     {
