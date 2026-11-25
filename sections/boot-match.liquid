@@ -499,13 +499,13 @@
   .bm-scrim {
     position: absolute;
     inset: 0;
-    background: rgb(8 8 8 / 0.62);
+    background: rgb(6 6 6 / 0.68);
     will-change: opacity;
   }
 
   .bm-dlg.is-settled .bm-scrim {
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
     transition: -webkit-backdrop-filter 0.3s linear, backdrop-filter 0.3s linear;
   }
 
@@ -1349,13 +1349,13 @@
   .bm-intro__scrim {
     position: absolute;
     inset: 0;
-    background: rgb(6 6 6 / 0.7);
+    background: rgb(6 6 6 / 0.68);
     will-change: opacity;
   }
 
   .bm-intro.is-settled .bm-intro__scrim {
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
     transition: -webkit-backdrop-filter 0.5s linear, backdrop-filter 0.5s linear;
   }
 
@@ -3430,7 +3430,8 @@
       }
     }
 
-    function open() {
+    function open(fromIntro) {
+      if (fromIntro !== true) fromIntro = false;
       hideTip();
       if (dlg.open) return;
       // Everything is in place before the window shows, so nothing redraws while it moves
@@ -3441,7 +3442,14 @@
         panel.style.transform = desktop() ? 'translateY(16px) scale(0.92)' : 'translateY(calc(100% + 40px))';
         if (desktop()) panel.style.opacity = '0';
       }
-      dlg.classList.remove('is-settled');
+      // From the welcome, the dark blurred background is already showing: the game's own takes over
+      // at full strength in the same frame, and only the window slides in
+      if (fromIntro) {
+        scrim.style.opacity = '';
+        dlg.classList.add('is-settled');
+      } else {
+        dlg.classList.remove('is-settled');
+      }
       dlg.showModal();
       lockPage(true);
       if (reduced()) {
@@ -3452,14 +3460,14 @@
       opening = new Promise((resolve) => {
         requestAnimationFrame(() => {
           const moves = [
-            animate(scrim, { opacity: [0, 1] }, { duration: 0.35, ease: 'linear' }),
+            fromIntro ? null : animate(scrim, { opacity: [0, 1] }, { duration: 0.35, ease: 'linear' }),
             animate(
               panel,
               desktop() ? { opacity: [0, 1], transform: ['translateY(16px) scale(0.92)', 'none'] } : { transform: ['translateY(calc(100% + 40px))', 'none'] },
               { duration: 0.55, ease: EASE }
             ),
           ];
-          Promise.all(moves.map((move) => move.finished)).then(() => {
+          Promise.all(moves.filter(Boolean).map((move) => move.finished)).then(() => {
             scrim.style.opacity = '';
             panel.style.transform = '';
             panel.style.opacity = '';
@@ -3571,6 +3579,9 @@
         const big = Math.max(1.2, Math.min(1.9, (window.innerHeight * 0.38) / box.height));
         const centre = 'translateY(' + dy + 'px) scale(' + big + ')';
         flame.style.transform = centre;
+        // The boots load quietly while the welcome plays, so the game opens with them ready
+        setTimeout(warm, 1600);
+
         // A fixed timeline (seconds): pop in, land with a flash, a short hold, zoom out, words in
         const POP = 0.12;
         const LAND = POP + 0.24;
@@ -3622,9 +3633,26 @@
     }
 
     function play() {
-      hideIntro().then(() => {
+      if (!intro.open) {
         if (!dlg.open) open();
-      });
+        return;
+      }
+      store.set('oce-bm-intro', '1');
+      const stage = $('.bm-intro__stage');
+      const swap = () => {
+        open(true);
+        // Under the game's window now, and looking the same: gone without a trace
+        intro.close();
+        flame.classList.remove('is-alive');
+        stage.getAnimations().forEach((animation) => animation.cancel());
+        stage.style.opacity = '';
+        stage.style.transform = '';
+      };
+      if (reduced()) {
+        swap();
+        return;
+      }
+      animate(stage, { opacity: [1, 0], transform: ['none', 'scale(0.96)'] }, { duration: 0.2, ease: [0.4, 0, 1, 1] }).finished.then(swap);
     }
 
     $$('[data-bm-intro-close]').forEach((button) => button.addEventListener('click', () => hideIntro()));
