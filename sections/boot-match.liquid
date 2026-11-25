@@ -2,10 +2,11 @@
   Boot Match: a swipe game that finds a shopper their boot. A round button (the flame-and-ball
   mark) floats in the bottom-right corner; it opens a window that asks three things, then deals
   boots one at a time:
-  1. Size: US, UK or EU (the same big type and number grid as the Shop by Size menu), or any size.
+  1. Size: US, UK or EU (the same big type and number grid as the Shop by Size menu); one or more
+     sizes, thirds counted with the nearest whole size (EU 41 takes in 40⅔ and 41⅓), or any size.
   2. Price: a two-handled slider over a little chart of how many boots sit at each price, in the
      shopper's own currency (as the product cards show it).
-  3. Up to three favourite silos (Mercurial, Predator...), as tiles with the silo pictures.
+  3. Favourite silos (Mercurial, Predator...), as many as they like, as tiles with the silo pictures.
   Only boots in stock that fit all three come up. Swipe right (or tap the heart) on ones you like,
   left (or the cross) on ones you don't; each swipe teaches it what you like within those silos:
   the silo, the line (Vapor, Superfly), the condition and the price. The next boots lean that way,
@@ -71,7 +72,7 @@
         {%- comment -%} 1. Size, in the Shop by Size menu's style {%- endcomment -%}
         <div class="bm-screen bm-step" data-bm-screen="size">
           <p class="bm-step__lead">{{ section.settings.intro | escape }}</p>
-          <p class="bm-step__q">What size are you?</p>
+          <p class="bm-step__q">What size are you? <span class="bm-step__hint">Pick one or more</span></p>
           <div class="size-drill size-drill--drawer bm-sizepick" data-active>
             <ul class="size-drill__systems list-unstyled" role="list">
               {%- for system in (1..3) -%}
@@ -126,9 +127,9 @@
           </div>
         </div>
 
-        {%- comment -%} 3. Up to three favourite silos {%- endcomment -%}
+        {%- comment -%} 3. Favourite silos (as many as they like) {%- endcomment -%}
         <div class="bm-screen bm-step" data-bm-screen="silos" hidden>
-          <p class="bm-step__q">Pick up to 3 favourite silos</p>
+          <p class="bm-step__q">Pick your favourite silos</p>
           <div class="bm-silos" data-bm-silos role="group" aria-label="Favourite silos">
             {%- for entry in bm_silos -%}
               {%- assign bits = entry | split: '|' -%}
@@ -188,6 +189,10 @@
           <div class="bm-result__buttons">
             <a class="bm-primary" data-bm-match-cta href="#">View this boot</a>
             <button type="button" class="bm-secondary" data-bm-again>Keep swiping</button>
+          </div>
+          <div class="bm-likes" data-bm-more-wrap hidden>
+            <p class="bm-label">More matches for you</p>
+            <div class="bm-likes__row" data-bm-more></div>
           </div>
           <div class="bm-likes" data-bm-likes-wrap hidden>
             <div class="bm-likes__head">
@@ -467,6 +472,16 @@
     letter-spacing: -0.02em;
   }
 
+  .bm-step__hint {
+    display: block;
+    margin-top: 4px;
+    font-family: var(--font-body--family);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0;
+    color: rgb(18 18 18 / 0.5);
+  }
+
   .bm-step__count {
     margin: 10px 0 0;
     font-size: 14px;
@@ -654,7 +669,7 @@
     outline-offset: 2px;
   }
 
-  /* Silos: picture tiles, up to three picked (numbered in the order picked) */
+  /* Silos: picture tiles, numbered in the order picked */
   .bm-silos {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -693,10 +708,6 @@
   .bm-silo:disabled {
     opacity: 0.3;
     cursor: default;
-  }
-
-  .bm-silos[data-full] .bm-silo[aria-pressed='false']:not(:disabled) {
-    opacity: 0.5;
   }
 
   .bm-silo__media {
@@ -1045,6 +1056,10 @@
 
   .bm-like-thumb {
     flex: none;
+    border: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: box-shadow 0.18s;
     display: grid;
     place-items: center;
     width: 76px;
@@ -1053,6 +1068,19 @@
     border-radius: 12px;
     background: #ffffff;
     box-shadow: 0 0 0 1px rgb(18 18 18 / 0.08);
+  }
+
+  .bm-like-thumb[aria-pressed='true'] {
+    box-shadow: 0 0 0 2.5px #121212;
+  }
+
+  .bm-card__note {
+    margin: 0 0 4px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #ff6a00;
   }
 
   .bm-like-thumb img {
@@ -1235,15 +1263,11 @@
 
     /* ---------- The shopper's answers ---------- */
     let system = store.get('oce-bm-system') || 'US';
-    let sizeValue = store.get('oce-bm-size2') || '';
+    // Sizes picked (several allowed), as whole or half sizes: thirds count with the nearest whole
+    let sizeValues = (store.get('oce-bm-sizes') || '').split(',').filter(Boolean);
     let priceLo = null;
     let priceHi = null;
     let picked = (store.get('oce-bm-silos') || '').split(',').filter(Boolean);
-
-    const inSize = (boot) => !sizeValue || boot.sizes.some((set) => set[system] === sizeValue);
-    const inPrice = (boot) => (priceLo === null || boot.units >= priceLo) && (priceHi === null || boot.units <= priceHi);
-    const inSilos = (boot) => !picked.length || picked.includes(boot.silo);
-    const eligible = (boot) => inSize(boot) && inPrice(boot) && inSilos(boot);
 
     function numeric(value) {
       const [whole, fraction] = String(value).split(' ');
@@ -1255,11 +1279,41 @@
       return n;
     }
 
-    const pretty = (value) => String(value).replace(' 1/3', '⅓').replace(' 2/3', '⅔').replace(' 1/2', '½');
+    // A size as a chip: EU 41⅓ goes with 41 and 41⅔ with 42 (as the site's size filter); halves stay
+    function sizeKey(value) {
+      const n = numeric(value);
+      const part = n - Math.floor(n);
+      const rounded = Math.abs(part - 1 / 3) < 0.02 ? Math.floor(n) : Math.abs(part - 2 / 3) < 0.02 ? Math.ceil(n) : n;
+      return String(Math.round(rounded * 2) / 2);
+    }
 
-    /* 1. Size: US / UK / EU, then the sizes in stock in that system */
+    // A boot fits a picked size when its size in the chosen system is within a third of it
+    const near = (value, key) => Math.abs(numeric(value) - Number(key)) <= 0.34;
+    const sizeIn = (set) => Boolean(set[system]) && sizeValues.some((key) => near(set[system], key));
+    const inSize = (boot) => !sizeValues.length || boot.sizes.some(sizeIn);
+    const inPrice = (boot) => (priceLo === null || boot.units >= priceLo) && (priceHi === null || boot.units <= priceHi);
+    const inSilos = (boot) => !picked.length || picked.includes(boot.silo);
+    const eligible = (boot) => inSize(boot) && inPrice(boot) && inSilos(boot);
+
+    const pretty = (key) => String(key).replace('.5', '½');
+    const sizeText = () => sizeValues.map((key) => system + ' ' + pretty(key)).join(', ');
+
+    function saveSizes() {
+      store.set('oce-bm-system', system);
+      store.set('oce-bm-sizes', sizeValues.join(','));
+    }
+
+    /* 1. Size: US / UK / EU, then the sizes in stock in that system (pick one or more) */
     const sizePick = $('.bm-sizepick');
     const sizeList = $('[data-bm-sizes]');
+
+    function markSizes() {
+      $$('.bm-sizepick .size-drill__size').forEach((button) => {
+        button.setAttribute('aria-pressed', String(sizeValues.includes(button.dataset.value)));
+      });
+      sizePick.toggleAttribute('data-picked', sizeValues.length > 0);
+      $('[data-bm-anysize]').setAttribute('aria-pressed', String(!sizeValues.length));
+    }
 
     function renderSizes(animated) {
       $$('[data-bm-system]').forEach((button) => {
@@ -1267,68 +1321,70 @@
       });
       const counts = new Map();
       boots.forEach((boot) => {
-        const values = new Set(boot.sizes.map((set) => set[system]).filter(Boolean));
-        values.forEach((value) => counts.set(value, (counts.get(value) || 0) + 1));
+        const keys = new Set(boot.sizes.map((set) => set[system] && sizeKey(set[system])).filter(Boolean));
+        keys.forEach((key) => counts.set(key, (counts.get(key) || 0) + 1));
       });
-      const values = Array.from(counts.keys()).sort((a, b) => numeric(a) - numeric(b));
-      if (sizeValue && fullyLoaded && !counts.has(sizeValue)) sizeValue = '';
+      const keys = Array.from(counts.keys()).sort((a, b) => Number(a) - Number(b));
+      if (fullyLoaded) sizeValues = sizeValues.filter((key) => counts.has(key));
       sizeList.replaceChildren();
-      values.forEach((value) => {
+      keys.forEach((key) => {
         const item = document.createElement('li');
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'size-drill__size';
-        button.dataset.value = value;
-        button.setAttribute('aria-pressed', String(value === sizeValue));
-        button.setAttribute('aria-label', system + ' ' + value + ', ' + counts.get(value) + ' boots');
+        button.dataset.value = key;
+        button.setAttribute('aria-label', system + ' ' + key + ', ' + counts.get(key) + ' boots');
         const shown = document.createElement('span');
         shown.className = 'size-drill__value';
-        shown.textContent = pretty(value);
+        shown.textContent = pretty(key);
         const count = document.createElement('span');
         count.className = 'size-drill__count';
-        count.textContent = counts.get(value);
+        count.textContent = counts.get(key);
         button.append(shown, count);
         item.appendChild(button);
         sizeList.appendChild(item);
       });
-      if (!values.length) {
+      if (!keys.length) {
         const item = document.createElement('li');
         item.className = 'bm-step__count';
         item.textContent = 'Loading sizes…';
         sizeList.appendChild(item);
       }
-      sizePick.toggleAttribute('data-picked', Boolean(sizeValue));
-      $('[data-bm-anysize]').setAttribute('aria-pressed', String(!sizeValue));
+      markSizes();
       if (animated && !reduced()) {
         animate(sizeList, { opacity: [0, 1], transform: ['translateY(-12px)', 'none'] }, { duration: 0.55, ease: EASE });
       }
+    }
+
+    // The most common size in another system for boots of this size (US 9 -> UK 8)
+    function convert(key, from, to) {
+      const tally = new Map();
+      boots.forEach((boot) =>
+        boot.sizes.forEach((set) => {
+          if (set[from] && set[to] && Math.abs(numeric(set[from]) - Number(key)) <= 0.34) {
+            const other = sizeKey(set[to]);
+            tally.set(other, (tally.get(other) || 0) + 1);
+          }
+        })
+      );
+      let best = '';
+      let most = 0;
+      tally.forEach((n, other) => {
+        if (n > most) {
+          most = n;
+          best = other;
+        }
+      });
+      return best;
     }
 
     $$('[data-bm-system]').forEach((button) => {
       button.addEventListener('click', () => {
         const next = button.dataset.bmSystem;
         if (next === system) return;
-        // Keep the shopper's size: the most common matching size in the new system
-        if (sizeValue) {
-          const tally = new Map();
-          boots.forEach((boot) =>
-            boot.sizes.forEach((set) => {
-              if (set[system] === sizeValue && set[next]) tally.set(set[next], (tally.get(set[next]) || 0) + 1);
-            })
-          );
-          let best = '';
-          let most = 0;
-          tally.forEach((n, value) => {
-            if (n > most) {
-              most = n;
-              best = value;
-            }
-          });
-          sizeValue = best;
-        }
+        sizeValues = Array.from(new Set(sizeValues.map((key) => convert(key, system, next)).filter(Boolean)));
         system = next;
-        store.set('oce-bm-system', system);
-        store.set('oce-bm-size2', sizeValue);
+        saveSizes();
         renderSizes(true);
       });
     });
@@ -1336,18 +1392,15 @@
     sizeList.addEventListener('click', (event) => {
       const button = event.target.closest('[data-value]');
       if (!button) return;
-      sizeValue = sizeValue === button.dataset.value ? '' : button.dataset.value;
-      store.set('oce-bm-size2', sizeValue);
-      $$('.bm-sizepick .size-drill__size').forEach((other) => {
-        other.setAttribute('aria-pressed', String(other.dataset.value === sizeValue));
-      });
-      sizePick.toggleAttribute('data-picked', Boolean(sizeValue));
-      $('[data-bm-anysize]').setAttribute('aria-pressed', String(!sizeValue));
+      const key = button.dataset.value;
+      sizeValues = sizeValues.includes(key) ? sizeValues.filter((other) => other !== key) : sizeValues.concat(key);
+      saveSizes();
+      markSizes();
     });
 
     $('[data-bm-anysize]').addEventListener('click', () => {
-      sizeValue = '';
-      store.set('oce-bm-size2', '');
+      sizeValues = [];
+      saveSizes();
       renderSizes(false);
       go('price');
     });
@@ -1426,14 +1479,14 @@
         money(low) + ' – ' + money(high) + (priceHi === null ? '+' : '') + (CURRENCY ? ' ' + CURRENCY : '');
       const count = boots.filter((boot) => inSize(boot) && inPrice(boot)).length;
       $('[data-bm-price-count]').textContent =
-        count + (count === 1 ? ' boot' : ' boots') + (sizeValue ? ' in ' + system + ' ' + pretty(sizeValue) : '') + ' at this price';
+        count + (count === 1 ? ' boot' : ' boots') + (sizeValues.length ? ' in ' + sizeText() : '') + ' at this price';
       $('[data-bm-next="silos"]').disabled = count === 0;
     }
 
     minInput.addEventListener('input', updatePrice);
     maxInput.addEventListener('input', updatePrice);
 
-    /* 3. Up to three favourite silos */
+    /* 3. Favourite silos, as many as they like */
     const silosEl = $('[data-bm-silos]');
 
     function renderSilos() {
@@ -1450,7 +1503,6 @@
         tile.querySelector('[data-bm-silo-count]').textContent = n ? n + (n === 1 ? ' boot' : ' boots') : fullyLoaded ? 'None in range' : '…';
         tile.querySelector('[data-bm-silo-badge]').textContent = order >= 0 ? String(order + 1) : '';
       });
-      silosEl.toggleAttribute('data-full', picked.length >= 3);
       const start = $('[data-bm-start]');
       start.textContent = picked.length ? 'Start swiping' : 'Pick a silo';
       start.disabled = !picked.length;
@@ -1462,13 +1514,9 @@
       const silo = tile.dataset.silo;
       if (picked.includes(silo)) {
         picked = picked.filter((other) => other !== silo);
-      } else if (picked.length < 3) {
+      } else {
         picked.push(silo);
         if (!reduced()) animate(tile, { transform: ['scale(0.94)', 'none'] }, { type: spring, visualDuration: 0.3, bounce: 0.4 });
-      } else {
-        // Already three: a little shake on the full set
-        if (!reduced()) animate(tile, { transform: ['translateX(0)', 'translateX(-4px)', 'translateX(4px)', 'translateX(0)'] }, { duration: 0.25 });
-        return;
       }
       store.set('oce-bm-silos', picked.join(','));
       renderSilos();
@@ -1522,9 +1570,30 @@
       return total;
     }
 
+    // Beyond the answers, closest first: other silos at their price, then any price; always their size
+    const pickedBrands = () => new Set(picked.map((silo) => silo.split('-')[0]));
+
+    function nearest(exclude) {
+      const open = (boot) => inSize(boot) && !seen.has(boot.handle) && !exclude.has(boot.handle);
+      let pool = boots.filter((boot) => open(boot) && inPrice(boot));
+      if (!pool.length) pool = boots.filter(open);
+      if (!pool.length) return null;
+      const brands = pickedBrands();
+      let best = null;
+      let bestScore = -Infinity;
+      pool.forEach((boot) => {
+        const score = fit(boot) + (brands.has(boot.brand) ? 1 : 0) + Math.random() * 0.6;
+        if (score > bestScore) {
+          bestScore = score;
+          best = boot;
+        }
+      });
+      return best;
+    }
+
     function pickNext(exclude) {
       const pool = boots.filter((boot) => eligible(boot) && !seen.has(boot.handle) && !exclude.has(boot.handle));
-      if (!pool.length) return null;
+      if (!pool.length) return fullyLoaded ? nearest(exclude) : null;
       // First few (or nothing liked yet): take turns between the chosen silos
       if (liked.length === 0 || swipes < 3) {
         const recent = new Set(history.slice(-Math.max(1, picked.length - 1)).map((step) => step.boot.silo));
@@ -1551,7 +1620,8 @@
       const likedHandles = new Set(liked.map((boot) => boot.handle));
       let best = null;
       let bestScore = -Infinity;
-      boots.filter(eligible).forEach((boot) => {
+      const pool = boots.filter(eligible);
+      (pool.length ? pool : boots.filter(inSize)).forEach((boot) => {
         const score = fit(boot) + (likedHandles.has(boot.handle) ? 0.5 : 0);
         if (score > bestScore) {
           bestScore = score;
@@ -1583,7 +1653,7 @@
     function metaText(boot) {
       const parts = [];
       if (boot.condition) parts.push(boot.condition);
-      const index = sizeValue ? boot.sizes.findIndex((set) => set[system] === sizeValue) : 0;
+      const index = sizeValues.length ? boot.sizes.findIndex(sizeIn) : 0;
       const label = boot.labels[index >= 0 ? index : 0];
       if (label) parts.push(label.replace(/\s*-\s*/g, ' · '));
       return parts.join(' · ');
@@ -1605,6 +1675,7 @@
       media.appendChild(img);
 
       const info = el('div', 'bm-card__info');
+      if (!eligible(boot)) info.appendChild(el('p', 'bm-card__note', inPrice(boot) ? 'Outside your silos · close to what you like' : 'Outside your price · close to what you like'));
       info.append(el('h3', 'bm-card__name', boot.title), el('p', 'bm-card__meta', metaText(boot)), priceLine(boot, 'bm-card__price'));
 
       const like = el('span', 'bm-stamp bm-stamp--like', 'LOVE');
@@ -1656,7 +1727,7 @@
         const empty = el(
           'div',
           'bm-card bm-card--empty',
-          fullyLoaded ? (liked.length ? 'That’s every boot that fits. Here’s your match.' : 'That’s every boot that fits. Try a wider price range or more silos.') : 'Loading more boots…'
+          fullyLoaded ? (liked.length ? 'That’s every boot in your size. Here’s your match.' : 'That’s every boot in your size. Try more sizes.') : 'Loading more boots…'
         );
         deck.appendChild(empty);
         if (fullyLoaded && liked.length) setTimeout(showMatch, 900);
@@ -1883,35 +1954,64 @@
 
     $('[data-bm-start]').addEventListener('click', start);
 
+    // The big card: one boot's photo, name, size and price, linking to it
+    function showInCard(boot, animated) {
+      $('[data-bm-match-link]').href = boot.url;
+      $('[data-bm-match-cta]').href = boot.url;
+      const img = $('[data-bm-match-img]');
+      img.src = boot.image;
+      img.alt = boot.title;
+      $('[data-bm-match-title]').textContent = boot.title;
+      $('[data-bm-match-meta]').textContent = metaText(boot);
+      $('[data-bm-match-price]').replaceChildren(...priceLine(boot, '').childNodes);
+      $$('.bm-like-thumb').forEach((thumb) => thumb.setAttribute('aria-pressed', String(thumb.dataset.handle === boot.handle)));
+      if (animated && !reduced()) {
+        animate($('[data-bm-match-link]'), { opacity: [0.4, 1], transform: ['scale(0.97)', 'none'] }, { duration: 0.4, ease: EASE });
+      }
+    }
+
+    function thumbs(row, list) {
+      row.replaceChildren();
+      list.forEach((boot) => {
+        const button = el('button', 'bm-like-thumb');
+        button.type = 'button';
+        button.dataset.handle = boot.handle;
+        button.setAttribute('aria-label', 'Show ' + boot.title);
+        button.setAttribute('aria-pressed', 'false');
+        const thumb = el('img');
+        thumb.src = boot.image;
+        thumb.alt = '';
+        button.appendChild(thumb);
+        button._boot = boot;
+        row.appendChild(button);
+      });
+    }
+
+    $('.bm-result').addEventListener('click', (event) => {
+      const button = event.target.closest('.bm-like-thumb');
+      if (button && button._boot) showInCard(button._boot, true);
+    });
+
     function showMatch() {
       const match = bestMatch();
       if (!match) {
         go('silos');
         return;
       }
-      $('[data-bm-match-link]').href = match.url;
-      $('[data-bm-match-cta]').href = match.url;
-      const img = $('[data-bm-match-img]');
-      img.src = match.image;
-      img.alt = match.title;
-      $('[data-bm-match-title]').textContent = match.title;
-      $('[data-bm-match-meta]').textContent = metaText(match);
-      const priceEl = $('[data-bm-match-price]');
-      priceEl.replaceChildren(...priceLine(match, '').childNodes);
-
-      const row = $('[data-bm-likes]');
-      row.replaceChildren();
-      liked.forEach((boot) => {
-        const link = el('a', 'bm-like-thumb');
-        link.href = boot.url;
-        link.title = boot.title;
-        const thumb = el('img');
-        thumb.src = boot.image;
-        thumb.alt = boot.title;
-        link.appendChild(thumb);
-        row.appendChild(link);
-      });
+      // More matches: the next best fits (not already liked), then the boots they liked
+      const likedHandles = new Set(liked.map((boot) => boot.handle));
+      const pool = boots.filter(eligible);
+      const more = (pool.length ? pool : boots.filter(inSize))
+        .filter((boot) => boot.handle !== match.handle && !likedHandles.has(boot.handle))
+        .map((boot) => [fit(boot), boot])
+        .sort((a, b) => b[0] - a[0])
+        .slice(0, 6)
+        .map((pair) => pair[1]);
+      thumbs($('[data-bm-more]'), [match].concat(more));
+      $('[data-bm-more-wrap]').hidden = more.length === 0;
+      thumbs($('[data-bm-likes]'), liked);
       $('[data-bm-likes-wrap]').hidden = liked.length === 0;
+      showInCard(match, false);
       const save = $('[data-bm-save]');
       save.textContent = 'Save all to wishlist';
       save.onclick = null;
