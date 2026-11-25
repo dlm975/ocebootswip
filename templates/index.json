@@ -1,5 +1,5 @@
 /*
- * ------------------------------------------------------------ 
+ * ------------------------------------------------------------
  * IMPORTANT: The contents of this file are auto-generated.
  *
  * This file may be updated by the Shopify admin theme editor
@@ -183,15 +183,16 @@
           "type": "brand",
           "settings": {
             "title": "Nike",
-            "collection": "nike"
+            "collection": "nike",
+            "aliases": []
           }
         },
         "silo_01": {
           "type": "silo",
           "settings": {
             "title": "Nike Mercurial",
-            "image": "shopify://shop_images/silo-nike-mercurial.jpg",
             "collection": "nike-mercurial",
+            "image": "shopify://shop_images/silo-nike-mercurial.jpg",
             "generations": [
               "nike-mercurial-vapor-17",
               "nike-mercurial-vapor-16",
@@ -228,8 +229,8 @@
           "type": "silo",
           "settings": {
             "title": "Nike Phantom",
-            "image": "shopify://shop_images/silo-nike-phantom.jpg",
             "collection": "phantom-1",
+            "image": "shopify://shop_images/silo-nike-phantom.jpg",
             "generations": [
               "nike-phantom-6",
               "nike-phantom-gx-2",
@@ -250,8 +251,8 @@
           "type": "silo",
           "settings": {
             "title": "Nike Tiempo",
-            "image": "shopify://shop_images/silo-nike-tiempo.jpg",
             "collection": "tiempo-1",
+            "image": "shopify://shop_images/silo-nike-tiempo.jpg",
             "generations": [
               "nike-tiempo-maestro",
               "nike-tiempo-legend-10",
@@ -272,8 +273,8 @@
           "type": "silo",
           "settings": {
             "title": "Nike Hypervenom",
-            "image": "shopify://shop_images/silo-nike-hypervenom.jpg",
             "collection": "hypervenom-1",
+            "image": "shopify://shop_images/silo-nike-hypervenom.jpg",
             "generations": [
               "nike-hypervenom-phantom-3",
               "nike-hypervenom-phantom-2",
@@ -288,8 +289,8 @@
           "type": "silo",
           "settings": {
             "title": "Nike Magista",
-            "image": "shopify://shop_images/silo-nike-magista.jpg",
             "collection": "magista-1",
+            "image": "shopify://shop_images/silo-nike-magista.jpg",
             "generations": [
               "nike-magista-obra-2",
               "nike-magista-obra-1",
@@ -305,8 +306,8 @@
           "type": "silo",
           "settings": {
             "title": "Nike CTR360",
-            "image": "shopify://shop_images/silo-nike-ctr360.jpg",
             "collection": "ctr360-1",
+            "image": "shopify://shop_images/silo-nike-ctr360.jpg",
             "generations": [
               "nike-ctr360-maestri-3",
               "nike-ctr360-maestri-2",
@@ -321,8 +322,8 @@
           "type": "silo",
           "settings": {
             "title": "Nike Total 90",
-            "image": "shopify://shop_images/silo-nike-total-90.jpg",
             "collection": "total-91",
+            "image": "shopify://shop_images/silo-nike-total-90.jpg",
             "generations": [
               "nike-total-90-laser-4",
               "nike-total-90-laser-3"
@@ -336,15 +337,16 @@
           "type": "brand",
           "settings": {
             "title": "Adidas",
-            "collection": "adidas"
+            "collection": "adidas",
+            "aliases": []
           }
         },
         "silo_04": {
           "type": "silo",
           "settings": {
             "title": "Adidas Predator",
-            "image": "shopify://shop_images/silo-adidas-predator.jpg",
             "collection": "predator-1",
+            "image": "shopify://shop_images/silo-adidas-predator.jpg",
             "generations": [
               "adidas-predator-ft",
               "adidas-predator-accuracy",
@@ -360,8 +362,8 @@
           "type": "silo",
           "settings": {
             "title": "Adidas X",
-            "image": "shopify://shop_images/silo-adidas-x.jpg",
             "collection": "x",
+            "image": "shopify://shop_images/silo-adidas-x.jpg",
             "generations": [
               "adidas-x-crazyfast",
               "adidas-x-speedportal",
@@ -383,8 +385,8 @@
           "type": "silo",
           "settings": {
             "title": "Adidas F50",
-            "image": "shopify://shop_images/silo-adidas-f50.jpg",
             "collection": "f50",
+            "image": "shopify://shop_images/silo-adidas-f50.jpg",
             "generations": [
               "adidas-f50-hyperfast",
               "adidas-f50-elite",
@@ -400,53 +402,57 @@
           "type": "silo",
           "settings": {
             "title": "Adidas Copa",
-            "image": "shopify://shop_images/silo-adidas-copa.jpg",
             "collection": "copa",
+            "image": "shopify://shop_images/silo-adidas-copa.jpg",
             "generations": [
               "adidas-copa-pure",
               "adidas-copa-sense",
               "adidas-copa-20",
               "adidas-copa-19"
-            ]
+            ],
+            "aliases": []
           }
         },
         "silo_10": {
           "type": "silo",
           "settings": {
             "title": "Adidas Nemeziz",
-            "image": "shopify://shop_images/silo-adidas-nemeziz.jpg",
             "collection": "nemeziz",
+            "image": "shopify://shop_images/silo-adidas-nemeziz.jpg",
             "generations": [
               "adidas-nemeziz-19",
               "adidas-nemeziz-18",
               "adidas-nemeziz-17"
-            ]
+            ],
+            "aliases": []
           }
         },
         "silo_16": {
           "type": "silo",
           "settings": {
             "title": "Adidas 11Pro",
-            "image": "shopify://shop_images/silo-adidas-11pro.jpg",
             "collection": "11pro",
+            "image": "shopify://shop_images/silo-adidas-11pro.jpg",
             "generations": [
               "adidas-11pro-elite",
               "adidas-11pro",
               "adidas-adipure-11pro"
-            ]
+            ],
+            "aliases": []
           }
         },
         "silo_13": {
           "type": "silo",
           "settings": {
             "title": "Adidas Ace",
-            "image": "shopify://shop_images/silo-adidas-ace.jpg",
             "collection": "",
+            "image": "shopify://shop_images/silo-adidas-ace.jpg",
             "generations": [
               "adidas-ace-17",
               "adidas-ace-16",
               "adidas-ace-15"
-            ]
+            ],
+            "aliases": []
           }
         },
         "brand_puma": {
@@ -463,43 +469,48 @@
           "type": "silo",
           "settings": {
             "title": "Puma Future",
-            "image": "shopify://shop_images/silo-puma-future.jpg",
             "collection": "puma-future",
-            "generations": []
+            "image": "shopify://shop_images/silo-puma-future.jpg",
+            "generations": [],
+            "aliases": []
           }
         },
         "silo_17": {
           "type": "silo",
           "settings": {
             "title": "Puma Ultra",
-            "image": "shopify://shop_images/silo-puma-ultra.jpg",
             "collection": "puma-ultra",
-            "generations": []
+            "image": "shopify://shop_images/silo-puma-ultra.jpg",
+            "generations": [],
+            "aliases": []
           }
         },
         "silo_18": {
           "type": "silo",
           "settings": {
             "title": "Puma evoPOWER",
-            "image": "shopify://shop_images/silo-puma-evopower.jpg",
             "collection": "puma-evopower",
-            "generations": []
+            "image": "shopify://shop_images/silo-puma-evopower.jpg",
+            "generations": [],
+            "aliases": []
           }
         },
         "brand_mizuno": {
           "type": "brand",
           "settings": {
             "title": "Mizuno",
-            "collection": "mizuno"
+            "collection": "mizuno",
+            "aliases": []
           }
         },
         "silo_15": {
           "type": "silo",
           "settings": {
             "title": "Mizuno Morelia",
-            "image": "shopify://shop_images/silo-mizuno-morelia.jpg",
             "collection": "mizuno-morelia",
-            "generations": []
+            "image": "shopify://shop_images/silo-mizuno-morelia.jpg",
+            "generations": [],
+            "aliases": []
           }
         }
       },
@@ -633,6 +644,7 @@
       "settings": {
         "heading": "Who we've worked with",
         "hint": "Tap a league to meet the players",
+        "attach_to_details": false,
         "color_scheme": "scheme-1",
         "padding-block-start": 24,
         "padding-block-end": 24
@@ -1062,7 +1074,7 @@
       "settings": {
         "enabled": true,
         "collection": "all-football-boots",
-        "heading": "Match",
+        "heading": "Tinder",
         "tip": "Find your boot match",
         "likes_to_match": 4
       }
