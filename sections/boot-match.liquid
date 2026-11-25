@@ -2469,12 +2469,15 @@
 
     /* The Super Like reward in the shopper's market currency (the cart's currency, which follows
        their market), always with its code. Shopify converts the NZD discount at its own rate at
-       checkout; the game shows that rounded DOWN to a clean figure (steps of 0.5 for small
-       amounts, 5, 50... for bigger ones: $12.69 AUD -> $12.50, £6.39 -> £6, ¥1,327 -> ¥1,300),
-       so checkout always takes off at least what was promised */
+       checkout; the game shows that rounded DOWN to a clean figure, so checkout always takes
+       off at least what was promised: steps of 0.5 under 20 ($12.69 AUD -> $12.50, £6.39 -> £6),
+       5 under 100 (HK$65.53 -> 65), then two leading digits (₹772 -> 770, ¥1,332 -> 1,300,
+       ₩11,228 -> 11,000, Rp152,906 -> 150,000) */
     function cleanDown(value) {
       if (value <= 0) return 0;
-      const step = Math.max(0.5, 5 * Math.pow(10, Math.floor(Math.log10(value)) - 2));
+      let step = 0.5;
+      if (value >= 100) step = Math.pow(10, Math.floor(Math.log10(value)) - 1);
+      else if (value >= 20) step = 5;
       return Math.floor(value / step + 1e-9) * step;
     }
 
@@ -2491,7 +2494,13 @@
     // "$25 NZD", "$15 USD", "£10 GBP", "¥2,000 JPY"
     function rewardText() {
       const amount = rewardAmount();
-      return money(amount, amount % 1 !== 0) + ' ' + (CURRENCY || 'NZD');
+      return withCode(money(amount, amount % 1 !== 0));
+    }
+
+    // "$8 USD"; currencies without a symbol already print their code ("CHF 6.50"): not twice
+    function withCode(text) {
+      const code = CURRENCY || 'NZD';
+      return text.includes(code) ? text : text + ' ' + code;
     }
 
     // For headlines: the same
@@ -3717,7 +3726,7 @@
       claim.hidden = !(discounted && isSuper);
       if (discounted) {
         const after = Math.max(0, boot.units - rewardAmount());
-        deal.replaceChildren(document.createTextNode(money(after, true) + ' ' + (CURRENCY || 'NZD')), el('small', '', 'with Super Like'));
+        deal.replaceChildren(document.createTextNode(withCode(money(after, true))), el('small', '', 'with Super Like'));
         claim.lastElementChild.textContent = 'Claim ' + money(rewardAmount(), rewardAmount() % 1 !== 0);
         const claimUrl = '/discount/' + encodeURIComponent(CODE) + '?redirect=' + encodeURIComponent(boot.url);
         $('[data-bm-match-link]').href = claimUrl;
