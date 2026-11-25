@@ -4049,7 +4049,7 @@
       // Tidy the address (no ?bm-open left to reopen the game on refresh)
       const url = new URL(window.location.href);
       url.searchParams.delete('bm-open');
-      history.replaceState(history.state, '', url.pathname + url.search + url.hash);
+      window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
     }
     if (forced || (root.dataset.intro === 'true' && !store.get('oce-bm-intro'))) {
       store.set('oce-bm-tip', '1');
