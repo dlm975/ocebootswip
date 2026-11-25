@@ -386,11 +386,11 @@
         </div>
 
         <div class="bm-intro__step" data-bm-intro-step="done" hidden>
-          <h2 class="bm-intro__title">
-            <span class="bm-intro__star">{{ bm_gold }}</span>
-            Super Like unlocked
+          <h2 class="bm-intro__title bm-intro__unlocked">
+            <span class="bm-intro__unlocked-line"><span class="bm-intro__star">{{ bm_gold }}</span>SUPER LIKE</span>
+            <span>UNLOCKED</span>
           </h2>
-          <p class="bm-intro__text">Tap the star on the boot you love most.</p>
+          <p class="bm-intro__text">Tap the gold flame on the boot you love most.</p>
         </div>
       </div>
     </dialog>
@@ -1649,6 +1649,19 @@
   }
 
   /* "SUPER LIKE = $25 OFF" kept on one line, phones included */
+  /* "SUPER LIKE UNLOCKED": centred on two lines, the gold flame tight against the words */
+  .bm-intro__unlocked {
+    flex-direction: column;
+    gap: 2px;
+    text-align: center;
+  }
+
+  .bm-intro__unlocked-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
   .bm-intro__deal {
     flex-direction: column;
     gap: 6px;
