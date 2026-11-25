@@ -190,10 +190,6 @@
             <a class="bm-primary" data-bm-match-cta href="#">View this boot</a>
             <button type="button" class="bm-secondary" data-bm-again>Keep swiping</button>
           </div>
-          <div class="bm-likes" data-bm-more-wrap hidden>
-            <p class="bm-label">More matches for you</p>
-            <div class="bm-likes__row" data-bm-more></div>
-          </div>
           <div class="bm-likes" data-bm-likes-wrap hidden>
             <div class="bm-likes__head">
               <p class="bm-label">Boots you liked</p>
@@ -1998,17 +1994,6 @@
         go('silos');
         return;
       }
-      // More matches: the next best fits (not already liked), then the boots they liked
-      const likedHandles = new Set(liked.map((boot) => boot.handle));
-      const pool = boots.filter(eligible);
-      const more = (pool.length ? pool : boots.filter(inSize))
-        .filter((boot) => boot.handle !== match.handle && !likedHandles.has(boot.handle))
-        .map((boot) => [fit(boot), boot])
-        .sort((a, b) => b[0] - a[0])
-        .slice(0, 6)
-        .map((pair) => pair[1]);
-      thumbs($('[data-bm-more]'), [match].concat(more));
-      $('[data-bm-more-wrap]').hidden = more.length === 0;
       thumbs($('[data-bm-likes]'), liked);
       $('[data-bm-likes-wrap]').hidden = liked.length === 0;
       showInCard(match, false);
