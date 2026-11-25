@@ -3405,22 +3405,30 @@
     const introError = $('[data-bm-intro-error]');
     let thenPlay = false;
 
-    function introStep(name) {
+    // Show a step; its lines rise in one after another (after `wait` seconds), or start hidden
+    // when `held` (the welcome brings them in itself, once the flame has had the stage)
+    function introStep(name, held) {
       $$('[data-bm-intro-step]').forEach((step) => {
         step.hidden = step.dataset.bmIntroStep !== name;
       });
       const step = $('[data-bm-intro-step="' + name + '"]');
-      if (!reduced()) {
+      $('[data-bm-reward-text]').textContent = rewardText();
+      if (reduced()) return step;
+      if (held) {
+        Array.from(step.children).forEach((child) => {
+          child.style.opacity = '0';
+        });
+      } else {
         animate(step.children, { opacity: [0, 1], transform: ['translateY(14px)', 'none'] }, { duration: 0.55, ease: EASE, delay: stagger(0.07) });
       }
-      $('[data-bm-reward-text]').textContent = rewardText();
+      return step;
     }
 
     function showIntro(step, fromGame) {
       if (intro.open) return;
       thenPlay = !fromGame;
       hideTip();
-      introStep(step);
+      const stepEl = introStep(step, !fromGame);
       introError.textContent = '';
       intro.classList.remove('is-settled');
       flame.classList.remove('is-alive');
@@ -3434,18 +3442,48 @@
       introScrim.style.opacity = '0';
       flame.style.opacity = '0';
       requestAnimationFrame(() => {
-        // The page darkens, then blurs; the flame pops up and comes alive
+        // The page darkens, then blurs
         animate(introScrim, { opacity: [0, 1] }, { duration: fromGame ? 0.3 : 0.6, ease: 'linear' }).finished.then(() => {
           introScrim.style.opacity = '';
           intro.classList.add('is-settled');
         });
+
+        if (fromGame) {
+          animate(
+            flame,
+            { opacity: [0, 1], transform: ['translateY(40px) scale(0.2) rotate(-12deg)', 'none'] },
+            { type: spring, visualDuration: 0.6, bounce: 0.45, delay: 0.05 }
+          ).finished.then(() => {
+            flame.style.opacity = '';
+            flame.classList.add('is-alive');
+          });
+          return;
+        }
+
+        // The welcome: the flame takes centre stage, big and alive, then zooms out a little to its
+        // place above the words, which rise in as it settles
+        const box = flame.getBoundingClientRect();
+        const dy = window.innerHeight / 2 - (box.top + box.height / 2);
+        const big = Math.max(1.2, Math.min(1.9, (window.innerHeight * 0.38) / box.height));
+        const centre = 'translateY(' + dy + 'px) scale(' + big + ')';
+        flame.style.transform = centre;
+        const POP = 0.35;
+        const HOLD = 1.0;
         animate(
           flame,
-          { opacity: [0, 1], transform: ['translateY(40px) scale(0.2) rotate(-12deg)', 'none'] },
-          { type: spring, visualDuration: 0.6, bounce: 0.45, delay: fromGame ? 0.05 : 0.35 }
+          { opacity: [0, 1], transform: ['translateY(' + dy + 'px) scale(0.3) rotate(-14deg)', centre] },
+          { type: spring, visualDuration: 0.7, bounce: 0.4, delay: POP }
         ).finished.then(() => {
           flame.style.opacity = '';
           flame.classList.add('is-alive');
+          animate(flame, { transform: [centre, 'none'] }, { duration: 0.8, ease: EASE, delay: HOLD }).finished.then(() => {
+            flame.style.transform = '';
+          });
+          animate(
+            stepEl.children,
+            { opacity: [0, 1], transform: ['translateY(18px)', 'none'] },
+            { duration: 0.55, ease: EASE, delay: stagger(0.08, { startDelay: HOLD + 0.35 }) }
+          );
         });
       });
     }
