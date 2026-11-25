@@ -387,7 +387,7 @@
 
         <div class="bm-intro__step" data-bm-intro-step="done" hidden>
           <h2 class="bm-intro__title bm-intro__unlocked">
-            <span class="bm-intro__unlocked-line"><span class="bm-intro__star">{{ bm_gold }}</span>SUPER LIKE</span>
+            <span class="bm-intro__unlocked-line"><span class="bm-intro__star">{{ bm_gold }}</span>Super like</span>
             <span>UNLOCKED</span>
           </h2>
           <p class="bm-intro__text">Tap the gold flame on the boot you love most.</p>
@@ -1659,7 +1659,7 @@
   .bm-intro__unlocked-line {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 12px;
   }
 
   .bm-intro__deal {
@@ -2611,6 +2611,7 @@
         line: item.g ? item.g.replace(/-\d+$/, '') : brand,
         brand: brand,
         band: units > 0 ? Math.round(Math.log2(units / 50) * 2) : 0,
+        variants: item.v || [],
       };
     }
 
@@ -3648,6 +3649,47 @@
       });
     }
 
+    // Claim: the boot (in the shopper's size) into the cart, then straight to checkout with the code
+    let shownBoot = null;
+    function variantFor(boot) {
+      const ids = boot.variants || [];
+      const index = sizeValues.length ? boot.sizes.findIndex(sizeIn) : 0;
+      return ids[index >= 0 ? index : 0] || ids[0];
+    }
+
+    async function claimCheckout() {
+      const boot = shownBoot;
+      const claim = $('[data-bm-match-claim]');
+      const label = claim.lastElementChild;
+      const id = boot && variantFor(boot);
+      const checkout = '/checkout?discount=' + encodeURIComponent(CODE);
+      if (!id) {
+        window.location.href = '/discount/' + encodeURIComponent(CODE) + '?redirect=' + encodeURIComponent(boot ? boot.url : '/');
+        return;
+      }
+      label.textContent = 'To checkout…';
+      try {
+        const cart = await fetch('/cart.js', { credentials: 'same-origin' }).then((response) => response.json());
+        if (!cart.items.some((item) => item.variant_id === id)) {
+          await fetch('/cart/add.js', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({ items: [{ id: id, quantity: 1 }] }),
+          });
+        }
+      } catch (e) {
+        /* checkout anyway: the cart has whatever made it in */
+      }
+      window.location.href = checkout;
+    }
+
+    $('[data-bm-match-link]').addEventListener('click', (event) => {
+      if (!event.target.closest('[data-bm-match-claim]')) return;
+      event.preventDefault();
+      claimCheckout();
+    });
+
     function showInCard(boot, animated) {
       $('[data-bm-match-link]').href = boot.url;
       $('[data-bm-match-cta]').href = boot.url;
@@ -3664,11 +3706,14 @@
       $('[data-bm-match-link]').classList.toggle('is-super', isSuper);
       // The gold price and Claim say it's the Super Like; the tag only when there's no code
       $('[data-bm-match-supertag]').hidden = !isSuper || Boolean(CODE);
-      // The Super Liked boot: its price after the discount, and Claim (the discount, then the boot)
+      // Once the Super Like is used the code is on the cart: every full-price boot shows its price
+      // after the discount; the Super Liked one also gets Claim (straight to checkout)
       const deal = $('[data-bm-match-deal]');
       const claim = $('[data-bm-match-claim]');
-      deal.hidden = claim.hidden = !(isSuper && CODE);
-      if (isSuper && CODE) {
+      const discounted = Boolean(CODE) && superState().status === 'used' && !(boot.off > 0);
+      deal.hidden = !discounted;
+      claim.hidden = !(discounted && isSuper);
+      if (discounted) {
         const after = Math.max(0, boot.units - rewardAmount());
         deal.replaceChildren(document.createTextNode(money(after, true) + ' ' + (CURRENCY || 'NZD')), el('small', '', 'with Super Like'));
         claim.lastElementChild.textContent = 'Claim ' + money(rewardAmount());
@@ -3676,6 +3721,7 @@
         $('[data-bm-match-link]').href = claimUrl;
         $('[data-bm-match-cta]').href = claimUrl;
       }
+      shownBoot = boot;
       $$('.bm-like-thumb').forEach((thumb) => thumb.setAttribute('aria-pressed', String(thumb.dataset.handle === boot.handle)));
       if (animated && !reduced()) {
         animate($('[data-bm-match-link]'), { opacity: [0.4, 1], transform: ['scale(0.97)', 'none'] }, { duration: 0.4, ease: EASE });

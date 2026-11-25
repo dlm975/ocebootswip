@@ -5,7 +5,8 @@
   h handle · t title · u url · i image · m price as product cards show it (the shopper's currency,
   with its code) · p price in cents, same currency · c was-price in cents (0 if not on sale) ·
   o % off as the cards' badge rounds it (0 if not on sale) · s sizes in stock · k condition ·
-  g generation tag (without "gen:")
+  g generation tag (without "gen:") · v variant id per size in s (the first in stock), or the
+  first variant's id alone when there are no sizes
 {%- endcomment -%}
 {%- paginate collection.products by 250 -%}
 {"page":{{ paginate.current_page }},"pages":{{ paginate.pages }},"items":[
@@ -44,6 +45,19 @@
       endfor
       assign size_list = sizes | remove_first: '|' | split: '|' | uniq
       assign v1 = p.selected_or_first_available_variant
+      assign ids = ''
+      for label in size_list
+        for v in p.variants
+          if v.available and v.options[size_i] == label
+            assign ids = ids | append: ',' | append: v.id
+            break
+          endif
+        endfor
+      endfor
+      if ids == ''
+        assign ids = ',' | append: v1.id
+      endif
+      assign ids = ids | remove_first: ','
       assign was = 0
       assign off = 0
       if v1.compare_at_price > v1.price
@@ -51,7 +65,7 @@
         assign off = v1.compare_at_price | minus: v1.price | times: 100.0 | divided_by: v1.compare_at_price | round | divided_by: 5.0 | ceil | times: 5
       endif
     -%}
-    {{- sep -}}{"h":{{ p.handle | json }},"t":{{ p.title | json }},"u":{{ p.url | json }},"i":{% if p.featured_image %}{{ p.featured_image | image_url: width: 640 | json }}{% else %}""{% endif %},"m":{{ v1.price | money_with_currency | strip_html | json }},"p":{{ v1.price }},"c":{{ was }},"o":{{ off }},"s":{{ size_list | json }},"k":{{ cond | json }},"g":{{ gen | json }}}
+    {{- sep -}}{"h":{{ p.handle | json }},"t":{{ p.title | json }},"u":{{ p.url | json }},"i":{% if p.featured_image %}{{ p.featured_image | image_url: width: 640 | json }}{% else %}""{% endif %},"m":{{ v1.price | money_with_currency | strip_html | json }},"p":{{ v1.price }},"c":{{ was }},"o":{{ off }},"s":{{ size_list | json }},"k":{{ cond | json }},"g":{{ gen | json }},"v":[{{ ids }}]}
     {%- assign sep = ',' -%}
   {%- endfor -%}
 ]}
