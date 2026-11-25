@@ -1011,12 +1011,14 @@
     object-fit: cover;
   }
 
-  /* A shade at the bottom so the white names read on the grass */
+  /* A slight dark wash over the whole picture, deeper at the bottom, so the white names read */
   .bm-ground__media::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgb(0 0 0 / 0.55), rgb(0 0 0 / 0) 65%);
+    background:
+      linear-gradient(to top, rgb(0 0 0 / 0.5), rgb(0 0 0 / 0) 65%),
+      rgb(0 0 0 / 0.18);
   }
 
   .bm-ground[aria-pressed='true'] {
