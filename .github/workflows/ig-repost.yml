@@ -1,0 +1,80 @@
+name: Instagram repost
+
+# Reposts new @cleats posts to @ftblpov (with credit) every 2 hours.
+# Run it by hand from the Actions tab to repost specific post links.
+# What has been posted is remembered in state.json on the `ig-repost-state` branch.
+on:
+  schedule:
+    - cron: '17 */2 * * *'
+  workflow_dispatch:
+    inputs:
+      links:
+        description: 'Post/reel links to repost (space-separated). Leave empty to repost the newest unposted posts.'
+        required: false
+        default: ''
+      max_posts:
+        description: 'Most posts to repost this run when no links are given'
+        required: false
+        default: '1'
+      dry_run:
+        description: 'Dry run: log what would be posted without posting'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write  # to save state.json to the ig-repost-state branch
+
+concurrency:
+  group: ig-repost
+  cancel-in-progress: false
+
+jobs:
+  repost:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: tools/ig-repost
+    env:
+      IG_USER_ID: ${{ secrets.IG_USER_ID }}
+      ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+      SOURCE_USERNAME: ${{ vars.IG_REPOST_SOURCE || 'cleats' }}
+      EXPECT_ACCOUNT: ${{ vars.IG_REPOST_TARGET || 'ftblpov' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Load state
+        id: state
+        run: |
+          if git fetch --depth=1 origin ig-repost-state 2>/dev/null; then
+            git show FETCH_HEAD:state.json > state.json
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+      # First run ever: mark the existing posts as handled so only posts made from now on get reposted.
+      - name: Seed (first run only)
+        if: steps.state.outputs.found == 'false' && inputs.dry_run != true
+        run: python3 repost.py --seed
+      - name: Repost
+        run: |
+          set -f  # links contain '?', don't glob them
+          args=(--max-posts "${MAX_POSTS:-1}")
+          if [ "$DRY_RUN" = "true" ]; then args+=(--dry-run); fi
+          python3 repost.py "${args[@]}" $LINKS
+        env:
+          LINKS: ${{ inputs.links }}
+          MAX_POSTS: ${{ inputs.max_posts }}
+          DRY_RUN: ${{ inputs.dry_run }}
+      - name: Save state
+        if: always() && inputs.dry_run != true && hashFiles('tools/ig-repost/state.json') != ''
+        run: |
+          cp state.json "$RUNNER_TEMP/state.json"
+          cd "$RUNNER_TEMP"
+          rm -rf st && mkdir st && cd st
+          git init -q -b ig-repost-state
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cp "$RUNNER_TEMP/state.json" .
+          git add state.json
+          git commit -qm "ig-repost state $(date -u +%FT%TZ)"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" ig-repost-state

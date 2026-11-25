@@ -42,12 +42,19 @@ which reads any public Business/Creator account, so nothing from @cleats is shar
    ```
    Links must be @cleats posts from roughly the last 100; use `--lookback 300` for older ones.
 
-## Running it automatically
+## Running it automatically (GitHub Actions)
 
-Run it every couple of hours with cron (keep `state.json`: it's how the tool remembers what it posted):
-```
-0 */2 * * * cd /path/to/tools/ig-repost && IG_USER_ID=... ACCESS_TOKEN=... python3 repost.py >> repost.log 2>&1
-```
+`.github/workflows/ig-repost.yml` runs every 2 hours and reposts new @cleats posts.
+To repost specific links, open Actions → **Instagram repost** → Run workflow and paste them.
+
+Setup, once:
+1. Repo Settings → Secrets and variables → Actions → add secrets **`IG_USER_ID`** (@ftblpov's
+   account ID) and **`IG_ACCESS_TOKEN`** (a long-lived token for @ftblpov).
+2. Merge the workflow into `main` (GitHub only runs schedules from the default branch).
+3. Optional: run it once by hand with **Dry run** ticked to check it.
+
+The first run marks @cleats' existing posts as handled, so only posts made after that get reposted.
+What has been posted is kept in `state.json` on the `ig-repost-state` branch.
 
 ## Options
 
