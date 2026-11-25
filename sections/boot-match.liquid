@@ -1,16 +1,20 @@
 {%- doc -%}
   Boot Match: a swipe game that finds a shopper their boot. A round button (the flame-and-ball
-  mark) floats in the bottom-right corner; it opens a window where boots in stock come up one at a
-  time. Swipe right (or tap the heart) on ones you like, left (or the cross) on ones you don't.
-  Each swipe teaches it what you like: the silo (Mercurial, Predator...), the line within it
-  (Vapor, Superfly), the brand, the condition and the price range. The next boots lean that way,
-  and after a few likes it shows "your match": the boot in stock that best fits everything liked
-  so far, plus the boots you liked, which can be saved to the wishlist in one tap.
+  mark) floats in the bottom-right corner; it opens a window that asks three things, then deals
+  boots one at a time:
+  1. Size: US, UK or EU (the same big type and number grid as the Shop by Size menu), or any size.
+  2. Price: a two-handled slider over a little chart of how many boots sit at each price, in the
+     shopper's own currency (as the product cards show it).
+  3. Up to three favourite silos (Mercurial, Predator...), as tiles with the silo pictures.
+  Only boots in stock that fit all three come up. Swipe right (or tap the heart) on ones you like,
+  left (or the cross) on ones you don't; each swipe teaches it what you like within those silos:
+  the silo, the line (Vapor, Superfly), the condition and the price. The next boots lean that way,
+  and after a few likes it shows "your match": the boot that best fits everything liked so far,
+  plus the liked boots, which can be saved to the wishlist in one tap.
 
   - Boots come from a JSON feed (templates/collection.bootmatch.liquid), loaded only when the game
     opens: the first 250 at once, the rest behind them.
-  - The shopper can pick their US size first; only boots in that size come up.
-  - Everything stays in this browser; nothing is sent anywhere.
+  - The size and silos picked are remembered in this browser; nothing is sent anywhere.
   - Animations: Motion (the house timing); reduced motion: no flying or tilting, just changes.
 {%- enddoc -%}
 
@@ -20,6 +24,9 @@
     assign bm_collection = collections.all
   endif
   assign bm_feed = bm_collection.url | append: '?view=bootmatch'
+
+  # The silos to choose from: key (as the boots' gen: tags start), name, picture in Files
+  assign bm_silos = 'nike-mercurial|Mercurial|Nike|silo-nike-mercurial.jpg,nike-phantom|Phantom|Nike|silo-nike-phantom.jpg,nike-tiempo|Tiempo|Nike|silo-nike-tiempo.jpg,nike-hypervenom|Hypervenom|Nike|silo-nike-hypervenom.jpg,nike-magista|Magista|Nike|silo-nike-magista.jpg,nike-ctr360|CTR360|Nike|silo-nike-ctr360.jpg,nike-total-90|Total 90|Nike|silo-nike-total-90.jpg,adidas-predator|Predator|Adidas|silo-adidas-predator.jpg,adidas-x|X|Adidas|silo-adidas-x.jpg,adidas-f50|F50|Adidas|silo-adidas-f50.jpg,adidas-copa|Copa|Adidas|silo-adidas-copa.jpg,adidas-nemeziz|Nemeziz|Adidas|silo-adidas-nemeziz.jpg,adidas-11pro|11Pro|Adidas|silo-adidas-11pro.jpg,adidas-ace|Ace|Adidas|silo-adidas-ace.jpg,puma-future|Future|Puma|silo-puma-future.jpg,puma-ultra|Ultra|Puma|silo-puma-ultra.jpg,puma-evopower|evoPOWER|Puma|silo-puma-evopower.jpg,mizuno-morelia|Morelia|Mizuno|silo-mizuno-morelia.jpg' | split: ','
 -%}
 
 {%- if section.settings.enabled -%}
@@ -29,6 +36,8 @@
     data-feed="{{ bm_feed }}"
     data-likes-to-match="{{ section.settings.likes_to_match }}"
     data-wishlist-url="{{ routes.all_products_collection_url }}?view=wishlist"
+    data-money-format="{{ shop.money_format | strip_html | escape }}"
+    data-currency="{{ cart.currency.iso_code }}"
   >
     <div class="bm-dock" data-bm-dock>
       <span class="bm-tip" data-bm-tip hidden>{{ section.settings.tip | escape }}</span>
@@ -48,27 +57,104 @@
       <div class="bm-scrim" data-bm-close></div>
       <div class="bm-panel" data-bm-panel>
         <header class="bm-head">
+          <button type="button" class="bm-icon-btn bm-head__back" data-bm-back aria-label="Back" hidden>
+            {%- render 'gicon', name: 'chevron_left', size: 24 -%}
+          </button>
           {%- render 'boot-match-logo', id: 'bm-flame-head', class: 'bm-head__logo' -%}
           <h2 class="bm-head__title" id="bm-title-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+          <span class="bm-head__step" data-bm-step></span>
           <button type="button" class="bm-icon-btn bm-head__close" data-bm-close aria-label="Close">
             {%- render 'gicon', name: 'close', size: 22 -%}
           </button>
         </header>
 
-        {%- comment -%} 1. Start: what it is, and the shopper's size {%- endcomment -%}
-        <div class="bm-screen bm-intro" data-bm-screen="intro">
-          <p class="bm-intro__lead">{{ section.settings.intro | escape }}</p>
-          <p class="bm-label" id="bm-size-label-{{ section.id }}">Your size (US)</p>
-          <div
-            class="bm-sizes"
-            data-bm-sizes
-            role="radiogroup"
-            aria-labelledby="bm-size-label-{{ section.id }}"
-          ></div>
-          <button type="button" class="bm-primary" data-bm-start>Start swiping</button>
+        {%- comment -%} 1. Size, in the Shop by Size menu's style {%- endcomment -%}
+        <div class="bm-screen bm-step" data-bm-screen="size">
+          <p class="bm-step__lead">{{ section.settings.intro | escape }}</p>
+          <p class="bm-step__q">What size are you?</p>
+          <div class="size-drill size-drill--drawer bm-sizepick" data-active>
+            <ul class="size-drill__systems list-unstyled" role="list">
+              {%- for system in (1..3) -%}
+                {%- liquid
+                  case system
+                    when 1
+                      assign system_name = 'US'
+                    when 2
+                      assign system_name = 'UK'
+                    else
+                      assign system_name = 'EU'
+                  endcase
+                -%}
+                <li class="size-drill__system-item">
+                  <button
+                    type="button"
+                    class="size-drill__system"
+                    aria-expanded="{% if system == 1 %}true{% else %}false{% endif %}"
+                    data-bm-system="{{ system_name }}"
+                  >
+                    {{- system_name -}}
+                  </button>
+                </li>
+              {%- endfor -%}
+            </ul>
+            <div class="size-drill__panels bm-sizepick__panel">
+              <ul class="size-drill__sizes list-unstyled" role="list" data-bm-sizes></ul>
+            </div>
+          </div>
+          <div class="bm-step__foot">
+            <button type="button" class="bm-link" data-bm-anysize>Any size</button>
+            <button type="button" class="bm-primary" data-bm-next="price">Next</button>
+          </div>
         </div>
 
-        {%- comment -%} 2. The deck {%- endcomment -%}
+        {%- comment -%} 2. Price {%- endcomment -%}
+        <div class="bm-screen bm-step" data-bm-screen="price" hidden>
+          <p class="bm-step__q">What do you want to spend?</p>
+          <p class="bm-price__value" data-bm-price-label aria-live="polite"></p>
+          <div class="bm-price">
+            <div class="bm-hist" data-bm-hist aria-hidden="true"></div>
+            <div class="bm-range" data-bm-range>
+              <div class="bm-range__track"><div class="bm-range__fill" data-bm-fill></div></div>
+              <input type="range" class="bm-range__input" data-bm-min aria-label="Lowest price">
+              <input type="range" class="bm-range__input" data-bm-max aria-label="Highest price">
+            </div>
+          </div>
+          <p class="bm-step__count" data-bm-price-count></p>
+          <div class="bm-step__foot">
+            <span></span>
+            <button type="button" class="bm-primary" data-bm-next="silos">Next</button>
+          </div>
+        </div>
+
+        {%- comment -%} 3. Up to three favourite silos {%- endcomment -%}
+        <div class="bm-screen bm-step" data-bm-screen="silos" hidden>
+          <p class="bm-step__q">Pick up to 3 favourite silos</p>
+          <div class="bm-silos" data-bm-silos role="group" aria-label="Favourite silos">
+            {%- for entry in bm_silos -%}
+              {%- assign bits = entry | split: '|' -%}
+              <button type="button" class="bm-silo" data-silo="{{ bits[0] }}" aria-pressed="false">
+                <span class="bm-silo__media">
+                  <img
+                    src="{{ bits[3] | file_img_url: '400x' }}"
+                    alt=""
+                    width="400"
+                    height="235"
+                    loading="lazy"
+                  >
+                </span>
+                <span class="bm-silo__name">{{ bits[1] }}</span>
+                <span class="bm-silo__count" data-bm-silo-count></span>
+                <span class="bm-silo__badge" data-bm-silo-badge aria-hidden="true"></span>
+              </button>
+            {%- endfor -%}
+          </div>
+          <div class="bm-step__foot">
+            <button type="button" class="bm-link" data-bm-anysilo>Any silo</button>
+            <button type="button" class="bm-primary" data-bm-start>Start swiping</button>
+          </div>
+        </div>
+
+        {%- comment -%} 4. The deck {%- endcomment -%}
         <div class="bm-screen bm-play" data-bm-screen="play" hidden>
           <p class="bm-status" data-bm-status aria-live="polite"></p>
           <div class="bm-deck" data-bm-deck></div>
@@ -85,7 +171,7 @@
           </div>
         </div>
 
-        {%- comment -%} 3. The match {%- endcomment -%}
+        {%- comment -%} 5. The match {%- endcomment -%}
         <div class="bm-screen bm-result" data-bm-screen="match" hidden>
           <p class="bm-result__kicker">
             {%- render 'boot-match-logo', id: 'bm-flame-match', class: 'bm-result__logo' -%}
@@ -211,12 +297,13 @@
     background: transparent;
   }
 
+  /* The page behind: darkened and blurred */
   .bm-scrim {
     position: absolute;
     inset: 0;
-    background: rgb(18 18 18 / 0.32);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
+    background: rgb(8 8 8 / 0.62);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
   }
 
   .bm-panel {
@@ -248,11 +335,6 @@
       transform-origin: 100% 100%;
     }
 
-    .bm-scrim {
-      background: rgb(18 18 18 / 0.12);
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-    }
   }
 
   .bm-head {
@@ -351,46 +433,313 @@
     cursor: pointer;
   }
 
-  /* ---- 1. Start ---- */
-  .bm-intro__lead {
-    margin: 4px 0 20px;
-    font-size: 16px;
-    line-height: 1.45;
-    color: rgb(18 18 18 / 0.8);
+  /* ---- 1–3. The questions ---- */
+  .bm-head__back[hidden],
+  .bm-head__step:empty {
+    display: none;
   }
 
-  .bm-sizes {
+  .bm-head__back {
+    margin-inline-start: -6px;
+    background: none;
+  }
+
+  .bm-head__step {
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: rgb(18 18 18 / 0.5);
+  }
+
+  .bm-step__lead {
+    margin: 0 0 14px;
+    font-size: 15px;
+    line-height: 1.45;
+    color: rgb(18 18 18 / 0.75);
+  }
+
+  .bm-step__q {
+    margin: 0 0 12px;
+    font-family: var(--font-heading--family);
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .bm-step__count {
+    margin: 10px 0 0;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    color: rgb(18 18 18 / 0.6);
+  }
+
+  .bm-step__foot {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-content: flex-start;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: auto;
+    padding-top: 14px;
+  }
+
+  .bm-step__foot .bm-primary {
+    flex: 0 1 auto;
+    min-width: 50%;
+  }
+
+  .bm-primary:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  /* Size: the Shop by Size menu's type and grid, inside the window */
+  .bm .bm-sizepick {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    padding-block: 0;
+  }
+
+  .bm .bm-sizepick .size-drill__system {
+    font-size: 44px;
+  }
+
+  .bm .bm-sizepick__panel {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    margin-bottom: 16px;
+    overscroll-behavior: contain;
   }
 
-  .bm-size {
-    min-width: 56px;
-    height: 40px;
-    padding: 0 12px;
-    border: 1.5px solid rgb(18 18 18 / 0.14);
-    border-radius: 999px;
+  .bm .bm-sizepick .size-drill__sizes {
+    padding-block: 14px 6px;
+  }
+
+  .bm .bm-sizepick .size-drill__size {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    cursor: pointer;
+    justify-content: flex-start;
+  }
+
+  .bm .bm-sizepick .size-drill__size[aria-pressed='true'] .size-drill__value {
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-underline-offset: 5px;
+  }
+
+  .bm .bm-sizepick[data-picked] .size-drill__size[aria-pressed='false'] {
+    opacity: 0.45;
+  }
+
+  .bm-link[aria-pressed='true'] {
+    text-decoration-thickness: 2px;
+  }
+
+  /* Price: how many boots at each price, and a two-handled slider under it */
+  .bm-price__value {
+    margin: 0 0 18px;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bm-price {
+    padding: 0 4px;
+  }
+
+  .bm-hist {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 72px;
+  }
+
+  .bm-hist__bar {
+    flex: 1;
+    min-height: 2px;
+    border-radius: 3px 3px 0 0;
+    background: rgb(18 18 18 / 0.12);
+    transition: background-color 0.18s;
+  }
+
+  .bm-hist__bar.is-in {
+    background: #121212;
+  }
+
+  .bm-range {
+    position: relative;
+    height: 36px;
+  }
+
+  .bm-range__track {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 4px;
+    margin-top: -2px;
+    border-radius: 2px;
+    background: rgb(18 18 18 / 0.12);
+  }
+
+  .bm-range__fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-radius: 2px;
+    background: #121212;
+  }
+
+  .bm-range__input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    background: none;
+    pointer-events: none;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .bm-range__input::-webkit-slider-runnable-track {
+    background: none;
+    border: 0;
+  }
+
+  .bm-range__input::-moz-range-track {
+    background: none;
+    border: 0;
+  }
+
+  .bm-range__input::-webkit-slider-thumb {
+    width: 28px;
+    height: 28px;
+    border: 3px solid #121212;
+    border-radius: 50%;
     background: #ffffff;
+    box-shadow: 0 2px 8px rgb(18 18 18 / 0.2);
+    pointer-events: auto;
+    cursor: grab;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .bm-range__input::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border: 3px solid #121212;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgb(18 18 18 / 0.2);
+    pointer-events: auto;
+    cursor: grab;
+  }
+
+  .bm-range__input:focus-visible::-webkit-slider-thumb {
+    outline: 2px solid #121212;
+    outline-offset: 2px;
+  }
+
+  /* Silos: picture tiles, up to three picked (numbered in the order picked) */
+  .bm-silos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    align-content: start;
+    padding: 2px;
+  }
+
+  .bm-silo {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+    padding: 6px 6px 8px;
+    border: 0;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 0 0 1px rgb(18 18 18 / 0.1);
     color: #121212;
     font: inherit;
-    font-size: 14px;
-    font-weight: 600;
+    text-align: left;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: box-shadow 0.18s, opacity 0.18s;
   }
 
-  .bm-size[aria-checked='true'] {
-    border-color: #121212;
+  .bm-silo[aria-pressed='true'] {
+    box-shadow: 0 0 0 2.5px #121212;
+  }
+
+  .bm-silo:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  .bm-silos[data-full] .bm-silo[aria-pressed='false']:not(:disabled) {
+    opacity: 0.5;
+  }
+
+  .bm-silo__media {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1.7;
+    margin-bottom: 4px;
+  }
+
+  .bm-silo__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .bm-silo__name {
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .bm-silo__count {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgb(18 18 18 / 0.55);
+  }
+
+  .bm-silo__badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
     background: #121212;
     color: #ffffff;
+    font-size: 12px;
+    font-weight: 800;
   }
 
-  /* ---- 2. The deck ---- */
+  .bm-silo__badge:empty {
+    display: none;
+  }
+
+  /* ---- 4. The deck ---- */
   .bm-status {
     min-height: 18px;
     margin: 0 0 10px;
@@ -449,6 +798,22 @@
     object-fit: contain;
     pointer-events: none;
     -webkit-user-drag: none;
+  }
+
+  /* The sale sticker straddles the bottom edge of the photo, as on the product cards */
+  .bm-card__sale {
+    margin: 0;
+    padding-inline: 12px;
+  }
+
+  .bm-card__sale .bfsale-fire--card {
+    left: 12px;
+  }
+
+  .bm-was {
+    font-size: 0.8em;
+    font-weight: 500;
+    color: rgb(18 18 18 / 0.5);
   }
 
   .bm-card__info {
@@ -565,7 +930,7 @@
     cursor: default;
   }
 
-  /* ---- 3. The match ---- */
+  /* ---- 5. The match ---- */
   .bm-result {
     overflow-y: auto;
   }
@@ -707,6 +1072,7 @@
     root.dataset.ready = '1';
 
     const $ = (selector) => root.querySelector(selector);
+    const $$ = (selector) => Array.from(root.querySelectorAll(selector));
     const dock = $('[data-bm-dock]');
     const tip = $('[data-bm-tip]');
     const dlg = $('[data-bm-dlg]');
@@ -714,8 +1080,9 @@
     const scrim = $('.bm-scrim');
     const deck = $('[data-bm-deck]');
     const status = $('[data-bm-status]');
-    const sizesEl = $('[data-bm-sizes]');
     const undoBtn = $('[data-bm-undo]');
+    const backBtn = $('[data-bm-back]');
+    const stepEl = $('[data-bm-step]');
 
     const EASE = [0.3, 0.7, 0.3, 1];
     const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -723,6 +1090,8 @@
     const dur = (seconds) => (reduced() ? 0 : seconds);
     const LIKES_TO_MATCH = Math.max(2, Number(root.dataset.likesToMatch) || 4);
     const MAX_SWIPES = 16;
+    const CURRENCY = root.dataset.currency || '';
+    const MONEY_FORMAT = root.dataset.moneyFormat || '${amount}';
 
     const store = {
       get(key) {
@@ -741,15 +1110,27 @@
       },
     };
 
+    /* Money in the shop's own format (as the product cards), in the shopper's currency */
+    function money(units, decimals) {
+      const fixed = decimals ? Number(units).toFixed(2) : String(Math.round(units));
+      const [whole, cents] = fixed.split('.');
+      const group = (separator) => whole.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+      return MONEY_FORMAT.replace(/\{\{\s*(\w+)\s*\}\}/, (all, kind) => {
+        if (kind === 'amount_no_decimals') return group(',');
+        if (kind === 'amount_with_comma_separator') return group('.') + (cents ? ',' + cents : '');
+        if (kind === 'amount_no_decimals_with_comma_separator') return group('.');
+        if (kind === 'amount_with_apostrophe_separator') return group("'") + (cents ? '.' + cents : '');
+        return group(',') + (cents ? '.' + cents : '');
+      });
+    }
+
     /* ---------- The launcher: pops in once the page has settled ---------- */
     setTimeout(() => {
       dock.classList.add('is-shown');
       if (!reduced()) {
         animate(dock, { opacity: [0, 1], transform: ['translateY(12px) scale(0.8)', 'none'] }, { duration: 0.55, ease: EASE });
       }
-      if (!store.get('oce-bm-tip')) {
-        setTimeout(showTip, 1400);
-      }
+      if (!store.get('oce-bm-tip')) setTimeout(showTip, 1400);
     }, 1200);
 
     function showTip() {
@@ -772,7 +1153,7 @@
     let loading = null;
     let fullyLoaded = false;
 
-    function silo(gen) {
+    function siloOf(gen) {
       if (!gen) return '';
       const parts = gen.split('-');
       let name = parts[1] || '';
@@ -781,41 +1162,38 @@
       return parts[0] + '-' + name;
     }
 
-    function line(gen) {
-      // The generation without its number: nike-mercurial-vapor-14 -> nike-mercurial-vapor
-      return gen ? gen.replace(/-\d+$/, '') : '';
-    }
-
-    function usSizes(labels) {
-      const out = [];
-      (labels || []).forEach((label) => {
-        const found = /US\s*([\d.]+)/i.exec(label);
-        if (found) out.push(found[1]);
-      });
-      return out;
-    }
-
-    function priceValue(text) {
-      const n = parseFloat(String(text).replace(/[^\d.]/g, ''));
-      return isNaN(n) ? 0 : n;
+    // "US 9 - UK 8 - EU 42.5" -> { US: '9', UK: '8', EU: '42.5' }
+    function sizeSet(label) {
+      const set = {};
+      String(label)
+        .split(' - ')
+        .forEach((part) => {
+          const found = /^\s*(US|UK|EU)\s+(.+?)\s*$/i.exec(part);
+          if (found) set[found[1].toUpperCase()] = found[2];
+        });
+      return set;
     }
 
     function prepare(item) {
       const brand = (item.t.split(' ')[0] || '').toLowerCase();
-      const price = priceValue(item.m);
+      const units = (item.p || 0) / 100;
       return {
         handle: item.h,
         title: item.t,
         url: item.u,
         image: item.i,
         price: item.m,
-        sizes: item.s || [],
-        us: usSizes(item.s),
+        units: units,
+        was: (item.c || 0) / 100,
+        off: item.o || 0,
+        sale: item.o > 0 ? 'yes' : 'no',
+        labels: item.s || [],
+        sizes: (item.s || []).map(sizeSet),
         condition: item.k || '',
-        silo: silo(item.g) || brand,
-        line: line(item.g) || brand,
+        silo: siloOf(item.g) || brand,
+        line: item.g ? item.g.replace(/-\d+$/, '') : brand,
         brand: brand,
-        band: price > 0 ? Math.round(Math.log2(price / 50)) : 0,
+        band: units > 0 ? Math.round(Math.log2(units / 50) * 2) : 0,
       };
     }
 
@@ -830,19 +1208,18 @@
       loading = fetchPage(1).then((first) => {
         boots = first.items.filter((item) => item.i).map(prepare);
         const pages = Math.min(first.pages || 1, 8);
-        // The rest arrive behind the first page, one after another
         (async () => {
           for (let page = 2; page <= pages; page++) {
             try {
               const next = await fetchPage(page);
               boots = boots.concat(next.items.filter((item) => item.i).map(prepare));
-              onMoreBoots();
+              refresh();
             } catch (e) {
               break;
             }
           }
           fullyLoaded = true;
-          onMoreBoots();
+          refresh();
         })();
       });
       loading.catch(() => {
@@ -851,40 +1228,254 @@
       return loading;
     }
 
-    /* ---------- Size ---------- */
-    let size = store.get('oce-bm-size') || '';
+    /* ---------- The shopper's answers ---------- */
+    let system = store.get('oce-bm-system') || 'US';
+    let sizeValue = store.get('oce-bm-size2') || '';
+    let priceLo = null;
+    let priceHi = null;
+    let picked = (store.get('oce-bm-silos') || '').split(',').filter(Boolean);
 
-    function renderSizes() {
-      const counts = new Map();
-      boots.forEach((boot) => boot.us.forEach((us) => counts.set(us, (counts.get(us) || 0) + 1)));
-      const list = Array.from(counts.keys()).sort((a, b) => parseFloat(a) - parseFloat(b));
-      if (size && !counts.has(size) && fullyLoaded) size = '';
-      sizesEl.replaceChildren();
-      const add = (value, label) => {
-        const chip = document.createElement('button');
-        chip.type = 'button';
-        chip.className = 'bm-size';
-        chip.setAttribute('role', 'radio');
-        chip.setAttribute('aria-checked', String(value === size));
-        chip.dataset.size = value;
-        chip.textContent = label;
-        sizesEl.appendChild(chip);
-      };
-      add('', 'Any size');
-      list.forEach((us) => add(us, 'US ' + us));
+    const inSize = (boot) => !sizeValue || boot.sizes.some((set) => set[system] === sizeValue);
+    const inPrice = (boot) => (priceLo === null || boot.units >= priceLo) && (priceHi === null || boot.units <= priceHi);
+    const inSilos = (boot) => !picked.length || picked.includes(boot.silo);
+    const eligible = (boot) => inSize(boot) && inPrice(boot) && inSilos(boot);
+
+    function numeric(value) {
+      const [whole, fraction] = String(value).split(' ');
+      let n = parseFloat(whole) || 0;
+      if (fraction && fraction.includes('/')) {
+        const [a, b] = fraction.split('/');
+        n += Number(a) / Number(b);
+      }
+      return n;
     }
 
-    sizesEl.addEventListener('click', (event) => {
-      const chip = event.target.closest('[data-size]');
-      if (!chip) return;
-      size = chip.dataset.size;
-      store.set('oce-bm-size', size);
-      sizesEl.querySelectorAll('[data-size]').forEach((other) => {
-        other.setAttribute('aria-checked', String(other === chip));
+    const pretty = (value) => String(value).replace(' 1/3', '⅓').replace(' 2/3', '⅔').replace(' 1/2', '½');
+
+    /* 1. Size: US / UK / EU, then the sizes in stock in that system */
+    const sizePick = $('.bm-sizepick');
+    const sizeList = $('[data-bm-sizes]');
+
+    function renderSizes(animated) {
+      $$('[data-bm-system]').forEach((button) => {
+        button.setAttribute('aria-expanded', String(button.dataset.bmSystem === system));
+      });
+      const counts = new Map();
+      boots.forEach((boot) => {
+        const values = new Set(boot.sizes.map((set) => set[system]).filter(Boolean));
+        values.forEach((value) => counts.set(value, (counts.get(value) || 0) + 1));
+      });
+      const values = Array.from(counts.keys()).sort((a, b) => numeric(a) - numeric(b));
+      if (sizeValue && fullyLoaded && !counts.has(sizeValue)) sizeValue = '';
+      sizeList.replaceChildren();
+      values.forEach((value) => {
+        const item = document.createElement('li');
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'size-drill__size';
+        button.dataset.value = value;
+        button.setAttribute('aria-pressed', String(value === sizeValue));
+        button.setAttribute('aria-label', system + ' ' + value + ', ' + counts.get(value) + ' boots');
+        const shown = document.createElement('span');
+        shown.className = 'size-drill__value';
+        shown.textContent = pretty(value);
+        const count = document.createElement('span');
+        count.className = 'size-drill__count';
+        count.textContent = counts.get(value);
+        button.append(shown, count);
+        item.appendChild(button);
+        sizeList.appendChild(item);
+      });
+      if (!values.length) {
+        const item = document.createElement('li');
+        item.className = 'bm-step__count';
+        item.textContent = 'Loading sizes…';
+        sizeList.appendChild(item);
+      }
+      sizePick.toggleAttribute('data-picked', Boolean(sizeValue));
+      $('[data-bm-anysize]').setAttribute('aria-pressed', String(!sizeValue));
+      if (animated && !reduced()) {
+        animate(sizeList, { opacity: [0, 1], transform: ['translateY(-12px)', 'none'] }, { duration: 0.55, ease: EASE });
+      }
+    }
+
+    $$('[data-bm-system]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const next = button.dataset.bmSystem;
+        if (next === system) return;
+        // Keep the shopper's size: the most common matching size in the new system
+        if (sizeValue) {
+          const tally = new Map();
+          boots.forEach((boot) =>
+            boot.sizes.forEach((set) => {
+              if (set[system] === sizeValue && set[next]) tally.set(set[next], (tally.get(set[next]) || 0) + 1);
+            })
+          );
+          let best = '';
+          let most = 0;
+          tally.forEach((n, value) => {
+            if (n > most) {
+              most = n;
+              best = value;
+            }
+          });
+          sizeValue = best;
+        }
+        system = next;
+        store.set('oce-bm-system', system);
+        store.set('oce-bm-size2', sizeValue);
+        renderSizes(true);
       });
     });
 
-    /* ---------- What the shopper likes ---------- */
+    sizeList.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-value]');
+      if (!button) return;
+      sizeValue = sizeValue === button.dataset.value ? '' : button.dataset.value;
+      store.set('oce-bm-size2', sizeValue);
+      $$('.bm-sizepick .size-drill__size').forEach((other) => {
+        other.setAttribute('aria-pressed', String(other.dataset.value === sizeValue));
+      });
+      sizePick.toggleAttribute('data-picked', Boolean(sizeValue));
+      $('[data-bm-anysize]').setAttribute('aria-pressed', String(!sizeValue));
+    });
+
+    $('[data-bm-anysize]').addEventListener('click', () => {
+      sizeValue = '';
+      store.set('oce-bm-size2', '');
+      renderSizes(false);
+      go('price');
+    });
+
+    /* 2. Price: a slider over a chart of how many boots sit at each price */
+    const minInput = $('[data-bm-min]');
+    const maxInput = $('[data-bm-max]');
+    const fillEl = $('[data-bm-fill]');
+    const hist = $('[data-bm-hist]');
+    const BINS = 24;
+    let bounds = { lo: 0, hi: 0, step: 10 };
+
+    function renderPrice() {
+      const pool = boots.filter(inSize);
+      const prices = pool.map((boot) => boot.units).filter((n) => n > 0);
+      if (!prices.length) {
+        $('[data-bm-price-label]').textContent = boots.length ? 'No boots in that size yet' : 'Loading…';
+        $('[data-bm-price-count]').textContent = '';
+        hist.replaceChildren();
+        return;
+      }
+      const min = Math.min(...prices);
+      const max = Math.max(...prices);
+      const spread = max - min;
+      const step = spread <= 300 ? 5 : spread <= 1500 ? 10 : spread <= 4000 ? 25 : 50;
+      const lo = Math.floor(min / step) * step;
+      const hi = Math.max(lo + step, Math.ceil(max / step) * step);
+      bounds = { lo, hi, step };
+      [minInput, maxInput].forEach((input) => {
+        input.min = lo;
+        input.max = hi;
+        input.step = step;
+      });
+      minInput.value = priceLo === null ? lo : Math.max(lo, Math.min(priceLo, hi));
+      maxInput.value = priceHi === null ? hi : Math.min(hi, Math.max(priceHi, lo));
+
+      // The chart: boots per slice of the price range
+      const bins = new Array(BINS).fill(0);
+      prices.forEach((n) => {
+        bins[Math.min(BINS - 1, Math.floor(((n - lo) / (hi - lo)) * BINS))] += 1;
+      });
+      const tallest = Math.max(...bins, 1);
+      hist.replaceChildren();
+      bins.forEach((n, index) => {
+        const bar = document.createElement('span');
+        bar.className = 'bm-hist__bar';
+        bar.style.height = Math.max(3, (n / tallest) * 100) + '%';
+        bar.dataset.from = String(lo + ((hi - lo) * index) / BINS);
+        bar.dataset.to = String(lo + ((hi - lo) * (index + 1)) / BINS);
+        hist.appendChild(bar);
+      });
+      updatePrice();
+    }
+
+    function updatePrice() {
+      let low = Number(minInput.value);
+      let high = Number(maxInput.value);
+      if (low > high - bounds.step) {
+        if (document.activeElement === minInput) {
+          low = high - bounds.step;
+          minInput.value = low;
+        } else {
+          high = low + bounds.step;
+          maxInput.value = high;
+        }
+      }
+      priceLo = low <= bounds.lo ? null : low;
+      priceHi = high >= bounds.hi ? null : high;
+      const span = bounds.hi - bounds.lo || 1;
+      fillEl.style.left = ((low - bounds.lo) / span) * 100 + '%';
+      fillEl.style.right = (1 - (high - bounds.lo) / span) * 100 + '%';
+      $$('.bm-hist__bar').forEach((bar) => {
+        bar.classList.toggle('is-in', Number(bar.dataset.to) > low && Number(bar.dataset.from) < high);
+      });
+      $('[data-bm-price-label]').textContent =
+        money(low) + ' – ' + money(high) + (priceHi === null ? '+' : '') + (CURRENCY ? ' ' + CURRENCY : '');
+      const count = boots.filter((boot) => inSize(boot) && inPrice(boot)).length;
+      $('[data-bm-price-count]').textContent =
+        count + (count === 1 ? ' boot' : ' boots') + (sizeValue ? ' in ' + system + ' ' + pretty(sizeValue) : '') + ' at this price';
+      $('[data-bm-next="silos"]').disabled = count === 0;
+    }
+
+    minInput.addEventListener('input', updatePrice);
+    maxInput.addEventListener('input', updatePrice);
+
+    /* 3. Up to three favourite silos */
+    const silosEl = $('[data-bm-silos]');
+
+    function renderSilos() {
+      const counts = new Map();
+      boots.forEach((boot) => {
+        if (inSize(boot) && inPrice(boot)) counts.set(boot.silo, (counts.get(boot.silo) || 0) + 1);
+      });
+      if (fullyLoaded) picked = picked.filter((silo) => counts.get(silo));
+      $$('.bm-silo').forEach((tile) => {
+        const n = counts.get(tile.dataset.silo) || 0;
+        const order = picked.indexOf(tile.dataset.silo);
+        tile.setAttribute('aria-pressed', String(order >= 0));
+        tile.disabled = n === 0 && order < 0 && fullyLoaded;
+        tile.querySelector('[data-bm-silo-count]').textContent = n ? n + (n === 1 ? ' boot' : ' boots') : fullyLoaded ? 'None in range' : '…';
+        tile.querySelector('[data-bm-silo-badge]').textContent = order >= 0 ? String(order + 1) : '';
+      });
+      silosEl.toggleAttribute('data-full', picked.length >= 3);
+      const start = $('[data-bm-start]');
+      start.textContent = picked.length ? 'Start swiping' : 'Pick a silo';
+      start.disabled = !picked.length;
+    }
+
+    silosEl.addEventListener('click', (event) => {
+      const tile = event.target.closest('.bm-silo');
+      if (!tile || tile.disabled) return;
+      const silo = tile.dataset.silo;
+      if (picked.includes(silo)) {
+        picked = picked.filter((other) => other !== silo);
+      } else if (picked.length < 3) {
+        picked.push(silo);
+        if (!reduced()) animate(tile, { transform: ['scale(0.94)', 'none'] }, { type: spring, visualDuration: 0.3, bounce: 0.4 });
+      } else {
+        // Already three: a little shake on the full set
+        if (!reduced()) animate(tile, { transform: ['translateX(0)', 'translateX(-4px)', 'translateX(4px)', 'translateX(0)'] }, { duration: 0.25 });
+        return;
+      }
+      store.set('oce-bm-silos', picked.join(','));
+      renderSilos();
+    });
+
+    $('[data-bm-anysilo]').addEventListener('click', () => {
+      picked = [];
+      store.set('oce-bm-silos', '');
+      start();
+    });
+
+    /* ---------- Learning what the shopper likes, within their answers ---------- */
     let taste;
     let seen;
     let liked;
@@ -893,7 +1484,7 @@
     let target;
 
     function reset() {
-      taste = { silo: {}, line: {}, brand: {}, condition: {}, band: {} };
+      taste = { silo: {}, line: {}, brand: {}, condition: {}, band: {}, sale: {} };
       seen = new Set();
       liked = [];
       history = [];
@@ -902,12 +1493,19 @@
     }
     reset();
 
-    const WEIGHTS = { silo: 3, line: 1.5, brand: 1, condition: 0.8, band: 0.8 };
+    // How much each thing counts. Liking sale boots raises "sale" and pulls the price band down,
+    // so a shopper who keeps liking sale boots is shown more sale boots and cheaper ones.
+    const WEIGHTS = { silo: 3, line: 1.5, brand: 1, condition: 0.8, band: 1, sale: 1.4 };
 
     function learn(boot, amount) {
       Object.keys(WEIGHTS).forEach((key) => {
         const value = boot[key];
         taste[key][value] = (taste[key][value] || 0) + amount;
+      });
+      // Neighbouring price bands count a little too, so a budget emerges rather than exact prices
+      [-1, 1].forEach((offset) => {
+        const near = boot.band + offset;
+        taste.band[near] = (taste.band[near] || 0) + amount * 0.4;
       });
     }
 
@@ -919,29 +1517,21 @@
       return total;
     }
 
-    function inSize(boot) {
-      return !size || boot.us.includes(size);
-    }
-
-    function available() {
-      return boots.filter((boot) => !seen.has(boot.handle) && inSize(boot));
-    }
-
     function pickNext(exclude) {
-      const pool = available().filter((boot) => !exclude.has(boot.handle));
+      const pool = boots.filter((boot) => eligible(boot) && !seen.has(boot.handle) && !exclude.has(boot.handle));
       if (!pool.length) return null;
-      // Early on (or with nothing liked yet), show the range: a silo not shown recently
-      if (liked.length === 0 || swipes < 4) {
-        const shownSilos = new Set(history.slice(-6).map((step) => step.boot.silo));
-        const fresh = pool.filter((boot) => !shownSilos.has(boot.silo));
+      // First few (or nothing liked yet): take turns between the chosen silos
+      if (liked.length === 0 || swipes < 3) {
+        const recent = new Set(history.slice(-Math.max(1, picked.length - 1)).map((step) => step.boot.silo));
+        const fresh = pool.filter((boot) => !recent.has(boot.silo));
         const from = fresh.length ? fresh : pool;
         return from[Math.floor(Math.random() * from.length)];
       }
-      // Then lean towards what's liked, with some surprise (one in four is a wildcard)
+      // Then lean towards what's liked, with one in four a wildcard so it stays fun
       if (Math.random() < 0.25) return pool[Math.floor(Math.random() * pool.length)];
+      const sample = pool.length > 150 ? pool.slice().sort(() => Math.random() - 0.5).slice(0, 150) : pool;
       let best = null;
       let bestScore = -Infinity;
-      const sample = pool.length > 120 ? pool.slice().sort(() => Math.random() - 0.5).slice(0, 120) : pool;
       sample.forEach((boot) => {
         const score = fit(boot) + Math.random() * 1.2;
         if (score > bestScore) {
@@ -953,12 +1543,10 @@
     }
 
     function bestMatch() {
-      // The boot in stock (in their size) that best fits everything liked, seen or not
       const likedHandles = new Set(liked.map((boot) => boot.handle));
-      const pool = boots.filter((boot) => inSize(boot));
       let best = null;
       let bestScore = -Infinity;
-      pool.forEach((boot) => {
+      boots.filter(eligible).forEach((boot) => {
         const score = fit(boot) + (likedHandles.has(boot.handle) ? 0.5 : 0);
         if (score > bestScore) {
           bestScore = score;
@@ -969,15 +1557,52 @@
     }
 
     /* ---------- Cards ---------- */
-    function cardFor(boot) {
-      const card = document.createElement('article');
-      card.className = 'bm-card';
-      card.dataset.handle = boot.handle;
-      card.setAttribute('aria-label', boot.title);
+    function el(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    }
 
-      const media = document.createElement('div');
-      media.className = 'bm-card__media';
-      const img = document.createElement('img');
+    // The site's sale badge (snippets/sale-badge.liquid): flames and "35% off" on the image's edge
+    function saleBadge(boot) {
+      const anchor = el('div', 'bfsale-badge-anchor bm-card__sale');
+      const fire = el('span', 'bfsale-fire bfsale-fire--card');
+      const flames = el('span', 'bfsale-fire__flames');
+      flames.setAttribute('aria-hidden', 'true');
+      for (let i = 0; i < 7; i++) flames.appendChild(el('i', 'bfsale-fire__flame'));
+      for (let i = 0; i < 3; i++) flames.appendChild(el('i', 'bfsale-fire__ember'));
+      fire.append(flames, el('span', 'bfsale-badge sale-badge', boot.off + '% off'));
+      anchor.appendChild(fire);
+      return anchor;
+    }
+
+    function priceLine(boot, className) {
+      const line = el('p', className);
+      line.appendChild(el('span', '', boot.price));
+      if (boot.off > 0 && boot.was > 0) {
+        const was = el('s', 'bm-was', money(boot.was, true));
+        line.append(' ', was);
+      }
+      return line;
+    }
+
+    function metaText(boot) {
+      const parts = [];
+      if (boot.condition) parts.push(boot.condition);
+      const index = sizeValue ? boot.sizes.findIndex((set) => set[system] === sizeValue) : 0;
+      const label = boot.labels[index >= 0 ? index : 0];
+      if (label) parts.push(label.replace(/\s*-\s*/g, ' · '));
+      return parts.join(' · ');
+    }
+
+    function cardFor(boot) {
+      const card = el('article', 'bm-card');
+      card.dataset.handle = boot.handle;
+      card.setAttribute('aria-label', boot.title + (boot.off ? ', ' + boot.off + '% off' : ''));
+
+      const media = el('div', 'bm-card__media');
+      const img = el('img');
       img.src = boot.image;
       img.alt = boot.title;
       img.width = 640;
@@ -986,56 +1611,31 @@
       img.decoding = 'async';
       media.appendChild(img);
 
-      const info = document.createElement('div');
-      info.className = 'bm-card__info';
-      const name = document.createElement('h3');
-      name.className = 'bm-card__name';
-      name.textContent = boot.title;
-      const meta = document.createElement('p');
-      meta.className = 'bm-card__meta';
-      meta.textContent = metaText(boot);
-      const price = document.createElement('p');
-      price.className = 'bm-card__price';
-      price.textContent = boot.price;
-      info.append(name, meta, price);
+      const info = el('div', 'bm-card__info');
+      info.append(el('h3', 'bm-card__name', boot.title), el('p', 'bm-card__meta', metaText(boot)), priceLine(boot, 'bm-card__price'));
 
-      const like = document.createElement('span');
-      like.className = 'bm-stamp bm-stamp--like';
-      like.textContent = 'LOVE';
+      const like = el('span', 'bm-stamp bm-stamp--like', 'LOVE');
       like.setAttribute('aria-hidden', 'true');
-      const nope = document.createElement('span');
-      nope.className = 'bm-stamp bm-stamp--nope';
-      nope.textContent = 'PASS';
+      const nope = el('span', 'bm-stamp bm-stamp--nope', 'PASS');
       nope.setAttribute('aria-hidden', 'true');
 
-      card.append(media, info, like, nope);
+      card.append(media);
+      if (boot.off > 0) card.append(saleBadge(boot));
+      card.append(info, like, nope);
       card._boot = boot;
       return card;
     }
 
-    function metaText(boot) {
-      const parts = [];
-      if (boot.condition) parts.push(boot.condition);
-      const shown = size ? boot.sizes.find((label) => new RegExp('US\\s*' + size.replace('.', '\\.') + '(\\s|$)', 'i').test(label)) : boot.sizes[0];
-      if (shown) parts.push(shown.replace(/\s*-\s*/g, ' · '));
-      else if (boot.sizes.length > 1) parts.push(boot.sizes.length + ' sizes');
-      return parts.join(' · ');
-    }
-
-    // Cards below the top one sit a little smaller and lower, like a stack
     const STACK = [
       { transform: 'none', opacity: 1 },
       { transform: 'translateY(10px) scale(0.955)', opacity: 1 },
       { transform: 'translateY(20px) scale(0.91)', opacity: 0.9 },
     ];
 
-    function cards() {
-      return Array.from(deck.querySelectorAll('.bm-card:not(.is-leaving)'));
-    }
+    const cards = () => Array.from(deck.querySelectorAll('.bm-card:not(.is-leaving):not(.bm-card--empty)'));
 
     function layout(animated) {
-      const list = cards();
-      list.forEach((card, index) => {
+      cards().forEach((card, index) => {
         card.style.zIndex = String(10 - index);
         card.classList.toggle('is-top', index === 0);
         const place = STACK[Math.min(index, STACK.length - 1)];
@@ -1050,7 +1650,6 @@
     }
 
     function fill() {
-      // The empty note is never part of the stack
       deck.querySelectorAll('.bm-card--empty').forEach((note) => note.remove());
       const showing = new Set(cards().map((card) => card.dataset.handle));
       while (cards().length < 3) {
@@ -1063,34 +1662,26 @@
         deck.appendChild(card);
       }
       if (!cards().length) {
-        const empty = document.createElement('div');
-        empty.className = 'bm-card bm-card--empty';
-        empty.textContent = fullyLoaded
-          ? 'That’s every boot' + (size ? ' in US ' + size : '') + '. Here’s your match.'
-          : 'Loading more boots…';
+        const empty = el(
+          'div',
+          'bm-card bm-card--empty',
+          fullyLoaded ? (liked.length ? 'That’s every boot that fits. Here’s your match.' : 'That’s every boot that fits. Try a wider price range or more silos.') : 'Loading more boots…'
+        );
         deck.appendChild(empty);
-        if (fullyLoaded) setTimeout(showMatch, 900);
+        if (fullyLoaded && liked.length) setTimeout(showMatch, 900);
       }
       layout(true);
       updateStatus();
     }
 
-    function onMoreBoots() {
-      if (!dlg.open) return;
-      if (!$('[data-bm-screen="intro"]').hidden) renderSizes();
-      if (!$('[data-bm-screen="play"]').hidden && cards().length < 3) {
-        deck.querySelectorAll('.bm-card--empty').forEach((note) => note.remove());
-        fill();
-      }
-    }
-
     function updateStatus() {
       const left = Math.max(0, target - liked.length);
-      status.textContent = liked.length === 0
-        ? 'Swipe right on boots you love'
-        : left > 0
-          ? left + (left === 1 ? ' more like' : ' more likes') + ' to find your match'
-          : 'Finding your match…';
+      status.textContent =
+        liked.length === 0
+          ? 'Swipe right on boots you love'
+          : left > 0
+            ? left + (left === 1 ? ' more like' : ' more likes') + ' to find your match'
+            : 'Finding your match…';
     }
 
     /* ---------- Swiping ---------- */
@@ -1098,7 +1689,6 @@
 
     function decide(card, liking) {
       const boot = card._boot;
-      if (!boot) return;
       seen.add(boot.handle);
       swipes += 1;
       history.push({ boot: boot, liked: liking });
@@ -1112,11 +1702,8 @@
     }
 
     function afterDecision() {
-      if (liked.length >= target || (swipes >= MAX_SWIPES && liked.length > 0)) {
-        showMatch();
-      } else {
-        fill();
-      }
+      if (liked.length >= target || (swipes >= MAX_SWIPES && liked.length > 0)) showMatch();
+      else fill();
     }
 
     function stamps(card, x) {
@@ -1131,7 +1718,6 @@
       card.classList.add('is-leaving');
       card.classList.remove('is-top');
       decide(card, liking);
-      const distance = Math.max(window.innerWidth, 500) * direction;
       stamps(card, direction * 110);
       const done = () => {
         card.remove();
@@ -1142,6 +1728,7 @@
         done();
         return;
       }
+      const distance = Math.max(window.innerWidth, 500) * direction;
       flying = animate(
         card,
         {
@@ -1153,19 +1740,13 @@
         { duration: 0.32, ease: [0.4, 0, 1, 1] }
       );
       flying.finished.then(done);
-      // The next card moves up while this one flies off
       layout(true);
-    }
-
-    function topCard() {
-      const card = cards()[0];
-      return card && card._boot ? card : null;
     }
 
     function choose(liking) {
       if (flying) flying.complete();
-      const card = topCard();
-      if (card) fling(card, liking);
+      const card = cards()[0];
+      if (card && card._boot) fling(card, liking);
     }
 
     $('[data-bm-like]').addEventListener('click', () => choose(true));
@@ -1183,25 +1764,20 @@
       } else {
         learn(step.boot, 0.6);
       }
-      // The card comes back on top, from the side it left
       const card = cardFor(step.boot);
       deck.querySelectorAll('.bm-card--empty').forEach((note) => note.remove());
       deck.prepend(card);
-      const extra = cards().slice(3);
-      extra.forEach((spare) => spare.remove());
+      cards()
+        .slice(3)
+        .forEach((spare) => spare.remove());
       layout(true);
       if (!reduced()) {
         const side = step.liked ? 1 : -1;
-        animate(
-          card,
-          { transform: ['translateX(' + side * 420 + 'px) rotate(' + side * 20 + 'deg)', 'none'], opacity: [0, 1] },
-          { duration: 0.55, ease: EASE }
-        );
+        animate(card, { transform: ['translateX(' + side * 420 + 'px) rotate(' + side * 20 + 'deg)', 'none'], opacity: [0, 1] }, { duration: 0.55, ease: EASE });
       }
       updateStatus();
     });
 
-    // Dragging the top card
     let drag = null;
 
     deck.addEventListener('pointerdown', (event) => {
@@ -1219,8 +1795,7 @@
       const x = event.clientX - drag.x0;
       const y = event.clientY - drag.y0;
       const now = performance.now();
-      const elapsed = Math.max(1, now - drag.t);
-      drag.vx = (x - drag.x) / elapsed;
+      drag.vx = (x - drag.x) / Math.max(1, now - drag.t);
       drag.x = x;
       drag.y = y;
       drag.t = now;
@@ -1239,7 +1814,6 @@
         fling(card, (fast ? vx : x) > 0, { x: x, y: y });
         return;
       }
-      // Not far enough: it springs back to the middle
       stamps(card, 0);
       if (reduced()) {
         card.style.transform = 'none';
@@ -1267,18 +1841,43 @@
     });
 
     /* ---------- Screens ---------- */
-    function show(name) {
-      root.querySelectorAll('[data-bm-screen]').forEach((screen) => {
-        screen.hidden = screen.dataset.bmScreen !== name;
-      });
-      const screen = $('[data-bm-screen="' + name + '"]');
-      if (!reduced()) animate(screen, { opacity: [0, 1] }, { duration: 0.25 });
+    const STEPS = { size: '1/3', price: '2/3', silos: '3/3' };
+    const BACK = { price: 'size', silos: 'price', play: 'silos' };
+    let screen = 'size';
+
+    function render(name) {
+      if (name === 'size') renderSizes(false);
+      if (name === 'price') renderPrice();
+      if (name === 'silos') renderSilos();
     }
+
+    function go(name) {
+      screen = name;
+      $$('[data-bm-screen]').forEach((node) => {
+        node.hidden = node.dataset.bmScreen !== name;
+      });
+      stepEl.textContent = STEPS[name] || '';
+      backBtn.hidden = !BACK[name];
+      render(name);
+      const node = $('[data-bm-screen="' + name + '"]');
+      if (!reduced()) animate(node, { opacity: [0, 1], transform: ['translateX(16px)', 'none'] }, { duration: 0.4, ease: EASE });
+    }
+
+    function refresh() {
+      if (!dlg.open) return;
+      if (screen === 'size') renderSizes(false);
+      if (screen === 'price') renderPrice();
+      if (screen === 'silos') renderSilos();
+      if (screen === 'play' && cards().length < 3) fill();
+    }
+
+    $$('[data-bm-next]').forEach((button) => button.addEventListener('click', () => go(button.dataset.bmNext)));
+    backBtn.addEventListener('click', () => go(BACK[screen] || 'size'));
 
     async function start() {
       reset();
       deck.replaceChildren();
-      show('play');
+      go('play');
       if (!boots.length) {
         status.textContent = 'Loading boots…';
         try {
@@ -1296,7 +1895,7 @@
     function showMatch() {
       const match = bestMatch();
       if (!match) {
-        show('intro');
+        go('silos');
         return;
       }
       $('[data-bm-match-link]').href = match.url;
@@ -1304,52 +1903,52 @@
       const img = $('[data-bm-match-img]');
       img.src = match.image;
       img.alt = match.title;
-      $('[data-bm-match-title]').textContent = match.title;
+      $('[data-bm-match-title]').textContent = match.title + (match.off ? ' · ' + match.off + '% off' : '');
       $('[data-bm-match-meta]').textContent = metaText(match);
-      $('[data-bm-match-price]').textContent = match.price;
+      const priceEl = $('[data-bm-match-price]');
+      priceEl.replaceChildren(...priceLine(match, '').childNodes);
 
-      const wrap = $('[data-bm-likes-wrap]');
       const row = $('[data-bm-likes]');
       row.replaceChildren();
       liked.forEach((boot) => {
-        const link = document.createElement('a');
-        link.className = 'bm-like-thumb';
+        const link = el('a', 'bm-like-thumb');
         link.href = boot.url;
         link.title = boot.title;
-        const thumb = document.createElement('img');
+        const thumb = el('img');
         thumb.src = boot.image;
         thumb.alt = boot.title;
-        thumb.loading = 'lazy';
         link.appendChild(thumb);
         row.appendChild(link);
       });
-      wrap.hidden = liked.length === 0;
+      $('[data-bm-likes-wrap]').hidden = liked.length === 0;
       const save = $('[data-bm-save]');
       save.textContent = 'Save all to wishlist';
-      save.disabled = false;
+      save.onclick = null;
 
-      show('match');
+      go('match');
       if (!reduced()) {
         animate($('[data-bm-match-link]'), { transform: ['scale(0.85)', 'none'], opacity: [0, 1] }, { type: spring, visualDuration: 0.45, bounce: 0.35 });
-        animate($('.bm-result__kicker'), { transform: ['translateY(10px)', 'none'], opacity: [0, 1] }, { duration: 0.55, ease: EASE });
       }
     }
 
     $('[data-bm-again]').addEventListener('click', () => {
       target = liked.length + 3;
-      deck.querySelectorAll('.bm-card--empty').forEach((note) => note.remove());
-      show('play');
+      go('play');
       fill();
     });
 
     $('[data-bm-save]').addEventListener('click', (event) => {
       const button = event.currentTarget;
+      if (button.onclick) return;
       const wishlist = window.OceWishlist;
       if (!wishlist) {
         window.location.href = root.dataset.wishlistUrl;
         return;
       }
-      liked.slice().reverse().forEach((boot) => wishlist.set(boot.handle, true));
+      liked
+        .slice()
+        .reverse()
+        .forEach((boot) => wishlist.set(boot.handle, true));
       button.textContent = 'Saved ✓ View wishlist';
       button.onclick = () => {
         window.location.href = root.dataset.wishlistUrl;
@@ -1364,18 +1963,13 @@
       if (dlg.open) return;
       dlg.showModal();
       document.documentElement.style.overflow = 'hidden';
-      if (!boots.length) {
-        load().then(renderSizes).catch(() => {});
-      }
-      renderSizes();
-      if (!$('[data-bm-screen="play"]').hidden && !cards().length) show('intro');
+      if (!boots.length) load().then(refresh).catch(() => {});
+      if (screen !== 'play' && screen !== 'match') go('size');
       if (!reduced()) {
         animate(scrim, { opacity: [0, 1] }, { duration: 0.3 });
         animate(
           panel,
-          desktop()
-            ? { opacity: [0, 1], transform: ['translateY(16px) scale(0.92)', 'none'] }
-            : { transform: ['translateY(100%)', 'none'] },
+          desktop() ? { opacity: [0, 1], transform: ['translateY(16px) scale(0.92)', 'none'] } : { transform: ['translateY(100%)', 'none'] },
           { duration: 0.55, ease: EASE }
         );
       }
@@ -1398,11 +1992,10 @@
         return;
       }
       animate(scrim, { opacity: 0 }, { duration: 0.22 });
-      animate(
-        panel,
-        desktop() ? { opacity: 0, transform: 'translateY(10px) scale(0.96)' } : { transform: 'translateY(100%)' },
-        { duration: desktop() ? 0.2 : 0.28, ease: [0.4, 0, 1, 1] }
-      ).finished.then(() => {
+      animate(panel, desktop() ? { opacity: 0, transform: 'translateY(10px) scale(0.96)' } : { transform: 'translateY(100%)' }, {
+        duration: desktop() ? 0.2 : 0.28,
+        ease: [0.4, 0, 1, 1],
+      }).finished.then(() => {
         panel.getAnimations().forEach((animation) => animation.cancel());
         scrim.getAnimations().forEach((animation) => animation.cancel());
         finish();
@@ -1410,7 +2003,7 @@
     }
 
     $('[data-bm-open]').addEventListener('click', open);
-    root.querySelectorAll('[data-bm-close]').forEach((button) => button.addEventListener('click', close));
+    $$('[data-bm-close]').forEach((button) => button.addEventListener('click', close));
     dlg.addEventListener('cancel', (event) => {
       event.preventDefault();
       close();
@@ -1456,7 +2049,7 @@
       "type": "textarea",
       "id": "intro",
       "label": "Intro",
-      "default": "Swipe right on boots you love and left on the ones you don’t. After a few likes we’ll find your perfect match."
+      "default": "Three quick questions, then swipe right on boots you love and left on the ones you don’t. After a few likes we’ll find your perfect match."
     },
     {
       "type": "range",
