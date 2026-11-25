@@ -544,8 +544,8 @@
               class="menu-drawer__menu-item menu-drawer__menu-item--mainlist menu-drawer__animated-element focus-inset menu-drawer__menu-item--bm"
               data-bm-menu
             >
-              <span class="menu-drawer__menu-item-text">OCEBOOTS Tinder</span>
-              <img class="menu-drawer__bm-mark" src="{{ 'boot-match-mark.png' | asset_url }}" alt="" width="18" height="22" loading="lazy">
+              <span class="menu-drawer__menu-item-text menu-item--bm">OCEBOOTS Tinder</span>
+              {%- render 'boot-match-menu-mark', class: 'menu-drawer__bm-mark' -%}
             </a>
           </li>
 
@@ -640,9 +640,50 @@
   }
 
   .menu-drawer__bm-mark {
-    flex: none;
     width: 0.85em;
+  }
+
+  /* Boot Match in the menus: the game's bold title type and its iridescent logo */
+  :is(.menu-list__link-title, .menu-drawer__menu-item-text).menu-item--bm {
+    font-family: var(--font-heading--family);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .menu-bm-mark {
+    position: relative;
+    display: inline-block;
+    flex: none;
+    aspect-ratio: 197 / 240;
+    width: 18px;
+  }
+
+  .menu-bm-mark__foil {
+    position: absolute;
+    inset: 0;
+    background: #c9c6f5 var(--bm-holo) 0 0 / 120px 60px repeat;
+    -webkit-mask: var(--bm-fill) center / 100% 100% no-repeat;
+    mask: var(--bm-fill) center / 100% 100% no-repeat;
+    animation: menu-bm-foil 14s linear infinite;
+  }
+
+  .menu-bm-mark img {
+    position: relative;
+    display: block;
+    width: 100%;
     height: auto;
+  }
+
+  @keyframes menu-bm-foil {
+    to {
+      background-position: 120px 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .menu-bm-mark__foil {
+      animation: none;
+    }
   }
 
   /* Sale reads as an offer: red, "Sale" with a capital S, in the brand Inter (display optical size)
