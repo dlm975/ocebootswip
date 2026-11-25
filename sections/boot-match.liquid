@@ -375,10 +375,12 @@
         {%- endcomment -%}
         <div class="bm-intro__forms" hidden>
           {%- form 'customer', id: 'bm-signup-email' -%}
+            <input type="hidden" name="return_to" value="/cart.js">
             <input type="hidden" name="contact[tags]" value="boot-match,super-like,newsletter">
             <input type="email" name="contact[email]" tabindex="-1" autocomplete="off">
           {%- endform -%}
           {%- form 'contact', id: 'bm-signup-phone' -%}
+            <input type="hidden" name="return_to" value="/cart.js">
             <input type="hidden" name="contact[name]" value="Boot Match Super Like">
             <input type="hidden" name="contact[email]" value="{{ shop.email | escape }}">
             <input type="tel" name="contact[phone]" tabindex="-1" autocomplete="off">
@@ -3539,7 +3541,8 @@
       const submit = $('[data-bm-intro-submit]');
       submit.disabled = true;
       submit.textContent = 'One moment…';
-      await signUp(value);
+      // Sent in the background (the hidden frame finishes it); the shopper moves straight on
+      signUp(value);
       setSuper({ status: 'ready' });
       submit.disabled = false;
       submit.textContent = 'Get my Super Like';
