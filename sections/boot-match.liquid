@@ -321,6 +321,7 @@
         </button>
         <div class="bm-intro__flame" data-bm-intro-flame>
           <span class="bm-intro__glow" aria-hidden="true"></span>
+          <span class="bm-intro__burst" aria-hidden="true"></span>
           <span class="bm-intro__embers" aria-hidden="true">
             {%- for i in (1..8) -%}<i style="--i: {{ i }};"></i>{%- endfor -%}
           </span>
@@ -1411,6 +1412,21 @@
 
   .bm-intro__flame.is-alive .bm-mark__foil {
     animation-duration: 5s;
+  }
+
+  /* The flash as the flame lands: a ring of light thrown outwards */
+  .bm-intro__burst {
+    position: absolute;
+    left: 50%;
+    top: 58%;
+    width: 110%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 3px solid rgb(255 214 120 / 0.95);
+    box-shadow: 0 0 34px rgb(255 140 40 / 0.8), inset 0 0 24px rgb(255 190 80 / 0.6);
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+    pointer-events: none;
   }
 
   .bm-intro__glow {
@@ -3531,7 +3547,7 @@
       flame.style.opacity = '0';
       requestAnimationFrame(() => {
         // The page darkens, then blurs
-        animate(introScrim, { opacity: [0, 1] }, { duration: fromGame ? 0.3 : 0.6, ease: 'linear' }).finished.then(() => {
+        animate(introScrim, { opacity: [0, 1] }, { duration: fromGame ? 0.3 : 0.35, ease: 'linear' }).finished.then(() => {
           introScrim.style.opacity = '';
           intro.classList.add('is-settled');
         });
@@ -3555,24 +3571,29 @@
         const big = Math.max(1.2, Math.min(1.9, (window.innerHeight * 0.38) / box.height));
         const centre = 'translateY(' + dy + 'px) scale(' + big + ')';
         flame.style.transform = centre;
-        const POP = 0.35;
-        const HOLD = 1.0;
+        // A fixed timeline (seconds): pop in, land with a flash, a short hold, zoom out, words in
+        const POP = 0.12;
+        const LAND = POP + 0.24;
+        const ZOOM = LAND + 0.7;
         animate(
           flame,
-          { opacity: [0, 1], transform: ['translateY(' + dy + 'px) scale(0.3) rotate(-14deg)', centre] },
-          { type: spring, visualDuration: 0.7, bounce: 0.4, delay: POP }
-        ).finished.then(() => {
+          { opacity: [0, 1], transform: ['translateY(' + dy + 'px) scale(0.15) rotate(-18deg)', centre] },
+          { type: spring, visualDuration: 0.42, bounce: 0.55, delay: POP }
+        );
+        setTimeout(() => {
           flame.style.opacity = '';
           flame.classList.add('is-alive');
-          animate(flame, { transform: [centre, 'none'] }, { duration: 0.8, ease: EASE, delay: HOLD }).finished.then(() => {
-            flame.style.transform = '';
-          });
-          animate(
-            stepEl.children,
-            { opacity: [0, 1], transform: ['translateY(18px)', 'none'] },
-            { duration: 0.55, ease: EASE, delay: stagger(0.08, { startDelay: HOLD + 0.35 }) }
-          );
+          animate($('.bm-intro__burst'), { opacity: [0.95, 0], transform: ['translate(-50%, -50%) scale(0.5)', 'translate(-50%, -50%) scale(2.6)'] }, { duration: 0.6, ease: [0.2, 0.7, 0.3, 1] });
+          animate($('.bm-intro__glow'), { opacity: [0, 1], transform: ['translateX(-50%) scale(0.5)', 'translateX(-50%) scale(1.25)', 'translateX(-50%) scale(1)'] }, { duration: 0.5, ease: 'easeOut' });
+        }, LAND * 1000);
+        animate(flame, { transform: [centre, 'none'] }, { duration: 0.55, ease: EASE, delay: ZOOM }).finished.then(() => {
+          flame.style.transform = '';
         });
+        animate(
+          stepEl.children,
+          { opacity: [0, 1], transform: ['translateY(18px) scale(0.96)', 'none'] },
+          { duration: 0.45, ease: EASE, delay: stagger(0.06, { startDelay: ZOOM + 0.18 }) }
+        );
       });
     }
 
