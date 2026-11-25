@@ -3,6 +3,9 @@
 Reposts new posts from **@cleats** (with their permission) to **@ftblpov**, with a
 `📸 @cleats` credit line at the end of each caption. Uses only the official Instagram Graph API.
 
+Only @ftblpov's API access is needed. @cleats' posts are read through Business Discovery,
+which reads any public Business/Creator account, so nothing from @cleats is shared.
+
 ## Requirements
 
 - @ftblpov is an Instagram **Business or Creator** account linked to a Facebook Page.
@@ -29,10 +32,15 @@ Reposts new posts from **@cleats** (with their permission) to **@ftblpov**, with
    ```bash
    python3 repost.py --dry-run
    ```
-5. Post for real (one post per run by default):
+5. Post for real. Either repost specific posts by link:
+   ```bash
+   python3 repost.py https://www.instagram.com/p/XXXXXXXX/ https://www.instagram.com/reel/YYYYYYY/
+   ```
+   or repost the newest @cleats posts that haven't been reposted yet (one per run by default):
    ```bash
    python3 repost.py
    ```
+   Links must be @cleats posts from roughly the last 100; use `--lookback 300` for older ones.
 
 ## Running it automatically
 

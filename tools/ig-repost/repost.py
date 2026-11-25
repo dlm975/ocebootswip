@@ -12,6 +12,7 @@ Standard library only. Run `python3 repost.py --help` for options.
 import argparse
 import json
 import os
+import re
 import sys
 import time
 import urllib.error
@@ -23,6 +24,16 @@ GRAPH = "https://graph.facebook.com/" + os.environ.get("GRAPH_VERSION", "v21.0")
 CAPTION_MAX = 2200
 HASHTAG_MAX = 30
 HERE = Path(__file__).resolve().parent
+SHORTCODE_RE = re.compile(r"instagram\.com/(?:[\w.]+/)?(?:p|reel|reels|tv)/([\w-]+)")
+
+
+def shortcode_from(link):
+    m = SHORTCODE_RE.search(link)
+    if m:
+        return m.group(1)
+    if re.fullmatch(r"[\w-]{5,}", link):  # bare shortcode
+        return link
+    raise ValueError(f"not an Instagram post link: {link}")
 
 
 class ApiError(RuntimeError):
@@ -168,8 +179,11 @@ def main(argv=None):
                    help="username to repost from, without @ (default: cleats)")
     p.add_argument("--expect-account", default=os.environ.get("EXPECT_ACCOUNT", "ftblpov"),
                    help="refuse to post unless --ig-user-id is this username (default: ftblpov)")
+    p.add_argument("links", nargs="*",
+                   help="specific post/reel links to repost; without links, reposts the newest unposted posts")
     p.add_argument("--max-posts", type=int, default=1, help="most posts to publish this run (default 1)")
-    p.add_argument("--lookback", type=int, default=25, help="how many recent source posts to check (default 25)")
+    p.add_argument("--lookback", type=int, default=None,
+                   help="how many recent source posts to check (default 25, or 100 when links are given)")
     p.add_argument("--credit", default=os.environ.get("CREDIT_TEMPLATE", "📸 @{source}"),
                    help="credit line appended to captions; {source} = username")
     p.add_argument("--state", type=Path, default=HERE / "state.json", help="file tracking reposted posts")
@@ -182,6 +196,11 @@ def main(argv=None):
     if not args.ig_user_id:
         p.error("set --ig-user-id or IG_USER_ID")
     source = args.source.lstrip("@")
+    try:
+        wanted = [shortcode_from(x) for x in args.links]
+    except ValueError as e:
+        p.error(str(e))
+    lookback = args.lookback or (100 if wanted else 25)
 
     me = api("GET", args.ig_user_id, {"fields": "username"}).get("username")
     if args.expect_account and me != args.expect_account.lstrip("@"):
@@ -190,9 +209,23 @@ def main(argv=None):
 
     state = load_state(args.state)
     done = set(state["reposted"]) | set(state["skipped"])
-    posts = fetch_source_posts(args.ig_user_id, source, args.lookback)
-    new = [x for x in posts if x["id"] not in done]
-    print(f"@{source}: {len(posts)} recent posts, {len(new)} not yet handled")
+    posts = fetch_source_posts(args.ig_user_id, source, lookback)
+    if wanted:
+        by_code = {shortcode_from(x.get("permalink", "")): x for x in posts if x.get("permalink")}
+        new = []
+        for code in wanted:
+            post = by_code.get(code)
+            if not post:
+                print(f"not found: {code} is not among @{source}'s last {lookback} posts "
+                      f"(wrong account, or older: raise --lookback)", file=sys.stderr)
+            elif post["id"] in state["reposted"]:
+                print(f"already reposted: {post['permalink']}")
+            else:
+                new.append(post)
+        args.max_posts = len(new)
+    else:
+        new = [x for x in posts if x["id"] not in done]
+        print(f"@{source}: {len(posts)} recent posts, {len(new)} not yet handled")
 
     if args.seed:
         for x in new:
