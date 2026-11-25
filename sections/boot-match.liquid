@@ -39,7 +39,7 @@
   assign bm_feed = bm_collection.url | append: '?view=bootmatch'
 -%}
 {%- capture bm_gold -%}
-  <span class="bm-goldmark" aria-hidden="true"
+  <span class="bm-goldmark" aria-hidden="true" style="--bm-line-url: url({{ 'boot-match-mark.png' | asset_url }});"
     ><span
       class="bm-goldmark__shape"
       style="--bm-fill: url({{ 'boot-match-fill.png' | asset_url }}); --bm-line: url({{ 'boot-match-mark.png' | asset_url }});"
@@ -1253,6 +1253,20 @@
     -webkit-mask: var(--bm-line) center / 100% 100% no-repeat, var(--bm-fill) center / 100% 100% no-repeat;
     mask: var(--bm-line) center / 100% 100% no-repeat, var(--bm-fill) center / 100% 100% no-repeat;
     animation: bm-gold 2.6s linear infinite;
+  }
+
+  /* The lines in a deep antique gold over the bright gold, so the ball's panels read */
+  .bm-goldmark {
+    position: relative;
+  }
+
+  .bm-goldmark::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, #a06a00, #6b4300 55%, #8a5a00);
+    -webkit-mask: var(--bm-line-url) center / 100% 100% no-repeat;
+    mask: var(--bm-line-url) center / 100% 100% no-repeat;
   }
 
   .bm-round--super .bm-goldmark {
