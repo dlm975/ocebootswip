@@ -72,7 +72,7 @@
           <button type="button" class="bm-icon-btn bm-head__back" data-bm-back aria-label="Back" hidden>
             {%- render 'gicon', name: 'chevron_left', size: 24 -%}
           </button>
-          {%- render 'boot-match-logo', id: 'bm-flame-head', class: 'bm-head__logo' -%}
+          <img class="bm-head__logo" src="{{ 'boot-match-mark.png' | asset_url }}" alt="" width="197" height="240">
           <h2 class="bm-head__title" id="bm-title-{{ section.id }}">{{ bm_full_name | escape }}</h2>
           <span class="bm-head__step" data-bm-step></span>
           <button type="button" class="bm-icon-btn bm-head__close" data-bm-close aria-label="Close">
@@ -248,7 +248,7 @@
         {%- comment -%} 5. The match {%- endcomment -%}
         <div class="bm-screen bm-result" data-bm-screen="match" hidden>
           <p class="bm-result__kicker">
-            {%- render 'boot-match-logo', id: 'bm-flame-match', class: 'bm-result__logo' -%}
+            <img class="bm-result__logo" src="{{ 'boot-match-mark.png' | asset_url }}" alt="" width="197" height="240">
             <span>It’s a match</span>
           </p>
           <div class="bm-result__body">
@@ -432,8 +432,8 @@
   }
 
   .bm-head__logo {
-    width: 20px;
-    height: 30px;
+    width: 24px;
+    height: auto;
     flex: none;
   }
 
@@ -1232,8 +1232,8 @@
   }
 
   .bm-result__logo {
-    width: 23px;
-    height: 34px;
+    width: 28px;
+    height: auto;
   }
 
   .bm-result__card {
