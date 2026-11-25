@@ -800,20 +800,19 @@
     -webkit-user-drag: none;
   }
 
-  /* The sale sticker straddles the bottom edge of the photo, as on the product cards */
-  .bm-card__sale {
-    margin: 0;
-    padding-inline: 12px;
-  }
-
-  .bm-card__sale .bfsale-fire--card {
-    left: 12px;
-  }
-
   .bm-was {
     font-size: 0.8em;
     font-weight: 500;
     color: rgb(18 18 18 / 0.5);
+  }
+
+  /* On sale: the % off in red bold, as on the product page (.pdp-sale__off) */
+  .bm-off {
+    color: #e8323c;
+    font-size: 1.25em;
+    font-weight: 850;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
   }
 
   .bm-card__info {
@@ -1564,25 +1563,13 @@
       return node;
     }
 
-    // The site's sale badge (snippets/sale-badge.liquid): flames and "35% off" on the image's edge
-    function saleBadge(boot) {
-      const anchor = el('div', 'bfsale-badge-anchor bm-card__sale');
-      const fire = el('span', 'bfsale-fire bfsale-fire--card');
-      const flames = el('span', 'bfsale-fire__flames');
-      flames.setAttribute('aria-hidden', 'true');
-      for (let i = 0; i < 7; i++) flames.appendChild(el('i', 'bfsale-fire__flame'));
-      for (let i = 0; i < 3; i++) flames.appendChild(el('i', 'bfsale-fire__ember'));
-      fire.append(flames, el('span', 'bfsale-badge sale-badge', boot.off + '% off'));
-      anchor.appendChild(fire);
-      return anchor;
-    }
-
     function priceLine(boot, className) {
       const line = el('p', className);
       line.appendChild(el('span', '', boot.price));
       if (boot.off > 0 && boot.was > 0) {
-        const was = el('s', 'bm-was', money(boot.was, true));
-        line.append(' ', was);
+        line.append(' ', el('s', 'bm-was', money(boot.was, true)));
+        // Red bold "% off", as on the product page
+        line.append(' ', el('span', 'bm-off', boot.off + '% off'));
       }
       return line;
     }
@@ -1619,9 +1606,7 @@
       const nope = el('span', 'bm-stamp bm-stamp--nope', 'PASS');
       nope.setAttribute('aria-hidden', 'true');
 
-      card.append(media);
-      if (boot.off > 0) card.append(saleBadge(boot));
-      card.append(info, like, nope);
+      card.append(media, info, like, nope);
       card._boot = boot;
       return card;
     }
@@ -1903,7 +1888,7 @@
       const img = $('[data-bm-match-img]');
       img.src = match.image;
       img.alt = match.title;
-      $('[data-bm-match-title]').textContent = match.title + (match.off ? ' · ' + match.off + '% off' : '');
+      $('[data-bm-match-title]').textContent = match.title;
       $('[data-bm-match-meta]').textContent = metaText(match);
       const priceEl = $('[data-bm-match-price]');
       priceEl.replaceChildren(...priceLine(match, '').childNodes);
