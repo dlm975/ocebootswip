@@ -4044,10 +4044,31 @@
 
     // First visit (or ?bm-intro): the welcome as the page comes in
     const forced = /[?&]bm-intro\b/.test(window.location.search);
+    const fromMenu = /[?&]bm-open\b/.test(window.location.search);
+    if (fromMenu) {
+      // Tidy the address (no ?bm-open left to reopen the game on refresh)
+      const url = new URL(window.location.href);
+      url.searchParams.delete('bm-open');
+      history.replaceState(history.state, '', url.pathname + url.search + url.hash);
+    }
     if (forced || (root.dataset.intro === 'true' && !store.get('oce-bm-intro'))) {
       store.set('oce-bm-tip', '1');
       requestAnimationFrame(() => showIntro('hello', false));
+    } else if (fromMenu) {
+      // Came from the "OCEBOOTS Tinder" menu item on another page
+      requestAnimationFrame(() => open());
     }
+
+    // The menu item, on the home page: close the menu drawer and open the game in place
+    document.addEventListener('click', (event) => {
+      const link = event.target.closest('[data-bm-menu]');
+      if (!link || event.metaKey || event.ctrlKey || event.shiftKey) return;
+      event.preventDefault();
+      document.querySelectorAll('header-drawer').forEach((drawer) => {
+        if (drawer.isOpen && typeof drawer.close === 'function') drawer.close();
+      });
+      requestAnimationFrame(() => open());
+    });
     $$('[data-bm-close]').forEach((button) => button.addEventListener('click', close));
     dlg.addEventListener('cancel', (event) => {
       event.preventDefault();

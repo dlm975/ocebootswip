@@ -534,6 +534,21 @@
             {%- endfor -%}
           {% endif %}
 
+          {%- comment -%} The Boot Match game: opens it on the home page (or goes there and opens it) {%- endcomment -%}
+          <li
+            class="menu-drawer__list-item{% if block.settings.drawer_dividers %} menu-drawer__list-item--divider{% endif %}"
+            style="--menu-drawer-animation-index: {{ animation_index | plus: 1 }};"
+          >
+            <a
+              href="{{ routes.root_url }}?bm-open"
+              class="menu-drawer__menu-item menu-drawer__menu-item--mainlist menu-drawer__animated-element focus-inset menu-drawer__menu-item--bm"
+              data-bm-menu
+            >
+              <span class="menu-drawer__menu-item-text">OCEBOOTS Tinder</span>
+              <img class="menu-drawer__bm-mark" src="{{ 'boot-match-mark.png' | asset_url }}" alt="" width="18" height="22" loading="lazy">
+            </a>
+          </li>
+
           {%- if data_header_drawer_type == 'mobile-drawer' and localization.available_countries.size > 1 -%}
             <li class="menu-drawer__list-item drawer-region-item{% if block.settings.drawer_dividers %} menu-drawer__list-item--divider{% endif %}">
               {%- form 'localization', id: 'mobile-drawer-localization-form' -%}
@@ -618,6 +633,18 @@
 </header-drawer>
 
 {% stylesheet %}
+  /* The Boot Match menu item: the logo beside the name */
+  .menu-drawer__menu-item--bm {
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  .menu-drawer__bm-mark {
+    flex: none;
+    width: 18px;
+    height: auto;
+  }
+
   /* Sale reads as an offer: red, "Sale" with a capital S, in the brand Inter (display optical size)
      and heavier than the other menu items (also in the desktop menu, snippets/header-menu.liquid) */
   :is(.menu-list__link, .menu-drawer__menu-item, .menu-list__link-title, .menu-drawer__menu-item-text).menu-item--sale,

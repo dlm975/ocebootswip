@@ -114,6 +114,20 @@
       {%- endif -%}
     </li>
   {% endfor %}
+  {%- comment -%} The Boot Match game: opens it on the home page (or goes there and opens it) {%- endcomment -%}
+  <li
+    role="presentation"
+    class="menu-list__list-item"
+    on:focus="/activate"
+    on:blur="/deactivate"
+    on:pointerenter="/activate"
+    on:pointerleave="/deactivate"
+  >
+    <a href="{{ routes.root_url }}?bm-open" class="menu-list__link menu-list__link--icon menu-list__link--bm" data-bm-menu ref="menuitem">
+      <img class="menu-list__icon menu-bm__mark" src="{{ 'boot-match-mark.png' | asset_url }}" alt="" width="18" height="22" loading="lazy">
+      <span class="menu-list__link-title">OCEBOOTS Tinder</span>
+    </a>
+  </li>
   <li
     class="menu-list__list-item"
     role="presentation"
@@ -267,6 +281,11 @@
   /* Icons only show in the collection-page dock (desktop) */
   .menu-list__icon {
     display: none;
+  }
+
+  .menu-bm__mark {
+    width: 18px;
+    height: auto;
   }
 
   /*
