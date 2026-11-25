@@ -1402,7 +1402,7 @@
 
   /* On the Super Liked boot: the price after the discount, and the Claim button */
   .bm-result__deal {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 800;
     line-height: 1.2;
     color: #a86f00;
@@ -1421,12 +1421,14 @@
     align-items: center;
     justify-content: center;
     gap: 5px;
-    margin-top: 4px;
-    padding: 7px 12px;
+    align-self: flex-start;
+    margin-top: 2px;
+    padding: 6px 11px 6px 8px;
     border-radius: 999px;
     background: linear-gradient(115deg, #d79c0e, #ffe07a 45%, #e0a514);
     color: #3a2600;
-    font-size: 14px;
+    white-space: nowrap;
+    font-size: 13px;
     font-weight: 800;
   }
 
@@ -2212,14 +2214,15 @@
   .bm-result .bm-result__info {
     grid-area: info;
     align-self: center;
-    gap: 4px;
-    padding: 10px 12px 10px 0;
+    gap: 3px;
+    padding: 8px 10px 8px 0;
     border-top: 0;
   }
 
   .bm-result .bm-result__meta {
     white-space: pre-line;
-    line-height: 1.35;
+    font-size: 12px;
+    line-height: 1.3;
   }
 
   .bm-result .bm-result__price {
@@ -2326,8 +2329,8 @@
   .bm-likes.is-two .bm-likes__row {
     flex: 1 1 auto;
     min-height: 0;
-    grid-template-rows: repeat(2, minmax(58px, 1fr));
-    grid-auto-rows: minmax(58px, 1fr);
+    grid-template-rows: repeat(2, minmax(48px, 1fr));
+    grid-auto-rows: minmax(48px, 1fr);
   }
 
   .bm-likes__row.is-many {
@@ -3648,11 +3651,13 @@
       $('[data-bm-match-title]').textContent = boot.title;
       // Condition on one line, the sizes on the next
       // Condition, then each size system, one per line (the details column is narrow)
-      $('[data-bm-match-meta]').textContent = metaText(boot).replaceAll(' · ', '\n');
+      // (condition on its own line, the sizes together under it)
+      $('[data-bm-match-meta]').textContent = metaText(boot).replace(' · ', '\n');
       $('[data-bm-match-price]').replaceChildren(...priceLine(boot, '').childNodes);
       const isSuper = superState().handle === boot.handle;
       $('[data-bm-match-link]').classList.toggle('is-super', isSuper);
-      $('[data-bm-match-supertag]').hidden = !isSuper;
+      // The gold price and Claim say it's the Super Like; the tag only when there's no code
+      $('[data-bm-match-supertag]').hidden = !isSuper || Boolean(CODE);
       // The Super Liked boot: its price after the discount, and Claim (the discount, then the boot)
       const deal = $('[data-bm-match-deal]');
       const claim = $('[data-bm-match-claim]');
@@ -3660,7 +3665,7 @@
       if (isSuper && CODE) {
         const after = Math.max(0, boot.units - rewardAmount());
         deal.replaceChildren(document.createTextNode(money(after, true) + ' ' + (CURRENCY || 'NZD')), el('small', '', 'with Super Like'));
-        claim.lastElementChild.textContent = 'Claim ' + money(rewardAmount()) + ' off';
+        claim.lastElementChild.textContent = 'Claim ' + money(rewardAmount());
         const claimUrl = '/discount/' + encodeURIComponent(CODE) + '?redirect=' + encodeURIComponent(boot.url);
         $('[data-bm-match-link]').href = claimUrl;
         $('[data-bm-match-cta]').href = claimUrl;
