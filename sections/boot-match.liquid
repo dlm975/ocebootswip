@@ -3652,7 +3652,7 @@
       // Condition on one line, the sizes on the next
       // Condition, then each size system, one per line (the details column is narrow)
       // (condition on its own line, the sizes together under it)
-      $('[data-bm-match-meta]').textContent = metaText(boot).replace(' · ', '\n');
+      $('[data-bm-match-meta]').textContent = metaText(boot).replace(' · ', '\n').replace(/\b(US|UK|EU) /g, '$1\u00a0');
       $('[data-bm-match-price]').replaceChildren(...priceLine(boot, '').childNodes);
       const isSuper = superState().handle === boot.handle;
       $('[data-bm-match-link]').classList.toggle('is-super', isSuper);
